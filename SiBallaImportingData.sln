@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiBallaImportingData", "SiBallaImportingData\SiBallaImportingData.csproj", "{63A21A6C-B1AD-446E-8BFE-CD9F88CCE652}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service&Model", "Service&Model\Service&Model.csproj", "{9848144A-7215-4F64-A2F3-1B9637450E46}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63A21A6C-B1AD-446E-8BFE-CD9F88CCE652}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63A21A6C-B1AD-446E-8BFE-CD9F88CCE652}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63A21A6C-B1AD-446E-8BFE-CD9F88CCE652}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63A21A6C-B1AD-446E-8BFE-CD9F88CCE652}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9848144A-7215-4F64-A2F3-1B9637450E46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9848144A-7215-4F64-A2F3-1B9637450E46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9848144A-7215-4F64-A2F3-1B9637450E46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9848144A-7215-4F64-A2F3-1B9637450E46}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4140E953-2AC0-4A8D-AA65-888509BA21D7}
+	EndGlobalSection
+EndGlobal
