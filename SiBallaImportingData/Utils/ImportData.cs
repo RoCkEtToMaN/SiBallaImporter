@@ -6,6 +6,7 @@ using SiBallaImportingData.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -21,18 +22,16 @@ namespace SiBallaImportingData.Utils
             Dictionary<TipoEvento, List<ExcelTemplate>> eventiDic = new Dictionary<TipoEvento, List<ExcelTemplate>>();
 
             var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
-            var assembly = Assembly.GetExecutingAssembly();
-           
+            var assembly = Assembly.GetExecutingAssembly();           
 
             // Nome della risorsa (di solito: Namespace.NomeFile.Extensione)
             string resourceName = "MyProject.credentials.json";
 
             // Leggi la risorsa incorporata
-            //var assembly = Assembly.GetExecutingAssembly();
             using var stream = assembly.GetManifestResourceStream(resourcePath);
 
             if (stream == null)
-                throw new FileNotFoundException($"Risorsa '{resourceName}' non trovata");
+                throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
 
             var credential = GoogleCredential.FromStream(stream)
                 .CreateScoped(SheetsService.Scope.SpreadsheetsReadonly);
@@ -44,17 +43,13 @@ namespace SiBallaImportingData.Utils
             });
 
             var spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
-
-            // PRIMA: Verifica quali fogli esistono
-            Console.WriteLine("Fogli disponibili:");
             var spreadsheet = service.Spreadsheets.Get(spreadsheetId).Execute();
+
             foreach (var sheet in spreadsheet.Sheets)
             {
                 Console.WriteLine($"- '{sheet.Properties.Title}'");
 
-                var eventList = new List<ExcelTemplate>();
-
-                
+                var eventList = new List<ExcelTemplate>();                
 
                 // POI: Prova con il primo foglio
                 if (spreadsheet.Sheets.Count > 0)
@@ -77,9 +72,7 @@ namespace SiBallaImportingData.Utils
                     {
                         foreach (var row in values)
                         {
-                            Console.WriteLine(string.Join(", ", row));
-
-                            //int index = values.IndexOf(row);
+                            //Console.WriteLine(string.Join(", ", row));
 
                             if(values.IndexOf(row) > 1)
                             {
@@ -94,7 +87,10 @@ namespace SiBallaImportingData.Utils
                                     NomeEvento = row[4].ToString(),
                                     Luogo = row[5].ToString(),
                                     Organizzatore = row[6].ToString(),
-                                    Stile = stiliEvento
+                                    Stile = stiliEvento,
+                                    Riferimento = sheet.Properties.Title == TipoEvento.Serate.ToString() ? row[13].ToString(): row[17].ToString(),
+                                    Ordine = sheet.Properties.Title == TipoEvento.Serate.ToString() ? Convert.ToInt32(row[14]): Convert.ToInt32(row[18]),
+                                    Gratis = DetermineIfFree(sheet.Properties.Title, row)
                                 });
                             }                            
                         }
@@ -112,51 +108,37 @@ namespace SiBallaImportingData.Utils
                     Console.WriteLine("Successo!");
                 }
             }
-
-
-
-
-            //var range = "<sheet-name>!A:Z";
-            //var request = service.Spreadsheets.Values.Get(spreadsheetId, range);
-            //var response = request.Execute();
-            //var values = response.Values;
-
             
-        
+            return eventiDic;           
+        }
 
-            if (file != "")
+        private static bool DetermineIfFree(string sheetTitle, IList<object> row)
+        {
+
+            var conditions = new List<Func<bool>>
             {
+                // Condizione per Serate
+                () => sheetTitle == TipoEvento.Serate.ToString() &&
+                        row[12] != null &&
+                        row[12].ToString().ToLower().Equals("si"),
+        
+               
+                () => sheetTitle == TipoEvento.Serate.ToString() &&
+                        row[12] != null &&
+                        row[12].ToString().ToLower().Equals("no"),
+                // Condizione per Workshop
+                () => sheetTitle == TipoEvento.Workshop.ToString() &&
+                        row[17] != null &&
+                        row[17].ToString().ToLower().Equals("si"),
+        
                 
-                //https://stackoverflow.com/questions/52614865/how-to-properly-check-the-background-color-of-cell-using-epplus
+                () => sheetTitle == TipoEvento.Workshop.ToString() &&
+                        row[17] != null &&
+                        row[17].ToString().ToLower().Equals("no"),
+            };
 
-                using (ExcelPackage ep = new ExcelPackage(new FileInfo(file)))
-                {
-                    var workSheetList = ep.Workbook.Worksheets;
-                    int countSheet = 0;
-
-                    foreach (var worksheet in workSheetList)
-                    {
-                        if (countSheet <= workSheetList.Count - 1)
-                        {
-                            //var prescrizioni = ExcelTemplate.GetPrescrizioniList(fornici, gallerie, emettenti, responsabili, ep.Workbook.Worksheets[worksheet.Name], ep.File.Name.Substring(0, ep.File.Name.IndexOf("_")));
-
-                            //prescrizioniList.AddRange(prescrizioni);
-                        }
-
-                        countSheet++;
-                    }
-                }
-
-                //if (countResp != responsabili.Count())
-                //    GesGalSoggettoResponsabileRepository.UpdateList(responsabili, countResp);
-
-                //if (countEmett != emettenti.Count())
-                //    GesGalSoggettoEmettenteRepository.UpdateList(emettenti, countEmett);
-
-                return eventiDic;
-            }
-            else
-                return null;
+            // Usa LINQ Any() per verificare se almeno una condizione è vera
+            return conditions.Any(condition => condition());
         }
         private static List<StileEvento> ParseStili(string? stiliString)
         {
@@ -244,14 +226,6 @@ namespace SiBallaImportingData.Utils
                 }
 
                 return files.FirstOrDefault();
-
-                //if (files.Count() != 0)
-                //    return files.FirstOrDefault();
-                //else
-                //{
-                //    //EventLogger.Log.e("error ", "excel not found");
-                //    return "";
-                //}
             }
             catch (Exception ex)
             {

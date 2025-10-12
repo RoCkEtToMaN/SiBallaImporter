@@ -17,7 +17,7 @@ namespace SiBallaImportingData.Model
         public string? Luogo { get; set; }
         public List<StileEvento>? Stile { get; set; }
         public string? Organizzatore { get; set; }
-        public string Riferimento { get; set; }
+        public string? Riferimento { get; set; }
         public int Ordine { get; set; }
         public bool Gratis { get; set; }
       
