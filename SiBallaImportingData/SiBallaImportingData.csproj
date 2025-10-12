@@ -8,7 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Model\" />
+    <None Remove="Resources\siballa-8c6d48649c13.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\siballa-8c6d48649c13.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
+    <PackageReference Include="Google.Apis.Sheets.v4" Version="1.70.0.3819" />
   </ItemGroup>
 
 </Project>
