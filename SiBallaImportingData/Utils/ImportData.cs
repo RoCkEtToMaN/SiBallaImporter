@@ -1,8 +1,10 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
+using Google.Type;
 using OfficeOpenXml;
 using SiBallaImportingData.Model;
+using SiBallaImportingData.Service;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,10 +18,12 @@ namespace SiBallaImportingData.Utils
 {
     public static class ImportData
     {
-        public static Dictionary<TipoEvento, List<ExcelTemplate>> LoadFile()
+        public static Dictionary<TipoEvento, List<Event>> LoadFile()
         {
             var file = GetFile();
-            Dictionary<TipoEvento, List<ExcelTemplate>> eventiDic = new Dictionary<TipoEvento, List<ExcelTemplate>>();
+
+            var getLocationInfo = new LocationInfo();
+            Dictionary<TipoEvento, List<Event>> eventiDic = new Dictionary<TipoEvento, List<Event>>();
 
             var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
             var assembly = Assembly.GetExecutingAssembly();           
@@ -49,7 +53,7 @@ namespace SiBallaImportingData.Utils
             {
                 Console.WriteLine($"- '{sheet.Properties.Title}'");
 
-                var eventList = new List<ExcelTemplate>();                
+                var eventList = new List<Event>();                
 
                 // POI: Prova con il primo foglio
                 if (spreadsheet.Sheets.Count > 0)
@@ -73,25 +77,41 @@ namespace SiBallaImportingData.Utils
                         foreach (var row in values)
                         {
                             //Console.WriteLine(string.Join(", ", row));
-
-                            if(values.IndexOf(row) > 1)
+                            //eventItem.MonthYear = eventItem.Month + " " + eventItem.DateStart.Year;
+                            //eventItem.NameAndData = eventItem.PartyName + " " + eventItem.DateStart.ToString();
+                            if (values.IndexOf(row) > 1)
                             {
                                 var stiliEvento = ParseStili(row[7].ToString());
+                                var latlong = getLocationInfo.GetCoordinatesFromCityAndNameLocation(
+                                    row[5].ToString().Split(",")[1].Replace(" ", ""),
+                                    row[5].ToString().Split(",")[2].Replace(" ", ""),
+                                    row[5].ToString().Split(",")[0]
+                                    ).Result;
 
-                                eventList.Add(new ExcelTemplate
+                                eventList.Add(new Event
                                 {
-                                    Inizio = Convert.ToDateTime(row[0]),
-                                    Fine = Convert.ToDateTime(row[1]),
-                                    Giorni = row[2].ToString(),
-                                    N = Convert.ToInt32(row[3]),
-                                    NomeEvento = row[4].ToString(),
-                                    Luogo = row[5].ToString(),
-                                    Organizzatore = row[6].ToString(),
-                                    Stile = stiliEvento,
-                                    Riferimento = sheet.Properties.Title == TipoEvento.Serate.ToString() ? row[13].ToString(): row[17].ToString(),
-                                    Ordine = sheet.Properties.Title == TipoEvento.Serate.ToString() ? Convert.ToInt32(row[14]): Convert.ToInt32(row[18]),
+                                    DateStart = Convert.ToDateTime(row[0]),
+                                    DateFinish = Convert.ToDateTime(row[1]),
+                                    PartyName = row[4].ToString(),
+                                    //MonthYear = Month + " " + Convert.ToDateTime(row[0]).Year.ToString(),
+                                    NameAndData = Convert.ToDateTime(row[0]).Date.Day.ToString() + "th: " + row[4].ToString(),// + " " + Convert.ToDateTime(row[0]).Date.ToString("dd/MM/YYYY"),
+                                    EventDetail = new EventDetail
+                                    {
+                                        Latitude = latlong.Latitiude.ToString(),
+                                        Longitude = latlong.Longitude.ToString(),
+                                        Location = row[5].ToString().Split(",")[0],
+                                        City = row[5].ToString().Split(",")[1].Replace(" ", ""),
+                                        Country = row[5].ToString().Split(",")[2].Replace(" ", ""),
+                                        Styles = stiliEvento,
+                                        WebSite = sheet.Properties.Title == TipoEvento.Serate.ToString() ? row[13].ToString() : row[17].ToString()
+                                    },
+                                    Organizer = row[6].ToString(),
+                                    City = row[5].ToString().Split(",")[1].Replace(" ", ""),
+                                    Country = row[5].ToString().Split(",")[2].Replace(" ", ""),
                                     Gratis = DetermineIfFree(sheet.Properties.Title, row)
                                 });
+
+                                eventList.LastOrDefault().MonthYear = eventList.LastOrDefault().Month + " " + eventList.LastOrDefault().DateStart.Year.ToString();
                             }                            
                         }
                     }

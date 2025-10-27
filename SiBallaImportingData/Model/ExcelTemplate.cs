@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace SiBallaImportingData.Model
 {
     public class ExcelTemplate
@@ -22,30 +17,9 @@ namespace SiBallaImportingData.Model
         public bool Gratis { get; set; }
       
     }
-
     public enum TipoEvento
     {
         Serate,
         Workshop
-    }
-    public enum StileEvento
-    {
-        Lindy,
-        Blues,
-        Balboa,
-        Boogie,
-        Shag,
-        SoloJazz,
-        Aerials,
-        Afrodance
-    }
-
-    public class Eventi: ExcelTemplate
-    {
-
-    }
-    public class Workshop: ExcelTemplate
-    {
-
     }
 }
