@@ -97,6 +97,8 @@ namespace SiBallaImportingData.Utils
                                     NameAndData = Convert.ToDateTime(row[0]).Date.Day.ToString() + "th: " + row[4].ToString(),// + " " + Convert.ToDateTime(row[0]).Date.ToString("dd/MM/YYYY"),
                                     EventDetail = new EventDetail
                                     {
+                                        PartyName = row[4].ToString(),
+                                        //When = Convert.ToDateTime(row[0]).ToString("dddd, dd MMMM yyyy"),   
                                         Latitude = latlong.Latitiude.ToString(),
                                         Longitude = latlong.Longitude.ToString(),
                                         Location = row[5].ToString().Split(",")[0],

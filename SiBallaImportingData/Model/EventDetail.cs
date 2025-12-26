@@ -1,7 +1,7 @@
 ﻿
 namespace SiBallaImportingData.Model
 {
-    public class EventDetail
+    public class EventDetail: Event
     {
         public int Id { get; set; }        
         public string? Latitude { get; set; }
@@ -26,6 +26,9 @@ namespace SiBallaImportingData.Model
         Shag,
         SoloJazz,
         Aerials,
-        Afrodance
+        Afrodance,
+        Charleston,
+        SlowBal,
+        StLouisShag
     }
 }

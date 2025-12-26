@@ -18,7 +18,7 @@ namespace SiBallaImportingData.Model
                 Month = MonthList[dateStart.Month - 1];
             }
         }      
-        public DateTime DateFinish { get; set; }        
+        public DateTime? DateFinish { get; set; }        
         public string? City { get; set; }  
         public string? Country { get;set; }
         public string? Type { get; set; }
@@ -29,7 +29,6 @@ namespace SiBallaImportingData.Model
         public bool TeachersConfirmed { get; set; }
         public bool ExchangeConfirmed { get; set; } 
         public bool Gratis { get; set; }
-
 
         public List<string> MonthList = new List<string> 
         { 
