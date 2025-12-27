@@ -71,6 +71,8 @@ namespace SiBallaImportingData.Utils
             string json = await response.Content.ReadAsStringAsync();
             return JObject.Parse(json);
         }
+
+        #region ESwingIt
         public async Task<List<ESwingIt>> GetESwing()
         {
             //string url = "https://e-swing.it/php/get-events-full.php?nazione=Italia";
@@ -97,11 +99,11 @@ namespace SiBallaImportingData.Utils
             {
                 HttpResponseMessage response = await client.GetAsync(url);
 
-                Console.WriteLine($"Status Code: {(int)response.StatusCode} - {response.StatusCode}");
-                Console.WriteLine($"Headers: {string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"))}");
+                //Console.WriteLine($"Status Code: {(int)response.StatusCode} - {response.StatusCode}");
+                //Console.WriteLine($"Headers: {string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"))}");
 
                 string responseContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Response Content: {responseContent}");
+                //Console.WriteLine($"Response Content: {responseContent}");
                 var doc = new HtmlDocument();
                 if (response.IsSuccessStatusCode)
                 {
@@ -118,7 +120,7 @@ namespace SiBallaImportingData.Utils
 
                 foreach (var innerArray in outerArray)
                 {
-                    Console.WriteLine($"Numero elementi: {innerArray.Length}");
+                    //Console.WriteLine($"Numero elementi: {innerArray.Length}");
                     DateTime? end = null;
 
                     DateTime start = DateTime.Parse(innerArray[2].GetString() +" " + innerArray[3].GetString());
@@ -126,17 +128,17 @@ namespace SiBallaImportingData.Utils
                     if(innerArray[5].GetString() != null)
                         end = DateTime.Parse(innerArray[5].GetString() +" " + innerArray[6].GetString());                  
 
-                    string[] urls = Array.Empty<string>();
+                    string urls = GetUrl(innerArray);
 
-                    for (int i = 30; i < innerArray.Length - 1; i++)
-                    {
-                        Console.WriteLine($"Elemento {i}: {innerArray[i]}");
+                    //for (int i = 30; i < innerArray.Length - 1; i++)
+                    //{
+                    //    Console.WriteLine($"Elemento {i}: {innerArray[i]}");
                        
-                        string? urlValue = innerArray[i].GetString();
+                    //    string? urlValue = innerArray[i].GetString();
 
-                        if (!string.IsNullOrEmpty(urlValue))                        
-                            urls.Append(urlValue);                        
-                    }
+                    //    if (!string.IsNullOrEmpty(urlValue))                        
+                    //        urls.Append(urlValue);                        
+                    //}
 
                     string styles = string.Empty;
                     if (innerArray[28].GetString() != null)
@@ -153,16 +155,14 @@ namespace SiBallaImportingData.Utils
                             Start = start,
                             End = end,
                             Description = innerArray[17].GetString() != null ? innerArray[17].GetString() : null,
-                            Longitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
-                            Latitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
+                            Longitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
+                            Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
                             Url = urls,
                             Styles = styles
 
                         }
                     );                    
                 }
-
-                //var nomeEvento = doc.DocumentNode.SelectNodes("//[]");
 
                 return listOfEvents;
             }
@@ -225,8 +225,21 @@ namespace SiBallaImportingData.Utils
             return styles;
         }
 
+        private string GetUrl(JsonElement[]? innerArray)
+        {
+            StringBuilder urls = new StringBuilder();
+            for (int i = 30; i < innerArray.Length - 1; i++)
+            {
+                //Console.WriteLine($"Elemento {i}: {innerArray[i]}");
+                string? urlValue = innerArray[i].GetString();
+                if (!string.IsNullOrEmpty(urlValue))
+                    urls.Append(urlValue + ";");
+            }
+            return urls.ToString();
+        }
 
 
+        #endregion
 
     }
 }

@@ -23,8 +23,16 @@ if (eventToBeStored.TryGetValue(TipoEvento.Serate, out var serate) && serate.Cou
     await firestoreService.AddEventAsync(JsonSerializer.Serialize(serate));
 }
 if (eventToBeStored.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
+if (enableSearching)
 {
-    await firestoreService.AddWorkshopAsync(JsonSerializer.Serialize(workshops));
+    var importDataFromWeb = new ImportDataFromWeb();
+    //var test = await importDataFromWeb.GetESwing();
+
+    var eventi = EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing());
+    //EventFilter.Test();
+    //var pageInfo = await importDataFromWeb.GetFaceBookPageInfo("SiBalla.it");
+    //var postInfo = await importDataFromWeb.GetFaceBookGroupPosts("SiBalla.it");
+    int i = 0;
 }
 
 

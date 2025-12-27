@@ -13,7 +13,7 @@ namespace SiBallaImportingData.Model
         public DateTime? End { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
-        public string[]? Url { get; set; }
+        public string? Url { get; set; }
         public string? Location { get; set; }
         public string? City { get; set; }
         public string? Country { get; set; }

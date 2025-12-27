@@ -1,22 +1,26 @@
-﻿
-using SiBallaImportingData.Model;
+﻿using SiBallaImportingData.Model;
 using System.Configuration;
 
 namespace SiBallaImportingData.Utils
 {
     public static class EventFilter
     {
+        public static bool IsInRadius(float lat, float lon, float radiusKm)
+        {
+            float distanzaMetri = HaversineDistance(lat, lon);
+            float radiusMetri = radiusKm * 1000f;
+
+            return distanzaMetri <= radiusMetri;
+        }
         public static List<Event> FilterESwingItEventsByDateRange(List<ESwingIt> events)
         {
             var eventList = new List<Event>();
 
-            foreach (var e in events)
+            foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.End <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))))
             {
-                // Example date range: from January 1, 2020 to December 31, 2025
-                DateTime startDate = DateTime.Today;
-                DateTime endDate = startDate.AddDays(14);
+                Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);               
                 
-                if (CheckEventInsideCircle(e, startDate, endDate))
+                if (CheckEventInsideCircle(e))
                 {
                     var end = new DateTime();
                     if (e.End != null)
@@ -33,26 +37,28 @@ namespace SiBallaImportingData.Utils
                             $"{e.Title} - {e.Start.ToShortDateString()}",
                     };
                     eventList.Add(newEvent);
+
+                    Console.WriteLine($"  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
                 }
+                else
+                    Console.WriteLine($"  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"❌ NO"}");
             }
 
             return eventList;
         }
-
-        private static bool CheckEventInsideCircle(ESwingIt e, DateTime startDate, DateTime endDate)
+        private static bool CheckEventInsideCircle(ESwingIt e)
         {
-            var raggio_km = (float) Convert.ToDouble(ConfigurationManager.AppSettings["Radius"]); // Raggio in km
-            //HaversineDistance(e.Latitude, e.Longitude) <= raggio_km * 1000;  // Converti km in metri
-            return (HaversineDistance(e.Latitude, e.Longitude) <= raggio_km * 1000) && (startDate <= e.Start && e.End <= endDate);
-        }
+            var raggio_km = (float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"]); // Raggio in km
 
+            return (HaversineDistance(e.Latitude, e.Longitude) <= raggio_km * 1000f);
+        }
         private static float HaversineDistance(float lat1, float lon1)
         {
             //Calcola la distanza in metri tra due punti geografici.
 
-            float rTerrestre = 6371000;  /*# Raggio terrestre in metri*/
-            float lat2 = 0;
-            float lon2 = 0;
+            const float R = 6371000f; // Raggio terrestre in metri
+            float lat2 = 44.4264f;
+            float lon2 = 8.91519f;
 
             //# Converti gradi in radianti
             var phi1 = lat1 * (MathF.PI / 180.0f);  
@@ -61,14 +67,44 @@ namespace SiBallaImportingData.Utils
             var delta_lambda = (lon2 - lon1) * (MathF.PI / 180.0f);
 
             //# Formula di Haversine
-            var a = (Math.Sin(delta_phi / 2) * Math.Sin(delta_phi / 2)) +
-                    Math.Cos(phi1) * Math.Cos(phi2) * (Math.Sin(delta_lambda / 2) * Math.Sin(delta_lambda / 2));
+            //var a = (Math.Sin(delta_phi / 2) * Math.Sin(delta_phi / 2)) +
+            //        Math.Cos(phi1) * Math.Cos(phi2) * (Math.Sin(delta_lambda / 2) * Math.Sin(delta_lambda / 2));
+
+            // CORRETTO: Usa MathF per tutto
+            float a = MathF.Sin(delta_phi / 2) * MathF.Sin(delta_phi / 2) +
+                      MathF.Cos(phi1) * MathF.Cos(phi2) *
+                      MathF.Sin(delta_lambda / 2) * MathF.Sin(delta_lambda / 2);
+
             var c =(float) (2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)));
 
+            return R * c;
+        }
+        public static void Test()
+        {
+            var cittas = new (string Nome, float Lat, float Lon)[]
+            {
+                ("Genova (centro)", 44.4264f, 8.91519f),
+                ("Milano", 45.4642f, 9.1900f),
+                ("Torino", 45.0703f, 7.6869f),
+                ("Firenze", 43.7696f, 11.2558f),
+                ("Roma", 41.9028f, 12.4964f),
+                ("Savona", 44.3090f, 8.4770f) // ~40km da Genova
+            };
 
-            return rTerrestre * c;
+            float raggioKm = 200f;
+            Console.WriteLine($"Cerchio di {raggioKm} km attorno a Genova:");
+            Console.WriteLine("=========================================");
 
-            //return true;
+            foreach (var citta in cittas)
+            {
+                float distanzaKm = HaversineDistance(citta.Lat, citta.Lon) / 1000f;
+                bool dentro = IsInRadius(citta.Lat, citta.Lon, raggioKm);
+
+                Console.WriteLine($"{citta.Nome}:");
+                Console.WriteLine($"  Distanza: {distanzaKm:F1} km");
+                Console.WriteLine($"  Entro {raggioKm} km: {(dentro ? "✅ SÌ" : "❌ NO")}");
+                Console.WriteLine();
+            }
         }
     }
 }
