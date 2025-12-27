@@ -32,9 +32,13 @@ namespace SiBallaImportingData.Utils
                         DateFinish = e.End,
                         City = e.City,
                         Country = e.Country,
-                        Organizer = e.Title,
+                        Organizer = e.Description,
                         NameAndData = e.End != null ? $"{e.Title} - {e.Start.ToShortDateString()} to {end.ToShortDateString()}" :
                             $"{e.Title} - {e.Start.ToShortDateString()}",
+                        EventDetail = new EventDetail()
+                        {
+                            WebSite = e.Url
+                        }
                     };
                     eventList.Add(newEvent);
 

@@ -29,6 +29,7 @@ if (enableSearching)
     //var test = await importDataFromWeb.GetESwing();
 
     var eventi = EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing());
+    EmailSender.SendWithMailjetAnonymous(eventi);
     //EventFilter.Test();
     //var pageInfo = await importDataFromWeb.GetFaceBookPageInfo("SiBalla.it");
     //var postInfo = await importDataFromWeb.GetFaceBookGroupPosts("SiBalla.it");
