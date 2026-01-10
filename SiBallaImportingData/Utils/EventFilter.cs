@@ -17,6 +17,7 @@ namespace SiBallaImportingData.Utils
             var eventList = new List<Event>();
 
             foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.End <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))))
+            foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))))
             {
                 Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);               
                 
