@@ -16,16 +16,14 @@ namespace SiBallaImportingData.Utils
         {
             var eventList = new List<Event>();
 
-            foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.End <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))))
             foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))))
-            {
-                Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);               
-                
+            {            
                 if (CheckEventInsideCircle(e))
                 {
+                    Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);
                     var end = new DateTime();
                     if (e.End != null)
-                        end = (DateTime)e.End;
+                        end = (DateTime)e.End;                  
 
                     var newEvent = new Event
                     {
@@ -43,10 +41,10 @@ namespace SiBallaImportingData.Utils
                     };
                     eventList.Add(newEvent);
 
-                    Console.WriteLine($"  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
+                    Console.WriteLine($"{e.City}  entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
                 }
                 else
-                    Console.WriteLine($"  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"❌ NO"}");
+                    Console.WriteLine($" {e.City}  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"❌ NO"}");
             }
 
             return eventList;

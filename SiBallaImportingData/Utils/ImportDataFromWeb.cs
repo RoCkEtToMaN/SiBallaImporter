@@ -126,7 +126,9 @@ namespace SiBallaImportingData.Utils
                     DateTime start = DateTime.Parse(innerArray[2].GetString() +" " + innerArray[3].GetString());
 
                     if(innerArray[5].GetString() != null)
-                        end = DateTime.Parse(innerArray[5].GetString() +" " + innerArray[6].GetString());                  
+                        end = DateTime.Parse(innerArray[5].GetString() +" " + innerArray[6].GetString());
+                    else                    
+                        end = start.AddDays(1);                    
 
                     string urls = GetUrl(innerArray);
 
@@ -159,7 +161,6 @@ namespace SiBallaImportingData.Utils
                             Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
                             Url = urls,
                             Styles = styles
-
                         }
                     );                    
                 }

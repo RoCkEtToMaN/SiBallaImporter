@@ -1,11 +1,8 @@
 ﻿using Newtonsoft.Json;
 using SiBallaImportingData.Model;
-using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SiBallaImportingData.Utils
 {
@@ -13,70 +10,116 @@ namespace SiBallaImportingData.Utils
     {
         public static async Task SendWithMailjetAnonymous(List<Event> eventi)
         {
-            TextEmail(eventi);
-            var apiKey = "***RIMOSSA***";
-            var apiSecret = "***RIMOSSA***";
-            var apiKeySina = "37aba9814c0aaf0ca5ffc14adaabae90";
-            var apiSecretSina = "1cef5018b25f74ddc14c27547a886a40";
-
-            using var client = new HttpClient();
-            var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{apiKeySina}:{apiSecretSina}"));
-            client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
-            //destinatari.Clear();
-            // Aggiungi dinamicamente altri destinatari
-            //destinatari.Add(new { Email = "giacomo.lo87@gmail.com" });
-            //destinatari.Add(new { Email = "giacomo.lo@iroi.it" });
-            //destinatari.Add(new { Email = "francesco.varone@sina.co.it" });
-            //destinatari.Add(new { Email = "rachele.bianchi@sina.it" });
-
-            var emailData = new
+            try
             {
-                Messages = new[]
+                var textEm = TextEmail(eventi);
+                var apiKey = "***RIMOSSA***";
+                var apiSecret = "***RIMOSSA***";
+
+                //using var client = new HttpClient();
+                using var client = new HttpClient
                 {
-                    new
+                    Timeout = TimeSpan.FromSeconds(30) // Aumenta timeout se necessario
+                };
+                var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{apiKey}:{apiSecret}"));
+                client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
+
+                var emailData = new
+                {
+                    Messages = new[]
                     {
-                        From = new {
-                            Email = "direzione.scientifica@sina.it",
-                            Name = "noreply@sina.it"
-                        },
-                        //To = destinatari,
-                        Bcc = new[]
+                        new
                         {
-                            //new { Email = "francesco.varone@sina.co.it" },
-                            //new { Email = "rachele.bianchi@sina.it" },
-                            //new { Email ="direzione.scientifica@sina.it" },
-                            new { Email ="giacomo.lo87@gmail.com" }
-                        },
-                        Subject = "Avviso di esercitazione in scadenza",
-                        TextPart = TextEmail(eventi),
-                        HTMLPart = TextEmail(eventi)
+                            From = new {
+                                Email = "siballanewsletter@gmail.com",
+                                Name = "siballanewsletter@gmail.com"
+                            },
+                              To = new[]
+                                {
+                                    new
+                                    {
+                                        Email = "giacomo.lo87@gmail.com",
+                                        Name = "Giacomo"
+                                    },
+                                    new
+                                    {
+                                        Email = "c.vota87@gmail.com",
+                                        Name = "Carlo"
+                                    },
+                                    new
+                                    {
+                                        Email = "alessio.carrega@gmail.com",
+                                        Name = "Alessio"
+                                    },
+                                    new
+                                    {
+                                        Email = "piccolo.gv@gmail.com",
+                                        Name = "Giulia"
+                                    },
+                                },
+                            Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
+                                $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).ToString("dd/MM/yyyy")}",
+                            TextPart = TextEmail(eventi),
+                            HTMLPart = TextEmail(eventi)
+                        }
+                    }
+                };
+
+                var json = JsonConvert.SerializeObject(emailData, Formatting.Indented);
+                Console.WriteLine($"JSON inviato:\n{json}");
+                try
+                {
+                    var response = await client.PostAsync(
+                    "https://api.mailjet.com/v3.1/send",
+                    new StringContent(JsonConvert.SerializeObject(emailData),
+                                     Encoding.UTF8, "application/json"));
+
+                    var responseBody = await response.Content.ReadAsStringAsync();
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"✅ Successo ({(int)response.StatusCode})");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"❌ Errore {(int)response.StatusCode}: {responseBody}");
                     }
                 }
-            };
+                catch (ThreadAbortException)
+                {
+                    Console.WriteLine("Thread abortito");
+                }
+                catch (OutOfMemoryException)
+                {
+                    Console.WriteLine("Memoria esaurita");
+                }
+                catch (StackOverflowException)
+                {
+                    Console.WriteLine("Stack overflow");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Errore: {e}");
+                }
 
-            // Mailjet accetta mittenti non verificati (ma potrebbero finire in spam)
-            var response = await client.PostAsync(
-                "https://api.mailjet.com/v3.1/send",
-                new StringContent(JsonConvert.SerializeObject(emailData),
-                                 Encoding.UTF8, "application/json"));
 
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"✅ Successo ({(int)response.StatusCode})");
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"❌ Errore {(int)response.StatusCode}: {responseBody}");
+                Console.WriteLine($"❌ Eccezione: {ex.Message}");
             }
+
         }
-
         private static string TextEmail(List<Event> eventi)
         {
             string text = $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
-                          $"{DateTime.Now} - {DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))} ,<br><br>" +
-                          $"con raggio d'azione di {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} Km.<br><br>";
+                          $"{DateTime.Now} - {DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))} ,<br>" +
+                          $"con raggio d'azione di {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} Km.<br><br>" +
+                          $"Bollettino ({DateTime.Today.Day}/{DateTime.Today.Month} - " +
+                          $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Day}/" +
+                          $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Month})<br><br>";
 
             foreach (var ev in eventi)
             {
@@ -86,6 +129,6 @@ namespace SiBallaImportingData.Utils
             //Togliere la data nel titolo e mettere durata in ore
 
             return text;
-        }
+        }        
     }
 }

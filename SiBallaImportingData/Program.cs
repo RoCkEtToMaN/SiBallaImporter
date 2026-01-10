@@ -3,38 +3,40 @@
 using SiBallaImportingData.Model;
 using SiBallaImportingData.Service;
 using SiBallaImportingData.Utils;
-using System.Text.Json;
+using System.Configuration; // Aggiungi questa direttiva using
+using System.Text.Json;        
 
-Console.WriteLine("Inizio Importazione");
+bool enableImporting = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableImporting"]);
+bool enableSearching = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSearching"]);
 
-//var import = new ImportData();
-
-var eventToBeStored = ImportData.LoadFile();
-
-var firestoreService = new FirestoreService();
-
-
-var eventi = await firestoreService.LoadEventAsync();
-var workshop = await firestoreService.LoadWorkshopAsync();
-
-
-if (eventToBeStored.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
+if (enableImporting)
 {
-    await firestoreService.AddEventAsync(JsonSerializer.Serialize(serate));
+    Console.WriteLine("Inizio Importazione");
+
+    var eventToBeStored = ImportData.LoadFile();
+    var firestoreService = new FirestoreService();
+    var eventi = await firestoreService.LoadEventAsync();
+    var workshop = await firestoreService.LoadWorkshopAsync();
+
+    if (eventToBeStored.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
+    {
+        await firestoreService.AddEventAsync(JsonSerializer.Serialize(serate));
+    }
+    if (eventToBeStored.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
+    {
+        await firestoreService.AddWorkshopAsync(JsonSerializer.Serialize(workshops));
+    }
 }
-if (eventToBeStored.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
+
 if (enableSearching)
 {
     var importDataFromWeb = new ImportDataFromWeb();
-    //var test = await importDataFromWeb.GetESwing();
-
     var eventi = EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing());
-    EmailSender.SendWithMailjetAnonymous(eventi);
-    //EventFilter.Test();
-    //var pageInfo = await importDataFromWeb.GetFaceBookPageInfo("SiBalla.it");
-    //var postInfo = await importDataFromWeb.GetFaceBookGroupPosts("SiBalla.it");
-    int i = 0;
+    
+    await EmailSender.SendWithMailjetAnonymous(eventi);   
 }
 
 
-int i = 0;
+
+
+  
