@@ -8,6 +8,24 @@ namespace SiBallaImportingData.Utils
 {
     public static class EmailSender
     {
+
+        private static string ExtractNameFromEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return "";
+
+            // Esempio: da "giacomo.lo87@gmail.com" ottieni "Giacomo"
+            var username = email.Split('@')[0];
+            var namePart = username.Split('.')[0];
+
+            // Capitalizza la prima lettera
+            if (namePart.Length > 0)
+            {
+                return char.ToUpper(namePart[0]) + namePart.Substring(1);
+            }
+
+            return namePart;
+        }
         public static async Task SendWithMailjetAnonymous(List<Event> eventi)
         {
             try
@@ -34,31 +52,13 @@ namespace SiBallaImportingData.Utils
                         {
                             From = new {
                                 Email = "siballanewsletter@gmail.com",
-                                Name = "siballanewsletter@gmail.com"
+                                //Name = "siballanewsletter"
                             },
-                              To = new[]
-                                {
-                                    new
-                                    {
-                                        Email = "giacomo.lo87@gmail.com",
-                                        Name = "Giacomo"
-                                    },
-                                    new
-                                    {
-                                        Email = "c.vota87@gmail.com",
-                                        Name = "Carlo"
-                                    },
-                                    new
-                                    {
-                                        Email = "alessio.carrega@gmail.com",
-                                        Name = "Alessio"
-                                    },
-                                    new
-                                    {
-                                        Email = "piccolo.gv@gmail.com",
-                                        Name = "Giulia"
-                                    },
-                                },
+                            To = ConfigurationManager.AppSettings["Email"]
+                                .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(email => email.Trim())
+                                .Where(email => !string.IsNullOrEmpty(email))
+                                .Select(email => new { Email = email }).ToArray(),
                             Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
                                 $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).ToString("dd/MM/yyyy")}",
                             TextPart = TextEmail(eventi),
