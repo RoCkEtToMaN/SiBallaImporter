@@ -30,7 +30,7 @@ namespace SiBallaImportingData.Utils
         {
             try
             {
-                var textEm = TextEmail(eventi);
+                //var textEm = TextEmail(eventi);
                 var apiKey = "***RIMOSSA***";
                 var apiSecret = "***RIMOSSA***";
 
@@ -103,8 +103,6 @@ namespace SiBallaImportingData.Utils
                 {
                     Console.WriteLine($"Errore: {e}");
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -122,9 +120,7 @@ namespace SiBallaImportingData.Utils
                           $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Month})<br><br>";
 
             foreach (var ev in eventi)
-            {
-                text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer} <br>";
-            }
+                text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer}; {ev.EventDetail.WebSite} <br>";            
 
             //Togliere la data nel titolo e mettere durata in ore
 
