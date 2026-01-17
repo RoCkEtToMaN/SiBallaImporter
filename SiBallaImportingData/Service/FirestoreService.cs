@@ -41,7 +41,7 @@ namespace SiBallaImportingData.Service
            .Child("Eventi")
            .PostAsync(eventData);
         }
-        public async Task<ObservableCollection<Event>> LoadEventAsync()
+        public async Task<List<Event>> LoadEventAsync()
         {
             // Ottieni la lista degli eventi come oggetti FirebaseObject<string>
             var firebaseObjects = await firebaseClient
@@ -52,7 +52,7 @@ namespace SiBallaImportingData.Service
             var eventStrings = firebaseObjects.Select(obj => obj.Object);
 
             // Deserializza ciascuna stringa in un oggetto Event e aggiungili a una ObservableCollection<Event>
-            var events = new ObservableCollection<Event>();
+            var events = new List<Event>();
             foreach (var eventString in eventStrings)
             {
                 if (!string.IsNullOrEmpty(eventString.ToString()))
@@ -66,7 +66,7 @@ namespace SiBallaImportingData.Service
 
             return events;
         }
-        public async Task<ObservableCollection<Event>> LoadWorkshopAsync()
+        public async Task<List<Event>> LoadWorkshopAsync()
         {
             // Ottieni la lista degli eventi come oggetti FirebaseObject<string>
             var firebaseObjects = await firebaseClient
@@ -77,7 +77,7 @@ namespace SiBallaImportingData.Service
             var eventStrings = firebaseObjects.Select(obj => obj.Object);
 
             // Deserializza ciascuna stringa in un oggetto Event e aggiungili a una ObservableCollection<Event>
-            var events = new ObservableCollection<Event>();
+            var events = new List<Event>();
             foreach (var eventString in eventStrings)
             {
                 if (!string.IsNullOrEmpty(eventString.ToString()))

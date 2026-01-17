@@ -88,6 +88,9 @@ namespace SiBallaImportingData.Utils
                                     row[5].ToString().Split(",")[0]
                                     ).Result;
 
+
+                                var duration = Convert.ToDateTime(row[1]) - Convert.ToDateTime(row[0]);
+
                                 eventList.Add(new Event
                                 {
                                     DateStart = Convert.ToDateTime(row[0]),

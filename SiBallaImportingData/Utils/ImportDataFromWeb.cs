@@ -121,14 +121,29 @@ namespace SiBallaImportingData.Utils
                 foreach (var innerArray in outerArray)
                 {
                     //Console.WriteLine($"Numero elementi: {innerArray.Length}");
-                    DateTime? end = null;
+                    DateTime end;
 
                     DateTime start = DateTime.Parse(innerArray[2].GetString() +" " + innerArray[3].GetString());
 
                     if(innerArray[5].GetString() != null)
                         end = DateTime.Parse(innerArray[5].GetString() +" " + innerArray[6].GetString());
-                    else                    
-                        end = start.AddDays(1);                    
+                    else
+                    {
+                        var endTmp = start.AddDays(1);
+                        end = new DateTime(endTmp.Year, endTmp.Month, endTmp.Day, 1, 0, 0);
+                    }                   
+                        
+
+                    if (start.Year < DateTime.Now.Year)
+                        start = new DateTime(DateTime.Now.Year, start.Month, start.Day, 21, 0, 0);
+                    if (start.Hour < 19)
+                        start = new DateTime(DateTime.Now.Year, start.Month, start.Day, 21, 0, 0);
+                    if (end.Year < DateTime.Now.Year)
+                        end = new DateTime(DateTime.Now.Year, end.Month, end.Day);
+                    if (end.Hour > 5)
+                        end = new DateTime(DateTime.Now.Year, end.Month, end.Day, 2,0,0);
+
+                    var duration = end - start;
 
                     string urls = GetUrl(innerArray);
 
@@ -156,6 +171,7 @@ namespace SiBallaImportingData.Utils
                             Country = innerArray[16].GetString() != null ? innerArray[16].GetString() : null,
                             Start = start,
                             End = end,
+                            Duration = end - start,
                             Description = innerArray[17].GetString() != null ? innerArray[17].GetString() : null,
                             Longitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
                             Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),

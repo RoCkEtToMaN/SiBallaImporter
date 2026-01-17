@@ -21,5 +21,6 @@ namespace SiBallaImportingData.Model
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string Styles { get; set; }
+        public TimeSpan Duration { get; set; }
     }
 }

@@ -16,7 +16,9 @@ namespace SiBallaImportingData.Utils
         {
             var eventList = new List<Event>();
 
-            foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))))
+            foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) && 
+                (!x.Title.ToLower().Contains("prova") && !x.Title.ToLower().Contains("prove") && !x.Title.ToLower().Contains("stage") && !x.Title.ToLower().Contains("corsi") && !x.Title.ToLower().Contains("corso") 
+                && !x.Title.ToLower().Contains("workshop")) && !x.Url.ToLower().Contains("cors")))
             {            
                 if (CheckEventInsideCircle(e))
                 {
@@ -29,9 +31,11 @@ namespace SiBallaImportingData.Utils
                     {
                         DateStart = e.Start,
                         DateFinish = e.End,
+                        Duration = e.Duration,
                         City = e.City,
                         Country = e.Country,
                         Organizer = e.Description,
+                        PartyName = e.Title,
                         NameAndData = e.End != null ? $"{e.Title} - {e.Start.ToShortDateString()} to {end.ToShortDateString()}" :
                             $"{e.Title} - {e.Start.ToShortDateString()}",
                         EventDetail = new EventDetail()

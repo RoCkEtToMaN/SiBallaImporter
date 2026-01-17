@@ -9,13 +9,23 @@ using System.Text.Json;
 bool enableImporting = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableImporting"]);
 bool enableSearching = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSearching"]);
 
+var eventi = new List<Event>();
+
+if (enableSearching)
+{
+    var importDataFromWeb = new ImportDataFromWeb();
+    eventi = EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing());
+
+    await EmailSender.SendWithMailjetAnonymous(eventi);
+}
+
 if (enableImporting)
 {
     Console.WriteLine("Inizio Importazione");
 
     var eventToBeStored = ImportData.LoadFile();
     var firestoreService = new FirestoreService();
-    var eventi = await firestoreService.LoadEventAsync();
+    eventi = await firestoreService.LoadEventAsync();
     var workshop = await firestoreService.LoadWorkshopAsync();
 
     if (eventToBeStored.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
@@ -28,13 +38,7 @@ if (enableImporting)
     }
 }
 
-if (enableSearching)
-{
-    var importDataFromWeb = new ImportDataFromWeb();
-    var eventi = EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing());
-    
-    await EmailSender.SendWithMailjetAnonymous(eventi);   
-}
+
 
 
 

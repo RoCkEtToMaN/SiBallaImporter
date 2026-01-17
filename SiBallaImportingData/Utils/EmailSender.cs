@@ -119,44 +119,30 @@ namespace SiBallaImportingData.Utils
                           $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Day}/" +
                           $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Month})<br><br>";
 
-            foreach (var ev in eventi)
-                text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer}; {ev.EventDetail.WebSite} <br>";            
             text += $"*Bollettino della settimana*🗓️:<br>";
 
             int i = 1;
             //string textTmp = "";
 
-            var t = eventi.GroupBy(x => x.City).ToList();
+            //var t = eventi.GroupBy(x => x.City).ToList();
             //int globalCounter = 1; // Contatore globale continuo
-            foreach (var city in eventi.Where(x => x.City.Equals("Genova")).GroupBy(x => x.City).ToList())
+            // Ordina: prima Genova, poi le altre città in ordine alfabetico
+            foreach (var city in eventi
+                .GroupBy(x => x.City)
+                .OrderByDescending(g => g.Key.Equals("Genova")) // Genova prima
+                .ThenBy(g => g.Key)) // Poi le altre in ordine alfabetico
             {
-                
                 text += $"_*{city.Key}*_:<br>";
-                foreach (var ev in city.ToList())
+
+                foreach (var ev in city.OrderBy(e => e.DateStart)) // Ordina eventi per data
                 {
-                    // Aggiungi uno spazio extra per numeri a 1 cifra
-                    string counterStr = i < 10 ? $" {i}" : $"{i}";
-                    var duration = ev.Duration.Days != 0 ? ev.Duration.Days + "giorni" : ev.Duration.Hours + "ore";
-                    text += $"  ·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
+                    var duration = ev.Duration.Days != 0
+                        ? $"{ev.Duration.Days} giorni"
+                        : $"{ev.Duration.Hours} ore";
+
+                    text += $"  ·{ev.DateStart:ddd} {ev.DateStart.Day}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
                     i++;
                 }
-                    
-
-            }
-            foreach (var city in eventi.Where(x => !x.City.Equals("Genova")).GroupBy(x => x.City).ToList())
-            {
-                
-                text += $"_*{city.Key}*_:<br>";
-                foreach (var ev in city.ToList())
-                {
-                    // Aggiungi uno spazio extra per numeri a 1 cifra
-                    string counterStr = i < 10 ? $" {i}" : $"{i}";
-
-                    text += $"  ·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
-                    i++;
-                }
-                    
-
             }
             //text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer}; {ev.EventDetail.WebSite} <br>";            
 
