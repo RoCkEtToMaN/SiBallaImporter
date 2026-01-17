@@ -121,6 +121,44 @@ namespace SiBallaImportingData.Utils
 
             foreach (var ev in eventi)
                 text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer}; {ev.EventDetail.WebSite} <br>";            
+            text += $"*Bollettino della settimana*🗓️:<br>";
+
+            int i = 1;
+            //string textTmp = "";
+
+            var t = eventi.GroupBy(x => x.City).ToList();
+            //int globalCounter = 1; // Contatore globale continuo
+            foreach (var city in eventi.Where(x => x.City.Equals("Genova")).GroupBy(x => x.City).ToList())
+            {
+                
+                text += $"_*{city.Key}*_:<br>";
+                foreach (var ev in city.ToList())
+                {
+                    // Aggiungi uno spazio extra per numeri a 1 cifra
+                    string counterStr = i < 10 ? $" {i}" : $"{i}";
+                    var duration = ev.Duration.Days != 0 ? ev.Duration.Days + "giorni" : ev.Duration.Hours + "ore";
+                    text += $"  ·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
+                    i++;
+                }
+                    
+
+            }
+            foreach (var city in eventi.Where(x => !x.City.Equals("Genova")).GroupBy(x => x.City).ToList())
+            {
+                
+                text += $"_*{city.Key}*_:<br>";
+                foreach (var ev in city.ToList())
+                {
+                    // Aggiungi uno spazio extra per numeri a 1 cifra
+                    string counterStr = i < 10 ? $" {i}" : $"{i}";
+
+                    text += $"  ·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
+                    i++;
+                }
+                    
+
+            }
+            //text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer}; {ev.EventDetail.WebSite} <br>";            
 
             //Togliere la data nel titolo e mettere durata in ore
 
