@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
 using SiBallaImportingData.Model;
@@ -116,70 +117,97 @@ namespace SiBallaImportingData.Utils
                 string text = doc.DocumentNode.InnerText;
                 string html2 = doc.DocumentNode.InnerHtml;
 
-                var outerArray = JsonSerializer.Deserialize<JsonElement[][]>(html2);
-
-                foreach (var innerArray in outerArray)
+                //var jsonString = await response.Content.ReadAsStringAsync();
+                bool canExit = true;
+                do 
                 {
-                    //Console.WriteLine($"Numero elementi: {innerArray.Length}");
-                    DateTime end;
-
-                    DateTime start = DateTime.Parse(innerArray[2].GetString() +" " + innerArray[3].GetString());
-
-                    if(innerArray[5].GetString() != null)
-                        end = DateTime.Parse(innerArray[5].GetString() +" " + innerArray[6].GetString());
-                    else
+                    if (html2.EndsWith("]") && html2.StartsWith("["))
                     {
-                        var endTmp = start.AddDays(1);
-                        end = new DateTime(endTmp.Year, endTmp.Month, endTmp.Day, 1, 0, 0);
-                    }                   
-                        
+                        // Solo allora deserializzare
+                        //var data = JsonSerializer.Deserialize<List<List<object>>>(jsonString);
+                        var outerArray = JsonSerializer.Deserialize<JsonElement[][]>(html2);
 
-                    if (start.Year < DateTime.Now.Year)
-                        start = new DateTime(DateTime.Now.Year, start.Month, start.Day, 21, 0, 0);
-                    if (start.Hour < 19)
-                        start = new DateTime(DateTime.Now.Year, start.Month, start.Day, 21, 0, 0);
-                    if (end.Year < DateTime.Now.Year)
-                        end = new DateTime(DateTime.Now.Year, end.Month, end.Day);
-                    if (end.Hour > 5)
-                        end = new DateTime(DateTime.Now.Year, end.Month, end.Day, 2,0,0);
+                        foreach (var innerArray in outerArray)
+                        {
+                            DateTime end;
 
-                    var duration = end - start;
+                            DateTime start = DateTime.Parse(innerArray[2].GetString() +" " + innerArray[3].GetString());
 
-                    string urls = GetUrl(innerArray);
+                            if(innerArray[5].GetString() != null)
+                                end = DateTime.Parse(innerArray[5].GetString() +" " + innerArray[6].GetString());
+                            else
+                            {
+                                var endTmp = start.AddDays(1);
+                                end = new DateTime(endTmp.Year, endTmp.Month, endTmp.Day, 1, 0, 0);
+                            }
 
-                    //for (int i = 30; i < innerArray.Length - 1; i++)
-                    //{
-                    //    Console.WriteLine($"Elemento {i}: {innerArray[i]}");
-                       
-                    //    string? urlValue = innerArray[i].GetString();
+                            if (start.Year < DateTime.Now.Year)
+                                start = new DateTime(DateTime.Now.Year, start.Month, start.Day, 21, 0, 0);
+                            if (start.Hour < 19)
+                                start = new DateTime(DateTime.Now.Year, start.Month, start.Day, 21, 0, 0);
+                            if (end.Year < DateTime.Now.Year)
+                                end = new DateTime(DateTime.Now.Year, end.Month, end.Day);
+                            if (end.Hour > 5)
+                                end = new DateTime(DateTime.Now.Year, end.Month, end.Day, 2,0,0);
 
-                    //    if (!string.IsNullOrEmpty(urlValue))                        
-                    //        urls.Append(urlValue);                        
-                    //}
+                            var duration = end - start;
 
-                    string styles = string.Empty;
-                    if (innerArray[28].GetString() != null)
-                        styles = GetStile(innerArray[28].GetString());
+                            string urls = GetUrl(innerArray);
 
-                    listOfEvents.Add(
-                        new ESwingIt 
-                        { 
-                            Id = innerArray[0].GetInt32(),
-                            Title = innerArray[9].GetString() != null ? innerArray[9].GetString(): null,
-                            City = innerArray[14].GetString() != null ? innerArray[14].GetString() : null,
-                            State = innerArray[15].GetString() != null ? innerArray[15].GetString() : null,
-                            Country = innerArray[16].GetString() != null ? innerArray[16].GetString() : null,
-                            Start = start,
-                            End = end,
-                            Duration = end - start,
-                            Description = innerArray[17].GetString() != null ? innerArray[17].GetString() : null,
-                            Longitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
-                            Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
-                            Url = urls,
-                            Styles = styles
+                            //for (int i = 30; i < innerArray.Length - 1; i++)
+                            //{
+                            //    Console.WriteLine($"Elemento {i}: {innerArray[i]}");
+
+                            //    string? urlValue = innerArray[i].GetString();
+
+                            //    if (!string.IsNullOrEmpty(urlValue))                        
+                            //        urls.Append(urlValue);                        
+                            //}
+
+                            string styles = string.Empty;
+                            if (innerArray[28].GetString() != null)
+                                styles = GetStile(innerArray[28].GetString());
+
+                            listOfEvents.Add(
+                                new ESwingIt 
+                                { 
+                                    Id = innerArray[0].GetInt32(),
+                                    Title = innerArray[9].GetString() != null ? innerArray[9].GetString(): null,
+                                    City = innerArray[14].GetString() != null ? innerArray[14].GetString() : null,
+                                    State = innerArray[15].GetString() != null ? innerArray[15].GetString() : null,
+                                    Country = innerArray[16].GetString() != null ? innerArray[16].GetString() : null,
+                                    Start = start,
+                                    End = end,
+                                    Duration = end - start,
+                                    Description = innerArray[17].GetString() != null ? innerArray[17].GetString() : null,
+                                    Longitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
+                                    Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
+                                    Url = urls,
+                                    Styles = styles
+                                }
+                            );                            
                         }
-                    );                    
+
+                        canExit = false;
+                    }
+                    else if (!html2.EndsWith("]"))
+                    {
+                        for (int i = html2.Length - 1; i >= 0; i--)
+                        {
+                            if (html2[i] == ']')
+                            {
+                                html2 = html2.Substring(0, i + 1);
+                                canExit = true;
+                                break;
+                            }
+                        }
+                    }
+                    else if (!html2.StartsWith("["))
+                    {
+                        html2 += "[" + html2;
+                    }
                 }
+                while (canExit);                
 
                 return listOfEvents;
             }
