@@ -1,18 +1,9 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using HtmlAgilityPack;
 ﻿using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Numeric;
 using SiBallaImportingData.Model;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace SiBallaImportingData.Utils
 {
@@ -52,9 +43,6 @@ namespace SiBallaImportingData.Utils
         public async Task<JObject> GetTest()
         {
             string url = $"https://e-swing.it/php/get-events-full.php?nazione=Italia";
-
-
-
 
             using HttpClient client = new();
             HttpResponseMessage response = await client.GetAsync(url);
