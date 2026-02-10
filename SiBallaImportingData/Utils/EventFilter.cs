@@ -40,7 +40,7 @@ namespace SiBallaImportingData.Utils
                             $"{e.Title} - {e.Start.ToShortDateString()}",
                         EventDetail = new EventDetail()
                         {
-                            WebSite = e.Url
+                            WebSite = e.Url.Contains(";") ? e.Url.Split(';')[0] : e.Url,
                         }
                     };
                     eventList.Add(newEvent);
