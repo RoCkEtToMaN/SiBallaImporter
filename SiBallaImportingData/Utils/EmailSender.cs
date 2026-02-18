@@ -121,16 +121,9 @@ namespace SiBallaImportingData.Utils
 
             text += $"*Bollettino della settimana*🗓️:<br>";
 
-            int i = 1;
-            //string textTmp = "";
-
-            //var t = eventi.GroupBy(x => x.City).ToList();
-            //int globalCounter = 1; // Contatore globale continuo
-            // Ordina: prima Genova, poi le altre città in ordine alfabetico
-            foreach (var city in eventi
-                .GroupBy(x => x.City)
-                .OrderByDescending(g => g.Key.Equals("Genova")) // Genova prima
-                .ThenBy(g => g.Key)) // Poi le altre in ordine alfabetico
+            int i = 1;            
+          
+            foreach (var city in eventi.GroupBy(x => x.City).OrderByDescending(g => string.Equals(g.Key, "Genova", StringComparison.Ordinal)).ThenBy(g => g.Key))
             {
                 text += $"_*{city.Key}*_:<br>";
 
