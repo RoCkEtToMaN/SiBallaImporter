@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SiBallaImportingData.Model;
 using System.Configuration;
 using System.Net.Http.Headers;
@@ -31,15 +32,17 @@ namespace SiBallaImportingData.Utils
             try
             {
                 //var textEm = TextEmail(eventi);
-                var apiKey = "***RIMOSSA***";
-                var apiSecret = "***RIMOSSA***";
+                var apiKeyGmail = "***RIMOSSA***";
+                var apiSecretGmail = "***RIMOSSA***";
+                var apiKeySiBalla = "***RIMOSSA***";
+                var apiSecretSiBalla = "***RIMOSSA***";
 
                 //using var client = new HttpClient();
                 using var client = new HttpClient
                 {
                     Timeout = TimeSpan.FromSeconds(30) // Aumenta timeout se necessario
                 };
-                var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{apiKey}:{apiSecret}"));
+                var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{apiKeyGmail}:{apiSecretGmail}"));
                 client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
@@ -51,8 +54,9 @@ namespace SiBallaImportingData.Utils
                         new
                         {
                             From = new {
+                                //Email = "info@siballa.xyz",
                                 Email = "siballanewsletter@gmail.com",
-                                //Name = "siballanewsletter"
+                                Name = "siballanewsletter"
                             },
                             To = ConfigurationManager.AppSettings["Email"]
                                 .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
@@ -133,11 +137,10 @@ namespace SiBallaImportingData.Utils
                         ? $"{ev.Duration.Days} giorni"
                         : $"{ev.Duration.Hours} ore";
 
-                    text += $"  ·{ev.DateStart:ddd} {ev.DateStart.Day}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
+                    text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
                     i++;
                 }
-            }
-            //text += $"·{ev.DateStart.DayOfWeek} {ev.DateStart.Day}; {ev.NameAndData}; {ev.City};{ev.Organizer}; {ev.EventDetail.WebSite} <br>";            
+            }                      
 
             //Togliere la data nel titolo e mettere durata in ore
 
