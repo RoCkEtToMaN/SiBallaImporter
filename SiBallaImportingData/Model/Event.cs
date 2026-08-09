@@ -22,7 +22,7 @@ namespace SiBallaImportingData.Model
         public TimeSpan Duration { get; set; }
         public string? City { get; set; }  
         public string? Country { get;set; }
-        public string? Type { get; set; }
+        public Type? Type { get; set; }
         public string? Organizer { get; set; }
         public string? NameAndData { get; set; }
         public string? Month { get; set; }
@@ -46,5 +46,11 @@ namespace SiBallaImportingData.Model
             "November",
             "December"
         };        
+    }
+
+    public enum Type
+    {
+        Event,
+        Workshop
     }
 }
