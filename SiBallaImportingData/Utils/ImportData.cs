@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DateTime = System.DateTime;
+using Type = SiBallaImportingData.Model.Type;
 
 namespace SiBallaImportingData.Utils
 {
@@ -230,7 +231,7 @@ namespace SiBallaImportingData.Utils
 
                 Console.WriteLine($"ev.DateFinish {ev.DateFinish}; ev.DateStart {ev.DateStart}; howMuhch {date}");
                 // Esempio di preparazione: aggiungi un prefisso al nome dell'evento
-                ev.PartyName = "[API] " + ev.PartyName;
+                //ev.PartyName = "[API] " + ev.PartyName;
 
                 if(date.Value.TotalDays > 1)
                 {
@@ -241,11 +242,8 @@ namespace SiBallaImportingData.Utils
                 {
                     e++;
                     eventsToAppend.Add(ev);
-
-
                 }
             }
-
 
             try
             {
@@ -303,44 +301,63 @@ namespace SiBallaImportingData.Utils
                 Console.WriteLine($"Accesso consentito al documento: {spreadsheet.Properties.Title}");
 
 
-
-                //Console.WriteLine("Verifico i permessi e leggo i fogli disponibili...");
-                //var testRequest = service.Spreadsheets.Get(spreadsheetId);
-                //var spreadsheet = testRequest.Execute();
-
                 // 🔍 STAMPA IN CONSOLE TUTTI I NOMI DEI FOGLI PRESENTi NEL DOCUMENTO
-                Console.WriteLine("--- FOGLI PRESENTI NEL TUO GOOGLE SHEET ---");
-                foreach (var sheet in spreadsheet.Sheets)
-                {
-                    Console.WriteLine($"> Nome esatto: [{sheet.Properties.Title}] (ID: {sheet.Properties.SheetId})");
-                }
-                Console.WriteLine("---------------------------------------------");
+                //Console.WriteLine("--- FOGLI PRESENTI NEL TUO GOOGLE SHEET ---");
 
-                // 2. Mappatura e formattazione dei dati dagli eventi
-                var newData3 = events.Select(ev => {
+                //foreach (var sheet in spreadsheet.Sheets)
+                //{
+                //    Console.WriteLine($"> Nome esatto: [{sheet.Properties.Title}] (ID: {sheet.Properties.SheetId})");
+                //}
+                //Console.WriteLine("---------------------------------------------");
+
+                // 2. Mappatura e formattazione dei dati dagli eventi                
+
+                var newData = events.Select(ev =>
+                {
+                    var dateStart = ev.DateStart;
                     var datefinish = (DateTime)ev.DateFinish;
 
-                    string cleanPartyName = "";
-                    if (!string.IsNullOrEmpty(ev.PartyName))
+                    if(datefinish == null || datefinish < dateStart || datefinish == dateStart || Math.Abs((datefinish - dateStart).TotalDays) > 300)
                     {
-                        cleanPartyName = ev.PartyName.Replace("[API]", "").Trim();
+                        //if(Type.Event.ToString().ToLower() == sheetName.ToLower())
+                        if(Type.Serate.ToString().ToLower() == sheetName.ToLower())
+                            datefinish = dateStart.AddDays(1);
+                        if(Type.Workshop.ToString().ToLower() == sheetName.ToLower())
+                            datefinish = dateStart.AddDays(3);
                     }
+
+                    bool isWorkshop = Type.Serate.ToString().ToLower() != sheetName.ToLower() ? true: false;
 
                     return (IList<object>)new List<object>
                     {
-                        ev.DateStart.ToString("yyyy-MM-dd"), // Colonna A
-                        datefinish.ToString("yyyy-MM-dd"),   // Colonna B
-                        "",                                  // Colonna C (lasciata vuota)
-                        "",                                  // Colonna D (lasciata vuota)
-                        cleanPartyName,                      // Colonna E
-                        ev.Country + ", " + ev.City,         // Colonna F 
-                        ev.Organizer                         // Colonna G
+                        ev.DateStart.ToString("yyyy-MM-dd"),                                             // Colonna A
+                        datefinish.ToString("yyyy-MM-dd"),                                               // Colonna B
+                        "",                                                                              // Colonna C
+                        "",                                                                              // Colonna D
+                        ev.PartyName,                                                                    // Colonna E
+                        $"{ev.Country}, {ev.City}({ev.EventDetail.Latitude};{ev.EventDetail.Longitude})", // Colonna F
+                        ev.Organizer,                                                                    // Colonna G
+                        ev.EventDetail.StylesToString,                                                                              // Colonna H
+                        "",                                                                              // Colonna I
+                        "",                                                                              // Colonna J
+                        "",                                                                              // Colonna K
+                        "",                                                                              // Colonna L
+                        "",                                                                              // Colonna M
+                        !isWorkshop ? ev.EventDetail.WebSite:"",                                                                              // Colonna N
+                        "",                                                                              // Colonna O
+                        "",                                                                              // Colonna P
+                        "",                                                                              // Colonna Q
+                        isWorkshop ? ev.EventDetail.WebSite: "",
+                        "",
+                        "",
+                        "",
+                        "",// Colonna R
                     };
-                }).ToList<IList<object>>();
+                }).ToList();
 
                 var valueRange = new ValueRange
                 {
-                    Values = newData3
+                    Values = newData
                 };
 
                 // 3. Configurazione dell'Append usando il nome del foglio o l'intervallo delle colonne

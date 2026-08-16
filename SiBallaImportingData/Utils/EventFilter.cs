@@ -1,5 +1,6 @@
 ﻿using SiBallaImportingData.Model;
 using System.Configuration;
+using System.Diagnostics.Eventing.Reader;
 
 namespace SiBallaImportingData.Utils
 {
@@ -15,10 +16,37 @@ namespace SiBallaImportingData.Utils
         public static List<Event> FilterESwingItEventsByDateRange(List<ESwingIt> events)
         {
             var eventList = new List<Event>();
+            //DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) &&
 
-            foreach (var e in events.Where(x => DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) && 
-                (!x.Title.ToLower().Contains("prova") && !x.Title.ToLower().Contains("prove") && !x.Title.ToLower().Contains("stage") && !x.Title.ToLower().Contains("corsi") && !x.Title.ToLower().Contains("corso") 
-                && !x.Title.ToLower().Contains("workshop")) && !x.Url.ToLower().Contains("cors")))
+            // Elenco delle parole da escludere nel titolo (tutte rigorosamente in minuscolo)
+            string[] excludedTitleWords = {
+                "prova", "prove", "stage", "corsi", "corso", "workshop", "blues dance - tutti i mercoledi"
+            };
+
+            var filteredEvents = events.Where(x =>
+            {
+                // Normalizzazione sicura (gestisce eventuali null senza crashare)
+                var title = x.Title?.ToLower() ?? string.Empty;
+                var desc = x.Description?.ToLower() ?? string.Empty;
+                var url = x.Url?.ToLower() ?? string.Empty;
+
+                // 1. Controlla se il titolo contiene una delle parole escluse
+                if (excludedTitleWords.Any(word => title.Contains(word)))
+                    return false;
+
+                // 2. Controlla la descrizione
+                if (desc.Contains("kirsten"))
+                    return false;
+
+                // 3. Controlla l'URL
+                if (url.Contains("cors"))
+                    return false;
+
+                // Se passa tutti i controlli, l'evento è valido
+                return true;
+            }).ToList();
+
+            foreach (var e in filteredEvents)
             {            
                 if (CheckEventInsideCircle(e))
                 {
@@ -40,8 +68,14 @@ namespace SiBallaImportingData.Utils
                             $"{e.Title} - {e.Start.ToShortDateString()}",
                         EventDetail = new EventDetail()
                         {
-                            WebSite = e.Url,
-                            //WebSite = e.Url.Contains(";") ? e.Url.Split(';')[0] : e.Url,
+                            //WebSite = e.Url,
+                            WebSite = e.Url.Contains(";") ? e.Url.Split(';')[0] : e.Url,
+                            City = e.City,
+                            Country = e.Country,
+                            Longitude = e.Longitude.ToString(),
+                            Latitude = e.Latitude.ToString(),
+                            //Styles = e.Styles,
+                            StylesToString = e.StylesString
                         }
                     };
                     eventList.Add(newEvent);
@@ -54,11 +88,84 @@ namespace SiBallaImportingData.Utils
 
             return eventList;
         }
-        private static bool CheckEventInsideCircle(ESwingIt e)
+        public static List<Event> FilterSwingPlanitEventsByDateRange(List<Event> events)
+        {
+            var eventList = new List<Event>();
+
+            // 1.Estraggono e valutano i valori prima della query LINQ(fuori dalla lambda)
+            int giorni = Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]);
+            DateTime oggi = DateTime.Today;
+            DateTime dataLimite = oggi.AddDays(giorni);
+
+            // 2. Esegui il filtraggio in modo pulito e sicuro in memoria locale
+            var filteredEvents = events.Where(x => oggi <= x.DateStart && x.DateStart <= dataLimite).ToList();
+            //.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])))
+            foreach (var e in events)
+            {            
+                if (CheckEventInsideCircle(e))
+                {
+                    Console.WriteLine("Data evento e città : " + e.DateStart + ", " + e.City);
+                    var end = new DateTime();
+                    if (e.DateFinish != null)
+                        end = (DateTime)e.DateFinish;                  
+
+                    var newEvent = new Event
+                    {
+                        DateStart = e.DateStart,
+                        DateFinish = e.DateFinish,
+                        Duration = e.Duration,
+                        City = e.City,
+                        Country = e.Country,
+                        Organizer = e.EventDetail.Description,
+                        PartyName = e.PartyName,
+                        NameAndData = e.DateFinish != null ? $"{e.PartyName} - {e.DateStart.ToShortDateString()} to {end.ToShortDateString()}" :
+                            $"{e.PartyName} - {e.DateStart.ToShortDateString()}",
+                        EventDetail = new EventDetail()
+                        {
+                            //WebSite = e.Url,
+                            WebSite = e.EventDetail.WebSite.Contains(";") ? e.EventDetail.WebSite.Split(';')[0] : e.EventDetail.WebSite,
+                            City = e.City,
+                            Country = e.Country,
+                            Longitude = e.EventDetail.Longitude,
+                            Latitude = e.EventDetail.Latitude,
+                            Styles = e.EventDetail.Styles,
+                            StylesToString = e.EventDetail.StylesToString
+                        }
+                    };
+                    eventList.Add(newEvent);
+
+                    Console.WriteLine($"{e.City}  entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
+                }
+                else
+                    Console.WriteLine($" {e.City}  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"❌ NO"}");
+            }
+
+            return eventList;
+        }
+        private static bool CheckEventInsideCircle(Object e)
         {
             var raggio_km = (float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"]); // Raggio in km
 
-            return (HaversineDistance(e.Latitude, e.Longitude) <= raggio_km * 1000f);
+            
+            if (e is Event)
+            {
+                var eEvent = e as Event;
+
+                if (eEvent.EventDetail.Latitude == null || eEvent.EventDetail.Longitude == null)
+                    return false;
+        
+                return (HaversineDistance(float.Parse(eEvent.EventDetail.Latitude), float.Parse(eEvent.EventDetail.Longitude)) <= raggio_km* 1000f);
+            }
+            else
+            {
+                var eEvent = e as ESwingIt;
+
+                if (eEvent?.Latitude == null || eEvent?.Longitude == null)
+                    return false;
+
+                return (HaversineDistance(eEvent.Latitude, eEvent.Longitude) <= raggio_km * 1000f);
+            }
+            
         }
         private static float HaversineDistance(float lat1, float lon1)
         {

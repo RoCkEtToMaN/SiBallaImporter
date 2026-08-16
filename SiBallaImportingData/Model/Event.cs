@@ -51,6 +51,7 @@ namespace SiBallaImportingData.Model
     public enum Type
     {
         Event,
-        Workshop
+        Workshop,
+        Serate
     }
 }

@@ -20,7 +20,8 @@ namespace SiBallaImportingData.Model
         public string? State { get; set; }
         public float Latitude { get; set; }
         public float Longitude { get; set; }
-        public string Styles { get; set; }
+        public string? StylesString { get; set; }
+        //public EventDetail? Styles { get; set; }
         public TimeSpan Duration { get; set; }
     }
 }

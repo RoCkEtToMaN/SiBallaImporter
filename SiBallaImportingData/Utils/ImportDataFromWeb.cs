@@ -1,9 +1,16 @@
 ﻿using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
+
 using SiBallaImportingData.Model;
+using SiBallaImportingData.Service;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
+using static SiBallaImportingData.Service.LocationInfo;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SiBallaImportingData.Utils
 {
@@ -152,6 +159,9 @@ namespace SiBallaImportingData.Utils
                             //        urls.Append(urlValue);                        
                             //}
 
+
+                            //VEDERE DI TOGLIERE ; dal LINK che non fa andare nella pagina corretta
+
                             string styles = string.Empty;
                             if (innerArray[28].GetString() != null)
                                 styles = GetStile(innerArray[28].GetString());
@@ -171,7 +181,7 @@ namespace SiBallaImportingData.Utils
                                     Longitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
                                     Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
                                     Url = urls,
-                                    Styles = styles
+                                    StylesString = styles
                                 }
                             );                            
                         }
@@ -205,7 +215,6 @@ namespace SiBallaImportingData.Utils
                 return null;
             }
         }
-
         private string GetStile(string stili)
         {
             string styles = string.Empty;
@@ -257,7 +266,6 @@ namespace SiBallaImportingData.Utils
 
             return styles;
         }
-
         private string GetUrl(JsonElement[]? innerArray)
         {
             StringBuilder urls = new StringBuilder();
@@ -271,8 +279,575 @@ namespace SiBallaImportingData.Utils
             return urls.ToString();
         }
 
-
         #endregion
+
+        #region SwingPlanint
+
+        private ObservableRangeCollection<GroupByDate>? _workshopsListByDate2 = new ObservableRangeCollection<GroupByDate>();
+        private List<Event> _workshops = new List<Event>();
+
+        private int countMesi = 0;
+        public async Task<List<Event>> GetSwingPlanit()
+        {
+            try
+            {
+                var workshops = new List<Event>();
+                var initialData = await GetInitialData();
+
+                var months = initialData?.DocumentNode.SelectNodes("//h3[contains(@class, 'swingtag')]");
+
+                if (months == null || !months.Any()) return null;
+
+                foreach (var month in months)
+                {
+                    workshops.AddRange(await SearchSwingPlanitAsync(initialData, month));
+
+                    var groupedItems = new ObservableCollection<GroupByDate>(
+                        workshops.GroupBy(x => x.MonthYear)
+                                 .Select(x => new GroupByDate(x.Key, x)));
+
+                    //await MainThread.InvokeOnMainThreadAsync(() =>
+                    //{
+                    _workshopsListByDate2.AddRange(groupedItems);
+                    //});
+
+                    //SetBusyState(false);
+                }
+
+                return workshops;
+            }
+            finally
+            {
+                //ActivityIndicatorVisibility = false;
+                //IsBusyA = false;
+            }
+        }
+
+        private async Task<List<Event>?> SearchSwingPlanitAsync(HtmlDocument doc, HtmlNode mese2)
+        {
+            try
+            {
+                //throw new Exception("asdasd");
+
+                using HttpClient client = new();
+                string text = doc.DocumentNode.InnerText;
+                string html2 = doc.DocumentNode.InnerHtml;
+
+                var nomeEvento = doc.DocumentNode.SelectNodes("//div[contains(@class, 'maintitle2')]");
+                var mesi = doc.DocumentNode.SelectNodes("//h3[contains(@class, 'swingtag')]");
+
+                var teacherConfirmed = doc.DocumentNode.SelectNodes("//div[contains(@class, 'circconf')]");
+                var excangheConfirmed = doc.DocumentNode.SelectNodes("//div[contains(@class, 'circexc')]");
+
+                var details = doc.DocumentNode.SelectNodes("//a[@href]");
+
+                //< a href =\"https://www.swingplanit.com/event/asia-balboa-exchange-df-2025\ dettagli
+                //
+                //countMesi = 5;//11
+                _workshops.Clear();
+
+                if (mesi != null)
+                {
+                    int lastMonthLine = 0;
+
+                    if (countMesi != 0 && countMesi < mesi.Count)
+                        lastMonthLine = mesi[countMesi].Line;
+
+                    List<HtmlNode> eventiQuestoMese = new List<HtmlNode>();
+
+                    if (countMesi >= 0 && countMesi != mesi.Count - 1)
+                    {
+                        countMesi++;
+                        eventiQuestoMese = nomeEvento.Where(x => x.Line > lastMonthLine && x.Line <= mesi[countMesi].Line).ToList();
+                    }
+                    else if (countMesi == mesi.Count - 1)
+                        eventiQuestoMese = nomeEvento.Where(x => x.Line >= lastMonthLine).ToList();
+
+                    var ev = new Event();
+                    if (eventiQuestoMese != null)
+                    {
+                        int countEvento = 0;
+                        foreach (var news in eventiQuestoMese)
+                        {
+                            //var ev = new Event();
+                            ev.EventDetail = new EventDetail();
+
+                            ev.Month = new string(mese2.InnerText.Where(c => !char.IsDigit(c)).ToArray()).Replace(" ", "");
+
+                            var numeroNodoEvento = news.Line;
+
+                            if ((countMesi) < mesi.Count() - 1 && numeroNodoEvento > mesi[countMesi].Line && numeroNodoEvento != mesi[countMesi].Line)
+                                continue;
+
+                            var titolo = news.InnerText;
+                            var contenuto = news.InnerText;
+
+                            ev.WorkshopName = titolo;
+
+                            Console.WriteLine("Workshop Name : " + ev.WorkshopName);
+
+                            bool lastEventOfMonth = false;
+
+                            if (news == eventiQuestoMese.Last())
+                                lastEventOfMonth = true;
+
+                            var exchangedConfirmedRow = excangheConfirmed.Where(x => (int)eventiQuestoMese[countEvento].Line < (int)x.Line).Count() != 0 ?  //eventiQuestoMese
+                                excangheConfirmed.Where(x => (int)eventiQuestoMese[countEvento].Line < (int)x.Line).FirstOrDefault().Line : 0;
+
+                            if (!lastEventOfMonth && (countEvento + 1) <= eventiQuestoMese.Count() && exchangedConfirmedRow != 0 && exchangedConfirmedRow < (int)eventiQuestoMese[countEvento + 1].Line
+                                 || lastEventOfMonth && (Math.Abs(exchangedConfirmedRow - (int)eventiQuestoMese[countEvento].Line) < 7))
+                                ev.ExchangeConfirmed = true;
+
+                            var teachersConfirmedRow = teacherConfirmed.Where(x => (int)eventiQuestoMese[countEvento].Line < (int)x.Line).Count() != 0 ?
+                                teacherConfirmed.Where(x => (int)eventiQuestoMese[countEvento].Line < (int)x.Line).FirstOrDefault().Line : 0;
+
+                            if (!lastEventOfMonth && (countEvento + 1) <= eventiQuestoMese.Count() && teachersConfirmedRow != 0 && teachersConfirmedRow < (int)eventiQuestoMese[countEvento + 1].Line
+                                || lastEventOfMonth && (Math.Abs(teachersConfirmedRow - (int)eventiQuestoMese[countEvento].Line) < 7))
+                                ev.TeachersConfirmed = true;
+
+                            if (details.Where(x => x.InnerText.Contains(ev.WorkshopName)).Count() != 0)
+                            {
+                                HtmlNode detailEvent;
+#if DEBUG
+
+                                //if (WorkShopListNameToBeChecked.Where(x => x.Equals(ev.WorkshopName)).Count() > 0)
+                                //    var provaMeseAnnoDopo = details.Where(x => x.InnerText.Contains(ev.WorkshopName)).LastOrDefault();
+
+
+#endif
+
+                                //if (WorkShopListNameToBeChecked.Where(x => x.Equals(ev.WorkshopName)).Count() == 0)//CONTROLLARE QUI
+                                //    detailEvent = details.FirstOrDefault(x => x.InnerText.Contains(ev.WorkshopName) && x.Line >= (int)mese2.Line);
+                                //else
+                                    detailEvent = details.LastOrDefault(x => x.InnerText.Contains(ev.WorkshopName) && x.Line >= (int)mese2.Line);
+
+                                ev.EventDetail.WebSite = detailEvent != null ? detailEvent.GetAttributeValue("href", string.Empty) : null;
+
+                                // normalizza e valida l'URL prima della chiamata HTTP
+                                string href = ev.EventDetail.WebSite ?? string.Empty;
+                                if (string.IsNullOrWhiteSpace(href))
+                                {
+                                    // Nessun link valido: aggiungi l'evento senza fare la richiesta
+                                    _workshops.Add(ev);
+                                    //WorkShopListNameToBeChecked.Add(ev.WorkshopName);
+#if DEBUG
+                                    Console.WriteLine("Link vuoto o mancante, salto richiesta HTTP.");
+#endif
+                                    continue;
+                                }
+
+                                if (href.StartsWith("//"))
+                                    href = "https:" + href;
+                                else if (href.StartsWith("/"))
+                                    href = "https://www.swingplanit.com" + href;
+                                else if (!href.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                                         !href.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                                    href = "https://www.swingplanit.com/" + href;
+
+                                ev.EventDetail.WebSite = href;
+
+                                // chiamata HTTP sicura con gestione eccezioni
+                                HttpResponseMessage responseEvent;
+                                try
+                                {
+                                    responseEvent = await client.GetAsync(href);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Errore richiesta dettaglio evento per '{href}': {ex.Message}");
+                                    // Aggiungi l'evento anche se non è possibile recuperare i dettagli
+                                    _workshops.Add(ev);
+                                    //WorkShopListNameToBeChecked.Add(ev.WorkshopName);
+                                    continue;
+                                }
+
+                                // prosegui come prima solo se la risposta è OK
+                                if (responseEvent.IsSuccessStatusCode)
+                                {
+
+                                    string jsonResponse2 = await responseEvent.Content.ReadAsStringAsync();
+                                    var doc2 = new HtmlDocument();
+                                    doc2.LoadHtml(jsonResponse2);
+
+                                    var details2 = doc2.DocumentNode.SelectNodes("//a[@href]");
+                                    var lowerSection = doc2.DocumentNode.SelectNodes("//div[contains(@class, 'lowersection')]");
+                                    var nomeEvento2 = doc2.DocumentNode.SelectNodes("//div[contains(@class, 'cardtitle')]");
+                                    var info = doc2.DocumentNode.SelectNodes("//div[contains(@class, 'postcardleft')]");
+                                    var info2 = doc2.DocumentNode.SelectNodes("//div[contains(@class, 'postcardright Yes')]");
+
+                                    if (details2 != null)
+                                    {
+#if DEBUG
+                                        foreach (HtmlNode link2 in details2)
+                                        {
+                                            string hrefValue2 = link2.GetAttributeValue("href", string.Empty);
+                                            Console.WriteLine($"Link trovato: {hrefValue2}");//Questo è il vero ev.EventDetail.WebSite
+                                        }
+#endif
+
+                                        foreach (HtmlNode link2 in info)
+                                        {
+
+#if DEBUG
+                                            string hrefValue2 = link2.GetAttributeValue("href", string.Empty);
+                                            Console.WriteLine($"Link trovato: {hrefValue2}");
+#endif
+
+                                            // Estrai When?
+                                            var whenNode = link2.SelectSingleNode(".//li[contains(., 'When?')]");
+                                            if (whenNode != null)
+                                            {
+                                                string start = "st", end = "st";
+
+                                                ev.EventDetail.When = whenNode.InnerText.Replace("When?", "").Trim();
+                                                var dates = ev.EventDetail.When.Split('-');
+
+                                                if (dates[0].Contains("nd"))
+                                                    start = "nd";
+                                                else if (dates[0].Contains("rd"))
+                                                    start = "rd";
+                                                else if (dates[0].Contains("th"))
+                                                    start = "th";
+
+                                                if (dates[1].Contains("nd"))
+                                                    end = "nd";
+                                                else if (dates[1].Contains("rd"))
+                                                    end = "rd";
+                                                else if (dates[1].Contains("th"))
+                                                    end = "th";
+
+                                                string formatStart = $"d'{start}' MMM yyyy";
+                                                string formatEnd = $"d'{end}' MMM yyyy";
+
+                                                if (DateTime.TryParseExact(dates[0].Trim(), formatStart, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime safeDateStart))
+                                                {
+                                                    ev.DateStart = safeDateStart;
+                                                }
+                                                if (dates.Length > 1 && DateTime.TryParseExact(dates[1].Trim(), formatEnd, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime safeDateFinish))
+                                                {
+                                                    ev.DateFinish = safeDateFinish;
+                                                }
+
+                                                ev.MonthYear = ev.Month + " " + ev.DateStart.Year;
+                                                ev.NameAndData = ev.DateStart.Day + "th: " + ev.WorkshopName;
+
+                                                var dateFinish = (DateTime) ev.DateFinish;
+                                                ev.EventDetail.When = ev.DateStart.ToString("yyyy-MM-dd") + " - " + dateFinish.ToString("yyyy-MM-dd");
+
+#if DEBUG
+                                                Console.WriteLine("NameAndData: " + ev.NameAndData + ", " + ev.MonthYear);
+#endif
+                                            }
+
+
+                                            var country = link2.SelectSingleNode(".//li[contains(., 'Country:')]");
+
+                                            if (country != null)
+                                                ev.EventDetail.Country = country.InnerText.Replace("Country:", "").Trim();
+
+                                            var city = link2.SelectSingleNode(".//li[contains(., 'Town:')]");
+
+                                            if (city != null)
+                                                ev.EventDetail.City = city.InnerText.Replace("Town:", "").Trim();
+
+
+                                            var latLong = await GetCoordinatesFromCityAndNameLocation(ev.EventDetail.City, ev.EventDetail.Country);
+
+                                            if(latLong.Longitude != 0 && latLong.Latitude != 0)
+                                            {
+                                                ev.EventDetail.Latitude = latLong.Latitude.ToString("F6");
+                                                ev.EventDetail.Longitude = latLong.Longitude.ToString("F6");
+                                            }
+
+                                            var webSite = link2.SelectSingleNode(".//li[contains(., 'Website:')]/a");
+
+                                            if (webSite != null)
+                                                ev.EventDetail.WebSite = webSite.InnerText.Replace("Styles:", "").Trim();
+
+                                            var styles = link2.SelectSingleNode(".//li[contains(., 'Styles:')]");
+
+                                            if (styles != null)
+                                            {
+                                                ev.EventDetail.Styles = new List<StileEvento>();
+                                                ev.EventDetail.StylesToString = styles.InnerText.Replace("Styles:", "").Trim();
+
+                                                foreach (var style in ev.EventDetail.StylesToString.Split(','))
+                                                {
+                                                    switch (style.ToLower().Trim())
+                                                    {
+                                                        case "lindy":
+                                                        case "lindy hop":
+                                                        case "lindyhop":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Lindy);
+                                                            break;
+                                                        case "blues":
+                                                        case "blues dance":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Blues);
+                                                            break;
+                                                        case "balboa":
+                                                        case "bal":
+                                                        case "slow bal":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Balboa);
+                                                            break;
+                                                        case "boogie":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Boogie);
+                                                            break;
+                                                        case "shag":
+                                                        case "collegiate shag":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Shag);
+                                                            break;
+                                                        case "solo jazz":
+                                                        case "solo":
+                                                        case "jazz":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.SoloJazz);
+                                                            break;
+                                                        case "aerials":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Aerials);
+                                                            break;
+                                                        case "afrodance":
+                                                            ev.EventDetail.Styles ??= new List<StileEvento>();
+                                                            ev.EventDetail.Styles.Add(StileEvento.Afrodance);
+                                                            break;
+                                                    }
+                                                }
+                                            }
+
+                                            var descriptionNode = link2.SelectSingleNode(".//div[@class='scroll-pane2']/p");
+
+                                            if (descriptionNode != null)
+                                                ev.EventDetail.Description = descriptionNode.InnerText.Trim();
+                                        }
+
+
+                                        if (ev.TeachersConfirmed && info2 != null)
+                                            foreach (HtmlNode link2 in info2)
+                                            {
+
+                                                // Estrai teachers?
+                                                var teachers2 = link2.SelectSingleNode(".//div[@class='scroll-pane']/p");
+
+                                                if (teachers2 != null)
+                                                    ev.EventDetail.Teachers = teachers2.InnerText;
+                                            }
+                                    }
+                                }
+
+                                string linkText = detailEvent.InnerText.Trim();
+#if DEBUG
+                                Console.WriteLine($"Testo del link: {linkText}");
+
+#endif
+                                _workshops.Add(ev);
+                                //WorkShopListNameToBeChecked.Add(ev.WorkshopName);
+
+
+#if DEBUG
+                                Console.WriteLine($"Aggiunto evento: {ev.WorkshopName}");
+#endif
+                            }
+                            else
+                            {
+#if DEBUG
+                                Console.WriteLine("Nessun tag 'a' con attributo 'href' trovato.");
+#endif
+                            }
+
+#if DEBUG
+
+                            Console.WriteLine($"Titolo: {titolo}");
+                            Console.WriteLine($"Contenuto: {contenuto}");
+                            Console.WriteLine($"Mese: {mese2.InnerText}");
+
+                            Console.WriteLine("--------------------------------");
+#endif
+                            countEvento++;
+                        }
+                    }
+
+                    ev.TeachersConfirmed = false;
+                    ev.ExchangeConfirmed = false;
+
+                    return _workshops;
+                }
+
+                //IsBusyA = false;
+
+                return _workshops;
+            }
+            catch (HttpRequestException httpEx)
+            {
+                // Log specifico per errori HTTP
+                //Console.WriteLine($"Errore nella richiesta HTTP: {httpEx.Message}");
+                //Debug.WriteLine($"Stack trace: {httpEx.StackTrace}");
+
+                //var logger = Application.Current.Handler?.MauiContext?.Services.GetRequiredService<IExceptionLogger>();
+                //logger.LogException(httpEx);
+
+                //// Opzionale: invio immediato
+                //await logger.SendLogsByEmail("giacomo.lo87@gmail.com", httpEx.StackTrace, httpEx.Message);
+
+                throw;
+            }
+            catch (HtmlWebException htmlEx)
+            {
+                //// Log specifico per errori di parsing HTML
+                //Console.WriteLine($"Errore nel parsing HTML: {htmlEx.Message}");
+                //Debug.WriteLine($"Stack trace: {htmlEx.StackTrace}");
+
+                //var logger = Application.Current.Handler?.MauiContext?.Services.GetRequiredService<IExceptionLogger>();
+                //logger.LogException(htmlEx);
+
+                //// Opzionale: invio immediato
+                //await logger.SendLogsByEmail("giacomo.lo87@gmail.com", htmlEx.StackTrace, htmlEx.Message);
+
+                throw;
+            }
+            catch (Exception e)
+            {
+                // Log per tutte le altre eccezioni
+                //Console.WriteLine($"Errore non gestito: {e.Message}");
+                //Debug.WriteLine($"Stack trace: {e.StackTrace}");
+
+                //var logger = Application.Current.Handler?.MauiContext?.Services.GetRequiredService<IExceptionLogger>();
+                //logger.LogException(e);
+
+                //// Opzionale: invio immediato
+                //await logger.SendLogsByEmail("giacomo.lo87@gmail.com", e.StackTrace, e.Message);
+
+                // A seconda delle tue esigenze, potresti voler rigettare l'eccezione
+                throw;
+            }
+        }
+
+
+        private async Task<HtmlDocument?> GetInitialData()
+        {
+            try
+            {
+                //string apiKey = "***RIMOSSA***";
+                //string searchEngineId = "06933566dfe984790";
+                string requestUrl = $"https://www.swingplanit.com/";
+                string requestUrl2 = $"https://www.swingplanit.com/event";
+
+                using HttpClient client = new();
+                HttpResponseMessage response = await client.GetAsync(requestUrl);
+                var doc = new HtmlDocument();
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    doc.LoadHtml(jsonResponse);
+                }
+
+                return doc;
+            }
+            finally
+            {
+                //ActivityIndicatorVisibility = false;
+                //IsBusyA = false;
+            }
+        }
+        #endregion
+
+
+        public async Task<(double Latitude, double Longitude)> GetCoordinatesFromCityAndNameLocation(string city, string state, string location = "")
+        {
+            //string apiKey = "***RIMOSSA***"; // Sostituisci con la tua API Key
+
+            //string url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(location + "," + city + ", " + state)}&key={apiKey}";
+            ////string url = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={apiKey}";
+
+            try
+            {
+                string address = string.Empty;
+                if (!string.IsNullOrEmpty(location))
+                    address = $"{location}, {city}, {state}";
+                else
+                    address = $"{city}, {state}";
+                
+                string apiKey = "***RIMOSSA***"; // Sostituisci con la tua API Key
+                var url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(address)}&key={apiKey}";
+
+                var response = new HttpResponseMessage();
+
+                using (var httpClient = new HttpClient())
+                {
+
+                    // Produttore (Apple, Samsung, ecc.)
+                    //var manufacturer = DeviceInfo.Current.Manufacturer;
+
+#if WINDOWS && DEBUG
+                    //var handler = new WinHttpHandler();
+                    //handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+                    //handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+                    //var test = new HttpClient(handler);
+                    //response = await test.GetAsync(url);
+                    var handler = new HttpClientHandler();
+                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+                    var httpClient2 = new HttpClient(handler);
+
+                    response = await httpClient2.GetAsync(url);
+#else
+
+                    response = await httpClient.GetAsync(url);
+#endif
+
+                    Console.WriteLine($"Status: {response.StatusCode}");
+                    Console.WriteLine("Headers:");
+                    foreach (var header in response.Headers)
+                    {
+                        Console.WriteLine($"{header.Key}: {string.Join(",", header.Value)}");
+                    }
+
+                    string rawContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"\nRaw Content (first 500 chars):\n{rawContent.Substring(0, Math.Min(500, rawContent.Length))}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonSerializer.Deserialize<GoogleGeocodeResponse>(content);
+
+                        if (result?.Results?.Count > 0)
+                        {
+                            var location2 = result.Results[0].Geometry.Location;
+
+                            return (location2.Lat, location2.Lng);
+                        }
+                    }
+
+                    return (0, 0);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                // Eccezioni specifiche di rete/HTTP (DNS, connessione, timeout, ecc.)
+                Console.WriteLine($"Errore nella richiesta: {ex.Message}");
+                return (0, 0);
+            }
+            catch (FormatException ex)
+            {
+                // Gestisci l'errore
+                Console.WriteLine($"Errore: {ex.Message}");
+                return (0, 0); // Ritorna valori di default in caso di errore
+            }
+            catch (Exception ex)
+            {
+                // Gestisci l'errore
+                Console.WriteLine($"Errore: {ex.Message}");
+
+                System.Diagnostics.Debugger.Break(); // Forza interruzione qui
+                //throw;
+                return (0, 0); // Ritorna valori di default in caso di errore
+            }
+
+            //return null;
+        }
 
     }
 }
