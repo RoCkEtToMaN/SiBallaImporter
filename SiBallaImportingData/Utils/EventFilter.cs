@@ -15,6 +15,7 @@ namespace SiBallaImportingData.Utils
         }
         public static List<Event> FilterESwingItEventsByDateRange(List<ESwingIt> events)
         {
+            var genova = events.Where(x => x.City?.ToLower() == "genova").OrderBy(x => x.Start).ToList();//170
             var eventList = new List<Event>();
             //DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) &&
 
@@ -45,6 +46,8 @@ namespace SiBallaImportingData.Utils
                 // Se passa tutti i controlli, l'evento è valido
                 return true;
             }).ToList();
+
+            
 
             foreach (var e in filteredEvents)
             {            

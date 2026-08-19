@@ -110,14 +110,14 @@ namespace SiBallaImportingData.Utils
                                         Latitude = latlong.Latitiude.ToString(),
                                         Longitude = latlong.Longitude.ToString(),
                                         Location = row[5].ToString().Split(",")[0],
-                                        City = row[5].ToString().Split(",")[1].Replace(" ", ""),
-                                        Country = row[5].ToString().Split(",")[2].Replace(" ", ""),
+                                        City = row[5].ToString().Split(",")[1].Split('(')[0].Trim(),
+                                        Country = row[5].ToString().Split(',')[0].Trim(),
                                         Styles = stiliEvento,
                                         WebSite = sheet.Properties.Title == TipoEvento.Serate.ToString() ? row[13].ToString() : row[17].ToString()
                                     },
                                     Organizer = row[6].ToString(),
-                                    City = row[5].ToString().Split(",")[1].Replace(" ", ""),
-                                    Country = row[5].ToString().Split(",")[2].Replace(" ", ""),
+                                    City = row[5].ToString().Split(",")[1].Split('(')[0].Trim(),
+                                    Country = row[5].ToString().Split(',')[0].Trim(),
                                     Gratis = DetermineIfFree(sheet.Properties.Title, row),
                                     Type = eventType == 0 ? Model.Type.Event: Model.Type.Workshop
                                 });

@@ -1,6 +1,6 @@
 ﻿using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
-
+using SiBallaDataImporting.Utils;
 using SiBallaImportingData.Model;
 using SiBallaImportingData.Service;
 using System.Collections.ObjectModel;
@@ -166,12 +166,22 @@ namespace SiBallaImportingData.Utils
                             if (innerArray[28].GetString() != null)
                                 styles = GetStile(innerArray[28].GetString());
 
+
+                            
+
+                            // 2. Estrazione pulita (GetString() restituisce già null se l'elemento è nullo)
+                            string cityVal = innerArray[14].GetString()?.Trim();
+                            string stateVal = innerArray[15].GetString()?.Trim();
+                            string countryVal = innerArray[16].GetString()?.Trim();
+
+                            (cityVal, stateVal, countryVal) = LocationHelper.NormalizeLocation(cityVal, stateVal, countryVal);
+
                             listOfEvents.Add(
                                 new ESwingIt 
                                 { 
                                     Id = innerArray[0].GetInt32(),
                                     Title = innerArray[9].GetString() != null ? innerArray[9].GetString(): null,
-                                    City = innerArray[14].GetString() != null ? innerArray[14].GetString() : null,
+                                    City = innerArray[21].GetString() != null ? innerArray[21].GetString() : null,
                                     State = innerArray[15].GetString() != null ? innerArray[15].GetString() : null,
                                     Country = innerArray[16].GetString() != null ? innerArray[16].GetString() : null,
                                     Start = start,
