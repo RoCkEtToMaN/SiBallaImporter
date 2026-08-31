@@ -229,7 +229,9 @@ namespace SiBallaImportingData.Utils
             {
                 var date = ev.DateFinish - ev.DateStart;
 
+#if DEBUG
                 Console.WriteLine($"ev.DateFinish {ev.DateFinish}; ev.DateStart {ev.DateStart}; howMuhch {date}");
+#endif
                 // Esempio di preparazione: aggiungi un prefisso al nome dell'evento
                 //ev.PartyName = "[API] " + ev.PartyName;
 
@@ -247,16 +249,20 @@ namespace SiBallaImportingData.Utils
 
             try
             {
+#if DEBUG
                 Console.WriteLine("Avvio programma...");
+#endif
 
                 if (eventsToAppend.Count() > 0)
                     await AppendToGoogleSheet(eventsToAppend, "Serate");
                 if (workshopsToAppend.Count() > 0)
                     await AppendToGoogleSheet(workshopsToAppend, "Workshop");
 
+#if DEBUG
                 Console.WriteLine($"quanti e: {e}; quanti w: {w}");
 
                 Console.WriteLine("Operazione completata con successo!");
+#endif
             }
             catch (Exception ex)
             {
@@ -294,11 +300,15 @@ namespace SiBallaImportingData.Utils
 
             try
             {
+#if DEBUG
                 // 1. Test di connessione e permessi corretto con .Execute()
                 Console.WriteLine("Verifico i permessi...");
+#endif
                 var testRequest = service.Spreadsheets.Get(spreadsheetId);
                 var spreadsheet = testRequest.Execute(); // <-- Corretto da .Get() a .Execute()
+#if DEBUG
                 Console.WriteLine($"Accesso consentito al documento: {spreadsheet.Properties.Title}");
+#endif
 
 
                 // 🔍 STAMPA IN CONSOLE TUTTI I NOMI DEI FOGLI PRESENTi NEL DOCUMENTO
@@ -370,6 +380,8 @@ namespace SiBallaImportingData.Utils
                 // 4. Esecuzione asincrona dell'inserimento
                 var response = appendRequest.Execute();
 
+#if DEBUG
+
                 // 5. VERIFICA DETTAGLIATA DELL'ESITO
                 if (response != null)
                 {
@@ -397,6 +409,7 @@ namespace SiBallaImportingData.Utils
                 // 5. Output di riscontro
                 Console.WriteLine($"Successo! Aggiunte {response.Updates.UpdatedRows} righe nel foglio.");
                 Console.WriteLine($"Range aggiornato: {response.Updates.UpdatedRange}");
+#endif
             }
             catch (GoogleApiException ex)
             {
