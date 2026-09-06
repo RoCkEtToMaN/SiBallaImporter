@@ -13,8 +13,6 @@ namespace SiBallaImportingData.Service
 {
     public class FirebaseDbService : Event
     {
-        private readonly FirestoreDb _firestoreDb;
-
         private FirebaseClient _firebaseClient;
         //[cite_start]// Stai usando correttamente l'URL del tuo database [cite: 36]
         private readonly string _databaseUrl;
@@ -35,27 +33,32 @@ namespace SiBallaImportingData.Service
         {
             if (_firebaseClient == null)
                 throw new InvalidOperationException("Devi prima chiamare InitializeDb()!");
-            //var collection = _firestoreDb.Collection("workshops");
-            //await collection.AddAsync(workshopData);
-           // await _firebaseClient
-           //.Child("Workshops")
-           //.DeleteAsync();
-
-            await _firebaseClient
-           .Child("Workshops")
-           .PostAsync(workshopData);
+            try
+            {
+                await _firebaseClient
+               .Child("Workshops")
+               .PostAsync(workshopData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Errore durante l'aggiunta del workshop: {ex.Message}");
+                throw;
+            }
         }
         public async Task AddEventAsync(string eventData)
         {
-           // await _firebaseClient
-           //.Child("Eventi")
-           //.DeleteAsync();
-
-            await _firebaseClient
-           .Child("Eventi")
-           .PostAsync(eventData);
+            try
+            {
+                await _firebaseClient
+               .Child("Eventi")
+               .PostAsync(eventData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Errore durante l'aggiunta dell'evento: {ex.Message}");
+                throw;
+            }
         }
-
         public async Task ResetDb()
         {
             if (_firebaseClient == null)
@@ -106,7 +109,6 @@ namespace SiBallaImportingData.Service
         }
         public async Task<ObservableCollection<Event>> LoadEventAsync() 
         {
-
             // Deserializza ciascuna stringa in un oggetto Event e aggiungili a una ObservableCollection<Event>
             var events = new ObservableCollection<Event>();
             try
