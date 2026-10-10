@@ -15,3 +15,10 @@ Service&Model/obj
 
 # chiavi segrete (vedi SiBallaImportingData/secrets.config.example)
 secrets.config
+
+# credenziali (in CI arrivano dai secrets di GitHub)
+siballa-*.json
+
+# dati GeoNames scaricati dall'app
+allCountries.*
+cities15000.*
