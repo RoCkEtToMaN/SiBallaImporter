@@ -14,7 +14,7 @@ namespace SiBallaImportingData.Utils
         }
         public static async Task<List<Event>> FilterESwingItEventsByDateRange(List<ESwingIt> events, KnownVenueStore store, AddressResolver resolver, float radiusKm)
         {
-            KnownVenueStore.Load(Path.Combine(AppContext.BaseDirectory, "venues.json"));
+            KnownVenueStore.Load(DataPaths.Get("venues.json"));
             var genova = events.Where(x => x.City?.ToLower() == "genova").OrderBy(x => x.Start).ToList();//170
             var eventList = new List<Event>();
             //DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) &&

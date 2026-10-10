@@ -16,8 +16,9 @@ public static class IstatDownloader
     public static Dictionary<string, string>? IstatDic { get; set; }
 
     private const string ZipDownloadUrl = "https://download.geonames.org/export/zip/allCountries.zip";
-    private const string ZipFileName = "allCountries.zip";
-    private const string TxtFileName = "allCountries.txt";
+    private static string ZipFileName => DataPaths.Get("allCountries.zip");
+    private const string TxtEntryName = "allCountries.txt"; // nome del file dentro lo zip
+    private static string TxtFileName => DataPaths.Get(TxtEntryName);
     // Mappa in memoria: Chiave "COUNTRY:ZIP" -> Nome Città (es. "IT:16044" -> "Genova", "TH:10200" -> "Bangkok")
     public static readonly ConcurrentDictionary<string, string> ZipToCityMap = new(StringComparer.OrdinalIgnoreCase);
     /// <summary>
@@ -52,7 +53,7 @@ public static class IstatDownloader
 
         using (ZipArchive archive = ZipFile.OpenRead(ZipFileName))
         {
-            ZipArchiveEntry entry = archive.GetEntry(TxtFileName);
+            ZipArchiveEntry entry = archive.GetEntry(TxtEntryName);
             if (entry != null)
             {
                 entry.ExtractToFile(TxtFileName, overwrite: true);

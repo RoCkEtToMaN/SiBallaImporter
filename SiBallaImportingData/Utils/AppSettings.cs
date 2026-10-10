@@ -11,6 +11,7 @@ namespace SiBallaImportingData.Utils
         public ImportOptions Import { get; set; } = new();
         public EmailOptions Email { get; set; } = new();
         public GeminiOptions Gemini { get; set; } = new();
+        public PathsOptions Paths { get; set; } = new();
 
         // scorciatoie per la riga di comando
         private static readonly Dictionary<string, string> SwitchMappings = new()
@@ -71,6 +72,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
+            Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
         }
     }
@@ -101,6 +103,12 @@ namespace SiBallaImportingData.Utils
         public string? MailjetApiSecret { get; set; }
 
         public bool HasMailjetKeys => !string.IsNullOrWhiteSpace(MailjetApiKey) && !string.IsNullOrWhiteSpace(MailjetApiSecret);
+    }
+
+    public class PathsOptions
+    {
+        // vuoto = %LOCALAPPDATA%\SiBallaImporter (vedi DataPaths)
+        public string? DataDirectory { get; set; }
     }
 
     public class GeminiOptions

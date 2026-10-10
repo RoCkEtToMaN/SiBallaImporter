@@ -19,7 +19,7 @@ namespace SiBallaImportingData.Utils
             }
 
             string sanitizedTitle = string.Join("_", customTitle.Split(Path.GetInvalidFileNameChars()));
-            string targetPath = Path.Combine(AppContext.BaseDirectory, sanitizedTitle);
+            string targetPath = DataPaths.Get(sanitizedTitle);
 
             var options = new JsonSerializerOptions
             {

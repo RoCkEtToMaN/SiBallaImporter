@@ -18,11 +18,12 @@ using System.Text.Json;
 
 // configurazione: appsettings.json -> user-secrets -> variabili d'ambiente -> riga di comando
 var settings = AppSettings.Load(args);
+DataPaths.Initialize(settings.Paths.DataDirectory);
 settings.Print();
 var opzioni = settings.Import;
 
 // nel punto di avvio dell'import (Program.cs o dove chiami il filtro)
-var store =KnownVenueStore.Load(Path.Combine(AppContext.BaseDirectory, "DizionarioEventiInfo.json"));
+var store =KnownVenueStore.Load(DataPaths.Get("DizionarioEventiInfo.json"));
 var resolver = new AddressResolver(store);
 Console.WriteLine("Caricamento codici ISTAT in corso...");
 Console.WriteLine("Inizializzazione dati geografici...");
@@ -30,7 +31,7 @@ await IstatDownloader.InitializeAsync();
 //await IstatDownloader.SyncIstatFromOfficialCsvAsync(); // riempie IstatDic, che oggi nessuno legge
 //await IstatDownloader.GetIstatCodesFromDBAsync();
 await OfflineGeocoder.EnsureGeoNamesFileExistsAsync();
-OfflineGeocoder.Initialize("cities15000.txt");
+OfflineGeocoder.Initialize(DataPaths.Get("cities15000.txt"));
 
 // TEST: conta le immagini trovate senza scrivere su foglio o DB
 // (Import:TestImmagini in appsettings.json, oppure dotnet run -- --test-immagini)

@@ -14,8 +14,9 @@ namespace SiBallaImportingData.Service
     {
         private static readonly HttpClient HttpClient = new HttpClient();
         private const string DownloadUrl = "http://download.geonames.org/export/dump/cities15000.zip";
-        private const string ZipFileName = "cities15000.zip";
-        private const string TxtFileName = "cities15000.txt";
+        private static string ZipFileName => DataPaths.Get("cities15000.zip");
+        private const string TxtEntryName = "cities15000.txt"; // nome del file dentro lo zip
+        private static string TxtFileName => DataPaths.Get(TxtEntryName);
 
 
         static OfflineGeocoder()
@@ -39,7 +40,7 @@ namespace SiBallaImportingData.Service
             Console.WriteLine("[GEO] Estrazione del file in corso...");
             using (ZipArchive archive = ZipFile.OpenRead(ZipFileName))
             {
-                var entry = archive.GetEntry(TxtFileName);
+                var entry = archive.GetEntry(TxtEntryName);
                 entry?.ExtractToFile(TxtFileName, overwrite: true);
             }
 

@@ -1,4 +1,5 @@
 ﻿using SiBallaImportingData.Models;
+using SiBallaImportingData.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,8 +10,8 @@ namespace SiBallaImportingData.Service
 {
     public static class CustomLocationsManager
     {
-        // accanto all'exe, come gli altri JSON: non dipende dalla cartella da cui si lancia il programma
-        private static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "custom_locations.json");
+        // nella cartella dati (vedi DataPaths), come gli altri JSON
+        private static string FilePath => DataPaths.Get("custom_locations.json");
         private static List<CustomLocation> _customCache = new();
         // Oggetto lock per garantire l'accesso esclusivo al file da parte di un solo thread alla volta
         private static readonly object FileLock = new object();
