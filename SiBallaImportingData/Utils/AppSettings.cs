@@ -22,6 +22,7 @@ namespace SiBallaImportingData.Utils
             ["--coords"] = "Import:UpdateSheetCoordinates",
             ["--reset-db"] = "Import:ResetDb",
             ["--test-immagini"] = "Import:TestImmagini",
+            ["--test-swing"] = "Import:TestSwing",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
         };
@@ -68,7 +69,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  EnableImportingOnDB = {Import.EnableImportingOnDB}");
             Console.WriteLine($"  UpdateSheetCoordinates = {Import.UpdateSheetCoordinates}");
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
-            Console.WriteLine($"  TestImmagini = {Import.TestImmagini}");
+            Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
         }
@@ -85,6 +86,8 @@ namespace SiBallaImportingData.Utils
         public bool ResetDb { get; set; }
         // conta solo le immagini trovate, senza scrivere su foglio/DB
         public bool TestImmagini { get; set; }
+        // classifica con Gemini gli eventi dei prossimi Giorni e stampa le liste, senza email/foglio/DB
+        public bool TestSwing { get; set; }
         public int Giorni { get; set; } = 7;
         public float Radius { get; set; } = 300;
         public string Centro { get; set; } = "Genova";

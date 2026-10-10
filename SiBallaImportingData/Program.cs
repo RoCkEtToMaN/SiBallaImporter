@@ -53,6 +53,28 @@ if (opzioni.TestImmagini)
     return;
 }
 
+// TEST: classifica con Gemini gli eventi dei prossimi Giorni (quelli dell'email) senza inviare nulla
+// (Import:TestSwing in appsettings.json, oppure dotnet run -- --test-swing)
+if (opzioni.TestSwing)
+{
+    var web = new ImportDataFromWeb();
+    var trovati = new List<Event>();
+    trovati.AddRange(await EventFilter.FilterESwingItEventsByDateRange(await web.GetESwing(), store, resolver, opzioni.Radius));
+    trovati.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await web.GetSwingPlanit(), store, resolver, opzioni.Radius));
+
+    var daClassificare = trovati.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni)).ToList();
+    var (swing, altri) = await SwingEventClassifier.ClassifyAsync(daClassificare, settings.Gemini);
+
+    Console.WriteLine($"\n===== Swing: {swing.Count}/{daClassificare.Count} =====");
+    foreach (var ev in swing.OrderBy(x => x.DateStart))
+        Console.WriteLine($"✅ {ev.DateStart:yyyy-MM-dd} {ev.City}: {ev.PartyName?.Trim()}");
+
+    Console.WriteLine($"\n===== Da verificare: {altri.Count}/{daClassificare.Count} =====");
+    foreach (var (ev, motivo) in altri.OrderBy(x => x.Evento.DateStart))
+        Console.WriteLine($"❓ {ev.DateStart:yyyy-MM-dd} {ev.City}: {ev.PartyName?.Trim()} -> {motivo}");
+    return;
+}
+
 bool enableImportingOnDB = opzioni.EnableImportingOnDB;
 bool enableImportingOnExcel = opzioni.EnableImportingOnExcel;
 bool enableSearching = opzioni.EnableSearching;
