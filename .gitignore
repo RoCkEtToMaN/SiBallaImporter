@@ -22,3 +22,6 @@ siballa-*.json
 # dati GeoNames scaricati dall'app
 allCountries.*
 cities15000.*
+
+# file di dati generati dal programma (stanno in bin)
+custom_locations.json

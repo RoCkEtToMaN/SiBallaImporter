@@ -9,7 +9,8 @@ namespace SiBallaImportingData.Service
 {
     public static class CustomLocationsManager
     {
-        private static readonly string FilePath = "custom_locations.json";
+        // accanto all'exe, come gli altri JSON: non dipende dalla cartella da cui si lancia il programma
+        private static readonly string FilePath = Path.Combine(AppContext.BaseDirectory, "custom_locations.json");
         private static List<CustomLocation> _customCache = new();
         // Oggetto lock per garantire l'accesso esclusivo al file da parte di un solo thread alla volta
         private static readonly object FileLock = new object();
