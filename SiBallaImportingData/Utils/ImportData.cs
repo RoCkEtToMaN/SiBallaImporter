@@ -136,6 +136,9 @@ namespace SiBallaImportingData.Utils
                                 var loc = ParseLocationCell(row[5]?.ToString());
                                 eventList.Add(new Event
                                 {
+                                    SheetName = sheet.Properties.Title,
+                                    SheetRow = values.IndexOf(row) + 1,
+                                    SheetLocationRaw = row[5]?.ToString(),
                                     DateStart = Convert.ToDateTime(row[0]),
                                     DateFinish = Convert.ToDateTime(row[1]),
                                     PartyName = row[4].ToString(),
@@ -566,6 +569,53 @@ namespace SiBallaImportingData.Utils
 
             var parts = raw.Split(',', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             return new(parts.ElementAtOrDefault(0), parts.ElementAtOrDefault(1), parts.ElementAtOrDefault(2), lat, lng);
+        }
+
+        /// <summary>
+        /// Riscrive sullo sheet le coordinate degli eventi indicati: nella colonna F sostituisce solo la parte "(lat;lng)",
+        /// paese, città e indirizzo restano come li hai scritti.
+        /// </summary>
+        public static async Task UpdateSheetCoordinatesAsync(IEnumerable<Event> events)
+        {
+            var data = new List<ValueRange>();
+            foreach (var ev in events)
+            {
+                if (ev.SheetName is null || ev.SheetRow is null || ev.SheetLocationRaw is null) continue;
+                if (ev.EventDetail?.Latitude is not double lat || ev.EventDetail.Longitude is not double lng) continue;
+
+                var raw = ev.SheetLocationRaw;
+                var m = CoordsRe.Match(raw);
+                var text = (m.Success ? raw[..m.Index] : raw).TrimEnd();
+                var cell = $"{text}({lat.ToString("0.0000000", CultureInfo.InvariantCulture)};{lng.ToString("0.0000000", CultureInfo.InvariantCulture)})";
+
+                data.Add(new ValueRange
+                {
+                    Range = $"'{ev.SheetName}'!F{ev.SheetRow}",
+                    Values = new List<IList<object>> { new List<object> { cell } }
+                });
+                Console.WriteLine($"[sheet] {ev.SheetName} riga {ev.SheetRow}: '{raw}' -> '{cell}'");
+            }
+
+            if (data.Count == 0) return;
+
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+
+            var request = service.Spreadsheets.Values.BatchUpdate(new BatchUpdateValuesRequest
+            {
+                ValueInputOption = "RAW",
+                Data = data
+            }, "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo");
+
+            var response = await request.ExecuteAsync();
+            Console.WriteLine($"[sheet] coordinate aggiornate sullo sheet: {response.TotalUpdatedCells} celle");
         }
     }
 }

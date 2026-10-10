@@ -262,6 +262,38 @@ public class KnownVenueStore
         v.GeocodedAddress = v.Address;
         _dirty = true;
     }
+
+    /// <summary>
+    /// Porta sugli eventi dello sheet le coordinate del JSON quando sono affidabili e diverse:
+    /// luogo verificato a mano, oppure trovato da Photon per lo stesso indirizzo scritto nello sheet.
+    /// Restituisce gli eventi modificati (da riscrivere sullo sheet).
+    /// </summary>
+    public List<Event> ApplyToSheetEvents(IEnumerable<Event> sheetEvents)
+    {
+        var changed = new List<Event>();
+        foreach (var e in sheetEvents)
+        {
+            if (e.EventDetail is null || string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
+            if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) continue;
+
+            var t = NormalizeTitle(e.PartyName);
+            if (t.Length == 0 || !org.Events.TryGetValue(t, out var v)) continue;
+            if (v.Lat is not double lat || v.Lng is not double lng || (lat == 0 && lng == 0)) continue;
+
+            var reliable = v.Verified
+                || (v.GeocodedAddress is not null && !string.IsNullOrWhiteSpace(e.EventDetail.Address)
+                    && Norm(v.GeocodedAddress) == Norm(e.EventDetail.Address));
+            if (!reliable) continue;
+
+            if (e.EventDetail.Latitude is double la && e.EventDetail.Longitude is double lo
+                && Math.Abs(la - lat) < 1e-6 && Math.Abs(lo - lng) < 1e-6) continue;   // già uguali
+
+            e.EventDetail.Latitude = lat;
+            e.EventDetail.Longitude = lng;
+            changed.Add(e);
+        }
+        return changed;
+    }
     /// <summary>Luoghi verificati con indirizzo ma senza coordinate: da geocodificare.</summary>
     //public List<(OrganizerVenues Org, VenueInfo Venue)> PendingGeocode() =>
     //    _data.Values

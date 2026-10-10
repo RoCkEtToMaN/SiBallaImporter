@@ -59,6 +59,13 @@ Console.WriteLine($"Voci da compilare aggiunte: {store.AddPlaceholders(daCompila
 // 3. voci verificate con indirizzo ma senza coordinate -> Photon
 await resolver.GeocodePendingAsync();
 
+// 4. coordinate migliori del JSON -> eventi dello sheet (in memoria sempre, sullo sheet solo se abilitato)
+var aggiornati = store.ApplyToSheetEvents(sheetEvents);
+Console.WriteLine($"Eventi dello sheet con coordinate aggiornate: {aggiornati.Count}");
+bool updateSheetCoordinates = Convert.ToBoolean(ConfigurationManager.AppSettings["UpdateSheetCoordinates"]);
+if (updateSheetCoordinates && aggiornati.Count > 0)
+    await ImportData.UpdateSheetCoordinatesAsync(aggiornati);
+
 try
 {
     if (enableSearching)

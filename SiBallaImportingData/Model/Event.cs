@@ -1,9 +1,15 @@
-﻿
+﻿using System.Text.Json.Serialization;
+
 namespace SiBallaImportingData.Model
 {
     public class Event
-    {        
+    {
         public int Id { get; set; }
+
+        // posizione nello sheet: valorizzata solo per gli eventi letti dallo sheet, non va su AppWrite
+        [JsonIgnore] public string? SheetName { get; set; }
+        [JsonIgnore] public int? SheetRow { get; set; }             // numero di riga (1 = prima riga)
+        [JsonIgnore] public string? SheetLocationRaw { get; set; }  // contenuto originale della colonna F
         public EventDetail EventDetail { get; set; } 
         public string? PartyName { get; set; }
         public string? WorkshopName { get; set; }
