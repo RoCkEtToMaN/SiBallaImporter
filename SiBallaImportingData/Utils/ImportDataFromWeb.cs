@@ -852,8 +852,6 @@ namespace SiBallaImportingData.Utils
         {
             try
             {
-                //string apiKey = "***RIMOSSA***";
-                //string searchEngineId = "06933566dfe984790";
                 string requestUrl = $"https://www.swingplanit.com/";
                 string requestUrl2 = $"https://www.swingplanit.com/event";
 
