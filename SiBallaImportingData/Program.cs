@@ -28,6 +28,27 @@ await IstatDownloader.InitializeAsync();
 await OfflineGeocoder.EnsureGeoNamesFileExistsAsync();
 OfflineGeocoder.Initialize("cities15000.txt");
 
+// TEST: conta le immagini trovate senza scrivere su foglio, DB o JSON
+// (flag TestImmagini in App.config, oppure dotnet run -- --test-immagini)
+if (Convert.ToBoolean(ConfigurationManager.AppSettings["TestImmagini"]) || args.Contains("--test-immagini"))
+{
+    var web = new ImportDataFromWeb();
+    var testESwing = await EventFilter.FilterESwingItEventsByDateRange(await web.GetESwing(), store, resolver);
+    var testSwingPlanit = await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await web.GetSwingPlanit(), store, resolver);
+
+    void Report(string fonte, List<Event> eventi)
+    {
+        var conImmagine = eventi.Where(x => !string.IsNullOrEmpty(x.EventDetail?.ImageUrl)).ToList();
+        Console.WriteLine($"\n===== {fonte}: {conImmagine.Count}/{eventi.Count} eventi con immagine =====");
+        foreach (var ev in eventi)
+            Console.WriteLine($"{(string.IsNullOrEmpty(ev.EventDetail?.ImageUrl) ? "❌" : "✅")} {ev.DateStart:yyyy-MM-dd} {ev.PartyName?.Trim()} -> {ev.EventDetail?.ImageUrl ?? ev.EventDetail?.WebSite}");
+    }
+
+    Report("e-swing", testESwing);
+    Report("SwingPlanit", testSwingPlanit);
+    return;
+}
+
 bool enableImportingOnDB = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableImportingOnDB"]);
 bool enableImportingOnExcel = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableImportingOnExcel"]);
 bool enableSearching = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSearching"]);
@@ -105,7 +126,13 @@ if (enableImportingOnExcel && eventsMergeUfficial.Count() != eventsMerge.Count()
     await ImportData.PrepareToAppendToGoogleSheet(eventsMergeUfficial.OrderBy(x => x.DateStart).ToList(), eventFromExcel);
 
 if (enableSending)
-    await EmailSender.SendWithMailjetAnonymous(eventsMerge.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))).ToList());
+{
+    var eventiEmail = eventsMerge.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))).ToList();
+
+    // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
+    var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail);
+    await EmailSender.SendWithMailjetAnonymous(eventiSwing, daVerificare);
+}
 
 if (resetDb)
     await appWriteService.ResetDbAsync();

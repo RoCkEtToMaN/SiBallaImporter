@@ -1,0 +1,182 @@
+[
+  {
+    "city": "Geyserville",
+    "countryCode": "US",
+    "latitude": 38.7129005,
+    "longitude": -122.9009983
+  },
+  {
+    "city": "Santa Fe, New Mexico",
+    "countryCode": "US",
+    "latitude": 35.6876096,
+    "longitude": -105.938456
+  },
+  {
+    "city": "Byron Bay NSW",
+    "countryCode": "AU",
+    "latitude": -28.6483333,
+    "longitude": 153.6177778
+  },
+  {
+    "city": "Palmanova",
+    "countryCode": "ES",
+    "latitude": 39.5237047,
+    "longitude": 2.5383777
+  },
+  {
+    "city": "New York City",
+    "countryCode": "GB",
+    "latitude": 40.7370702,
+    "longitude": -73.8157693
+  },
+  {
+    "city": "Vancouver, BC",
+    "countryCode": "CA",
+    "latitude": 49.2608724,
+    "longitude": -123.113952
+  },
+  {
+    "city": "Carrboro, North Carolina",
+    "countryCode": "US",
+    "latitude": 35.9099875,
+    "longitude": -79.0752876
+  },
+  {
+    "city": "Austin, TX",
+    "countryCode": "US",
+    "latitude": 30.2649261,
+    "longitude": -97.7474086
+  },
+  {
+    "city": "Titchfield, Fareham",
+    "countryCode": "GB",
+    "latitude": 50.8490257,
+    "longitude": -1.2354298
+  },
+  {
+    "city": "Rochester, NY",
+    "countryCode": "US",
+    "latitude": 43.157285,
+    "longitude": -77.615214
+  },
+  {
+    "city": "Venelles",
+    "countryCode": "FR",
+    "latitude": 43.6003084,
+    "longitude": 5.4804956
+  },
+  {
+    "city": "Bolln\u00E4s",
+    "countryCode": "SE",
+    "latitude": 61.3513005,
+    "longitude": 16.3972013
+  },
+  {
+    "city": "Brookline, Newton, MA",
+    "countryCode": "US",
+    "latitude": 42.301757,
+    "longitude": -71.177245
+  },
+  {
+    "city": "Montesilvano (Pescara)",
+    "countryCode": "IT",
+    "latitude": 42.4861709,
+    "longitude": 14.1840236
+  },
+  {
+    "city": "Asheville, NC 28806",
+    "countryCode": "US",
+    "latitude": 35.595363,
+    "longitude": -82.5508407
+  },
+  {
+    "city": "South Beach, Miami Beach",
+    "countryCode": "US",
+    "latitude": 25.7744291,
+    "longitude": -80.1332415
+  },
+  {
+    "city": "Adelaide, South Australia",
+    "countryCode": "AU",
+    "latitude": -34.9281805,
+    "longitude": 138.5999312
+  },
+  {
+    "city": "Oakland, California",
+    "countryCode": "US",
+    "latitude": 37.8044557,
+    "longitude": -122.271356
+  },
+  {
+    "city": "Thailand",
+    "countryCode": "TH",
+    "latitude": 13.7524938,
+    "longitude": 100.4935089
+  },
+  {
+    "city": "Austin, Texas",
+    "countryCode": "US",
+    "latitude": 30.2649261,
+    "longitude": -97.7474086
+  },
+  {
+    "city": "Bellingham, Washington",
+    "countryCode": "US",
+    "latitude": 48.7544012,
+    "longitude": -122.478836
+  },
+  {
+    "city": "Eiterfeld",
+    "countryCode": "DE",
+    "latitude": 50.7703444,
+    "longitude": 9.8385732
+  },
+  {
+    "city": "Mercedes - Buenos Aires, Argentina",
+    "countryCode": "AR",
+    "latitude": -34.6562866,
+    "longitude": -59.3323742
+  },
+  {
+    "city": "Cefal\u00F9",
+    "countryCode": "IT",
+    "latitude": 38.034957,
+    "longitude": 14.0244562
+  },
+  {
+    "city": "Chaponnay",
+    "countryCode": "FR",
+    "latitude": 45.6274322,
+    "longitude": 4.9345198
+  },
+  {
+    "city": "Ginzling",
+    "countryCode": "AT",
+    "latitude": 47.1003214,
+    "longitude": 11.8090362
+  },
+  {
+    "city": "Puerto de la Cruz, Tenerife, Canary Islands",
+    "countryCode": "ES",
+    "latitude": 28.4159024,
+    "longitude": -16.5532956
+  },
+  {
+    "city": "Silvi Marina (TE)",
+    "countryCode": "IT",
+    "latitude": 42.5719068,
+    "longitude": 14.0964247
+  },
+  {
+    "city": "Aix En Provence",
+    "countryCode": "FR",
+    "latitude": 43.5298424,
+    "longitude": 5.4474738
+  },
+  {
+    "city": "Denver, CO",
+    "countryCode": "US",
+    "latitude": 39.7392364,
+    "longitude": -104.984862
+  }
+]

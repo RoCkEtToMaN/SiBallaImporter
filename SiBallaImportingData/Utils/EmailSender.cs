@@ -8,7 +8,7 @@ namespace SiBallaImportingData.Utils
 {
     public static class EmailSender
     {
-        public static async Task SendWithMailjetAnonymous(List<Event> eventi)
+        public static async Task SendWithMailjetAnonymous(List<Event> eventi, List<(Event Evento, string Motivo)>? daVerificare = null)
         {
             try
             {
@@ -50,8 +50,8 @@ namespace SiBallaImportingData.Utils
                                 .Select(email => new { Email = email }).ToArray(),
                             Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
                                 $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).ToString("dd/MM/yyyy")}",
-                            TextPart = TextEmail(eventi),
-                            HTMLPart = TextEmail(eventi)
+                            TextPart = TextEmail(eventi, daVerificare),
+                            HTMLPart = TextEmail(eventi, daVerificare)
                         }
                     }
                 };
@@ -99,7 +99,7 @@ namespace SiBallaImportingData.Utils
             }
 
         }
-        private static string TextEmail(List<Event> eventi)
+        private static string TextEmail(List<Event> eventi, List<(Event Evento, string Motivo)>? daVerificare = null)
         {
             string text = $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
                           $"{DateTime.Now} - {DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))} ,<br>" +
@@ -125,7 +125,15 @@ namespace SiBallaImportingData.Utils
                     text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
                     i++;
                 }
-            }                      
+            }
+
+            if (daVerificare != null && daVerificare.Count > 0)
+            {
+                text += $"<br><br>*Eventi da verificare (secondo l'AI probabilmente non swing)*❓:<br>";
+
+                foreach (var (ev, motivo) in daVerificare.OrderBy(x => x.Evento.DateStart))
+                    text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.City}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{motivo}</i><br>";
+            }
 
             //Togliere la data nel titolo e mettere durata in ore
 
