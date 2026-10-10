@@ -123,7 +123,8 @@ foreach (var eventToCheck in eventsMerge)
 
 var countExcel = eventFromExcel[TipoEvento.Serate].Count() + eventFromExcel[TipoEvento.Workshop].Count();
 
-if (enableImportingOnExcel && eventsMergeUfficial.Count() != eventsMerge.Count() || (eventFromExcel[TipoEvento.Serate].Count() == 0 || eventFromExcel[TipoEvento.Workshop].Count() == 0))
+// lo Sheet si scrive solo se abilitato: le parentesi evitano che "Sheet vuoto" basti da solo
+if (enableImportingOnExcel && (eventsMergeUfficial.Count() != eventsMerge.Count() || eventFromExcel[TipoEvento.Serate].Count() == 0 || eventFromExcel[TipoEvento.Workshop].Count() == 0))
     await ImportData.PrepareToAppendToGoogleSheet(eventsMergeUfficial.OrderBy(x => x.DateStart).ToList(), eventFromExcel);
 
 if (enableSending)
