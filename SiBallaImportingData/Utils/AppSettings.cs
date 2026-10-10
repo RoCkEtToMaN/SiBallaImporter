@@ -105,7 +105,8 @@ namespace SiBallaImportingData.Utils
 
     public class GeminiOptions
     {
-        public string Model { get; set; } = "gemini-flash-latest";
+        // i Flash "pieni" più recenti sul piano gratuito possono impiegare minuti: il lite risponde in pochi secondi
+        public string Model { get; set; } = "gemini-flash-lite-latest";
         public string? ApiKey { get; set; }
     }
 }

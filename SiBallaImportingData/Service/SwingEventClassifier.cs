@@ -10,6 +10,7 @@ namespace SiBallaImportingData.Service
     public static class SwingEventClassifier
     {
         private static readonly HttpClient _client = new() { Timeout = TimeSpan.FromSeconds(90) };
+        private const int DimensioneGruppo = 20;
 
         private const string Istruzioni =
             "Sei un esperto di balli swing. Ti passo una lista di eventi trovati online. " +
@@ -35,98 +36,113 @@ namespace SiBallaImportingData.Service
                 return (swing, altri);
             }
 
-            try
+            // a gruppi: richieste brevi, e se un gruppo fallisce i suoi eventi restano semplicemente nella lista swing
+            var nonSwing = new Dictionary<int, string>();
+            int gruppi = (eventi.Count + DimensioneGruppo - 1) / DimensioneGruppo;
+            for (int g = 0; g < gruppi; g++)
             {
-                var elenco = new StringBuilder();
-                for (int i = 0; i < eventi.Count; i++)
+                int inizio = g * DimensioneGruppo;
+                int quanti = Math.Min(DimensioneGruppo, eventi.Count - inizio);
+                var cronometro = System.Diagnostics.Stopwatch.StartNew();
+                try
                 {
-                    var ev = eventi[i];
-                    var descrizione = ev.EventDetail?.Description ?? string.Empty;
-                    if (descrizione.Length > 600)
-                        descrizione = descrizione[..600];
-
-                    elenco.AppendLine($"id: {i}");
-                    elenco.AppendLine($"titolo: {ev.PartyName}");
-                    elenco.AppendLine($"stili: {ev.EventDetail?.StylesToString}");
-                    elenco.AppendLine($"organizzatore: {ev.Organizer}");
-                    elenco.AppendLine($"sito: {ev.EventDetail?.WebSite}");
-                    elenco.AppendLine($"descrizione: {descrizione.Replace('\n', ' ')}");
-                    elenco.AppendLine("---");
+                    foreach (var (id, motivo) in await ClassifyGroupAsync(eventi, inizio, quanti, apiKey, model))
+                        nonSwing[id] = motivo;
+                    Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi}: {quanti} eventi in {cronometro.Elapsed.TotalSeconds:F1} s");
                 }
-
-                var body = new
+                catch (Exception ex)
                 {
-                    systemInstruction = new { parts = new[] { new { text = Istruzioni } } },
-                    contents = new[] { new { role = "user", parts = new[] { new { text = elenco.ToString() } } } },
-                    generationConfig = new
+                    Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi} non classificato dopo {cronometro.Elapsed.TotalSeconds:F1} s, eventi lasciati nella lista: {ex.Message}");
+                }
+            }
+
+            swing.Clear();
+            for (int i = 0; i < eventi.Count; i++)
+            {
+                if (nonSwing.TryGetValue(i, out var motivo))
+                {
+                    altri.Add((eventi[i], motivo));
+                    Console.WriteLine($"[AI] Non swing: {eventi[i].PartyName} -> {motivo}");
+                }
+                else
+                    swing.Add(eventi[i]);
+            }
+
+            Console.WriteLine($"[AI] Eventi swing: {swing.Count}, da verificare: {altri.Count}");
+            return (swing, altri);
+        }
+
+        // classifica gli eventi [inizio, inizio + quanti) e restituisce quelli non swing con il motivo (id = indice nella lista completa)
+        private static async Task<Dictionary<int, string>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model)
+        {
+            var elenco = new StringBuilder();
+            for (int i = inizio; i < inizio + quanti; i++)
+            {
+                var ev = eventi[i];
+                var descrizione = ev.EventDetail?.Description ?? string.Empty;
+                if (descrizione.Length > 600)
+                    descrizione = descrizione[..600];
+
+                elenco.AppendLine($"id: {i}");
+                elenco.AppendLine($"titolo: {ev.PartyName}");
+                elenco.AppendLine($"stili: {ev.EventDetail?.StylesToString}");
+                elenco.AppendLine($"organizzatore: {ev.Organizer}");
+                elenco.AppendLine($"sito: {ev.EventDetail?.WebSite}");
+                elenco.AppendLine($"descrizione: {descrizione.Replace('\n', ' ')}");
+                elenco.AppendLine("---");
+            }
+
+            var body = new
+            {
+                systemInstruction = new { parts = new[] { new { text = Istruzioni } } },
+                contents = new[] { new { role = "user", parts = new[] { new { text = elenco.ToString() } } } },
+                generationConfig = new
+                {
+                    responseMimeType = "application/json",
+                    responseSchema = new
                     {
-                        responseMimeType = "application/json",
-                        responseSchema = new
+                        type = "ARRAY",
+                        items = new
                         {
-                            type = "ARRAY",
-                            items = new
+                            type = "OBJECT",
+                            properties = new
                             {
-                                type = "OBJECT",
-                                properties = new
-                                {
-                                    id = new { type = "INTEGER" },
-                                    isSwing = new { type = "BOOLEAN" },
-                                    motivo = new { type = "STRING" }
-                                },
-                                required = new[] { "id", "isSwing", "motivo" }
-                            }
+                                id = new { type = "INTEGER" },
+                                isSwing = new { type = "BOOLEAN" },
+                                motivo = new { type = "STRING" }
+                            },
+                            required = new[] { "id", "isSwing", "motivo" }
                         }
                     }
-                };
-
-                using var request = new HttpRequestMessage(HttpMethod.Post,
-                    $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent");
-                request.Headers.Add("x-goog-api-key", apiKey);
-                request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-
-                var response = await _client.SendAsync(request);
-                var responseBody = await response.Content.ReadAsStringAsync();
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"[AI] Errore Gemini {(int)response.StatusCode}: {responseBody}");
-                    return (swing, altri);
                 }
+            };
 
-                using var doc = JsonDocument.Parse(responseBody);
-                var text = doc.RootElement.GetProperty("candidates")[0]
-                    .GetProperty("content").GetProperty("parts")[0]
-                    .GetProperty("text").GetString();
+            using var request = new HttpRequestMessage(HttpMethod.Post,
+                $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent");
+            request.Headers.Add("x-goog-api-key", apiKey);
+            request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
-                using var risultati = JsonDocument.Parse(text ?? "[]");
-                var nonSwing = new Dictionary<int, string>();
-                foreach (var r in risultati.RootElement.EnumerateArray())
-                {
-                    if (!r.GetProperty("isSwing").GetBoolean())
-                        nonSwing[r.GetProperty("id").GetInt32()] = r.GetProperty("motivo").GetString() ?? string.Empty;
-                }
+            var response = await _client.SendAsync(request);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Gemini {(int)response.StatusCode}: {responseBody}");
 
-                swing.Clear();
-                for (int i = 0; i < eventi.Count; i++)
-                {
-                    if (nonSwing.TryGetValue(i, out var motivo))
-                    {
-                        altri.Add((eventi[i], motivo));
-                        Console.WriteLine($"[AI] Non swing: {eventi[i].PartyName} -> {motivo}");
-                    }
-                    else
-                        swing.Add(eventi[i]);
-                }
+            using var doc = JsonDocument.Parse(responseBody);
+            var text = doc.RootElement.GetProperty("candidates")[0]
+                .GetProperty("content").GetProperty("parts")[0]
+                .GetProperty("text").GetString();
 
-                Console.WriteLine($"[AI] Eventi swing: {swing.Count}, da verificare: {altri.Count}");
-            }
-            catch (Exception ex)
+            using var risultati = JsonDocument.Parse(text ?? "[]");
+            var nonSwing = new Dictionary<int, string>();
+            foreach (var r in risultati.RootElement.EnumerateArray())
             {
-                Console.WriteLine($"[AI] Controllo non riuscito, invio la lista completa: {ex.Message}");
-                swing = new List<Event>(eventi);
-                altri.Clear();
+                int id = r.GetProperty("id").GetInt32();
+                // ignora id fuori dal gruppo, se il modello ne inventa
+                if (id >= inizio && id < inizio + quanti && !r.GetProperty("isSwing").GetBoolean())
+                    nonSwing[id] = r.GetProperty("motivo").GetString() ?? string.Empty;
             }
 
-            return (swing, altri);
+            return nonSwing;
         }
     }
 }
