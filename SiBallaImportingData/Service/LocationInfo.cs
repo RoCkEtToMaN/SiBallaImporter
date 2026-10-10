@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using Google.Cloud.Location;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SiBallaImportingData.Service
@@ -92,6 +94,8 @@ namespace SiBallaImportingData.Service
 
             //return null;
         }
+
+        
         public class GoogleGeocodeResponse
         {
             [JsonPropertyName("results")]

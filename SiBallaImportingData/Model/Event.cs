@@ -4,7 +4,7 @@ namespace SiBallaImportingData.Model
     public class Event
     {        
         public int Id { get; set; }
-        public EventDetail EventDetail { get; set; }       
+        public EventDetail EventDetail { get; set; } 
         public string? PartyName { get; set; }
         public string? WorkshopName { get; set; }
         private DateTime dateStart;

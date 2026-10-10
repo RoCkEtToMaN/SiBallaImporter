@@ -191,9 +191,9 @@ public static class IstatDownloader
             IstatDic = istatDictionary;
 
             // Salva l'intera struttura sul database
-            await _firebaseClient
-                .Child("IstatCodes")
-                .PutAsync(istatDictionary);
+            //await _firebaseClient
+            //    .Child("IstatCodes")
+            //    .PutAsync(istatDictionary);
 
             Console.WriteLine("✅ Sincronizzazione ISTAT completata con successo!");
             return true;
@@ -208,7 +208,7 @@ public static class IstatDownloader
     /// <summary>
     /// Recupera l'intera mappa dei codici ISTAT dal database Firebase.
     /// </summary>
-    public static async Task<Dictionary<string, string>> GetIstatCodesAsync()
+    public static async Task<Dictionary<string, string>> GetIstatCodesFromDBAsync()
     {
         try
         {

@@ -1,4 +1,6 @@
-﻿using HtmlAgilityPack;
+﻿using Appwrite.Models;
+using Google.Protobuf.WellKnownTypes;
+using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using SiBallaDataImporting.Utils;
 using SiBallaImportingData.Model;
@@ -6,11 +8,11 @@ using SiBallaImportingData.Service;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
 using static SiBallaImportingData.Service.LocationInfo;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace SiBallaImportingData.Utils
 {
@@ -69,6 +71,17 @@ namespace SiBallaImportingData.Utils
         }
 
         #region ESwingIt
+
+        public async Task<string> FetchEventDetailByIdAsync(int eventId)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("SiBallaDataImporting/1.0");
+
+            // Esempio di endpoint per singolo dettaglio
+            string detailUrl = $"https://e-swing.it/php/get-event.php?id={eventId}";
+
+            return await client.GetStringAsync(detailUrl);
+        }
         public async Task<List<ESwingIt>> GetESwing()
         {
             //string url = "https://e-swing.it/php/get-events-full.php?nazione=Italia";
@@ -94,12 +107,12 @@ namespace SiBallaImportingData.Utils
             try
             {
                 HttpResponseMessage response = await client.GetAsync(url);
-
-                //Console.WriteLine($"Status Code: {(int)response.StatusCode} - {response.StatusCode}");
-                //Console.WriteLine($"Headers: {string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"))}");
-
                 string responseContent = await response.Content.ReadAsStringAsync();
                 //Console.WriteLine($"Response Content: {responseContent}");
+
+                // Deserializza direttamente il JSON nell'elenco di eventi
+                //var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                //listOfEvents = JsonSerializer.Deserialize<List<ESwingIt>>(responseContent, options) ?? new();
                 var doc = new HtmlDocument();
                 if (response.IsSuccessStatusCode)
                 {
@@ -146,52 +159,84 @@ namespace SiBallaImportingData.Utils
                                 end = new DateTime(DateTime.Now.Year, end.Month, end.Day, 2,0,0);
 
                             var duration = end - start;
-
                             string urls = GetUrl(innerArray);
 
-                            //for (int i = 30; i < innerArray.Length - 1; i++)
-                            //{
-                            //    Console.WriteLine($"Elemento {i}: {innerArray[i]}");
 
-                            //    string? urlValue = innerArray[i].GetString();
-
-                            //    if (!string.IsNullOrEmpty(urlValue))                        
-                            //        urls.Append(urlValue);                        
-                            //}
-
+                            float? latRaw = null, lngRaw = null;
+                            // Utilizziamo CultureInfo.InvariantCulture se il separatore decimale è il punto (.)
+                            if (innerArray[19].ValueKind == JsonValueKind.String && float.TryParse(innerArray[19].GetString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float lat))
+                                latRaw = lat;                            
+                            if (innerArray[20].ValueKind == JsonValueKind.String && float.TryParse(innerArray[20].GetString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float lng))
+                                lngRaw = lng;
 
                             //VEDERE DI TOGLIERE ; dal LINK che non fa andare nella pagina corretta
 
-                            string styles = string.Empty;
+                            string? styles = string.Empty;
                             if (innerArray[28].GetString() != null)
                                 styles = GetStile(innerArray[28].GetString());
 
 
-                            
+                            var description = innerArray[9].GetString() != null ? innerArray[9].GetString() : null;
 
                             // 2. Estrazione pulita (GetString() restituisce già null se l'elemento è nullo)
-                            string cityVal = innerArray[14].GetString()?.Trim();
-                            string stateVal = innerArray[15].GetString()?.Trim();
-                            string countryVal = innerArray[16].GetString()?.Trim();
+                            string? cityVal = (innerArray[14].GetString()?.Trim() != "" && innerArray[14].GetString()?.Trim() != "undefined") ? innerArray[14].GetString()?.Trim():
+                                (innerArray[15].GetString()?.Trim() != "" && innerArray[15].GetString()?.Trim() != "undefined") ? innerArray[15].GetString()?.Trim():
+                                innerArray[21].GetString()?.Trim();//15
+                            string? stateVal = innerArray[15].GetString()?.Trim();
+                            string? countryVal = innerArray[16].GetString()?.Trim();
+                            string? address = string.Empty;
 
-                            (cityVal, stateVal, countryVal) = LocationHelper.NormalizeLocation(cityVal, stateVal, countryVal);
+                            (cityVal, stateVal, countryVal) = LocationHelper.NormalizeLocation(cityVal, stateVal, countryVal); //CI SONO ANCHE QUI LE COORDINATE 
+
+                            var organizer = innerArray[17].GetString() != null ? innerArray[17].GetString() : null;
+
+                            
+                            if(latRaw == null || lngRaw == null)
+                            {
+                                var res = await ResolveCoordinatesAsync(address, cityVal, countryVal, latRaw, lngRaw); ;
+                                if (res.Lat != 0 && res.Lng != 0)
+                                {
+                                    latRaw = (float?)res.Lat;
+                                    lngRaw = (float?)res.Lng;
+                                }
+                            }
+
+
+                            if(latRaw != null && lngRaw != null && (cityVal == null || countryVal == null || stateVal == null))
+                            {
+                                var test4 = await OpenStreetMapGeocoder.GetmCityAndNameLocationFromCoordinatesAsync(latRaw.Value, lngRaw.Value);
+                                if (test4 != null)
+                                {
+                                    cityVal = test4.Value.City;
+                                    stateVal = test4.Value.Region;
+                                    countryVal = test4.Value.Country;
+                                }
+                            }
+
+                            if(cityVal == "" || countryVal == "" || stateVal == "")
+                            {
+                                int y = 0;
+                            }
 
                             listOfEvents.Add(
                                 new ESwingIt 
                                 { 
                                     Id = innerArray[0].GetInt32(),
                                     Title = innerArray[9].GetString() != null ? innerArray[9].GetString(): null,
-                                    City = innerArray[21].GetString() != null ? innerArray[21].GetString() : null,
-                                    State = innerArray[15].GetString() != null ? innerArray[15].GetString() : null,
-                                    Country = innerArray[16].GetString() != null ? innerArray[16].GetString() : null,
+                                    City = cityVal, //innerArray[21].GetString() != null ? innerArray[21].GetString() : null,
+                                    State = stateVal,//innerArray[15].GetString() != null ? innerArray[15].GetString() : null,
+                                    Country = countryVal, //innerArray[16].GetString() != null ? innerArray[16].GetString() : null,
                                     Start = start,
                                     End = end,
                                     Duration = end - start,
-                                    Description = innerArray[17].GetString() != null ? innerArray[17].GetString() : null,
-                                    Longitude = (float) double.Parse(innerArray[20].GetString(), CultureInfo.InvariantCulture),
-                                    Latitude = (float) double.Parse(innerArray[19].GetString(), CultureInfo.InvariantCulture),
+                                    Description = description,
+                                    Longitude = lngRaw,
+                                    Latitude = latRaw,
                                     Url = urls,
-                                    StylesString = styles
+                                    EventLink = innerArray[10].ValueKind == JsonValueKind.String ? innerArray[10].GetString() : null,
+                                    StylesString = styles,
+                                    Organizer = organizer
+                                    
                                 }
                             );                            
                         }
@@ -225,9 +270,9 @@ namespace SiBallaImportingData.Utils
                 return null;
             }
         }
-        private string GetStile(string stili)
+        private string? GetStile(string? stili)
         {
-            string styles = string.Empty;
+            string? styles = string.Empty;
 
             foreach (var stile in stili.Split(','))
             {
@@ -276,6 +321,39 @@ namespace SiBallaImportingData.Utils
 
             return styles;
         }
+        private static readonly HttpClient _ogClient = CreateOgClient();
+        private static HttpClient CreateOgClient()
+        {
+            var client = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
+            client.DefaultRequestHeaders.Add("Referer", "https://e-swing.it/index.html");
+            return client;
+        }
+
+        // Recupera l'immagine dell'evento tramite l'endpoint OpenGraph di e-swing (stesso meccanismo usato dal sito)
+        public static async Task<(string? Image, string? LocalImage)> GetESwingImageAsync(string? eventLink)
+        {
+            if (string.IsNullOrWhiteSpace(eventLink) || !eventLink.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                return (null, null);
+
+            try
+            {
+                var json = await _ogClient.GetStringAsync($"https://e-swing.it/php/get-opengraph.php?url={Uri.EscapeDataString(eventLink)}");
+                using var og = JsonDocument.Parse(json);
+                var root = og.RootElement;
+
+                string? image = root.TryGetProperty("image", out var i) && i.ValueKind == JsonValueKind.String ? i.GetString() : null;
+                string? localImage = root.TryGetProperty("local_image", out var l) && l.ValueKind == JsonValueKind.String ? l.GetString() : null;
+
+                return (image, localImage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Errore recupero immagine per '{eventLink}': {ex.Message}");
+                return (null, null);
+            }
+        }
+
         private string GetUrl(JsonElement[]? innerArray)
         {
             StringBuilder urls = new StringBuilder();
@@ -379,10 +457,11 @@ namespace SiBallaImportingData.Utils
                         int countEvento = 0;
                         foreach (var news in eventiQuestoMese)
                         {
-                            //var ev = new Event();
-                            ev.EventDetail = new EventDetail();
-
-                            ev.Month = new string(mese2.InnerText.Where(c => !char.IsDigit(c)).ToArray()).Replace(" ", "");
+                            ev = new Event
+                            {
+                                EventDetail = new EventDetail(),
+                                Month = new string(mese2.InnerText.Where(c => !char.IsDigit(c)).ToArray()).Replace(" ", "")
+                            };
 
                             var numeroNodoEvento = news.Line;
 
@@ -393,6 +472,7 @@ namespace SiBallaImportingData.Utils
                             var contenuto = news.InnerText;
 
                             ev.WorkshopName = titolo;
+                            ev.PartyName = titolo;
 
                             Console.WriteLine("Workshop Name : " + ev.WorkshopName);
 
@@ -429,7 +509,7 @@ namespace SiBallaImportingData.Utils
                                 //if (WorkShopListNameToBeChecked.Where(x => x.Equals(ev.WorkshopName)).Count() == 0)//CONTROLLARE QUI
                                 //    detailEvent = details.FirstOrDefault(x => x.InnerText.Contains(ev.WorkshopName) && x.Line >= (int)mese2.Line);
                                 //else
-                                    detailEvent = details.LastOrDefault(x => x.InnerText.Contains(ev.WorkshopName) && x.Line >= (int)mese2.Line);
+                                    detailEvent = details?.LastOrDefault(x => x.InnerText.Contains(ev.WorkshopName) && x.Line >= (int)mese2.Line);
 
                                 ev.EventDetail.WebSite = detailEvent != null ? detailEvent.GetAttributeValue("href", string.Empty) : null;
 
@@ -555,24 +635,130 @@ namespace SiBallaImportingData.Utils
                                             if (country != null)
                                                 ev.EventDetail.Country = country.InnerText.Replace("Country:", "").Trim();
 
-                                            var city = link2.SelectSingleNode(".//li[contains(., 'Town:')]");
+                                            var cityNode = link2.SelectSingleNode(".//li[contains(., 'Town:')]");
 
-                                            if (city != null)
-                                                ev.EventDetail.City = city.InnerText.Replace("Town:", "").Trim();
+                                            if (cityNode != null)
+                                                ev.EventDetail.City = cityNode.InnerText.Replace("Town:", "").Trim();
+
+                                            string? address = string.Empty;
+                                            double? latitude = null, longitude = null;
+
+                                            (ev.EventDetail.Latitude, ev.EventDetail.Longitude) = await ResolveCoordinatesAsync(address, ev.EventDetail.City, ev.EventDetail.Country, latitude, longitude);
+                                            //(cityVal, stateVal, countryVal) = LocationHelper.NormalizeLocation(cityVal, stateVal, countryVal); //CI SONO ANCHE QUI LE COORDINATE 
+
+                                            //var organizer = innerArray[17].GetString() != null ? innerArray[17].GetString() : null;
 
 
-                                            var latLong = await GetCoordinatesFromCityAndNameLocation(ev.EventDetail.City, ev.EventDetail.Country);
+                                            //if (latRaw == null || lngRaw == null)
+                                            //{
+                                            //    var res = await ResolveCoordinatesAsync(address, cityVal, countryVal, latRaw, lngRaw); ;
+                                            //    if (res.Lat != 0 && res.Lng != 0)
+                                            //    {
+                                            //        latRaw = (float?)res.Lat;
+                                            //        lngRaw = (float?)res.Lng;
+                                            //    }
+                                            //}
 
-                                            if(latLong.Longitude != 0 && latLong.Latitude != 0)
-                                            {
-                                                ev.EventDetail.Latitude = latLong.Latitude.ToString("F6");
-                                                ev.EventDetail.Longitude = latLong.Longitude.ToString("F6");
-                                            }
+
+                                            //if (latRaw != null && lngRaw != null && (cityVal == null || countryVal == null || stateVal == null))
+                                            //{
+                                            //    var test4 = await OpenStreetMapGeocoder.GetmCityAndNameLocationFromCoordinatesAsync(latRaw.Value, lngRaw.Value);
+                                            //    if (test4 != null)
+                                            //    {
+                                            //        cityVal = test4.Value.City;
+                                            //        stateVal = test4.Value.Region;
+                                            //        countryVal = test4.Value.Country;
+                                            //    }
+                                            //}
+
+                                            //if (cityVal == "" || countryVal == "" || stateVal == "")
+                                            //{
+                                            //    int y = 0;
+                                            //}
+
+
+                                            //if (latLong.Longitude != 0 && latLong.Latitude != 0)
+                                            //{
+                                            //    ev.EventDetail.Latitude = latLong.Latitude.ToString("F6");
+                                            //    ev.EventDetail.Longitude = latLong.Longitude.ToString("F6");
+                                            //}
 
                                             var webSite = link2.SelectSingleNode(".//li[contains(., 'Website:')]/a");
 
                                             if (webSite != null)
+                                            {
                                                 ev.EventDetail.WebSite = webSite.InnerText.Replace("Styles:", "").Trim();
+
+                                                // Costruzione dell'URL di dettaglio completo
+                                                string fullDetailUrl = string.Empty;
+                                                if (!string.IsNullOrEmpty(ev.EventDetail.WebSite))
+                                                {
+                                                    fullDetailUrl = ev.EventDetail.WebSite.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                                                        ? ev.EventDetail.WebSite
+                                                        : $"https://www.swingplanit.com{ev.EventDetail.WebSite}";
+                                                }
+
+                                                string city = string.Empty;
+                                                //string address = string.Empty;
+                                                //double latitude = 0;
+                                                //double longitude = 0;
+                                                
+                                                // 2. Scraping di 2° livello: visita automatica della pagina di dettaglio
+                                                if (!string.IsNullOrEmpty(fullDetailUrl))
+                                                {
+                                                    //try
+                                                    //{
+                                                    //    using var httpClient = new HttpClient();
+                                                    //    // Pausa di rispetto tra una richiesta e l'altra per evitare blocchi IP[cite: 1, 2]
+                                                    //    await Task.Delay(1000);
+
+                                                    //    string detailHtml = await httpClient.GetStringAsync(fullDetailUrl);
+                                                    //    var detailDoc = new HtmlDocument();
+                                                    //    detailDoc.LoadHtml(detailHtml);
+
+                                                    //    // Estrazione di via e città dalla lista della pagina di dettaglio[cite: 3]
+                                                    //    var liNodes = detailDoc.DocumentNode.SelectNodes("//div[@class='postcardleft']//ul/li");
+                                                    //    if (liNodes != null)
+                                                    //    {
+                                                    //        foreach (var li in liNodes)
+                                                    //        {
+                                                    //            var span = li.SelectSingleNode("span");
+                                                    //            if (span != null && li != null)
+                                                    //            {
+                                                    //                string label = span.InnerText.Trim();
+                                                    //                if (label.Contains("Town:"))
+                                                    //                {
+                                                    //                    city = li.InnerText.Replace("Town:", "").Trim();
+                                                    //                }
+                                                    //                else if (label.Contains("Address:") || label.Contains("Venue:"))
+                                                    //                {
+                                                    //                    address = li.InnerText.Replace(label, "").Trim();
+                                                    //                }
+                                                    //            }
+                                                    //        }
+                                                    //    }
+
+                                                    //    // 3. Ricerca delle coordinate di precisione (Via + Città + Paese)
+                                                    //    string locationQuery = !string.IsNullOrEmpty(address)
+                                                    //        ? $"{address}, {city}, {country}"
+                                                    //        : $"{city}, {country}";
+
+                                                    //    //(latitude, longitude) = await GetCoordinatesFromQueryAsync(httpClient, locationQuery);
+                                                    //}
+                                                    //catch (Exception exDetail)
+                                                    //{
+                                                    //    Console.WriteLine($"[ERRORE DETTAGLIO] Errore su '{fullDetailUrl}': {exDetail.Message}");
+                                                    //}
+                                                }
+                                            }
+                                                
+
+
+                                            
+
+
+
+
 
                                             var styles = link2.SelectSingleNode(".//li[contains(., 'Styles:')]");
 
@@ -765,7 +951,7 @@ namespace SiBallaImportingData.Utils
         }
         #endregion
 
-
+        //forse questa è da modificare
         public async Task<(double Latitude, double Longitude)> GetCoordinatesFromCityAndNameLocation(string city, string state, string location = "")
         {
             //string apiKey = "***RIMOSSA***"; // Sostituisci con la tua API Key
@@ -857,6 +1043,24 @@ namespace SiBallaImportingData.Utils
             }
 
             //return null;
+        }
+        public async Task<(double Lat, double Lng)> ResolveCoordinatesAsync(string? address, string? city, string? country, double? directLat, double? directLng)
+        {
+            // LIVELLO 1: Usare le coordinate dirette dal JSON di e-swing (se presenti)
+            if ((directLat != null && directLng != null) && directLat != 0 && directLng != 0)
+            {
+                return (directLat.Value, directLng.Value);
+            }
+
+            // LIVELLO 2: Se c'è una VIA specifica, usa Photon (OpenStreetMapGeocoder)
+            if (!string.IsNullOrWhiteSpace(address))
+            {
+                var photonResult = await OpenStreetMapGeocoder.GetCoordinatesFromCityAndNameLocation(city, country, address);
+                if (photonResult.Latitude != 0) return photonResult;
+            }
+
+            // LIVELLO 3: Fallback a livello di CITTÀ con OfflineGeocoder (istantaneo in RAM)
+            return OfflineGeocoder.GetCoordinates(city, country);
         }
 
     }

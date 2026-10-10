@@ -1,4 +1,5 @@
 ﻿using Google;
+using Google.Api;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -11,9 +12,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DateTime = System.DateTime;
 using Type = SiBallaImportingData.Model.Type;
@@ -77,25 +81,62 @@ namespace SiBallaImportingData.Utils
 
                     var values = response.Values;
 
-                    if (values != null && values.Count > 0)
+                    if (values != null && values.Count > 2)
                     {
                         foreach (var row in values)
                         {
                             //Console.WriteLine(string.Join(", ", row));
                             //eventItem.MonthYear = eventItem.Month + " " + eventItem.DateStart.Year;
                             //eventItem.NameAndData = eventItem.PartyName + " " + eventItem.DateStart.ToString();
-                            if (values.IndexOf(row) > 1)
+                            if (values.IndexOf(row) > 1 && row.Count() > 1)
                             {
-                                var stiliEvento = ParseStili(row[7].ToString());
-                                var latlong = getLocationInfo.GetCoordinatesFromCityAndNameLocation(
-                                    row[5].ToString().Split(",")[1].Replace(" ", ""),
-                                    row[5].ToString().Split(",")[2].Replace(" ", ""),
-                                    row[5].ToString().Split(",")[0]
-                                    ).Result;
+                                List<StileEvento> stiliEvento = new List<StileEvento>();
+                                if (row != null && row.Count > 7 && row[7] != null)
+                                {
+                                    stiliEvento = ParseStili(row[7].ToString());
+                                }
 
+                                string webSite = "";
+
+                                if (row != null && row.Count >= 13 && sheet.Properties.Title == TipoEvento.Serate.ToString() && row[13] != null)
+                                {
+                                    webSite = row[13].ToString();
+                                }
+                                else if (row != null && row.Count >= 17 && (sheet.Properties.Title == TipoEvento.Workshop.ToString() && row[17] != null))
+                                {
+                                    webSite = row[17].ToString();
+                                }
+
+                                //var latlong = getLocationInfo.GetCoordinatesFromCityAndNameLocation(
+                                //    row[5].ToString().Split(",")[1].Replace(" ", ""),
+                                //    row[5].ToString().Split(",")[2].Replace(" ", ""),
+                                //    row[5].ToString().Split(",")[0]
+                                //    ).Result;
+
+                                //var latlong =  OpenStreetMapGeocoder.GetCoordinatesFromCityAndNameLocation(
+                                //    row[5].ToString().Split(",")[1].Replace(" ", ""),
+                                //    row[5].ToString().Split(",")[2].Replace(" ", ""),
+                                //    row[5].ToString().Split(",")[0]
+                                //    ).Result;
+
+                                //Task.Delay(1100);
 
                                 var duration = Convert.ToDateTime(row[1]) - Convert.ToDateTime(row[0]);
 
+
+
+                                var raw = row[5]?.ToString() ?? "";
+
+                                // 1. taglio le coordinate: tutto ciò che sta prima della '('
+                                var withoutCoords = raw.Split('(')[0];
+
+                                // 2. spezzo in al massimo 3 parti: paese, città, indirizzo (il resto, virgole comprese, resta nell'indirizzo)
+                                var parts = withoutCoords.Split(',', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+                                //var country = parts.ElementAtOrDefault(0);
+                                //var city = parts.ElementAtOrDefault(1);
+                                //var address = parts.ElementAtOrDefault(2);     // null se non c'è
+                                var loc = ParseLocationCell(row[5]?.ToString());
                                 eventList.Add(new Event
                                 {
                                     DateStart = Convert.ToDateTime(row[0]),
@@ -106,19 +147,21 @@ namespace SiBallaImportingData.Utils
                                     EventDetail = new EventDetail
                                     {
                                         PartyName = row[4].ToString(),
-                                        //When = Convert.ToDateTime(row[0]).ToString("dddd, dd MMMM yyyy"),   
-                                        Latitude = latlong.Latitiude.ToString(),
-                                        Longitude = latlong.Longitude.ToString(),
-                                        Location = row[5].ToString().Split(",")[0],
-                                        City = row[5].ToString().Split(",")[1].Split('(')[0].Trim(),
-                                        Country = row[5].ToString().Split(',')[0].Trim(),
+                                        Location = loc.Address,
+                                        Address = loc.Address,
+                                        City = loc.City,
+                                        Country = loc.Country,
+                                        Latitude = loc.Lat,
+                                        Longitude = loc.Lng,
                                         Styles = stiliEvento,
-                                        WebSite = sheet.Properties.Title == TipoEvento.Serate.ToString() ? row[13].ToString() : row[17].ToString()
+                                        WebSite = webSite
                                     },
-                                    Organizer = row[6].ToString(),
+                                    Organizer = (row != null && row.Count > 6 && row[6] != null)
+                                        ? row[6].ToString()
+                                        : string.Empty,
                                     City = row[5].ToString().Split(",")[1].Split('(')[0].Trim(),
                                     Country = row[5].ToString().Split(',')[0].Trim(),
-                                    Gratis = DetermineIfFree(sheet.Properties.Title, row),
+                                    Gratis = sheet.Properties.Title == TipoEvento.Serate.ToString() && row.Count >= 13 ? DetermineIfFree(sheet.Properties.Title, row) : false,
                                     Type = eventType == 0 ? Model.Type.Event: Model.Type.Workshop
                                 });
 
@@ -144,6 +187,8 @@ namespace SiBallaImportingData.Utils
             
             return eventiDic;           
         }
+
+
         public static void TestReadWritePermissions()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -216,7 +261,7 @@ namespace SiBallaImportingData.Utils
                 }
             }
         }
-        public static async Task PrepareToAppendToGoogleSheet(List<Event> events)
+        public static async Task PrepareToAppendToGoogleSheet(List<Event> events, Dictionary<TipoEvento, List<Event>> eventiFromExcel)
         {
             // Qui puoi fare eventuali preparazioni prima di chiamare AppendToGoogleSheet2
             // Ad esempio, filtrare o trasformare i dati in 'events' se necessario
@@ -224,6 +269,8 @@ namespace SiBallaImportingData.Utils
             int w = 0, e = 0;
             var eventsToAppend = new List<Event>();
             var workshopsToAppend = new List<Event>();
+            var eventsToCheck = new List<Event>();
+            var workshopsToCheck = new List<Event>();
 
             foreach (var ev in events)
             {
@@ -235,12 +282,36 @@ namespace SiBallaImportingData.Utils
                 // Esempio di preparazione: aggiungi un prefisso al nome dell'evento
                 //ev.PartyName = "[API] " + ev.PartyName;
 
-                if(date.Value.TotalDays > 1)
+                // Verifica se l'evento è già presente tra i Workshop su Excel
+                bool giaPresenteInWorkshop = eventiFromExcel.TryGetValue(TipoEvento.Workshop, out var workshop)
+                    && workshop.Any(x => string.Equals(x.PartyName?.Trim(), ev.PartyName?.Trim(), StringComparison.OrdinalIgnoreCase)
+                                      && x.DateStart.Date == ev.DateStart.Date);
+
+                // Verifica se l'evento è già presente tra le Serate su Excel
+                bool giaPresenteInSerate = eventiFromExcel.TryGetValue(TipoEvento.Serate, out var serate)
+                    && serate.Any(x => string.Equals(x.PartyName?.Trim(), ev.PartyName?.Trim(), StringComparison.OrdinalIgnoreCase)
+                                      && x.DateStart.Date == ev.DateStart.Date);
+
+                //if (date.Value.TotalDays > 1 && eventiFromExcel.TryGetValue(TipoEvento.Workshop, out var workshop) && !workshop.Any(x => x.PartyName == ev.PartyName
+                //      && x.DateStart.Date == ev.DateStart.Date))
+                //{
+                //    w++;
+                //    workshopsToAppend.Add(ev);
+                //}
+                //else if (date.Value.TotalDays <= 1 && eventiFromExcel.TryGetValue(TipoEvento.Serate, out var serate) && !serate.Any(x => x.PartyName == ev.PartyName
+                //      && x.DateStart.Date == ev.DateStart.Date))
+                //{
+                //    e++;
+                //    eventsToAppend.Add(ev);
+                //}
+
+                // Aggiungi solo se NON è già presente nel rispettivo foglio
+                if (date.Value.TotalDays > 1 && !giaPresenteInWorkshop)
                 {
                     w++;
                     workshopsToAppend.Add(ev);
                 }
-                else if (date.Value.TotalDays <= 1)
+                else if (date.Value.TotalDays <= 1 && !giaPresenteInSerate)
                 {
                     e++;
                     eventsToAppend.Add(ev);
@@ -428,7 +499,6 @@ namespace SiBallaImportingData.Utils
         }
         private static bool DetermineIfFree(string sheetTitle, IList<object> row)
         {
-
             var conditions = new List<Func<bool>>
             {
                 // Condizione per Serate
@@ -485,6 +555,7 @@ namespace SiBallaImportingData.Utils
                         result.Add(StileEvento.Blues);
                         break;
                     case "solo jazz":
+                    case "solojazz":
                     case "solo":
                     case "jazz":
                         result.Add(StileEvento.SoloJazz);
@@ -546,6 +617,56 @@ namespace SiBallaImportingData.Utils
                 //Console.WriteLine("Errore: " + ex.Message);
                 return "";
             }
+        }
+
+        public record LocationCell(string? Country, string? City, string? Address, double? Lat, double? Lng);
+
+        private static readonly Regex CoordsRe = new(
+            @"\(\s*(?<lat>-?\d+(?:[.,]\d+)?)\s*[;,]\s*(?<lng>-?\d+(?:[.,]\d+)?)\s*\)\s*$");
+
+        private static double ParseD(string s) =>
+            double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture);
+
+        public static LocationCell ParseLocationCell(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return new(null, null, null, null, null);
+
+            double? lat = null, lng = null;
+            var m = CoordsRe.Match(raw);
+            if (m.Success)
+            {
+                lat = ParseD(m.Groups["lat"].Value);
+                lng = ParseD(m.Groups["lng"].Value);
+                raw = raw[..m.Index];
+            }
+
+            var parts = raw.Split(',', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            return new(parts.ElementAtOrDefault(0), parts.ElementAtOrDefault(1), parts.ElementAtOrDefault(2), lat, lng);
+        }
+
+        public static void ClearExcelFile()
+        {
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var assembly = Assembly.GetExecutingAssembly();
+
+            using var stream = assembly.GetManifestResourceStream(resourcePath);
+
+            if (stream == null)
+                throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+
+            var credential = GoogleCredential.FromStream(stream)
+                .CreateScoped(SheetsService.Scope.SpreadsheetsReadonly);
+
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "Google Sheets API .NET Quickstart",
+            });
+
+            var spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            string clearRangeSerate = $"'serate'!A3:R1000"; // Modifica l'intervallo secondo le tue esigenze
+            var clearRequestSerate = service.Spreadsheets.Values.Clear(new ClearValuesRequest(), spreadsheetId, clearRangeSerate);
+            clearRequestSerate.Execute();
         }
     }
 }

@@ -1,18 +1,17 @@
 ﻿
-
-using SiBallaImportingData.Model;
-
 namespace SiBallaImportingData.Model
 {
     public class EventDetail : Event
     {
         //public int Id { get; set; }        
-        public string? Latitude { get; set; }
-        public string? Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         public string? Teachers { get; set; }
         public string? Description { get; set; }
         public string? Location { get; set; }
-        public string? WebSite { get; set; }
+        public string? Address { get; set; }
+        public string? WebSite { get; set; }        
+        public string? ImageUrl { get; set; }
         public string When { get; set; }
         //public string Styles { get; set; }
         //public string City { get; set; }

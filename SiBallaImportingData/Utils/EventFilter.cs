@@ -1,4 +1,5 @@
-﻿using SiBallaImportingData.Model;
+﻿using Grpc.Net.Client.Balancer;
+using SiBallaImportingData.Model;
 using System.Configuration;
 using System.Diagnostics.Eventing.Reader;
 
@@ -13,8 +14,9 @@ namespace SiBallaImportingData.Utils
 
             return distanzaMetri <= radiusMetri;
         }
-        public static List<Event> FilterESwingItEventsByDateRange(List<ESwingIt> events)
+        public static async Task<List<Event>> FilterESwingItEventsByDateRange(List<ESwingIt> events, KnownVenueStore store, AddressResolver resolver)
         {
+            KnownVenueStore.Load(Path.Combine(AppContext.BaseDirectory, "venues.json"));
             var genova = events.Where(x => x.City?.ToLower() == "genova").OrderBy(x => x.Start).ToList();//170
             var eventList = new List<Event>();
             //DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) &&
@@ -30,6 +32,7 @@ namespace SiBallaImportingData.Utils
                 var title = x.Title?.ToLower() ?? string.Empty;
                 var desc = x.Description?.ToLower() ?? string.Empty;
                 var url = x.Url?.ToLower() ?? string.Empty;
+                var dateStart = x.Start;
 
                 // 1. Controlla se il titolo contiene una delle parole escluse
                 if (excludedTitleWords.Any(word => title.Contains(word)))
@@ -43,11 +46,12 @@ namespace SiBallaImportingData.Utils
                 if (url.Contains("cors"))
                     return false;
 
+                if (DateTime.SpecifyKind(dateStart.Date, DateTimeKind.Local) < DateTime.Today)
+                    return false;
+
                 // Se passa tutti i controlli, l'evento è valido
                 return true;
-            }).ToList();
-
-            
+            }).ToList();            
 
             foreach (var e in filteredEvents)
             {            
@@ -56,7 +60,17 @@ namespace SiBallaImportingData.Utils
                     Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);
                     var end = new DateTime();
                     if (e.End != null)
-                        end = (DateTime)e.End;                  
+                        end = (DateTime)e.End;
+
+                    var descr = e.Title + ".\n" + e.Description;
+
+                    var located = await resolver.ApplyAsync(e);
+                    if (located)
+                        Console.WriteLine($"📍 Coordinate aggiornate: {e.Title} ({e.City}) -> {e.Latitude}, {e.Longitude}");
+
+                    (e.ExternalImage, e.LocalImage) = await ImportDataFromWeb.GetESwingImageAsync(e.EventLink);
+                    if (!string.IsNullOrEmpty(e.FullImageUrl))
+                        Console.WriteLine($"🖼️ Immagine trovata: {e.Title} -> {e.FullImageUrl}");
 
                     var newEvent = new Event
                     {
@@ -65,23 +79,29 @@ namespace SiBallaImportingData.Utils
                         Duration = e.Duration,
                         City = e.City,
                         Country = e.Country,
-                        Organizer = e.Description,
+                        Organizer = e.Organizer,                        
                         PartyName = e.Title,
                         NameAndData = e.End != null ? $"{e.Title} - {e.Start.ToShortDateString()} to {end.ToShortDateString()}" :
                             $"{e.Title} - {e.Start.ToShortDateString()}",
                         EventDetail = new EventDetail()
                         {
                             //WebSite = e.Url,
-                            WebSite = e.Url.Contains(";") ? e.Url.Split(';')[0] : e.Url,
+                            //WebSite = e.Url.Contains(";") ? e.Url.Split(';')[0] : e.Url,
+                            WebSite = e.Url?.Split(';')[0],
                             City = e.City,
                             Country = e.Country,
-                            Longitude = e.Longitude.ToString(),
-                            Latitude = e.Latitude.ToString(),
+                            Longitude = e.Longitude,
+                            Latitude = e.Latitude,
                             //Styles = e.Styles,
-                            StylesToString = e.StylesString
+                            StylesToString = e.StylesString,
+                            Description = descr,
+                            ImageUrl = string.IsNullOrEmpty(e.FullImageUrl) ? null : e.FullImageUrl
                         }
                     };
                     eventList.Add(newEvent);
+
+                    if (store.TryApply(newEvent))
+                        Console.WriteLine($"📍 Luogo noto per: {newEvent.PartyName} ({newEvent.City})");
 
                     Console.WriteLine($"{e.City}  entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
                 }
@@ -91,26 +111,38 @@ namespace SiBallaImportingData.Utils
 
             return eventList;
         }
-        public static List<Event> FilterSwingPlanitEventsByDateRange(List<Event> events)
+        public static async Task<List<Event>> FilterSwingPlanitEventsByDateRangeAsync(
+            List<Event> events, KnownVenueStore store, AddressResolver resolver)
         {
             var eventList = new List<Event>();
 
-            // 1.Estraggono e valutano i valori prima della query LINQ(fuori dalla lambda)
-            int giorni = Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]);
             DateTime oggi = DateTime.Today;
-            DateTime dataLimite = oggi.AddDays(giorni);
 
-            // 2. Esegui il filtraggio in modo pulito e sicuro in memoria locale
-            var filteredEvents = events.Where(x => oggi <= x.DateStart && x.DateStart <= dataLimite).ToList();
-            //.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])))
-            foreach (var e in events)
-            {            
+            var filteredEvents2 = events
+                .Where(x => DateTime.SpecifyKind(x.DateStart, DateTimeKind.Local) >= oggi)
+                .ToList();
+
+            foreach (var e in filteredEvents2)
+            {
                 if (CheckEventInsideCircle(e))
                 {
                     Console.WriteLine("Data evento e città : " + e.DateStart + ", " + e.City);
                     var end = new DateTime();
                     if (e.DateFinish != null)
-                        end = (DateTime)e.DateFinish;                  
+                        end = (DateTime)e.DateFinish;
+
+                    var descr = e.PartyName + ".\n" + e.EventDetail.Description;
+
+                    // SwingPlanit non ha immagini: le cerco sul sito esterno dell'evento (campo Website) tramite l'OpenGraph di e-swing
+                    string? imageUrl = null;
+                    var webSite = e.EventDetail.WebSite?.Split(';')[0];
+                    if (!string.IsNullOrWhiteSpace(webSite) && !webSite.Contains("swingplanit.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var (image, localImage) = await ImportDataFromWeb.GetESwingImageAsync(webSite);
+                        imageUrl = !string.IsNullOrWhiteSpace(localImage) ? $"https://e-swing.it{localImage}" : image;
+                        if (!string.IsNullOrEmpty(imageUrl))
+                            Console.WriteLine($"🖼️ Immagine trovata: {e.PartyName} -> {imageUrl}");
+                    }
 
                     var newEvent = new Event
                     {
@@ -123,19 +155,30 @@ namespace SiBallaImportingData.Utils
                         PartyName = e.PartyName,
                         NameAndData = e.DateFinish != null ? $"{e.PartyName} - {e.DateStart.ToShortDateString()} to {end.ToShortDateString()}" :
                             $"{e.PartyName} - {e.DateStart.ToShortDateString()}",
+
                         EventDetail = new EventDetail()
                         {
-                            //WebSite = e.Url,
-                            WebSite = e.EventDetail.WebSite.Contains(";") ? e.EventDetail.WebSite.Split(';')[0] : e.EventDetail.WebSite,
+                            WebSite = e.EventDetail.WebSite?.Split(';')[0],
                             City = e.City,
                             Country = e.Country,
+                            Location = e.EventDetail.Location,      // NUOVO
                             Longitude = e.EventDetail.Longitude,
                             Latitude = e.EventDetail.Latitude,
                             Styles = e.EventDetail.Styles,
-                            StylesToString = e.EventDetail.StylesToString
+                            StylesToString = e.EventDetail.StylesToString,
+                            Description = descr,
+                            ImageUrl = imageUrl
                         }
                     };
                     eventList.Add(newEvent);
+
+                    // NUOVO: geocodifica dall'indirizzo (JSON, cache o Photon)
+                    if (await resolver.ApplyAsync(newEvent))
+                        Console.WriteLine($"📍 Coordinate aggiornate: {newEvent.PartyName} ({newEvent.City}) -> {newEvent.EventDetail.Latitude}, {newEvent.EventDetail.Longitude}");
+
+                    // nome sala e indirizzo, se esiste un luogo verificato nel JSON
+                    if (store.TryApply(newEvent))
+                        Console.WriteLine($"📍 Luogo noto per: {newEvent.PartyName} ({newEvent.City})");
 
                     Console.WriteLine($"{e.City}  entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
                 }
@@ -157,7 +200,7 @@ namespace SiBallaImportingData.Utils
                 if (eEvent.EventDetail.Latitude == null || eEvent.EventDetail.Longitude == null)
                     return false;
         
-                return (HaversineDistance(float.Parse(eEvent.EventDetail.Latitude), float.Parse(eEvent.EventDetail.Longitude)) <= raggio_km* 1000f);
+                return (HaversineDistance((float)eEvent.EventDetail.Latitude, (float)eEvent.EventDetail.Longitude) <= raggio_km* 1000f);
             }
             else
             {
@@ -166,7 +209,7 @@ namespace SiBallaImportingData.Utils
                 if (eEvent?.Latitude == null || eEvent?.Longitude == null)
                     return false;
 
-                return (HaversineDistance(eEvent.Latitude, eEvent.Longitude) <= raggio_km * 1000f);
+                return (HaversineDistance((float)eEvent.Latitude, (float)eEvent.Longitude) <= raggio_km * 1000f);
             }
             
         }
