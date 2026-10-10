@@ -1,5 +1,4 @@
 ﻿using Appwrite.Models;
-using Google.Protobuf.WellKnownTypes;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using SiBallaDataImporting.Utils;
@@ -9,79 +8,17 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
-using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
-using static SiBallaImportingData.Service.LocationInfo;
 
 namespace SiBallaImportingData.Utils
 {
     public class ImportDataFromWeb
     {
-        private readonly string _accessToken;
-        private readonly HttpClient _httpClient;
         public ImportDataFromWeb() { }
-
-        // Metodo per ottenere informazioni di una pagina pubblica
-        public async Task<JObject> GetFaceBookPageInfo(string pageIdOrUsername)
-        {
-            string url = $"https://graph.facebook.com/v18.0/{pageIdOrUsername}" +
-                        $"?fields=id,name,about,fan_count,posts{{message,created_time}}" +
-                        $"&access_token={"1228936242417680 | J3zfYwphpb0p1wldBSmMCR_t - Ic"}";
-
-            var response = await _httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-
-            string json = await response.Content.ReadAsStringAsync();
-            return JObject.Parse(json);
-        }
-
-        // Metodo per ottenere post di un gruppo (richiede permessi)
-        public async Task<JObject> GetFaceBookGroupPosts(string groupId)
-        {
-            // NOTA: Richiede user_groups permission e membership nel gruppo
-            string url = $"https://e-swing.it/index.html";
-
-            var response = await _httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-
-            string json = await response.Content.ReadAsStringAsync();
-            return JObject.Parse(json);
-        }
-        // Metodo per ottenere post di un gruppo (richiede permessi)
-        public async Task<JObject> GetTest()
-        {
-            string url = $"https://e-swing.it/php/get-events-full.php?nazione=Italia";
-
-            using HttpClient client = new();
-            HttpResponseMessage response = await client.GetAsync(url);
-            var doc = new HtmlDocument();
-            if (response.IsSuccessStatusCode)
-            {
-                string jsonResponse = await response.Content.ReadAsStringAsync();
-                doc.LoadHtml(jsonResponse);
-            }
-
-
-            //var response = await _httpClient.GetAsync(url);
-            //response.EnsureSuccessStatusCode();
-
-            string json = await response.Content.ReadAsStringAsync();
-            return JObject.Parse(json);
-        }
 
         #region ESwingIt
 
-        public async Task<string> FetchEventDetailByIdAsync(int eventId)
-        {
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("SiBallaDataImporting/1.0");
-
-            // Esempio di endpoint per singolo dettaglio
-            string detailUrl = $"https://e-swing.it/php/get-event.php?id={eventId}";
-
-            return await client.GetStringAsync(detailUrl);
-        }
         public async Task<List<ESwingIt>> GetESwing()
         {
             //string url = "https://e-swing.it/php/get-events-full.php?nazione=Italia";
@@ -371,7 +308,6 @@ namespace SiBallaImportingData.Utils
 
         #region SwingPlanint
 
-        private ObservableRangeCollection<GroupByDate>? _workshopsListByDate2 = new ObservableRangeCollection<GroupByDate>();
         private List<Event> _workshops = new List<Event>();
 
         private int countMesi = 0;
@@ -389,17 +325,6 @@ namespace SiBallaImportingData.Utils
                 foreach (var month in months)
                 {
                     workshops.AddRange(await SearchSwingPlanitAsync(initialData, month));
-
-                    var groupedItems = new ObservableCollection<GroupByDate>(
-                        workshops.GroupBy(x => x.MonthYear)
-                                 .Select(x => new GroupByDate(x.Key, x)));
-
-                    //await MainThread.InvokeOnMainThreadAsync(() =>
-                    //{
-                    _workshopsListByDate2.AddRange(groupedItems);
-                    //});
-
-                    //SetBusyState(false);
                 }
 
                 return workshops;
@@ -951,99 +876,6 @@ namespace SiBallaImportingData.Utils
         }
         #endregion
 
-        //forse questa è da modificare
-        public async Task<(double Latitude, double Longitude)> GetCoordinatesFromCityAndNameLocation(string city, string state, string location = "")
-        {
-            //string apiKey = "***RIMOSSA***"; // Sostituisci con la tua API Key
-
-            //string url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(location + "," + city + ", " + state)}&key={apiKey}";
-            ////string url = $"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={apiKey}";
-
-            try
-            {
-                string address = string.Empty;
-                if (!string.IsNullOrEmpty(location))
-                    address = $"{location}, {city}, {state}";
-                else
-                    address = $"{city}, {state}";
-                
-                string apiKey = "***RIMOSSA***"; // Sostituisci con la tua API Key
-                var url = $"https://maps.googleapis.com/maps/api/geocode/json?address={Uri.EscapeDataString(address)}&key={apiKey}";
-
-                var response = new HttpResponseMessage();
-
-                using (var httpClient = new HttpClient())
-                {
-
-                    // Produttore (Apple, Samsung, ecc.)
-                    //var manufacturer = DeviceInfo.Current.Manufacturer;
-
-#if WINDOWS && DEBUG
-                    //var handler = new WinHttpHandler();
-                    //handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-                    //handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
-                    //var test = new HttpClient(handler);
-                    //response = await test.GetAsync(url);
-                    var handler = new HttpClientHandler();
-                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
-                    var httpClient2 = new HttpClient(handler);
-
-                    response = await httpClient2.GetAsync(url);
-#else
-
-                    response = await httpClient.GetAsync(url);
-#endif
-
-                    Console.WriteLine($"Status: {response.StatusCode}");
-                    Console.WriteLine("Headers:");
-                    foreach (var header in response.Headers)
-                    {
-                        Console.WriteLine($"{header.Key}: {string.Join(",", header.Value)}");
-                    }
-
-                    string rawContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"\nRaw Content (first 500 chars):\n{rawContent.Substring(0, Math.Min(500, rawContent.Length))}");
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var result = JsonSerializer.Deserialize<GoogleGeocodeResponse>(content);
-
-                        if (result?.Results?.Count > 0)
-                        {
-                            var location2 = result.Results[0].Geometry.Location;
-
-                            return (location2.Lat, location2.Lng);
-                        }
-                    }
-
-                    return (0, 0);
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                // Eccezioni specifiche di rete/HTTP (DNS, connessione, timeout, ecc.)
-                Console.WriteLine($"Errore nella richiesta: {ex.Message}");
-                return (0, 0);
-            }
-            catch (FormatException ex)
-            {
-                // Gestisci l'errore
-                Console.WriteLine($"Errore: {ex.Message}");
-                return (0, 0); // Ritorna valori di default in caso di errore
-            }
-            catch (Exception ex)
-            {
-                // Gestisci l'errore
-                Console.WriteLine($"Errore: {ex.Message}");
-
-                System.Diagnostics.Debugger.Break(); // Forza interruzione qui
-                //throw;
-                return (0, 0); // Ritorna valori di default in caso di errore
-            }
-
-            //return null;
-        }
         public async Task<(double Lat, double Lng)> ResolveCoordinatesAsync(string? address, string? city, string? country, double? directLat, double? directLng)
         {
             // LIVELLO 1: Usare le coordinate dirette dal JSON di e-swing (se presenti)

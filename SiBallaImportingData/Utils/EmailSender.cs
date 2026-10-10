@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SiBallaImportingData.Model;
 using System.Configuration;
 using System.Net.Http.Headers;
@@ -9,33 +8,19 @@ namespace SiBallaImportingData.Utils
 {
     public static class EmailSender
     {
-
-        private static string ExtractNameFromEmail(string email)
-        {
-            if (string.IsNullOrEmpty(email))
-                return "";
-
-            // Esempio: da "giacomo.lo87@gmail.com" ottieni "Giacomo"
-            var username = email.Split('@')[0];
-            var namePart = username.Split('.')[0];
-
-            // Capitalizza la prima lettera
-            if (namePart.Length > 0)
-            {
-                return char.ToUpper(namePart[0]) + namePart.Substring(1);
-            }
-
-            return namePart;
-        }
         public static async Task SendWithMailjetAnonymous(List<Event> eventi)
         {
             try
             {
                 //var textEm = TextEmail(eventi);
-                var apiKeyGmail = "***RIMOSSA***";
-                var apiSecretGmail = "***RIMOSSA***";
-                var apiKeySiBalla = "***RIMOSSA***";
-                var apiSecretSiBalla = "***RIMOSSA***";
+                // chiavi in secrets.config (non versionato), incluso da App.config
+                var apiKeyGmail = ConfigurationManager.AppSettings["MailjetApiKey"];
+                var apiSecretGmail = ConfigurationManager.AppSettings["MailjetApiSecret"];
+                if (string.IsNullOrWhiteSpace(apiKeyGmail) || string.IsNullOrWhiteSpace(apiSecretGmail))
+                {
+                    Console.WriteLine("❌ MailjetApiKey/MailjetApiSecret mancanti: crea secrets.config partendo da secrets.config.example");
+                    return;
+                }
 
                 //using var client = new HttpClient();
                 using var client = new HttpClient

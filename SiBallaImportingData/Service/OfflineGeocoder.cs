@@ -66,6 +66,7 @@ namespace SiBallaImportingData.Service
                 // Legge il file di GeoNames e lo salva in RAM (richiede circa 1-2 secondi)
                 _worldCities = GeoFileReader.ReadExtendedGeoNames(geoNamesFilePath).ToList();
                 Console.WriteLine($"[GEO] Caricate {_worldCities.Count} città. Geocoding offline pronto.");
+                CustomLocationsManager.Load();   // città trovate su Nominatim nelle esecuzioni precedenti
             }
             catch (Exception ex)
             {
@@ -106,6 +107,9 @@ namespace SiBallaImportingData.Service
                     }
                     else
                     {
+                       var saved = CustomLocationsManager.TryGet(cityName, targetIso);
+                       if (saved is not null) return saved.Value;
+
                        return Task.Run(() => FetchFromWebAndSaveAsync(cityName, targetIso)).Result;
                     }
                 }

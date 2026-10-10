@@ -12,3 +12,6 @@ Service&Model/obj
 .vs/SiBallaImportingData.slnx/FileContentIndex
 .vs/SiBallaImportingData.slnx/v18
 .vs
+
+# chiavi segrete (vedi SiBallaImportingData/secrets.config.example)
+secrets.config

@@ -1,10 +1,8 @@
 ﻿using Google;
-using Google.Api;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using Google.Type;
 using OfficeOpenXml;
 using SiBallaImportingData.Model;
 using SiBallaImportingData.Service;
@@ -30,7 +28,6 @@ namespace SiBallaImportingData.Utils
         {
             var file = GetFile();
 
-            var getLocationInfo = new LocationInfo();
             Dictionary<TipoEvento, List<Event>> eventiDic = new Dictionary<TipoEvento, List<Event>>();
 
             var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
@@ -188,79 +185,6 @@ namespace SiBallaImportingData.Utils
             return eventiDic;           
         }
 
-
-        public static void TestReadWritePermissions()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
-
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                var credential = GoogleCredential.FromStream(stream)
-                    .CreateScoped(SheetsService.Scope.Spreadsheets);
-
-                var service = new SheetsService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = credential,
-                    ApplicationName = "Test Permissions"
-                });
-
-                string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
-
-                try
-                {
-                    // TEST 1: Lettura (dovrebbe funzionare)
-                    Console.WriteLine("Test LETTURA...");
-                    var readRequest = service.Spreadsheets.Values.Get(spreadsheetId, "A1:C5");
-                    var readResult = readRequest.Execute();
-                    Console.WriteLine($"✅ Lettura OK - {readResult.Values?.Count ?? 0} righe lette");
-
-                    // TEST 2: Scrittura (questo fallisce)
-                    Console.WriteLine("\nTest SCRITTURA...");
-                    var writeData = new ValueRange
-                    {
-                        Values = new List<IList<object>> { new List<object> { "TEST", System.DateTime.Now.ToString("HH:mm:ss") } }
-                    };
-
-                    // Prova a scrivere in una cella che probabilmente esiste
-                    var writeRequest = service.Spreadsheets.Values.Update(
-                        writeData,
-                        spreadsheetId,
-                        "Z100"); // Cella probabilmente vuota
-
-                    writeRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-
-                    var writeResult = writeRequest.Execute();
-                    Console.WriteLine($"✅ Scrittura OK - Celle aggiornate: {writeResult.UpdatedCells}");
-
-                    // Se arriva qui, i permessi sono corretti!
-                    Console.WriteLine("\n🎉 TUTTI I PERMESSI SONO OK!");
-                }
-                catch (GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.Forbidden)
-                {
-                    Console.WriteLine($"\n❌ ERRORE: Il Service Account ha permessi di SOLO LETTURA");
-                    Console.WriteLine($"Messaggio: {ex.Error?.Message}");
-
-                    // Leggi l'email dal JSON
-                    stream.Position = 0;
-                    using (var reader = new StreamReader(stream))
-                    {
-                        string json = reader.ReadToEnd();
-                        dynamic jsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-                        string serviceEmail = jsonObj.client_email;
-
-                        Console.WriteLine("\n🔧 CORREGGI I PERMESSI:");
-                        Console.WriteLine($"1. Apri il Google Sheet");
-                        Console.WriteLine($"2. Clicca 'Condividi'");
-                        Console.WriteLine($"3. Trova l'email: {serviceEmail}");
-                        Console.WriteLine($"4. Cambia da 'Visualizzatore' a 'Editor'");
-                        Console.WriteLine($"5. Clicca 'Salva'");
-                        Console.WriteLine($"6. Aspetta 30 secondi");
-                        Console.WriteLine($"7. Riprova!");
-                    }
-                }
-            }
-        }
         public static async Task PrepareToAppendToGoogleSheet(List<Event> events, Dictionary<TipoEvento, List<Event>> eventiFromExcel)
         {
             // Qui puoi fare eventuali preparazioni prima di chiamare AppendToGoogleSheet2
@@ -642,31 +566,6 @@ namespace SiBallaImportingData.Utils
 
             var parts = raw.Split(',', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             return new(parts.ElementAtOrDefault(0), parts.ElementAtOrDefault(1), parts.ElementAtOrDefault(2), lat, lng);
-        }
-
-        public static void ClearExcelFile()
-        {
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
-            var assembly = Assembly.GetExecutingAssembly();
-
-            using var stream = assembly.GetManifestResourceStream(resourcePath);
-
-            if (stream == null)
-                throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
-
-            var credential = GoogleCredential.FromStream(stream)
-                .CreateScoped(SheetsService.Scope.SpreadsheetsReadonly);
-
-            var service = new SheetsService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "Google Sheets API .NET Quickstart",
-            });
-
-            var spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
-            string clearRangeSerate = $"'serate'!A3:R1000"; // Modifica l'intervallo secondo le tue esigenze
-            var clearRequestSerate = service.Spreadsheets.Values.Clear(new ClearValuesRequest(), spreadsheetId, clearRangeSerate);
-            clearRequestSerate.Execute();
         }
     }
 }

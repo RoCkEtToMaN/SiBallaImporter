@@ -1,6 +1,4 @@
-﻿using Firebase.Database;
-using Firebase.Database.Query;
-using SiBallaImportingData.Utils;
+﻿using SiBallaImportingData.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,15 +11,7 @@ using System.Threading.Tasks;
 
 public static class IstatDownloader
 {
-    private const string CacheFilePath = "zip_cache.json";
-    private static readonly HttpClient HttpClient = new HttpClient();
-
-    // Cache thread-safe in memoria: la chiave è nel formato "COUNTRY:ZIP" (es. "IT:16044" o "TH:10200")
-    private static ConcurrentDictionary<string, ZippoResponse> _memoryCache = new(StringComparer.OrdinalIgnoreCase);
     private const string IstatCsvUrl = "https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv";
-
-    private static readonly FirebaseClient _firebaseClient =
-        new FirebaseClient("https://siballa-8fc2f-default-rtdb.europe-west1.firebasedatabase.app/");
 
     public static Dictionary<string, string>? IstatDic { get; set; }
 
@@ -116,20 +106,7 @@ public static class IstatDownloader
     }
 
     /// <summary>
-    /// Cerca il nome della città partendo da Codice Paese (ISO 2 lettere) e CAP.
-    /// </summary>
-    public static string GetCityName(string countryCode, string zipCode)
-    {
-        if (string.IsNullOrWhiteSpace(countryCode) || string.IsNullOrWhiteSpace(zipCode))
-            return null;
-
-        string key = $"{countryCode.Trim().ToUpper()}:{zipCode.Trim()}";
-
-        return ZipToCityMap.TryGetValue(key, out var city) ? city : null;
-    }
-
-    /// <summary>
-    /// Scarica il CSV ISTAT ufficiale, effettua il parsing e salva la mappa su Firebase.
+    /// Scarica il CSV ISTAT ufficiale, effettua il parsing e salva la mappa in IstatDic.
     /// </summary>
     public static async Task<bool> SyncIstatFromOfficialCsvAsync()
     {
@@ -186,14 +163,9 @@ public static class IstatDownloader
                 }
             }
 
-            Console.WriteLine($"3. Invio di {istatDictionary.Count} codici ISTAT a Firebase...");
+            Console.WriteLine($"3. Caricati {istatDictionary.Count} codici ISTAT.");
 
             IstatDic = istatDictionary;
-
-            // Salva l'intera struttura sul database
-            //await _firebaseClient
-            //    .Child("IstatCodes")
-            //    .PutAsync(istatDictionary);
 
             Console.WriteLine("✅ Sincronizzazione ISTAT completata con successo!");
             return true;
@@ -202,180 +174,6 @@ public static class IstatDownloader
         {
             Console.WriteLine($"❌ Errore durante la sincronizzazione ISTAT: {ex.Message}");
             return false;
-        }
-    }
-
-    /// <summary>
-    /// Recupera l'intera mappa dei codici ISTAT dal database Firebase.
-    /// </summary>
-    public static async Task<Dictionary<string, string>> GetIstatCodesFromDBAsync()
-    {
-        try
-        {
-            Console.WriteLine("Lettura della tabella IstatCodes da Firebase...");
-
-            // Legge l'intero nodo /IstatCodes come Dizionario
-            var istatData = await _firebaseClient
-                .Child("IstatCodes")
-                .OnceSingleAsync<Dictionary<string, string>>();
-
-            if (istatData != null && istatData.Count > 0)
-            {
-                Console.WriteLine($"[INFO] Recuperati con successo {istatData.Count} codici ISTAT.");
-                IstatDic = istatData;
-                return new Dictionary<string, string>(istatData, StringComparer.OrdinalIgnoreCase);
-            }
-
-            Console.WriteLine("[AVVISO] La tabella IstatCodes su Firebase è vuota.");
-            return new Dictionary<string, string>();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERRORE] Impossibile recuperare la tabella ISTAT da Firebase: {ex.Message}");
-            return new Dictionary<string, string>();
-        }
-    }
-    //private static readonly HttpClient HttpClient = new HttpClient();
-
-    /// <summary>
-    /// Carica il file JSON di cache all'avvio dell'applicazione.
-    /// </summary>
-    public static async Task LoadCacheAsync()
-    {
-        if (!File.Exists(CacheFilePath)) return;
-
-        try
-        {
-            string json = await File.ReadAllTextAsync(CacheFilePath);
-            var loadedData = JsonSerializer.Deserialize<ConcurrentDictionary<string, ZippoResponse>>(json);
-
-            if (loadedData != null)
-            {
-                _memoryCache = new ConcurrentDictionary<string, ZippoResponse>(loadedData, StringComparer.OrdinalIgnoreCase);
-                Console.WriteLine($"[CACHE] Caricati {_memoryCache.Count} CAP salvati da file locale.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[AVVISO] Impossibile leggere il file di cache: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Cerca il CAP in memoria. Se non c'è, chiama l'API, salva il risultato in memoria e aggiorna il JSON.
-    /// </summary>
-    public static async Task<ZippoResponse> GetOrFetchZipInfoAsync(string countryCode, string zipCode)
-    {
-        if (string.IsNullOrWhiteSpace(countryCode) || string.IsNullOrWhiteSpace(zipCode))
-            return null;
-
-        string cacheKey = $"{countryCode.Trim().ToUpper()}:{zipCode.Trim()}";
-
-        // 1. Se presente in memoria, restituisce direttamente i dati salvati
-        if (_memoryCache.TryGetValue(cacheKey, out var cachedResponse))
-        {
-            return cachedResponse;
-        }
-
-        // 2. Se manca, interroga l'API online
-        try
-        {
-            string url = $"http://api.zippopotam.us/{countryCode.Trim().ToLower()}/{zipCode.Trim()}";
-            var response = await HttpClient.GetAsync(url);
-
-            if (!response.IsSuccessStatusCode) return null;
-
-            string json = await response.Content.ReadAsStringAsync();
-            var zippoData = JsonSerializer.Deserialize<ZippoResponse>(json);
-
-            if (zippoData != null && zippoData.Places != null && zippoData.Places.Any())
-            {
-                // Salva in memoria
-                _memoryCache[cacheKey] = zippoData;
-
-                // Persiste la cache aggiornata su file JSON
-                await SaveCacheToDiskAsync();
-
-                return zippoData;
-            }
-        }
-        catch
-        {
-            // Errore di rete o API non raggiungibile
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Restituisce solo il nome della città (estratto dal modello completo).
-    /// </summary>
-    public static async Task<string> GetCityNameAsync(string countryCode, string zipCode)
-    {
-        var data = await GetOrFetchZipInfoAsync(countryCode, zipCode);
-        return data?.Places?.FirstOrDefault()?.PlaceName;
-    }
-
-    private static async Task SaveCacheToDiskAsync()
-    {
-        try
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(_memoryCache, options);
-            await File.WriteAllTextAsync(CacheFilePath, json);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERRORE] Impossibile salvare il file di cache su disco: {ex.Message}");
-        }
-    }
-
-    public static async Task<string> GetCityFromZipAsync(string countryCode, string zipCode)
-    {
-        if (string.IsNullOrWhiteSpace(zipCode) || string.IsNullOrWhiteSpace(countryCode))
-            return null;
-
-        try
-        {
-            string url = $"http://api.zippopotam.us/{countryCode.Trim().ToLower()}/{zipCode.Trim()}";
-            var response = await HttpClient.GetAsync(url);
-
-            if (!response.IsSuccessStatusCode) return null;
-
-            string json = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<ZippoResponse>(json);
-
-            return data?.Places?.FirstOrDefault()?.PlaceName;
-        }
-        catch
-        {
-            return null; // Fallback in caso di errore di rete
-        }
-    }
-
-    /// <summary>
-    /// Recupera il nome della città per un singolo codice ISTAT specifico.
-    /// </summary>
-    public static async Task<string> GetCityByIstatCodeAsync(string istatCode)
-    {
-        if (string.IsNullOrWhiteSpace(istatCode)) return null;
-
-        try
-        {
-            string cleanCode = istatCode.Trim();
-
-            // Interroga direttamente il sotto-nodo del singolo codice (es. /IstatCodes/16044)
-            string cityName = await _firebaseClient
-                .Child("IstatCodes")
-                .Child(cleanCode)
-                .OnceSingleAsync<string>();
-
-            return cityName;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERRORE] Errore durante la ricerca del codice {istatCode}: {ex.Message}");
-            return null;
         }
     }
 }

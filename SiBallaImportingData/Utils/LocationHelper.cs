@@ -1,5 +1,4 @@
-﻿using Firebase.Database;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json;
@@ -9,11 +8,7 @@ namespace SiBallaDataImporting.Utils
 {
     public static class LocationHelper
     {
-        private static Dictionary<string, string> _istatToCity = new(StringComparer.OrdinalIgnoreCase);
         private static readonly Regex Digit4Or5Regex = new(@"^\d{4,5}$", RegexOptions.Compiled);
-        // Usa l'URL del tuo Realtime Database
-        private static readonly FirebaseClient _firebaseClient =
-            new FirebaseClient("https://siballa-8fc2f-default-rtdb.europe-west1.firebasedatabase.app/");
         /// <summary>
         /// Verifica se la stringa è un numero intero di 4 o 5 cifre.
         /// </summary>
@@ -23,58 +18,7 @@ namespace SiBallaDataImporting.Utils
 
             return Digit4Or5Regex.IsMatch(value.Trim());
         }
-        /// <summary>
-        /// Scarica il dizionario dei codici ISTAT dal nodo "IstatCodes" di Firebase Realtime Database.
-        /// </summary>
-        public static async Task InitIstatFromFirebaseAsync()
-        {
-            try
-            {
-                // Scarica direttamente il dizionario Chiave (Codice) -> Valore (Nome Città)
-                var remoteData = await _firebaseClient
-                    .Child("IstatCodes")
-                    .OnceSingleAsync<Dictionary<string, string>>();
 
-                if (remoteData != null)
-                {
-                    _istatToCity = new Dictionary<string, string>(remoteData, StringComparer.OrdinalIgnoreCase);
-
-                    // Mappa automaticamente anche le varianti senza lo '0' iniziale (es. "16044" e "016044")
-                    foreach (var (code, cityName) in remoteData)
-                    {
-                        string shortCode = code.TrimStart('0');
-                        if (!_istatToCity.ContainsKey(shortCode))
-                        {
-                            _istatToCity[shortCode] = cityName;
-                        }
-                    }
-
-                    Console.WriteLine($"[INFO] Mappatura ISTAT caricata da Firebase ({_istatToCity.Count} codici pronti).");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[AVVISO] Impossibile scaricare i codici ISTAT da Firebase: {ex.Message}");
-            }
-        }
-
-        public static string ResolveIstatCode(string code)
-        {
-            if (string.IsNullOrWhiteSpace(code)) return code;
-            string cleanCode = code.Trim();
-
-            return _istatToCity.TryGetValue(cleanCode, out var cityName) ? cityName : cleanCode;
-        }
-        public static string ToIso2Code(string countryName)
-        {
-            if (string.IsNullOrWhiteSpace(countryName)) return null;
-
-            string cleanName = countryName.Trim();
-
-            if (cleanName.Length == 2) return cleanName.ToUpperInvariant();
-
-            return CountryNameToIsoMap.TryGetValue(cleanName, out string isoCode) ? isoCode : null;
-        }
         public static readonly Dictionary<string, string> CountryNameToIsoMap = new(StringComparer.OrdinalIgnoreCase)
         {
             // ==================== EUROPA ====================
@@ -149,112 +93,6 @@ namespace SiBallaDataImporting.Utils
             { "Algeria", "DZ" }, { "DZA", "DZ" }
         };
 
-        public static readonly Dictionary<string, string> EuropeanCityMap = new(StringComparer.OrdinalIgnoreCase)
-        {
-            // ==================== FRANCIA ====================
-            { "Parigi", "Parigi" }, { "Paris", "Parigi" },
-            { "Lione", "Lione" }, { "Lyon", "Lione" },
-            { "Marsiglia", "Marsiglia" }, { "Marseille", "Marsiglia" },
-            { "Nizza", "Nizza" }, { "Nice", "Nizza" },
-            { "Strasburgo", "Strasburgo" }, { "Strasbourg", "Strasburgo" },
-            { "Tolosa", "Tolosa" }, { "Toulouse", "Tolosa" },
-            { "Bordeaux", "Bordeaux" },
-            { "Lilla", "Lilla" }, { "Lille", "Lilla" },
-
-            // ==================== GERMANIA ====================
-            { "Berlino", "Berlino" }, { "Berlin", "Berlino" },
-            { "Monaco di Baviera", "Monaco di Baviera" }, { "München", "Monaco di Baviera" }, { "Munich", "Monaco di Baviera" },
-            { "Francoforte", "Francoforte" }, { "Frankfurt", "Francoforte" }, { "Frankfurt am Main", "Francoforte" },
-            { "Amburgo", "Amburgo" }, { "Hamburg", "Amburgo" },
-            { "Colonia", "Colonia" }, { "Köln", "Colonia" }, { "Cologne", "Colonia" },
-            { "Stoccarda", "Stoccarda" }, { "Stuttgart", "Stoccarda" },
-            { "Dresda", "Dresda" }, { "Dresden", "Dresda" },
-            { "Lipsia", "Lipsia" }, { "Leipzig", "Lipsia" },
-            { "Norimberga", "Norimberga" }, { "Nürnberg", "Norimberga" }, { "Nuremberg", "Norimberga" },
-
-            // ==================== REGNO UNITO E IRLANDA ====================
-            { "Londra", "Londra" }, { "London", "Londra" },
-            { "Edimburgo", "Edimburgo" }, { "Edinburgh", "Edimburgo" },
-            { "Manchester", "Manchester" },
-            { "Birmingham", "Birmingham" },
-            { "Liverpool", "Liverpool" },
-            { "Glasgow", "Glasgow" },
-            { "Dublino", "Dublino" }, { "Dublin", "Dublino" },
-
-            // ==================== SPAGNA E PORTOGALLO ====================
-            { "Barcellona", "Barcellona" }, { "Barcelona", "Barcellona" },
-            { "Madrid", "Madrid" },
-            { "Siviglia", "Siviglia" }, { "Sevilla", "Siviglia" }, { "Seville", "Siviglia" },
-            { "Valencia", "Valencia" }, { "Valenza", "Valencia" },
-            { "Saragozza", "Saragozza" }, { "Zaragoza", "Saragozza" },
-            { "Bilbao", "Bilbao" },
-            { "Malaga", "Malaga" },
-            { "Lisbona", "Lisbona" }, { "Lisboa", "Lisbona" }, { "Lisbon", "Lisbona" },
-            { "Porto", "Porto" }, { "Oporto", "Porto" },
-
-            // ==================== ITALIA (Principali Hub) ====================
-            { "Roma", "Roma" }, { "Rome", "Roma" },
-            { "Milano", "Milano" }, { "Milan", "Milano" },
-            { "Venezia", "Venezia" }, { "Venice", "Venezia" },
-            { "Firenze", "Firenze" }, { "Florence", "Firenze" },
-            { "Napoli", "Napoli" }, { "Naples", "Napoli" },
-            { "Torino", "Torino" }, { "Turin", "Torino" },
-            { "Genova", "Genova" }, { "Genoa", "Genova" },
-            { "Bologna", "Bologna" },
-            { "Palermo", "Palermo" },
-
-            // ==================== SVIZZERA ED AUSTRIA ====================
-            { "Zurigo", "Zurigo" }, { "Zürich", "Zurigo" }, { "Zurich", "Zurigo" },
-            { "Ginevra", "Ginevra" }, { "Geneva", "Ginevra" }, { "Genève", "Ginevra" },
-            { "Basilea", "Basilea" }, { "Basel", "Basilea" }, { "Basle", "Basilea" },
-            { "Berna", "Berna" }, { "Bern", "Berna" },
-            { "Lugano", "Lugano" },
-            { "Vienna", "Vienna" }, { "Wien", "Vienna" },
-            { "Salisburgo", "Salisburgo" }, { "Salzburg", "Salisburgo" },
-            { "Innsbruck", "Innsbruck" },
-
-            // ==================== BENELUX ====================
-            { "Bruxelles", "Bruxelles" }, { "Brussels", "Bruxelles" }, { "Brussel", "Bruxelles" },
-            { "Anversa", "Anversa" }, { "Antwerpen", "Anversa" }, { "Antwerp", "Anversa" },
-            { "Gand", "Gand" }, { "Gent", "Gand" }, { "Ghent", "Gand" },
-            { "Bruges", "Bruges" }, { "Brugge", "Bruges" },
-            { "Amsterdam", "Amsterdam" },
-            { "Rotterdam", "Rotterdam" },
-            { "L'Aia", "L'Aia" }, { "Den Haag", "L'Aia" }, { "The Hague", "L'Aia" },
-
-            // ==================== EUROPA ORIENTALE E GRECIA ====================
-            { "Atene", "Atene" }, { "Athens", "Atene" },
-            { "Salonicco", "Salonicco" }, { "Thessaloniki", "Salonicco" },
-            { "Varsavia", "Varsavia" }, { "Warszawa", "Varsavia" }, { "Warsaw", "Varsavia" },
-            { "Cracovia", "Cracovia" }, { "Kraków", "Cracovia" }, { "Cracow", "Cracovia" },
-            { "Breslavia", "Breslavia" }, { "Wrocław", "Breslavia" },
-            { "Praga", "Praga" }, { "Praha", "Praga" }, { "Prague", "Praga" },
-            { "Budapest", "Budapest" },
-            { "Bucarest", "Bucarest" }, { "București", "Bucarest" }, { "Bucharest", "Bucarest" },
-            { "Belgrado", "Belgrado" }, { "Beograd", "Belgrado" }, { "Belgrade", "Belgrado" },
-
-            // ==================== NORD EUROPA ====================
-            { "Stoccolma", "Stoccolma" }, { "Stockholm", "Stoccolma" },
-            { "Göteborg", "Göteborg" }, { "Gothenburg", "Göteborg" },
-            { "Oslo", "Oslo" },
-            { "Copenaghen", "Copenaghen" }, { "København", "Copenaghen" }, { "Copenhagen", "Copenaghen" },
-            { "Helsinki", "Helsinki" }
-        };
-
-        /// <summary>
-        /// Restituisce il nome standardizzato della città se presente nel dizionario,
-        /// altrimenti restituisce la stringa di input pulita.
-        /// </summary>
-        public static string NormalizeCity(string rawCityName)
-        {
-            if (string.IsNullOrWhiteSpace(rawCityName)) return null;
-
-            string clean = rawCityName.Trim();
-
-            return EuropeanCityMap.TryGetValue(clean, out string normalizedCity)
-                ? normalizedCity
-                : clean;
-        }
         // 1. Insieme dei Paesi noti (O(1) e case-insensitive)
         public static readonly HashSet<string> KnownCountries = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -393,8 +231,6 @@ namespace SiBallaDataImporting.Utils
             string state = rawState?.Trim();
             string country = rawCountry?.Trim();
 
-            var gg = IstatDownloader.ZipToCityMap;
-
             //ToIso2Code
             var valueee = CountryNameToIsoMap.ContainsKey(country) ? CountryNameToIsoMap[country] : state;
             if (Is4Or5DigitNumber(city))
@@ -444,32 +280,5 @@ namespace SiBallaDataImporting.Utils
 
             return (city, state, country);
         }
-
-        // Dizionario dei codici ISTAT noti (puoi estenderlo o caricarlo da un file CSV/JSON)
-        private static readonly Dictionary<string, string> IstatToCity = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "16044", "Genova" },
-            { "016044", "Genova" },
-            { "015146", "Milano" },
-            { "058091", "Roma" }
-            // Aggiungi altri codici ricorrenti nei tuoi dati
-        };
-
-        /// <summary>
-        /// Verifica se la stringa è un codice numerico (es. ISTAT o CAP).
-        /// </summary>
-        public static bool IsNumericCode(string value) =>
-            !string.IsNullOrWhiteSpace(value) && int.TryParse(value.Trim(), out _);
-
-        /// <summary>
-        /// Converte il codice ISTAT nel nome del Comune se presente nel dizionario.
-        /// </summary>
-        //public static string ResolveIstatCode(string code)
-        //{
-        //    if (string.IsNullOrWhiteSpace(code)) return code;
-
-        //    string cleanCode = code.Trim();
-        //    return IstatToCity.TryGetValue(cleanCode, out var cityName) ? cityName : cleanCode;
-        //}
     }
 }

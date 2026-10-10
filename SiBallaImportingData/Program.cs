@@ -23,7 +23,7 @@ var resolver = new AddressResolver(store);
 Console.WriteLine("Caricamento codici ISTAT in corso...");
 Console.WriteLine("Inizializzazione dati geografici...");
 await IstatDownloader.InitializeAsync();
-await IstatDownloader.SyncIstatFromOfficialCsvAsync();
+//await IstatDownloader.SyncIstatFromOfficialCsvAsync(); // riempie IstatDic, che oggi nessuno legge
 //await IstatDownloader.GetIstatCodesFromDBAsync();
 await OfflineGeocoder.EnsureGeoNamesFileExistsAsync();
 OfflineGeocoder.Initialize("cities15000.txt");
@@ -33,7 +33,7 @@ bool enableImportingOnExcel = Convert.ToBoolean(ConfigurationManager.AppSettings
 bool enableSearching = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSearching"]);
 bool enableSending = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSending"]);
 bool resetDb = Convert.ToBoolean(ConfigurationManager.AppSettings["ResetDb"]);
-bool clearExcel = Convert.ToBoolean(ConfigurationManager.AppSettings["ClearExcel"]);
+//bool clearExcel = Convert.ToBoolean(ConfigurationManager.AppSettings["ClearExcel"]); // flag non più usato
 //string databaseUrl = ConfigurationManager.AppSettings["DatabaseUrl"];
 //var firebaseDbService = new FirebaseDbService(databaseUrl);
 var appWriteService = new AppWriteService();

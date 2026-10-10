@@ -24,10 +24,7 @@
   <ItemGroup>
     <PackageReference Include="Appwrite" Version="8.0.0" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
-    <PackageReference Include="FirebaseAdmin" Version="3.4.0" />
-    <PackageReference Include="FirebaseDatabase.net" Version="5.0.0" />
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.70.0.3819" />
-    <PackageReference Include="Google.Cloud.Firestore" Version="3.10.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="Mailjet.Api" Version="3.0.1" />
     <PackageReference Include="NGeoNames" Version="1.5.1" />
@@ -37,6 +34,9 @@
   <ItemGroup>
     <None Update="Resources\iconWhityLH.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="secrets.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
