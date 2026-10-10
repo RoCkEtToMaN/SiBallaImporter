@@ -1,5 +1,5 @@
 using SiBallaImportingData.Model;
-using System.Configuration;
+using SiBallaImportingData.Utils;
 using System.Text;
 using System.Text.Json;
 
@@ -17,21 +17,21 @@ namespace SiBallaImportingData.Service
             "St. Louis Shag, Charleston, Solo Jazz, Blues dance, Tap, serate o festival swing con musica dal vivo o DJ. " +
             "NON sono swing: liscio, balli di gruppo, rock'n'roll acrobatico sportivo, West Coast Swing se è l'unico stile, " +
             "fiere o mercatini vintage senza una parte di ballo, concerti rockabilly senza riferimenti al ballo swing, " +
-            "eventi non legati al ballo. Se l'evento è misto ma include una parte swing, consideralo swing." +
-            "Se sono eventi lezioni di prova senza una parte di ballo, considerali non swing." +
+            "eventi non legati al ballo. Se l'evento è misto ma include una parte swing, consideralo swing. " +
+            "Se sono eventi lezioni di prova senza una parte di ballo, considerali non swing. " +
             "Per ogni evento rispondi con id, isSwing e un motivo breve in italiano (max 15 parole).";
 
-        public static async Task<(List<Event> Swing, List<(Event Evento, string Motivo)> Altri)> ClassifyAsync(List<Event> eventi)
+        public static async Task<(List<Event> Swing, List<(Event Evento, string Motivo)> Altri)> ClassifyAsync(List<Event> eventi, GeminiOptions gemini)
         {
             var swing = new List<Event>(eventi);
             var altri = new List<(Event, string)>();
 
-            var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
-            var model = ConfigurationManager.AppSettings["GeminiModel"];
+            var apiKey = gemini.ApiKey;
+            var model = gemini.Model;
             if (eventi.Count == 0 || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(model))
             {
                 if (eventi.Count != 0)
-                    Console.WriteLine("[AI] GEMINI_API_KEY o GeminiModel non impostati: controllo saltato.");
+                    Console.WriteLine("[AI] Chiave Gemini (Gemini:ApiKey o GEMINI_API_KEY) o modello non impostati: controllo saltato.");
                 return (swing, altri);
             }
 

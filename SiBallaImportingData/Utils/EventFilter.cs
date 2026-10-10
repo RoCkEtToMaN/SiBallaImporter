@@ -1,5 +1,4 @@
 ﻿using SiBallaImportingData.Model;
-using System.Configuration;
 using System.Diagnostics.Eventing.Reader;
 
 namespace SiBallaImportingData.Utils
@@ -13,7 +12,7 @@ namespace SiBallaImportingData.Utils
 
             return distanzaMetri <= radiusMetri;
         }
-        public static async Task<List<Event>> FilterESwingItEventsByDateRange(List<ESwingIt> events, KnownVenueStore store, AddressResolver resolver)
+        public static async Task<List<Event>> FilterESwingItEventsByDateRange(List<ESwingIt> events, KnownVenueStore store, AddressResolver resolver, float radiusKm)
         {
             KnownVenueStore.Load(Path.Combine(AppContext.BaseDirectory, "venues.json"));
             var genova = events.Where(x => x.City?.ToLower() == "genova").OrderBy(x => x.Start).ToList();//170
@@ -54,7 +53,7 @@ namespace SiBallaImportingData.Utils
 
             foreach (var e in filteredEvents)
             {            
-                if (CheckEventInsideCircle(e))
+                if (CheckEventInsideCircle(e, radiusKm))
                 {
                     Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);
                     var end = new DateTime();
@@ -102,16 +101,16 @@ namespace SiBallaImportingData.Utils
                     if (store.TryApply(newEvent))
                         Console.WriteLine($"📍 Luogo noto per: {newEvent.PartyName} ({newEvent.City})");
 
-                    Console.WriteLine($"{e.City}  entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
+                    Console.WriteLine($"{e.City}  entro {radiusKm} km: {"✅ SÌ"}");
                 }
                 else
-                    Console.WriteLine($" {e.City}  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"❌ NO"}");
+                    Console.WriteLine($" {e.City}  Entro {radiusKm} km: {"❌ NO"}");
             }
 
             return eventList;
         }
         public static async Task<List<Event>> FilterSwingPlanitEventsByDateRangeAsync(
-            List<Event> events, KnownVenueStore store, AddressResolver resolver)
+            List<Event> events, KnownVenueStore store, AddressResolver resolver, float radiusKm)
         {
             var eventList = new List<Event>();
 
@@ -123,7 +122,7 @@ namespace SiBallaImportingData.Utils
 
             foreach (var e in filteredEvents2)
             {
-                if (CheckEventInsideCircle(e))
+                if (CheckEventInsideCircle(e, radiusKm))
                 {
                     Console.WriteLine("Data evento e città : " + e.DateStart + ", " + e.City);
                     var end = new DateTime();
@@ -179,17 +178,16 @@ namespace SiBallaImportingData.Utils
                     if (store.TryApply(newEvent))
                         Console.WriteLine($"📍 Luogo noto per: {newEvent.PartyName} ({newEvent.City})");
 
-                    Console.WriteLine($"{e.City}  entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"✅ SÌ"}");
+                    Console.WriteLine($"{e.City}  entro {radiusKm} km: {"✅ SÌ"}");
                 }
                 else
-                    Console.WriteLine($" {e.City}  Entro {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} km: {"❌ NO"}");
+                    Console.WriteLine($" {e.City}  Entro {radiusKm} km: {"❌ NO"}");
             }
 
             return eventList;
         }
-        private static bool CheckEventInsideCircle(Object e)
+        private static bool CheckEventInsideCircle(Object e, float raggio_km)
         {
-            var raggio_km = (float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"]); // Raggio in km
 
             
             if (e is Event)

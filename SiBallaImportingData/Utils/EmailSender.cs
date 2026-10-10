@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using SiBallaImportingData.Model;
-using System.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -8,17 +7,17 @@ namespace SiBallaImportingData.Utils
 {
     public static class EmailSender
     {
-        public static async Task SendWithMailjetAnonymous(List<Event> eventi, List<(Event Evento, string Motivo)>? daVerificare = null)
+        public static async Task SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null)
         {
             try
             {
                 //var textEm = TextEmail(eventi);
-                // chiavi in secrets.config (non versionato), incluso da App.config
-                var apiKeyGmail = ConfigurationManager.AppSettings["MailjetApiKey"];
-                var apiSecretGmail = ConfigurationManager.AppSettings["MailjetApiSecret"];
-                if (string.IsNullOrWhiteSpace(apiKeyGmail) || string.IsNullOrWhiteSpace(apiSecretGmail))
+                // chiavi da user-secrets (PC locale) o variabili d'ambiente Email__MailjetApiKey / Email__MailjetApiSecret
+                var apiKeyGmail = settings.Email.MailjetApiKey;
+                var apiSecretGmail = settings.Email.MailjetApiSecret;
+                if (!settings.Email.HasMailjetKeys)
                 {
-                    Console.WriteLine("❌ MailjetApiKey/MailjetApiSecret mancanti: crea secrets.config partendo da secrets.config.example");
+                    Console.WriteLine("❌ Chiavi Mailjet mancanti: dotnet user-secrets set \"Email:MailjetApiKey\" \"...\" (e Email:MailjetApiSecret)");
                     return;
                 }
 
@@ -43,15 +42,15 @@ namespace SiBallaImportingData.Utils
                                 Email = "siballanewsletter@gmail.com",
                                 Name = "siballanewsletter"
                             },
-                            To = ConfigurationManager.AppSettings["Email"]
+                            To = settings.Email.Recipients
                                 .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                                 .Select(email => email.Trim())
                                 .Where(email => !string.IsNullOrEmpty(email))
                                 .Select(email => new { Email = email }).ToArray(),
                             Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
-                                $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).ToString("dd/MM/yyyy")}",
-                            TextPart = TextEmail(eventi, daVerificare),
-                            HTMLPart = TextEmail(eventi, daVerificare)
+                                $"{DateTime.Today.AddDays(settings.Import.Giorni).ToString("dd/MM/yyyy")}",
+                            TextPart = TextEmail(eventi, settings.Import, daVerificare),
+                            HTMLPart = TextEmail(eventi, settings.Import, daVerificare)
                         }
                     }
                 };
@@ -99,14 +98,14 @@ namespace SiBallaImportingData.Utils
             }
 
         }
-        private static string TextEmail(List<Event> eventi, List<(Event Evento, string Motivo)>? daVerificare = null)
+        private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null)
         {
             string text = $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
-                          $"{DateTime.Now} - {DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))} ,<br>" +
-                          $"con raggio d'azione di {(float)Convert.ToDouble(ConfigurationManager.AppSettings["Radius"])} Km.<br><br>" +
+                          $"{DateTime.Now} - {DateTime.Today.AddDays(opzioni.Giorni)} ,<br>" +
+                          $"con raggio d'azione di {opzioni.Radius} Km.<br><br>" +
                           $"Bollettino ({DateTime.Today.Day}/{DateTime.Today.Month} - " +
-                          $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Day}/" +
-                          $"{DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])).Month})<br><br>";
+                          $"{DateTime.Today.AddDays(opzioni.Giorni).Day}/" +
+                          $"{DateTime.Today.AddDays(opzioni.Giorni).Month})<br><br>";
 
             text += $"*Bollettino della settimana*🗓️:<br>";
 

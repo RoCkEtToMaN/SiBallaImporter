@@ -6,7 +6,6 @@ using SiBallaDataImporting.Utils;
 using SiBallaImportingData.Model;
 using SiBallaImportingData.Service;
 using SiBallaImportingData.Utils;
-using System.Configuration; // Aggiungi questa direttiva using
 using System.Drawing;
 using System.Text.Json;
 
@@ -17,8 +16,13 @@ using System.Text.Json;
 
 //icon.Save(stream);
 
+// configurazione: appsettings.json -> user-secrets -> variabili d'ambiente -> riga di comando
+var settings = AppSettings.Load(args);
+settings.Print();
+var opzioni = settings.Import;
+
 // nel punto di avvio dell'import (Program.cs o dove chiami il filtro)
-var store = KnownVenueStore.Load(Path.Combine(AppContext.BaseDirectory, "DizionarioEventiInfo.json"));
+var store =KnownVenueStore.Load(Path.Combine(AppContext.BaseDirectory, "DizionarioEventiInfo.json"));
 var resolver = new AddressResolver(store);
 Console.WriteLine("Caricamento codici ISTAT in corso...");
 Console.WriteLine("Inizializzazione dati geografici...");
@@ -28,13 +32,13 @@ await IstatDownloader.InitializeAsync();
 await OfflineGeocoder.EnsureGeoNamesFileExistsAsync();
 OfflineGeocoder.Initialize("cities15000.txt");
 
-// TEST: conta le immagini trovate senza scrivere su foglio, DB o JSON
-// (flag TestImmagini in App.config, oppure dotnet run -- --test-immagini)
-if (Convert.ToBoolean(ConfigurationManager.AppSettings["TestImmagini"]) || args.Contains("--test-immagini"))
+// TEST: conta le immagini trovate senza scrivere su foglio o DB
+// (Import:TestImmagini in appsettings.json, oppure dotnet run -- --test-immagini)
+if (opzioni.TestImmagini)
 {
     var web = new ImportDataFromWeb();
-    var testESwing = await EventFilter.FilterESwingItEventsByDateRange(await web.GetESwing(), store, resolver);
-    var testSwingPlanit = await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await web.GetSwingPlanit(), store, resolver);
+    var testESwing = await EventFilter.FilterESwingItEventsByDateRange(await web.GetESwing(), store, resolver, opzioni.Radius);
+    var testSwingPlanit = await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await web.GetSwingPlanit(), store, resolver, opzioni.Radius);
 
     void Report(string fonte, List<Event> eventi)
     {
@@ -49,13 +53,11 @@ if (Convert.ToBoolean(ConfigurationManager.AppSettings["TestImmagini"]) || args.
     return;
 }
 
-bool enableImportingOnDB = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableImportingOnDB"]);
-bool enableImportingOnExcel = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableImportingOnExcel"]);
-bool enableSearching = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSearching"]);
-bool enableSending = Convert.ToBoolean(ConfigurationManager.AppSettings["EnableSending"]);
-bool resetDb = Convert.ToBoolean(ConfigurationManager.AppSettings["ResetDb"]);
-//bool clearExcel = Convert.ToBoolean(ConfigurationManager.AppSettings["ClearExcel"]); // flag non più usato
-//string databaseUrl = ConfigurationManager.AppSettings["DatabaseUrl"];
+bool enableImportingOnDB = opzioni.EnableImportingOnDB;
+bool enableImportingOnExcel = opzioni.EnableImportingOnExcel;
+bool enableSearching = opzioni.EnableSearching;
+bool enableSending = opzioni.EnableSending;
+bool resetDb = opzioni.ResetDb;
 //var firebaseDbService = new FirebaseDbService(databaseUrl);
 var appWriteService = new AppWriteService();
 
@@ -83,18 +85,17 @@ await resolver.GeocodePendingAsync();
 // 4. coordinate migliori del JSON -> eventi dello sheet (in memoria sempre, sullo sheet solo se abilitato)
 var aggiornati = store.ApplyToSheetEvents(sheetEvents);
 Console.WriteLine($"Eventi dello sheet con coordinate aggiornate: {aggiornati.Count}");
-bool updateSheetCoordinates = Convert.ToBoolean(ConfigurationManager.AppSettings["UpdateSheetCoordinates"]);
-if (updateSheetCoordinates && aggiornati.Count > 0)
+if (opzioni.UpdateSheetCoordinates && aggiornati.Count > 0)
     await ImportData.UpdateSheetCoordinatesAsync(aggiornati);
 
 try
 {
     if (enableSearching)
     {
-        eventsMerge.AddRange(await EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing(), store, resolver));
+        eventsMerge.AddRange(await EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing(), store, resolver, opzioni.Radius));
 
         var undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
-        eventsMerge.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await importDataFromWeb.GetSwingPlanit(), store, resolver));
+        eventsMerge.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await importDataFromWeb.GetSwingPlanit(), store, resolver, opzioni.Radius));
         undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
 
 
@@ -127,11 +128,11 @@ if (enableImportingOnExcel && eventsMergeUfficial.Count() != eventsMerge.Count()
 
 if (enableSending)
 {
-    var eventiEmail = eventsMerge.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"]))).ToList();
+    var eventiEmail = eventsMerge.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni)).ToList();
 
     // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
-    var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail);
-    await EmailSender.SendWithMailjetAnonymous(eventiSwing, daVerificare);
+    var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail, settings.Gemini);
+    await EmailSender.SendWithMailjetAnonymous(eventiSwing, settings, daVerificare);
 }
 
 if (resetDb)
