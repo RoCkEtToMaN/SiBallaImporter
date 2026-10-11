@@ -112,6 +112,7 @@ jobs:
           Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
           Import__ResetDb: "false"
           Import__TestImmagini: "false"
+          Import__TestSwing: "false"
           # file di dati nella stessa cartella che le cache salvano e ripristinano
           Paths__DataDirectory: ${{ env.OUT }}
         run: dotnet SiBallaImportingData.dll
