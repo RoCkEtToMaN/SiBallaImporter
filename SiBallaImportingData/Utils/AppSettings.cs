@@ -24,6 +24,7 @@ namespace SiBallaImportingData.Utils
             ["--reset-db"] = "Import:ResetDb",
             ["--test-immagini"] = "Import:TestImmagini",
             ["--test-swing"] = "Import:TestSwing",
+            ["--test-indirizzi"] = "Import:TestIndirizzi",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
         };
@@ -70,7 +71,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  EnableImportingOnDB = {Import.EnableImportingOnDB}");
             Console.WriteLine($"  UpdateSheetCoordinates = {Import.UpdateSheetCoordinates}");
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
-            Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}");
+            Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
@@ -90,6 +91,9 @@ namespace SiBallaImportingData.Utils
         public bool TestImmagini { get; set; }
         // classifica con Gemini gli eventi dei prossimi Giorni e stampa le liste, senza email/foglio/DB
         public bool TestSwing { get; set; }
+        // cerca con Gemini il locale degli eventi dello sheet senza indirizzo e stampa i risultati, senza scrivere nulla
+        public bool TestIndirizzi { get; set; }
+        public int TestIndirizziMax { get; set; } = 10;
         public int Giorni { get; set; } = 7;
         public float Radius { get; set; } = 300;
         public string Centro { get; set; } = "Genova";
@@ -116,5 +120,9 @@ namespace SiBallaImportingData.Utils
         // i Flash "pieni" più recenti sul piano gratuito possono impiegare minuti: il lite risponde in pochi secondi
         public string Model { get; set; } = "gemini-flash-lite-latest";
         public string? ApiKey { get; set; }
+        // ricerca Google per trovare gli indirizzi: sul piano gratuito risponde 429, serve la fatturazione attiva
+        public bool UseGoogleSearch { get; set; }
+        // indirizzi "a memoria" del modello, senza strumenti: gratuito ma può inventare (controllo con Photon comunque)
+        public bool UseModelKnowledge { get; set; }
     }
 }

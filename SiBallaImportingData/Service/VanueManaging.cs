@@ -202,50 +202,6 @@ public class KnownVenueStore
 
         _dirty = true;
     }
-    /// <summary>Carica i luoghi dallo sheet: le righe con indirizzo diventano "verificate" (lo sheet vince sul JSON).</summary>
-    //public int ImportFromSheet(IEnumerable<Event> sheetEvents)
-    //{
-    //    int n = 0;
-    //    foreach (var e in sheetEvents)
-    //    {
-    //        var address = e.EventDetail?.Address;
-    //        if (string.IsNullOrWhiteSpace(address)) continue;       // senza indirizzo: coordinate solo approssimate
-    //        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
-
-    //        var key = MakeKey(e.Organizer, e.City);
-    //        if (!_data.TryGetValue(key, out var org))
-    //        {
-    //            org = new OrganizerVenues { Default = new VenueInfo { Organizer = e.Organizer, City = e.City, Country = e.Country } };
-    //            _data[key] = org;
-    //        }
-
-    //        // primo indirizzo (o stesso indirizzo) -> default; un indirizzo diverso -> eccezione per titolo
-    //        VenueInfo target;
-    //        if (string.IsNullOrWhiteSpace(org.Default.Address) || Norm(org.Default.Address) == Norm(address))
-    //            target = org.Default;
-    //        else
-    //        {
-    //            var t = NormalizeTitle(e.PartyName);
-    //            if (t.Length == 0) continue;
-    //            if (!org.Events.TryGetValue(t, out target!)) org.Events[t] = target = new VenueInfo();
-    //        }
-
-    //        var addressChanged = target.Address is not null && Norm(target.Address) != Norm(address);
-    //        target.Address = address;
-    //        target.Verified = true;
-    //        target.Source = "sheet";
-
-    //        if (e.EventDetail!.Latitude is double la && e.EventDetail.Longitude is double lo)
-    //        { target.Lat = la; target.Lng = lo; }
-    //        else if (addressChanged)
-    //        { target.Lat = null; target.Lng = null; }                // indirizzo cambiato: da geocodificare di nuovo
-
-    //        _dirty = true;
-    //        n++;
-    //    }
-    //    return n;
-    //}
-
     /// <summary>Eventi non verificati con un indirizzo non ancora geocodificato (nuovo o cambiato).
     /// Il default (indirizzo della scuola) non viene geocodificato.</summary>
     public List<(OrganizerVenues Org, VenueInfo Venue)> PendingGeocode() =>
@@ -294,57 +250,6 @@ public class KnownVenueStore
         }
         return changed;
     }
-    /// <summary>Luoghi verificati con indirizzo ma senza coordinate: da geocodificare.</summary>
-    //public List<(OrganizerVenues Org, VenueInfo Venue)> PendingGeocode() =>
-    //    _data.Values
-    //        .SelectMany(o => new[] { o.Default }.Concat(o.Events.Values).Select(v => (o, v)))
-    //        .Where(x => x.v.Verified && !HasCoords(x.v) && !string.IsNullOrWhiteSpace(x.v.Address))
-    //        .ToList();
-
-    //public void SetCoords(VenueInfo v, double lat, double lng, string source)
-    //{
-    //    v.Lat = lat; v.Lng = lng; v.Source = source;
-    //    _dirty = true;
-    //}
-    // ---------- Aggiornamento ----------
-
-    /// <summary>
-    /// Registra un luogo trovato automaticamente (Photon, AI...) come NON verificato.
-    /// Non sovrascrive mai un record già verificato.
-    /// </summary>
-    public void RegisterFound(string? organizer, string? city, string? country, string? title,
-                          double lat, double lng, string source,
-                          string? venueName = null, string? address = null)
-    {
-        if (string.IsNullOrWhiteSpace(organizer) || string.IsNullOrWhiteSpace(city)) return;
-
-        var key = MakeKey(organizer, city);
-        if (!_data.TryGetValue(key, out var org))
-        {
-            org = new OrganizerVenues
-            {
-                Default = new VenueInfo { Organizer = organizer, City = city, Country = country }
-            };
-            _data[key] = org;
-        }
-
-        var target = org.Default;
-        var t = NormalizeTitle(title);
-        if (t.Length > 0 && org.Events.TryGetValue(t, out var ev)) target = ev;
-
-        if (target.Verified) return;
-
-        target.Lat = lat;
-        target.Lng = lng;
-        target.Source = source;
-        target.VenueName ??= venueName;
-        target.Address ??= address;
-        _dirty = true;
-    }
-
-    public void RegisterFound(Event e, double lat, double lng, string source,
-                              string? venueName = null, string? address = null)
-        => RegisterFound(e.Organizer, e.City, e.Country, e.PartyName, lat, lng, source, venueName, address);
 
     // ---------- Applicazione a un Event ----------
 

@@ -95,15 +95,23 @@ public class AddressResolver
             var city = v.City ?? org.Default.City;
             var country = v.Country ?? org.Default.Country;
             var address = v.Address!.Replace("·", ",").Trim();
-            var center = OfflineGeocoder.GetCoordinates(city, country);
-            var maxKm = center == (0.0, 0.0) ? double.MaxValue : 10;
 
-            var hit = await _geo.FindAsync($"{address}, {city}, {country}", center, maxKm, ct);
-            await Task.Delay(1100, ct);
-
+            var hit = await GeocodeAsync(address, city, country, ct);
             if (hit is null) { Console.WriteLine($"[sheet] indirizzo non trovato: {address}, {city}"); continue; }
             Console.WriteLine($"[sheet] Photon OK: {address}, {city} -> {hit.Value.Lat}, {hit.Value.Lng}");
             _store.SetCoords(v, hit.Value.Lat, hit.Value.Lng, "sheet+photon");
         }
+    }
+
+    /// <summary>Photon con controllo di distanza (10 km dal centro città). Non salva nulla nel JSON.</summary>
+    public async Task<(double Lat, double Lng)?> GeocodeAsync(string address, string? city, string? country, CancellationToken ct = default)
+    {
+        var center = OfflineGeocoder.GetCoordinates(city, country);
+        var maxKm = center == (0.0, 0.0) ? double.MaxValue : 10;
+
+        var hit = await _geo.FindAsync($"{address}, {city}, {country}", center, maxKm, ct);
+        await Task.Delay(1100, ct);                                  // Photon pubblico: una richiesta al secondo
+
+        return hit is null ? null : (hit.Value.Lat, hit.Value.Lng);
     }
 }

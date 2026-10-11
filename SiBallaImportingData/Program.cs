@@ -99,6 +99,59 @@ var daCompilare = sheetEvents
     .Where(e => string.IsNullOrWhiteSpace(e.EventDetail?.Address))
     .Where(e => store.Find(e) is null)
     .ToList();
+
+// TEST: cerca con Gemini il locale degli eventi da compilare e lo verifica con Photon, senza scrivere su JSON/foglio/DB
+// (Import:TestIndirizzi in appsettings.json, oppure dotnet run -- --test-indirizzi)
+if (opzioni.TestIndirizzi)
+{
+    var campione = daCompilare
+        .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
+        .GroupBy(e => KnownVenueStore.MakeKey(e.Organizer!, e.City!) + "|" + KnownVenueStore.NormalizeTitle(e.PartyName))
+        .Select(g => g.OrderBy(e => e.DateStart).First())
+        .Where(e => settings.Gemini.UseGoogleSearch || !string.IsNullOrWhiteSpace(e.EventDetail?.WebSite))   // senza ricerca Google serve il sito
+        .OrderBy(e => e.DateStart)
+        .Take(opzioni.TestIndirizziMax)
+        .ToList();
+
+    Console.WriteLine($"\n===== Ricerca indirizzi con Gemini: {campione.Count} eventi (su {daCompilare.Count} da compilare) =====");
+    int trovati = 0, confermati = 0;
+    foreach (var ev in campione)
+    {
+        Console.WriteLine($"\n🔎 {ev.DateStart:yyyy-MM-dd} {ev.City} | {ev.Organizer?.Trim()} | {ev.PartyName?.Trim()}");
+        try
+        {
+            var r = await VenueAddressFinder.FindAsync(ev, settings.Gemini);
+            if (r is null || !r.Found)
+            {
+                Console.WriteLine($"   ❌ Gemini: non trovato{(r?.Motivo is null ? "" : " - " + r.Motivo)}");
+            }
+            else
+            {
+                trovati++;
+                Console.WriteLine($"   🤖 {r.VenueName}, {r.Address}, {r.City} (confidenza {r.Confidence})");
+                Console.WriteLine($"      fonte: {r.SourceUrl} - {r.Motivo}");
+
+                var coords = await resolver.GeocodeAsync(r.Address!, r.City ?? ev.City, ev.Country);
+                if (coords is null)
+                    Console.WriteLine("   ⚠️ Photon: indirizzo non trovato entro 10 km dalla città");
+                else
+                {
+                    confermati++;
+                    Console.WriteLine($"   ✅ Photon: {coords.Value.Lat:F7}, {coords.Value.Lng:F7}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"   ❗ errore: {ex.Message}");
+        }
+
+        await Task.Delay(4000);   // piano gratuito: poche richieste al minuto
+    }
+
+    Console.WriteLine($"\n===== Gemini ha trovato {trovati}/{campione.Count}, confermati da Photon {confermati} =====");
+    return;
+}
 Console.WriteLine($"Voci da compilare aggiunte: {store.AddPlaceholders(daCompilare)}");
 
 // 3. voci verificate con indirizzo ma senza coordinate -> Photon
