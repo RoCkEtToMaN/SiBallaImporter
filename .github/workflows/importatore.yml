@@ -18,7 +18,8 @@ name: Importatore eventi
 
 on:
   schedule:
-    - cron: "0 6 * * 1" # ogni lunedì alle 06:00 UTC (08:00 ora legale italiana)
+    # GitHub usa solo UTC: domenica 23:00 UTC = mezzanotte italiana con l'ora solare, 01:00 con l'ora legale
+    - cron: "0 23 * * 0"
   workflow_dispatch:
     inputs:
       enable_sending:
@@ -54,6 +55,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
+      # il programma calcola il bollettino da DateTime.Today: il giorno deve essere quello italiano, non UTC
+      TZ: Europe/Rome
       PROJECT: SiBallaImportingData/SiBallaImportingData.csproj
       OUT: ${{ github.workspace }}/out
       DATA_FILES: |
