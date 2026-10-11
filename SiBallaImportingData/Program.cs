@@ -7,7 +7,12 @@ using SiBallaImportingData.Model;
 using SiBallaImportingData.Service;
 using SiBallaImportingData.Utils;
 using System.Drawing;
+using System.Globalization;
 using System.Text.Json;
+
+// date e numeri dello Sheet sono in formato italiano (15/10/2026): stessa cultura su Windows, Mac e runner Linux
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("it-IT");
+CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = new CultureInfo("it-IT");
 
 //using Bitmap bmp = new Bitmap(@"Resources\iconWhityLH.png");
 //IntPtr hIcon = bmp.GetHicon();
