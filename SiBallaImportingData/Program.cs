@@ -72,6 +72,7 @@ if (opzioni.TestSwing)
 
     Console.WriteLine($"\n===== Da verificare: {altri.Count}/{daClassificare.Count} =====");
     foreach (var (ev, motivo) in altri.OrderBy(x => x.Evento.DateStart))
+        
         Console.WriteLine($"❓ {ev.DateStart:yyyy-MM-dd} {ev.City}: {ev.PartyName?.Trim()} -> {motivo}");
     return;
 }
