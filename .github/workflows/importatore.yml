@@ -11,6 +11,8 @@
 #
 # Il programma legge la configurazione a strati (appsettings.json -> variabili d'ambiente -> riga di comando):
 # qui le impostazioni e le chiavi arrivano come variabili d'ambiente Sezione__Chiave (es. Import__EnableSending).
+# Valore usato: input del lancio manuale, altrimenti la Variable, altrimenti il default scritto qui sotto.
+# I valori effettivi sono stampati all'avvio nel log dello step "Esegui importatore".
 
 name: Importatore eventi
 
