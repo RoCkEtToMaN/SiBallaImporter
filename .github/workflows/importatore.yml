@@ -1,0 +1,135 @@
+# Batch dell'importatore eventi.
+#
+# Secrets richiesti (Settings > Secrets and variables > Actions > Secrets):
+#   MAILJET_API_KEY, MAILJET_API_SECRET  -> invio email
+#   GOOGLE_SERVICE_ACCOUNT_JSON          -> contenuto del JSON del service account per Google Sheets
+#   GEMINI_API_KEY                       -> controllo finale degli eventi con l'AI
+#
+# Variables opzionali (stessa pagina, tab Variables) per cambiare il comportamento
+# dell'esecuzione pianificata senza toccare questo file:
+#   ENABLE_SENDING, ENABLE_IMPORTING_ON_EXCEL, ENABLE_IMPORTING_ON_DB, UPDATE_SHEET_COORDINATES, GIORNI
+#
+# Il programma legge la configurazione a strati (appsettings.json -> variabili d'ambiente -> riga di comando):
+# qui le impostazioni e le chiavi arrivano come variabili d'ambiente Sezione__Chiave (es. Import__EnableSending).
+
+name: Importatore eventi
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # ogni lunedì alle 06:00 UTC (08:00 ora legale italiana)
+  workflow_dispatch:
+    inputs:
+      enable_sending:
+        description: Invia l'email con gli eventi
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+      enable_importing_on_excel:
+        description: Aggiunge i nuovi eventi al Google Sheet
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+      enable_importing_on_db:
+        description: Carica gli eventi dello Sheet su Appwrite
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+      update_sheet_coordinates:
+        description: Riscrive sullo Sheet le coordinate trovate
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+      giorni:
+        description: Giorni coperti dall'email
+        default: "7"
+
+concurrency:
+  group: importatore
+  cancel-in-progress: false
+
+jobs:
+  importa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PROJECT: SiBallaImportingData/SiBallaImportingData.csproj
+      OUT: ${{ github.workspace }}/out
+      DATA_FILES: |
+        out/DizionarioEventiInfo.json
+        out/venues.json
+        out/custom_locations.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Service account Google
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        shell: pwsh
+        run: |
+          if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) { throw "Secret GOOGLE_SERVICE_ACCOUNT_JSON mancante" }
+          # il JSON viene incorporato come EmbeddedResource in fase di build
+          Set-Content -Path SiBallaImportingData/Resources/siballa-8c6d48649c13.json -Value $env:GOOGLE_SERVICE_ACCOUNT_JSON -Encoding utf8NoBOM
+
+      - name: Build
+        run: dotnet publish "$PROJECT" -c Release -o "$OUT"
+
+      # i file GeoNames (~150 MB) vengono scaricati dall'app solo se mancano
+      - name: Cache dati GeoNames
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/allCountries.txt
+            out/cities15000.txt
+          key: geonames-v1
+
+      # dizionario dei luoghi: viene aggiornato a ogni giro, quindi una cache nuova per ogni run
+      - name: Ripristina dizionario luoghi
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.DATA_FILES }}
+          key: luoghi-${{ github.run_id }}
+          restore-keys: luoghi-
+
+      - name: Esegui importatore
+        working-directory: out
+        env:
+          # chiavi
+          Email__MailjetApiKey: ${{ secrets.MAILJET_API_KEY }}
+          Email__MailjetApiSecret: ${{ secrets.MAILJET_API_SECRET }}
+          Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
+          # impostazioni (sovrascrivono appsettings.json)
+          Import__EnableSearching: "true"
+          Import__EnableSending: ${{ inputs.enable_sending || vars.ENABLE_SENDING || 'true' }}
+          Import__EnableImportingOnExcel: ${{ inputs.enable_importing_on_excel || vars.ENABLE_IMPORTING_ON_EXCEL || 'false' }}
+          Import__EnableImportingOnDB: ${{ inputs.enable_importing_on_db || vars.ENABLE_IMPORTING_ON_DB || 'false' }}
+          Import__UpdateSheetCoordinates: ${{ inputs.update_sheet_coordinates || vars.UPDATE_SHEET_COORDINATES || 'false' }}
+          Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
+          Import__ResetDb: "false"
+          Import__TestImmagini: "false"
+          # file di dati nella stessa cartella che le cache salvano e ripristinano
+          Paths__DataDirectory: ${{ env.OUT }}
+        run: dotnet SiBallaImportingData.dll
+
+      - name: Salva dizionario luoghi
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.DATA_FILES }}
+          key: luoghi-${{ github.run_id }}
+
+      - name: Allega file prodotti
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: importatore-${{ github.run_number }}
+          path: |
+            out/*.json
+            !out/*.deps.json
+            !out/*.runtimeconfig.json
+            !out/siballa-*.json
+          if-no-files-found: ignore
+          retention-days: 30
