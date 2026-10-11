@@ -14,13 +14,6 @@ using System.Text.Json;
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("it-IT");
 CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = new CultureInfo("it-IT");
 
-//using Bitmap bmp = new Bitmap(@"Resources\iconWhityLH.png");
-//IntPtr hIcon = bmp.GetHicon();
-//using Icon icon = Icon.FromHandle(hIcon);
-//using var stream = File.Create(@"Resources\icona.ico");
-
-//icon.Save(stream);
-
 // configurazione: appsettings.json -> user-secrets -> variabili d'ambiente -> riga di comando
 var settings = AppSettings.Load(args);
 DataPaths.Initialize(settings.Paths.DataDirectory);
