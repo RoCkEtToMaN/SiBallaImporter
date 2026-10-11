@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#E9B44C"/>
+  <circle cx="128" cy="128" r="98" fill="#F6D58E"/>
+  <g fill="#1F1A17" stroke="#1F1A17" stroke-linecap="round" stroke-linejoin="round">
+    <!-- LUI: fedora inclinato -->
+    <g transform="rotate(-12 70 56)">
+      <ellipse cx="70" cy="57" rx="21" ry="4.5" stroke="none"/>
+      <path d="M58 57 C57 41 83 40 82 57 Z" stroke="none"/>
+    </g>
+    <circle cx="72" cy="68" r="11.5" stroke="none"/>
+    <path d="M70 76 L76 86" fill="none" stroke-width="9"/>
+    <!-- giacca: spalle larghe, vita stretta, inclinata indietro -->
+    <path d="M56 86 C64 80 84 80 94 86 L96 120 C96 132 94 140 92 144 L70 144 C68 132 64 110 56 86 Z" stroke-width="3"/>
+    <!-- braccia -->
+    <path d="M90 92 L108 110 L128 113" fill="none" stroke-width="10"/>
+    <path d="M60 92 L46 112 L36 96" fill="none" stroke-width="9"/>
+    <!-- pantaloni larghi, ginocchia piegate -->
+    <path d="M70 140 L90 140 L76 182 L64 214 L48 214 L58 180 Z" stroke-width="4"/>
+    <path d="M78 140 L96 138 L118 172 L112 214 L98 214 L102 176 Z" stroke-width="4"/>
+    <path d="M40 216 L64 216" fill="none" stroke-width="8"/>
+    <path d="M98 216 L122 216" fill="none" stroke-width="8"/>
+    <!-- LEI: testa e capelli raccolti -->
+    <circle cx="186" cy="72" r="10.5" stroke="none"/>
+    <circle cx="195" cy="63" r="7.5" stroke="none"/>
+    <circle cx="193" cy="79" r="6.5" stroke="none"/>
+    <path d="M182 80 L178 88" fill="none" stroke-width="7"/>
+    <!-- busto con vita stretta -->
+    <path d="M168 88 C174 84 186 84 192 90 L184 112 L186 126 L172 126 L174 112 Z" stroke-width="3"/>
+    <!-- braccia -->
+    <path d="M172 94 L150 108 L128 113" fill="none" stroke-width="8"/>
+    <path d="M188 94 L206 82 L218 60" fill="none" stroke-width="7"/>
+    <!-- gonna che ruota -->
+    <path d="M170 122 L188 122 C202 138 220 150 236 158 C226 164 220 172 210 168 C202 176 194 172 186 178 C178 174 168 182 160 176 C152 178 146 176 140 172 C152 158 162 142 170 122 Z" stroke-width="2"/>
+    <!-- gambe -->
+    <path d="M172 172 L164 192 L168 212" fill="none" stroke-width="7.5"/>
+    <path d="M196 170 L214 188 L232 194" fill="none" stroke-width="7.5"/>
+    <path d="M160 214 L174 214" fill="none" stroke-width="6"/>
+  </g>
+</svg>

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64</Platforms>
-	<ApplicationIcon>Resources\iconWhityLH.ico</ApplicationIcon>
+	<ApplicationIcon>Resources\iconLindyHop.ico</ApplicationIcon>
     <!-- chiavi segrete in locale: dotnet user-secrets set "Email:MailjetApiKey" "..." -->
     <UserSecretsId>siballa-importingdata</UserSecretsId>
 <!-- 	<RuntimeIdentifier>osx-x64</RuntimeIdentifier>
@@ -38,9 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\iconWhityLH.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
