@@ -18,10 +18,11 @@ name: Importatore eventi
 
 on:
   schedule:
-    # GitHub usa solo UTC: lunedì 02:17 UTC = 03:17 italiane con l'ora solare, 04:17 con l'ora legale.
-    # I cron possono partire in ritardo (anche ore): c'è margine per avere l'email entro le 6:30.
-    # Minuto non tondo perché a :00 GitHub è più carico e ritarda di più.
-    - cron: "17 2 * * 1"
+    # Lunedì alle 6:37 italiane tutto l'anno. GitHub usa solo UTC, quindi due cron:
+    # 04:37 UTC vale con l'ora legale, 05:37 UTC con l'ora solare; il job "orario" fa girare solo quello giusto.
+    # Minuto non tondo perché a :00/:30 GitHub è più carico e i cron partono più in ritardo.
+    - cron: "37 4 * * 1"
+    - cron: "37 5 * * 1"
   workflow_dispatch:
     inputs:
       enable_sending:
@@ -53,7 +54,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # sceglie il cron in base all'ora italiana in vigore (non all'ora di partenza, così un ritardo di GitHub non conta)
+  orario:
+    runs-on: ubuntu-latest
+    outputs:
+      esegui: ${{ steps.verifica.outputs.esegui }}
+    steps:
+      - id: verifica
+        env:
+          CRON: ${{ github.event.schedule }}
+        run: |
+          esegui=true
+          if [ -n "$CRON" ]; then
+            if [ "$(TZ=Europe/Rome date +%z)" = "+0200" ]; then giusto="37 4 * * 1"; else giusto="37 5 * * 1"; fi
+            [ "$CRON" = "$giusto" ] || esegui=false
+          fi
+          echo "cron: ${CRON:-avvio manuale}, esegui: $esegui"
+          echo "esegui=$esegui" >> "$GITHUB_OUTPUT"
+
   importa:
+    needs: orario
+    if: needs.orario.outputs.esegui == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
