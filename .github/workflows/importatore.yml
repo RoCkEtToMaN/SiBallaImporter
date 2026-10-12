@@ -18,8 +18,10 @@ name: Importatore eventi
 
 on:
   schedule:
-    # GitHub usa solo UTC: domenica 23:00 UTC = mezzanotte italiana con l'ora solare, 01:00 con l'ora legale
-    - cron: "0 23 * * 0"
+    # GitHub usa solo UTC: lunedì 02:17 UTC = 03:17 italiane con l'ora solare, 04:17 con l'ora legale.
+    # I cron possono partire in ritardo (anche ore): c'è margine per avere l'email entro le 6:30.
+    # Minuto non tondo perché a :00 GitHub è più carico e ritarda di più.
+    - cron: "17 2 * * 1"
   workflow_dispatch:
     inputs:
       enable_sending:
