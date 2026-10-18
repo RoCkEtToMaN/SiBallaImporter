@@ -200,7 +200,7 @@ var countExcel = eventFromExcel[TipoEvento.Serate].Count() + eventFromExcel[Tipo
 
 // eventsMergeUfficial = eventi trovati online e non ancora presenti nello Sheet
 if (enableImportingOnExcel && eventsMergeUfficial.Count > 0)
-    await ImportData.PrepareToAppendToGoogleSheet(eventsMergeUfficial.OrderBy(x => x.DateStart).ToList(), eventFromExcel);
+    await ImportData.PrepareToAppendToGoogleSheet([.. eventsMergeUfficial.OrderBy(x => x.DateStart)], eventFromExcel);
 
 if (enableSending)
 {
