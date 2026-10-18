@@ -142,14 +142,18 @@ namespace SiBallaImportingData.Utils
                             Console.WriteLine($"🖼️ Immagine trovata: {e.PartyName} -> {imageUrl}");
                     }
 
+                    // il parser di SwingPlanit salva città e nazione solo in EventDetail ("Town:" / "Country:")
+                    var city = string.IsNullOrWhiteSpace(e.City) ? e.EventDetail.City : e.City;
+                    var country = string.IsNullOrWhiteSpace(e.Country) ? e.EventDetail.Country : e.Country;
+
                     var newEvent = new Event
                     {
                         DateStart = e.DateStart,
                         DateFinish = e.DateFinish,
-                        Duration = e.Duration,
-                        City = e.City,
-                        Country = e.Country,
-                        Organizer = e.EventDetail.Description,
+                        Duration = e.DateFinish != null ? end - e.DateStart : e.Duration,
+                        City = city,
+                        Country = country,
+                        Organizer = e.Organizer, // SwingPlanit non indica l'organizzatore; la descrizione resta in EventDetail.Description
                         PartyName = e.PartyName,
                         NameAndData = e.DateFinish != null ? $"{e.PartyName} - {e.DateStart.ToShortDateString()} to {end.ToShortDateString()}" :
                             $"{e.PartyName} - {e.DateStart.ToShortDateString()}",
@@ -157,8 +161,8 @@ namespace SiBallaImportingData.Utils
                         EventDetail = new EventDetail()
                         {
                             WebSite = e.EventDetail.WebSite?.Split(';')[0],
-                            City = e.City,
-                            Country = e.Country,
+                            City = city,
+                            Country = country,
                             Location = e.EventDetail.Location,      // NUOVO
                             Longitude = e.EventDetail.Longitude,
                             Latitude = e.EventDetail.Latitude,
