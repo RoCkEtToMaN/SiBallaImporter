@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64</Platforms>
-	<ApplicationIcon>Resources\iconLindyHop.ico</ApplicationIcon>
+	<ApplicationIcon>Resources\iconLindyHopDipinto.ico</ApplicationIcon>
     <!-- chiavi segrete in locale: dotnet user-secrets set "Email:MailjetApiKey" "..." -->
     <UserSecretsId>siballa-importingdata</UserSecretsId>
 <!-- 	<RuntimeIdentifier>osx-x64</RuntimeIdentifier>
