@@ -7,7 +7,7 @@ namespace SiBallaImportingData.Utils
 {
     public static class EmailSender
     {
-        public static async Task SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null)
+        public static async Task SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
         {
             try
             {
@@ -49,8 +49,8 @@ namespace SiBallaImportingData.Utils
                                 .Select(email => new { Email = email }).ToArray(),
                             Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
                                 $"{DateTime.Today.AddDays(settings.Import.Giorni).ToString("dd/MM/yyyy")}",
-                            TextPart = TextEmail(eventi, settings.Import, daVerificare),
-                            HTMLPart = TextEmail(eventi, settings.Import, daVerificare)
+                            TextPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare),
+                            HTMLPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare)
                         }
                     }
                 };
@@ -98,7 +98,7 @@ namespace SiBallaImportingData.Utils
             }
 
         }
-        private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null)
+        private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
         {
             string text = $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
                           $"{DateTime.Now} - {DateTime.Today.AddDays(opzioni.Giorni)} ,<br>" +
@@ -132,6 +132,15 @@ namespace SiBallaImportingData.Utils
 
                 foreach (var (ev, motivo) in daVerificare.OrderBy(x => x.Evento.DateStart))
                     text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.City}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{motivo}</i><br>";
+            }
+
+            // eventi di cui non si sa la città: non so se sono dentro il raggio, li segnalo invece di perderli
+            if (luogoDaVerificare != null && luogoDaVerificare.Count > 0)
+            {
+                text += $"<br><br>*Luogo da verificare (città sconosciuta)*📍:<br>";
+
+                foreach (var ev in luogoDaVerificare.OrderBy(x => x.DateStart))
+                    text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.Country}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{ev.ProblemaLuogo}</i><br>";
             }
 
             //Togliere la data nel titolo e mettere durata in ore

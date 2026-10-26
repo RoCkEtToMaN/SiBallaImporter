@@ -1,4 +1,5 @@
 ﻿using SiBallaImportingData.Model;
+using SiBallaImportingData.Service;
 using System.Diagnostics.Eventing.Reader;
 
 namespace SiBallaImportingData.Utils
@@ -53,7 +54,7 @@ namespace SiBallaImportingData.Utils
 
             foreach (var e in filteredEvents)
             {            
-                if (CheckEventInsideCircle(e, radiusKm))
+                if (IsInsideCircle(e.Latitude, e.Longitude, e.City, e.Country, radiusKm))
                 {
                     Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);
                     var end = new DateTime();
@@ -101,6 +102,7 @@ namespace SiBallaImportingData.Utils
                     if (store.TryApply(newEvent))
                         Console.WriteLine($"📍 Luogo noto per: {newEvent.PartyName} ({newEvent.City})");
 
+                    MarkLocation(newEvent);
                     Console.WriteLine($"{e.City}  entro {radiusKm} km: {"✅ SÌ"}");
                 }
                 else
@@ -122,7 +124,9 @@ namespace SiBallaImportingData.Utils
 
             foreach (var e in filteredEvents2)
             {
-                if (CheckEventInsideCircle(e, radiusKm))
+                if (IsInsideCircle(e.EventDetail.Latitude, e.EventDetail.Longitude,
+                        string.IsNullOrWhiteSpace(e.City) ? e.EventDetail.City : e.City,
+                        string.IsNullOrWhiteSpace(e.Country) ? e.EventDetail.Country : e.Country, radiusKm))
                 {
                     Console.WriteLine("Data evento e città : " + e.DateStart + ", " + e.City);
                     var end = new DateTime();
@@ -182,6 +186,7 @@ namespace SiBallaImportingData.Utils
                     if (store.TryApply(newEvent))
                         Console.WriteLine($"📍 Luogo noto per: {newEvent.PartyName} ({newEvent.City})");
 
+                    MarkLocation(newEvent);
                     Console.WriteLine($"{e.City}  entro {radiusKm} km: {"✅ SÌ"}");
                 }
                 else
@@ -190,29 +195,49 @@ namespace SiBallaImportingData.Utils
 
             return eventList;
         }
-        private static bool CheckEventInsideCircle(Object e, float raggio_km)
+
+        public static bool HasCity(string? city) =>
+            !string.IsNullOrWhiteSpace(city) && !city.Equals("undefined", StringComparison.OrdinalIgnoreCase);
+
+        private static bool HasCoords(double? lat, double? lng) =>
+            lat is double la && lng is double lo && !(la == 0 && lo == 0);
+
+        /// <summary>
+        /// Coordinate dell'evento, altrimenti centro della città. Se non si sa dove sia l'evento
+        /// lo tengo (true): finisce nell'email come "luogo da verificare" invece di sparire.
+        /// </summary>
+        private static bool IsInsideCircle(double? lat, double? lng, string? city, string? country, float raggio_km)
         {
-
-            
-            if (e is Event)
+            if (!HasCoords(lat, lng))
             {
-                var eEvent = e as Event;
-
-                if (eEvent.EventDetail.Latitude == null || eEvent.EventDetail.Longitude == null)
-                    return false;
-        
-                return (HaversineDistance((float)eEvent.EventDetail.Latitude, (float)eEvent.EventDetail.Longitude) <= raggio_km* 1000f);
+                if (!HasCity(city)) return true;
+                (lat, lng) = OfflineGeocoder.GetCoordinates(city!, country);
+                if (!HasCoords(lat, lng)) return true;
             }
-            else
+
+            return HaversineDistance((float)lat!.Value, (float)lng!.Value) <= raggio_km * 1000f;
+        }
+
+        /// <summary>Senza coordinate precise metto il centro città (per la mappa va sistemato a mano), senza città segno il luogo come sconosciuto.</summary>
+        private static void MarkLocation(Event ev)
+        {
+            var d = ev.EventDetail;
+            if (HasCoords(d.Latitude, d.Longitude)) return;
+
+            if (HasCity(ev.City))
             {
-                var eEvent = e as ESwingIt;
-
-                if (eEvent?.Latitude == null || eEvent?.Longitude == null)
-                    return false;
-
-                return (HaversineDistance((float)eEvent.Latitude, (float)eEvent.Longitude) <= raggio_km * 1000f);
+                var (lat, lng) = OfflineGeocoder.GetCoordinates(ev.City!, ev.Country);
+                if (HasCoords(lat, lng))
+                {
+                    (d.Latitude, d.Longitude) = (lat, lng);
+                    ev.ProblemaLuogo = "coordinate del centro città";
+                    return;
+                }
             }
-            
+
+            ev.LuogoSconosciuto = true;
+            ev.ProblemaLuogo = HasCity(ev.City) ? $"città '{ev.City}' non trovata" : "città sconosciuta";
+            Console.WriteLine($"❓ Luogo da verificare: {ev.PartyName} -> {ev.ProblemaLuogo}");
         }
         private static float HaversineDistance(float lat1, float lon1)
         {

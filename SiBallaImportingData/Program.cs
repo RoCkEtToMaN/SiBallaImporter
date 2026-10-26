@@ -64,9 +64,16 @@ if (opzioni.TestSwing)
     var daClassificare = trovati.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni)).ToList();
     var (swing, altri) = await SwingEventClassifier.ClassifyAsync(daClassificare, settings.Gemini);
 
-    Console.WriteLine($"\n===== Swing: {swing.Count}/{daClassificare.Count} =====");
-    foreach (var ev in swing.OrderBy(x => x.DateStart))
-        Console.WriteLine($"✅ {ev.DateStart:yyyy-MM-dd} {ev.City}: {ev.PartyName?.Trim()}");
+    // stesse sezioni dell'email: bollettino (⚠️ = centro città) e luogo da verificare
+    var bollettino = swing.Where(x => !x.LuogoSconosciuto).ToList();
+    Console.WriteLine($"\n===== Swing: {bollettino.Count}/{daClassificare.Count} =====");
+    foreach (var ev in bollettino.OrderBy(x => x.DateStart))
+        Console.WriteLine($"{(ev.ProblemaLuogo is null ? "✅" : "⚠️")} {ev.DateStart:yyyy-MM-dd} {ev.City}: {ev.PartyName?.Trim()}{(ev.ProblemaLuogo is null ? "" : " -> " + ev.ProblemaLuogo)}");
+
+    var senzaLuogo = swing.Where(x => x.LuogoSconosciuto).ToList();
+    Console.WriteLine($"\n===== Luogo da verificare: {senzaLuogo.Count}/{daClassificare.Count} =====");
+    foreach (var ev in senzaLuogo.OrderBy(x => x.DateStart))
+        Console.WriteLine($"📍 {ev.DateStart:yyyy-MM-dd} {ev.Country}: {ev.PartyName?.Trim()} -> {ev.ProblemaLuogo} ({ev.EventDetail?.WebSite})");
 
     Console.WriteLine($"\n===== Da verificare: {altri.Count}/{daClassificare.Count} =====");
     foreach (var (ev, motivo) in altri.OrderBy(x => x.Evento.DateStart))
@@ -190,7 +197,8 @@ if (eventsMerge.Any(x => x.City == "undefined"))
 
 var eventsMergeUfficial = new List<Event>();
 
-foreach (var eventToCheck in eventsMerge)
+// senza città non vanno nello Sheet (la colonna F vuole "Paese, Città"): li vedi nell'email e li aggiungi tu
+foreach (var eventToCheck in eventsMerge.Where(x => !x.LuogoSconosciuto))
     if (!eventFromExcel[TipoEvento.Serate].Any(x => x.PartyName == eventToCheck.PartyName && x.DateStart.Date == eventToCheck.DateStart.Date) 
         && !eventFromExcel[TipoEvento.Workshop].Any(x => x.PartyName == eventToCheck.PartyName && x.DateStart.Date == eventToCheck.DateStart.Date))
         eventsMergeUfficial.Add(eventToCheck);
@@ -207,7 +215,10 @@ if (enableSending)
 
     // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
     var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail, settings.Gemini);
-    await EmailSender.SendWithMailjetAnonymous(eventiSwing, settings, daVerificare);
+    // senza città non so se sono vicini: sezione a parte invece del bollettino per città
+    await EmailSender.SendWithMailjetAnonymous(
+        eventiSwing.Where(x => !x.LuogoSconosciuto).ToList(), settings, daVerificare,
+        eventiSwing.Where(x => x.LuogoSconosciuto).ToList());
 }
 
 if (resetDb)

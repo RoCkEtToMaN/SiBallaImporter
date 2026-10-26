@@ -10,6 +10,11 @@ namespace SiBallaImportingData.Model
         [JsonIgnore] public string? SheetName { get; set; }
         [JsonIgnore] public int? SheetRow { get; set; }             // numero di riga (1 = prima riga)
         [JsonIgnore] public string? SheetLocationRaw { get; set; }  // contenuto originale della colonna F
+
+        // problema sul luogo trovato durante l'import (es. "coordinate del centro città"): da sistemare prima della mappa
+        [JsonIgnore] public string? ProblemaLuogo { get; set; }
+        // senza città non si sa nemmeno se è dentro il raggio: va nella sezione "Luogo da verificare" dell'email
+        [JsonIgnore] public bool LuogoSconosciuto { get; set; }
         public EventDetail EventDetail { get; set; } 
         public string? PartyName { get; set; }
         public string? WorkshopName { get; set; }
