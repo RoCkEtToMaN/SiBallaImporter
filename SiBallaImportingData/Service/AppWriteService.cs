@@ -77,32 +77,55 @@ public class AppWriteService
         Console.WriteLine("✅ Database resettato con successo!");
     }
 
-    private async Task ClearCollectionAsync(string collectionId)
+    /// <summary>
+    /// Elimina tutti i documenti della collezione. Restituisce false se qualcosa è andato storto
+    /// </summary>
+    public async Task<bool> ClearCollectionAsync(string collectionId)
     {
         try
         {
 #pragma warning disable CS0618
-            // 1. Recupera tutti i documenti presenti nella collezione
-            var response = await Databases.ListDocuments(
-                databaseId: DatabaseId,
-                collectionId: collectionId
-            );
-
-            // 2. Elimina ogni documento tramite il suo ID univoco
-            foreach (var doc in response.Documents)
+            // ListDocuments restituisce al massimo 25 documenti per volta: ripeto finché la collezione è vuota
+            while (true)
             {
-                await Databases.DeleteDocument(
+                // 1. Recupera i documenti presenti nella collezione
+                var response = await Databases.ListDocuments(
                     databaseId: DatabaseId,
-                    collectionId: collectionId,
-                    documentId: doc.Id
+                    collectionId: collectionId
                 );
+
+                if (response.Documents.Count == 0)
+                    return true;
+
+                // 2. Elimina ogni documento tramite il suo ID univoco
+                foreach (var doc in response.Documents)
+                {
+                    await Databases.DeleteDocument(
+                        databaseId: DatabaseId,
+                        collectionId: collectionId,
+                        documentId: doc.Id
+                    );
+                }
             }
 #pragma warning restore CS0618
         }
         catch (AppwriteException ex)
         {
             Console.WriteLine($"❌ Errore durante lo svuotamento di '{collectionId}': {ex.Message}");
+            return false;
         }
+    }
+
+    /// <summary>
+    /// Sostituisce il contenuto della collezione con un unico documento: app e bot leggono sempre una sola copia dello Sheet
+    /// </summary>
+    public async Task<Document?> ReplaceCollectionAsJsonAsync<T>(string collectionId, List<T> itemsList)
+    {
+        // se lo svuotamento fallisce non salvo: meglio i dati vecchi che una seconda copia
+        if (!await ClearCollectionAsync(collectionId))
+            return null;
+
+        return await SaveCollectionAsJsonAsync(collectionId, itemsList);
     }
 
     public async Task<List<Event>> GetEventsAsync(string collectionId)

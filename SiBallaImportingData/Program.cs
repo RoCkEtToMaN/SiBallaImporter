@@ -168,7 +168,6 @@ try
     if (enableSearching)
     {
         eventsMerge.AddRange(await EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing(), store, resolver, opzioni.Radius));
-
         var undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
         eventsMerge.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await importDataFromWeb.GetSwingPlanit(), store, resolver, opzioni.Radius));
         undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
@@ -216,10 +215,7 @@ if (resetDb)
 
 if (enableImportingOnDB)
 {
-    Console.WriteLine("Inizio Importazione");    
-    
-    var eventi = await appWriteService.GetEventsAsync(AppWriteService.SerateCollectionId);
-    var workshop = await appWriteService.GetEventsAsync(AppWriteService.WorkshopsCollectionId);
+    Console.WriteLine("Inizio Importazione");
 
     #region Firebase
     //firebaseDbService.InitializeDb();
@@ -230,10 +226,12 @@ if (enableImportingOnDB)
     #endregion
 
     #region  AppWrite
-    if (eventFromExcel.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0) 
-        await appWriteService.SaveCollectionAsJsonAsync(AppWriteService.SerateCollectionId, serate);
+    // il DB è la copia dello Sheet: sostituisco tutto, così arrivano anche modifiche e cancellazioni.
+    // Con lo Sheet vuoto (lettura fallita) non tocco la collezione per non svuotarla
+    if (eventFromExcel.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
+        await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.SerateCollectionId, serate);
     if (eventFromExcel.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
-        await appWriteService.SaveCollectionAsJsonAsync(AppWriteService.WorkshopsCollectionId, workshops);
+        await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.WorkshopsCollectionId, workshops);
     #endregion
 }
 
