@@ -58,8 +58,10 @@ if (opzioni.TestSwing)
 {
     var web = new ImportDataFromWeb();
     var trovati = new List<Event>();
-    trovati.AddRange(await EventFilter.FilterESwingItEventsByDateRange(await web.GetESwing(), store, resolver, opzioni.Radius));
-    trovati.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await web.GetSwingPlanit(), store, resolver, opzioni.Radius));
+    // solo i prossimi Giorni: e-swing arriva a un anno avanti, e cercare immagini e indirizzi per tutti richiede ore
+    var fine = DateTime.Today.AddDays(opzioni.Giorni + 1);
+    trovati.AddRange(await EventFilter.FilterESwingItEventsByDateRange((await web.GetESwing()).Where(x => x.Start < fine).ToList(), store, resolver, opzioni.Radius));
+    trovati.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync((await web.GetSwingPlanit()).Where(x => x.DateStart < fine).ToList(), store, resolver, opzioni.Radius));
 
     var daClassificare = trovati.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni)).ToList();
     var (swing, altri) = await SwingEventClassifier.ClassifyAsync(daClassificare, settings.Gemini);
