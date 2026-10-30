@@ -161,16 +161,31 @@ if (opzioni.TestIndirizzi)
     Console.WriteLine($"\n===== Gemini ha trovato {trovati}/{campione.Count}, confermati da Photon {confermati} =====");
     return;
 }
-Console.WriteLine($"Voci da compilare aggiunte: {store.AddPlaceholders(daCompilare)}");
-
-// 3. voci verificate con indirizzo ma senza coordinate -> Photon
+// 3. indirizzi nuovi o cambiati -> Photon
 await resolver.GeocodePendingAsync();
 
-// 4. coordinate migliori del JSON -> eventi dello sheet (in memoria sempre, sullo sheet solo se abilitato)
+// 4. luoghi del JSON -> eventi dello sheet: indirizzo copiato dalle altre date dello stesso evento e coordinate di Photon
+//    (in memoria sempre, così vanno sul DB; sullo sheet solo se abilitato, altrimenti è un'anteprima)
 var aggiornati = store.ApplyToSheetEvents(sheetEvents);
-Console.WriteLine($"Eventi dello sheet con coordinate aggiornate: {aggiornati.Count}");
-if (opzioni.UpdateSheetCoordinates && aggiornati.Count > 0)
-    await ImportData.UpdateSheetCoordinatesAsync(aggiornati);
+Console.WriteLine($"\nEventi dello sheet aggiornati dal dizionario: {aggiornati.Count} (indirizzo copiato: {aggiornati.Count(x => x.IndirizzoDalDizionario)})");
+if (aggiornati.Count > 0)
+    await ImportData.UpdateSheetLocationsAsync(aggiornati, write: opzioni.UpdateSheetCoordinates);
+
+// 5. report: eventi futuri che si ripetono e non hanno ancora un indirizzo, i più frequenti prima
+//    (basta scriverlo in una riga e il prossimo giro lo copia sulle altre)
+var ricorrentiSenzaIndirizzo = sheetEvents
+    .Where(e => e.DateStart.Date >= DateTime.Today && string.IsNullOrWhiteSpace(e.EventDetail?.Address))
+    .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
+    .GroupBy(e => KnownVenueStore.MakeKey(e.Organizer!, e.City!) + "|" + KnownVenueStore.NormalizeTitle(e.PartyName))
+    .Where(g => g.Count() > 1)
+    .OrderByDescending(g => g.Count())
+    .ToList();
+Console.WriteLine($"\n===== Eventi ricorrenti senza indirizzo: {ricorrentiSenzaIndirizzo.Count} (coprono {ricorrentiSenzaIndirizzo.Sum(g => g.Count())} date future) =====");
+foreach (var g in ricorrentiSenzaIndirizzo.Take(20))
+{
+    var first = g.OrderBy(e => e.DateStart).First();
+    Console.WriteLine($"  {g.Count(),3} date | {first.SheetName} riga {first.SheetRow} | {first.Organizer?.Trim()} ({first.City}) | {first.PartyName?.Trim()}");
+}
 
 try
 {

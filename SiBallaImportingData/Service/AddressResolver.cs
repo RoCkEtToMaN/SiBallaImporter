@@ -97,10 +97,27 @@ public class AddressResolver
             var address = v.Address!.Replace("·", ",").Trim();
 
             var hit = await GeocodeAsync(address, city, country, ct);
-            if (hit is null) { Console.WriteLine($"[sheet] indirizzo non trovato: {address}, {city}"); continue; }
+            if (hit is null) { Console.WriteLine($"[sheet] ⚠️ Photon non trova l'indirizzo, restano le coordinate dello sheet: {address}, {city}"); continue; }
+
+            // coordinate dello sheet vicine a quelle di Photon: probabilmente prese a mano, più precise
+            if (v.Lat is double la && v.Lng is double lo && DistanceKm(la, lo, hit.Value.Lat, hit.Value.Lng) < 0.3)
+            {
+                Console.WriteLine($"[sheet] Photon conferma le coordinate dello sheet: {address}, {city}");
+                _store.SetCoords(v, la, lo, "sheet");
+                continue;
+            }
+
             Console.WriteLine($"[sheet] Photon OK: {address}, {city} -> {hit.Value.Lat}, {hit.Value.Lng}");
             _store.SetCoords(v, hit.Value.Lat, hit.Value.Lng, "sheet+photon");
         }
+    }
+
+    private static double DistanceKm(double lat1, double lng1, double lat2, double lng2)
+    {
+        static double Rad(double x) => x * Math.PI / 180;
+        var h = Math.Pow(Math.Sin(Rad(lat2 - lat1) / 2), 2)
+              + Math.Cos(Rad(lat1)) * Math.Cos(Rad(lat2)) * Math.Pow(Math.Sin(Rad(lng2 - lng1) / 2), 2);
+        return 6371 * 2 * Math.Asin(Math.Sqrt(h));
     }
 
     /// <summary>Photon con controllo di distanza (10 km dal centro città). Non salva nulla nel JSON.</summary>

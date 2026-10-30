@@ -1,4 +1,5 @@
 ﻿using SiBallaImportingData.Model;
+using SiBallaImportingData.Utils;
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -56,7 +57,33 @@ public class KnownVenueStore
 
         var json = File.ReadAllText(path, Encoding.UTF8);
         var data = JsonSerializer.Deserialize<Dictionary<string, OrganizerVenues>>(json, JsonOpts) ?? new();
-        return new KnownVenueStore(path, data);
+        var store = new KnownVenueStore(path, data);
+        store.RemovePlaceholders();
+        return store;
+    }
+
+    /// <summary>Toglie le vecchie voci "da compilare" senza indirizzo né coordinate: la lista delle cose da fare ora è il report.</summary>
+    private void RemovePlaceholders()
+    {
+        static bool Empty(VenueInfo v) => !v.Verified && string.IsNullOrWhiteSpace(v.Address) && v.Lat is null;
+
+        int removed = 0;
+        foreach (var (key, org) in _data.ToList())
+        {
+            foreach (var t in org.Events.Where(x => Empty(x.Value)).Select(x => x.Key).ToList())
+            {
+                org.Events.Remove(t);
+                removed++;
+            }
+            if (org.Default.Notes?.StartsWith("da compilare") == true) org.Default.Notes = null;
+            if (Empty(org.Default) && org.Events.Count == 0) { _data.Remove(key); removed++; }
+        }
+
+        if (removed > 0)
+        {
+            _dirty = true;
+            Console.WriteLine($"[store] tolte {removed} voci 'da compilare' vuote");
+        }
     }
 
     public void Save()
@@ -69,58 +96,6 @@ public class KnownVenueStore
         File.Move(tmp, _path, overwrite: true);
         _dirty = false;
         Console.WriteLine($"[store] Salvato in {_path}");
-    }
-
-    public int AddPlaceholders(IEnumerable<Event> events)
-    {
-        int added = 0;
-
-        var groups = events
-            .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
-            .GroupBy(e => MakeKey(e.Organizer!, e.City!));
-
-        foreach (var g in groups)
-        {
-            var first = g.First();
-            var site = g.Select(e => e.EventDetail?.WebSite).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
-            var note = string.IsNullOrWhiteSpace(site) ? "da compilare" : $"da compilare - sito: {site}";
-
-            if (!_data.TryGetValue(g.Key, out var org))
-            {
-                org = new OrganizerVenues
-                {
-                    Default = new VenueInfo
-                    {
-                        Organizer = first.Organizer,
-                        City = first.City,
-                        Country = first.Country,
-                        EventCount = g.Count(),
-                        Notes = note
-                    }
-                };
-                _data[g.Key] = org;
-                added++; _dirty = true;
-            }
-
-            if (org.Default.Verified) continue;           // luogo già confermato
-
-            // più titoli diversi: una voce da compilare per ciascuno
-            var byTitle = g.GroupBy(e => NormalizeTitle(e.PartyName)).Where(x => x.Key.Length > 0).ToList();
-            if (byTitle.Count < 2) continue;
-
-            foreach (var t in byTitle)
-            {
-                if (org.Events.ContainsKey(t.Key)) continue;
-                var tSite = t.Select(e => e.EventDetail?.WebSite).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
-                org.Events[t.Key] = new VenueInfo
-                {
-                    EventCount = t.Count(),
-                    Notes = string.IsNullOrWhiteSpace(tSite) ? "da compilare" : $"da compilare - sito: {tSite}"
-                };
-                added++; _dirty = true;
-            }
-        }
-        return added;
     }
 
     // ---------- Ricerca ----------
@@ -140,11 +115,14 @@ public class KnownVenueStore
 
     public VenueInfo? Find(ESwingIt e) => Find(e.Organizer, e.City, e.Title);
     public VenueInfo? Find(Event e) => Find(e.Organizer, e.City, e.PartyName);
-    /// <summary>Carica i luoghi dallo sheet: le righe con indirizzo diventano "verificate" (lo sheet vince sul JSON).</summary>
+    /// <summary>
+    /// Carica i luoghi dallo sheet: l'indirizzo scritto a mano in una riga diventa la voce verificata dell'evento
+    /// (organizzatore + città + titolo). Lo sheet vince sul JSON; se lo stesso evento ha indirizzi diversi vince la data più recente.
+    /// </summary>
     public int ImportFromSheet(IEnumerable<Event> sheetEvents)
     {
         int n = 0;
-        foreach (var e in sheetEvents)
+        foreach (var e in sheetEvents.OrderBy(x => x.DateStart))
         {
             var address = e.EventDetail?.Address;
             if (string.IsNullOrWhiteSpace(address)) continue;
@@ -156,59 +134,84 @@ public class KnownVenueStore
             var key = MakeKey(e.Organizer, e.City);
             if (!_data.TryGetValue(key, out var org))
             {
-                // il default resta vuoto: l'indirizzo dell'organizzatore lo metti tu a mano
                 org = new OrganizerVenues
                 {
                     Default = new VenueInfo
                     {
                         Organizer = e.Organizer,
                         City = e.City,
-                        Country = e.Country,
-                        Notes = "da compilare: indirizzo dell'organizzatore"
+                        Country = e.Country
                     }
                 };
                 _data[key] = org;
                 _dirty = true;
             }
 
-            if (!org.Events.TryGetValue(t, out var ev)) org.Events[t] = ev = new VenueInfo();
-            Fill(ev, address, e.Country, e.City, e.EventDetail!.Latitude, e.EventDetail.Longitude);
+            org.Events.TryGetValue(t, out var ev);
+
+            // copiato dal programma: non è una fonte e viene riallineato al dizionario
+            if (e.LuogoVerificato == ImportData.VerifiedAuto)
+            {
+                if (ev?.Address is not null && Norm(ev.Address) != Norm(address))
+                    Console.WriteLine($"[store] ⚠️ {e.SheetName} riga {e.SheetRow}: '{address}' è segnato '{ImportData.VerifiedAuto}', viene sostituito con '{ev.Address}'. Se l'hai corretto tu, scrivi '{ImportData.VerifiedOk}' o svuota la colonna");
+                continue;
+            }
+
+            if (ev is null) org.Events[t] = ev = new VenueInfo();
+            Fill(ev, address, e.Country, e.City, e.EventDetail!.Latitude, e.EventDetail.Longitude,
+                 locked: e.LuogoVerificato == ImportData.VerifiedOk);
             n++;
         }
         return n;
     }
 
-    private void Fill(VenueInfo v, string address,string country, string city, double? lat, double? lng)
+    /// <param name="locked">"ok" nello sheet: anche le coordinate sono controllate, Photon non le cambia</param>
+    private void Fill(VenueInfo v, string address, string? country, string? city, double? lat, double? lng, bool locked)
     {
-        // verificato a mano: il JSON vince, segnalo solo se lo sheet dice altro
-        if (v.Verified)
+        var changed = v.Address is null || Norm(v.Address) != Norm(address);
+
+        if (locked && lat is double la && lng is double lo)
         {
-            if (v.Address is not null && Norm(v.Address) != Norm(address))
-                Console.WriteLine($"[store] ATTENZIONE luogo verificato, lo sheet ha un indirizzo diverso: '{v.Address}' vs '{address}'");
+            if (!changed && v.Source == "manuale" && v.Lat == la && v.Lng == lo) return;
+            v.Address = v.GeocodedAddress = address;
+            v.Lat = la;
+            v.Lng = lo;
+            v.City = city;
+            v.Country = country;
+            v.Verified = true;
+            v.Source = "manuale";
+            v.VerifiedOn = DateTime.Today.ToString("yyyy-MM-dd");
+            _dirty = true;
             return;
         }
 
-        v.Address = address;
-        v.City = city;
-        v.Country = country;
-        v.Source ??= "sheet";
+        if (!changed && v.Verified) return;
 
-        // le coordinate dello sheet sono spesso il centro città: le uso solo finché Photon non trova l'indirizzo
-        if (v.Lat is null && lat is double la && lng is double lo)
+        if (changed)
         {
-            v.Lat = la;
-            v.Lng = lo;
+            if (v.Address is not null)
+                Console.WriteLine($"[store] indirizzo cambiato nello sheet: '{v.Address}' -> '{address}'");
+            v.Address = address;
+            // coordinate dello sheet: valgono finché Photon non geocodifica il nuovo indirizzo
+            v.Lat = lat;
+            v.Lng = lng;
+            v.GeocodedAddress = null;
         }
 
+        // scritto a mano nello sheet = verificato
+        v.City = city;
+        v.Country = country;
+        v.Verified = true;
+        v.Source = "sheet";
+        v.VerifiedOn = DateTime.Today.ToString("yyyy-MM-dd");
         _dirty = true;
     }
-    /// <summary>Eventi non verificati con un indirizzo non ancora geocodificato (nuovo o cambiato).
+    /// <summary>Voci con un indirizzo non ancora geocodificato (nuovo o cambiato).
     /// Il default (indirizzo della scuola) non viene geocodificato.</summary>
     public List<(OrganizerVenues Org, VenueInfo Venue)> PendingGeocode() =>
         _data.Values
             .SelectMany(o => o.Events.Values.Select(v => (o, v)))
-            .Where(x => !x.v.Verified
-                        && !string.IsNullOrWhiteSpace(x.v.Address)
+            .Where(x => !string.IsNullOrWhiteSpace(x.v.Address)
                         && (x.v.GeocodedAddress is null || Norm(x.v.GeocodedAddress) != Norm(x.v.Address)))
             .ToList();
 
@@ -220,8 +223,9 @@ public class KnownVenueStore
     }
 
     /// <summary>
-    /// Porta sugli eventi dello sheet le coordinate del JSON quando sono affidabili e diverse:
-    /// luogo verificato a mano, oppure trovato da Photon per lo stesso indirizzo scritto nello sheet.
+    /// Porta sugli eventi dello sheet i luoghi del JSON:
+    /// - riga senza indirizzo e voce verificata per lo stesso evento: copio indirizzo e coordinate (IndirizzoDalDizionario);
+    /// - riga con indirizzo già geocodificato da Photon: aggiorno solo le coordinate.
     /// Restituisce gli eventi modificati (da riscrivere sullo sheet).
     /// </summary>
     public List<Event> ApplyToSheetEvents(IEnumerable<Event> sheetEvents)
@@ -234,19 +238,34 @@ public class KnownVenueStore
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0 || !org.Events.TryGetValue(t, out var v)) continue;
-            if (v.Lat is not double lat || v.Lng is not double lng || (lat == 0 && lng == 0)) continue;
 
-            var reliable = v.Verified
-                || (v.GeocodedAddress is not null && !string.IsNullOrWhiteSpace(e.EventDetail.Address)
-                    && Norm(v.GeocodedAddress) == Norm(e.EventDetail.Address));
-            if (!reliable) continue;
+            var rowAddress = e.EventDetail.Address;
+            // righe "auto" seguono sempre il dizionario: se correggi la riga sorgente, la correzione arriva anche qui
+            var copyAddress = v.Verified && !string.IsNullOrWhiteSpace(v.Address)
+                && (string.IsNullOrWhiteSpace(rowAddress)
+                    || (e.LuogoVerificato == ImportData.VerifiedAuto && Norm(rowAddress) != Norm(v.Address)));
+            var sameAddress = !string.IsNullOrWhiteSpace(rowAddress) && v.GeocodedAddress is not null
+                              && Norm(v.GeocodedAddress) == Norm(rowAddress);
+            if (!copyAddress && !sameAddress) continue;
 
-            if (e.EventDetail.Latitude is double la && e.EventDetail.Longitude is double lo
-                && Math.Abs(la - lat) < 1e-6 && Math.Abs(lo - lng) < 1e-6) continue;   // già uguali
+            var modified = false;
+            if (copyAddress)
+            {
+                e.EventDetail.Address = e.EventDetail.Location = v.Address;
+                e.IndirizzoDalDizionario = true;
+                modified = true;
+            }
 
-            e.EventDetail.Latitude = lat;
-            e.EventDetail.Longitude = lng;
-            changed.Add(e);
+            if (v.Lat is double lat && v.Lng is double lng && !(lat == 0 && lng == 0)
+                && !(e.EventDetail.Latitude is double la && e.EventDetail.Longitude is double lo
+                     && Math.Abs(la - lat) < 1e-6 && Math.Abs(lo - lng) < 1e-6))
+            {
+                e.EventDetail.Latitude = lat;
+                e.EventDetail.Longitude = lng;
+                modified = true;
+            }
+
+            if (modified) changed.Add(e);
         }
         return changed;
     }
@@ -261,6 +280,7 @@ public class KnownVenueStore
 
         e.EventDetail.Latitude = v.Lat;
         e.EventDetail.Longitude = v.Lng;
+        if (!string.IsNullOrWhiteSpace(v.Address)) e.EventDetail.Address = v.Address;   // finisce nella colonna F
 
         var place = string.Join(", ", new[] { v.VenueName, v.Address }.Where(s => !string.IsNullOrWhiteSpace(s)));
         if (place.Length > 0) e.EventDetail.Location = place;

@@ -80,6 +80,13 @@ namespace SiBallaImportingData.Utils
 
                     if (values != null && values.Count > 2)
                     {
+                        // colonna "Luogo verificato": la cerco per nome nell'intestazione (riga 2), così non dipende dalla posizione
+                        int? verifiedCol = values[1].Select((c, i) => (c, i))
+                            .Where(x => string.Equals(x.c?.ToString()?.Trim(), VerifiedHeader, StringComparison.OrdinalIgnoreCase))
+                            .Select(x => (int?)x.i).FirstOrDefault();
+                        if (verifiedCol is null)
+                            Console.WriteLine($"[sheet] '{sheet.Properties.Title}': manca la colonna '{VerifiedHeader}' (scrivi l'intestazione nella riga 2, dopo l'ultima colonna)");
+
                         foreach (var row in values)
                         {
                             //Console.WriteLine(string.Join(", ", row));
@@ -139,6 +146,8 @@ namespace SiBallaImportingData.Utils
                                     SheetName = sheet.Properties.Title,
                                     SheetRow = values.IndexOf(row) + 1,
                                     SheetLocationRaw = row[5]?.ToString(),
+                                    SheetVerifiedColumn = verifiedCol,
+                                    LuogoVerificato = verifiedCol is int vc && row.Count > vc ? row[vc]?.ToString()?.Trim().ToLowerInvariant() : null,
                                     DateStart = Convert.ToDateTime(row[0]),
                                     DateFinish = Convert.ToDateTime(row[1]),
                                     PartyName = row[4].ToString(),
@@ -343,7 +352,8 @@ namespace SiBallaImportingData.Utils
                         "",                                                                              // Colonna C
                         "",                                                                              // Colonna D
                         ev.PartyName,                                                                    // Colonna E
-                        $"{ev.Country}, {ev.City}({ev.EventDetail.Latitude};{ev.EventDetail.Longitude})", // Colonna F
+                        // Colonna F: "Paese, Città, Indirizzo(lat;lng)"; senza indirizzo resta lo spazio dopo la virgola per scriverlo a mano
+                        $"{ev.Country}, {ev.City}, {ev.EventDetail.Address}({ev.EventDetail.Latitude?.ToString(CultureInfo.InvariantCulture)};{ev.EventDetail.Longitude?.ToString(CultureInfo.InvariantCulture)})",
                         ev.Organizer,                                                                    // Colonna G
                         ev.EventDetail.StylesToString,                                                                              // Colonna H
                         "",                                                                              // Colonna I
@@ -546,6 +556,10 @@ namespace SiBallaImportingData.Utils
             }
         }
 
+        public const string VerifiedHeader = "Luogo verificato";
+        public const string VerifiedAuto = "auto";   // indirizzo copiato dal dizionario
+        public const string VerifiedOk = "ok";       // indirizzo e coordinate controllati a mano
+
         public record LocationCell(string? Country, string? City, string? Address, double? Lat, double? Lng);
 
         private static readonly Regex CoordsRe = new(
@@ -572,31 +586,58 @@ namespace SiBallaImportingData.Utils
         }
 
         /// <summary>
-        /// Riscrive sullo sheet le coordinate degli eventi indicati: nella colonna F sostituisce solo la parte "(lat;lng)",
-        /// paese, città e indirizzo restano come li hai scritti.
+        /// Riscrive la colonna F degli eventi indicati: sostituisce la parte "(lat;lng)" e, per gli indirizzi copiati dal dizionario,
+        /// scrive l'indirizzo dopo la città (e "auto" in "Luogo verificato"). Paese, città e indirizzi scritti da te restano come sono.
+        /// Con write = false stampa solo l'anteprima.
         /// </summary>
-        public static async Task UpdateSheetCoordinatesAsync(IEnumerable<Event> events)
+        public static async Task UpdateSheetLocationsAsync(IEnumerable<Event> events, bool write)
         {
             var data = new List<ValueRange>();
             foreach (var ev in events)
             {
                 if (ev.SheetName is null || ev.SheetRow is null || ev.SheetLocationRaw is null) continue;
                 if (ev.EventDetail?.Latitude is not double lat || ev.EventDetail.Longitude is not double lng) continue;
+                // senza la colonna non posso segnarlo "auto": al giro dopo sembrerebbe scritto da te e diventerebbe una fonte
+                if (ev.IndirizzoDalDizionario && ev.SheetVerifiedColumn is null) continue;
 
                 var raw = ev.SheetLocationRaw;
                 var m = CoordsRe.Match(raw);
                 var text = (m.Success ? raw[..m.Index] : raw).TrimEnd();
+                // indirizzo dal dizionario: paese e città restano come li hai scritti, l'indirizzo viene aggiunto o sostituito
+                if (ev.IndirizzoDalDizionario)
+                {
+                    var loc = ParseLocationCell(raw);
+                    text = $"{loc.Country}, {loc.City}, {ev.EventDetail.Address}";
+                }
                 var cell = $"{text}({lat.ToString("0.0000000", CultureInfo.InvariantCulture)};{lng.ToString("0.0000000", CultureInfo.InvariantCulture)})";
+                if (cell == raw) continue;
 
                 data.Add(new ValueRange
                 {
                     Range = $"'{ev.SheetName}'!F{ev.SheetRow}",
                     Values = new List<IList<object>> { new List<object> { cell } }
                 });
-                Console.WriteLine($"[sheet] {ev.SheetName} riga {ev.SheetRow}: '{raw}' -> '{cell}'");
+
+                // indirizzo copiato: lo segno "auto", così al prossimo giro non diventa una fonte e lo puoi filtrare
+                var mark = "";
+                if (ev.IndirizzoDalDizionario && ev.SheetVerifiedColumn is int vc)
+                {
+                    data.Add(new ValueRange
+                    {
+                        Range = $"'{ev.SheetName}'!{(char)('A' + vc)}{ev.SheetRow}",
+                        Values = new List<IList<object>> { new List<object> { VerifiedAuto } }
+                    });
+                    mark = $" + {VerifiedHeader} = {VerifiedAuto}";
+                }
+                Console.WriteLine($"[sheet{(write ? "" : " anteprima")}] {ev.SheetName} riga {ev.SheetRow}: '{raw}' -> '{cell}'{mark}");
             }
 
             if (data.Count == 0) return;
+            if (!write)
+            {
+                Console.WriteLine($"[sheet] {data.Count} celle da aggiornare: anteprima, niente scritto (Import:UpdateSheetCoordinates = false)");
+                return;
+            }
 
             var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)

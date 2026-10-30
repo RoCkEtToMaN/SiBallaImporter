@@ -15,6 +15,11 @@ namespace SiBallaImportingData.Model
         [JsonIgnore] public string? ProblemaLuogo { get; set; }
         // senza città non si sa nemmeno se è dentro il raggio: va nella sezione "Luogo da verificare" dell'email
         [JsonIgnore] public bool LuogoSconosciuto { get; set; }
+        // indirizzo copiato da un'altra riga dello stesso evento (dizionario dei luoghi): da riscrivere nella colonna F
+        [JsonIgnore] public bool IndirizzoDalDizionario { get; set; }
+        // colonna "Luogo verificato" dello sheet: vuoto = indirizzo scritto da te, "auto" = copiato dal programma, "ok" = controllato
+        [JsonIgnore] public string? LuogoVerificato { get; set; }
+        [JsonIgnore] public int? SheetVerifiedColumn { get; set; }   // indice della colonna (0 = A), null se manca l'intestazione
         public EventDetail EventDetail { get; set; } 
         public string? PartyName { get; set; }
         public string? WorkshopName { get; set; }
