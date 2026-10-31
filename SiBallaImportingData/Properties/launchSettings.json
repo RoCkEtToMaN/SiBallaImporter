@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SiBallaImportingData": {
+      "commandName": "Project"
+    },
+    "Anteprima email": {
+      "commandName": "Project",
+      "commandLineArgs": "--search true --send true --excel false --db false --coords false --Email:PreviewFile=email-anteprima.html",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

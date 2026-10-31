@@ -25,3 +25,9 @@ cities15000.*
 
 # file di dati generati dal programma (stanno in bin)
 custom_locations.json
+
+# anteprima dell'email (profilo "Anteprima email" di Visual Studio)
+email-anteprima.html
+
+# impostazioni personali di Visual Studio
+*.user
