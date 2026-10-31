@@ -57,33 +57,7 @@ public class KnownVenueStore
 
         var json = File.ReadAllText(path, Encoding.UTF8);
         var data = JsonSerializer.Deserialize<Dictionary<string, OrganizerVenues>>(json, JsonOpts) ?? new();
-        var store = new KnownVenueStore(path, data);
-        store.RemovePlaceholders();
-        return store;
-    }
-
-    /// <summary>Toglie le vecchie voci "da compilare" senza indirizzo né coordinate: la lista delle cose da fare ora è il report.</summary>
-    private void RemovePlaceholders()
-    {
-        static bool Empty(VenueInfo v) => !v.Verified && string.IsNullOrWhiteSpace(v.Address) && v.Lat is null;
-
-        int removed = 0;
-        foreach (var (key, org) in _data.ToList())
-        {
-            foreach (var t in org.Events.Where(x => Empty(x.Value)).Select(x => x.Key).ToList())
-            {
-                org.Events.Remove(t);
-                removed++;
-            }
-            if (org.Default.Notes?.StartsWith("da compilare") == true) org.Default.Notes = null;
-            if (Empty(org.Default) && org.Events.Count == 0) { _data.Remove(key); removed++; }
-        }
-
-        if (removed > 0)
-        {
-            _dirty = true;
-            Console.WriteLine($"[store] tolte {removed} voci 'da compilare' vuote");
-        }
+        return new KnownVenueStore(path, data);
     }
 
     public void Save()
@@ -118,18 +92,25 @@ public class KnownVenueStore
     /// <summary>
     /// Carica i luoghi dallo sheet: l'indirizzo scritto a mano in una riga diventa la voce verificata dell'evento
     /// (organizzatore + città + titolo). Lo sheet vince sul JSON; se lo stesso evento ha indirizzi diversi vince la data più recente.
+    /// Gli eventi futuri senza indirizzo entrano come voci vuote (default + evento): quando scrivi l'indirizzo nello sheet,
+    /// il giro successivo le riempie.
     /// </summary>
     public int ImportFromSheet(IEnumerable<Event> sheetEvents)
     {
-        int n = 0;
+        int n = 0, empty = 0;
         foreach (var e in sheetEvents.OrderBy(x => x.DateStart))
         {
-            var address = e.EventDetail?.Address;
-            if (string.IsNullOrWhiteSpace(address)) continue;
             if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0) continue;
+
+            var address = e.EventDetail?.Address;
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                if (e.DateStart.Date >= DateTime.Today && AddEmpty(e, t)) empty++;
+                continue;
+            }
 
             var key = MakeKey(e.Organizer, e.City);
             if (!_data.TryGetValue(key, out var org))
@@ -162,7 +143,25 @@ public class KnownVenueStore
                  locked: e.LuogoVerificato == ImportData.VerifiedOk);
             n++;
         }
+        if (empty > 0) Console.WriteLine($"[store] eventi senza indirizzo aggiunti come voci vuote: {empty}");
         return n;
+    }
+
+    /// <summary>Voce vuota per un evento senza indirizzo; non tocca quelle che esistono già.</summary>
+    private bool AddEmpty(Event e, string title)
+    {
+        var key = MakeKey(e.Organizer!, e.City!);
+        if (!_data.TryGetValue(key, out var org))
+        {
+            org = new OrganizerVenues { Default = new VenueInfo { Organizer = e.Organizer, City = e.City, Country = e.Country } };
+            _data[key] = org;
+        }
+        else if (org.Events.ContainsKey(title))
+            return false;
+
+        org.Events[title] = new VenueInfo { City = e.City, Country = e.Country };
+        _dirty = true;
+        return true;
     }
 
     /// <param name="locked">"ok" nello sheet: anche le coordinate sono controllate, Photon non le cambia</param>
