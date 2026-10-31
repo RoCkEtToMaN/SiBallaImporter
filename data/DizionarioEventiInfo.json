@@ -294,13 +294,13 @@
         "country": "Italia",
         "eventCount": null,
         "venueName": null,
-        "address": "viale jenner 67, Milan, Italy, 20158",
+        "address": "viale jenner 67, 20158",
         "lat": 45.4969618,
         "lng": 9.1768816,
-        "geocodedAddress": "viale jenner 67, Milan, Italy, 20158",
+        "geocodedAddress": "viale jenner 67, 20158",
         "verified": true,
         "source": "sheet",
-        "verifiedOn": "2026-10-30",
+        "verifiedOn": "2026-10-31",
         "notes": null
       }
     }
@@ -369,6 +369,40 @@
         "verified": true,
         "source": "sheet",
         "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "amour amor swingamora the must see b lindy swing festival held in morre 5 minutes from besancon france you can get there by train bike or carpool from besancon a city that is itself connected to paris and the rest of france by train saturday night party with swingup orchestra|morre": {
+    "default": {
+      "organizer": "Amour, Amor, Swingamorâ-the must-see B.lindy swing festival, held in Morre, 5 minutes from Besançon (France). You can get there by train, bike, or carpool from Besançon, a city that is itself connected to Paris and the rest of France by train. Saturday night Party with Swingup Orchestra",
+      "city": "Morre",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swingamor": {
+        "organizer": null,
+        "city": "Morre",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": "rue de l'échangeur,",
+        "lat": 47.2250355,
+        "lng": 6.0658273,
+        "geocodedAddress": "rue de l'échangeur,",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-31",
         "notes": null
       }
     }
