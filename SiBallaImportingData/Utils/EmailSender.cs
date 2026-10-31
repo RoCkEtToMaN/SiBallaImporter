@@ -11,6 +11,13 @@ namespace SiBallaImportingData.Utils
         {
             try
             {
+                if (!string.IsNullOrWhiteSpace(settings.Email.PreviewFile))
+                {
+                    await File.WriteAllTextAsync(settings.Email.PreviewFile, TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare));
+                    Console.WriteLine($"📄 Email non inviata, anteprima salvata in {settings.Email.PreviewFile}");
+                    return;
+                }
+
                 //var textEm = TextEmail(eventi);
                 // chiavi da user-secrets (PC locale) o variabili d'ambiente Email__MailjetApiKey / Email__MailjetApiSecret
                 var apiKeyGmail = settings.Email.MailjetApiKey;

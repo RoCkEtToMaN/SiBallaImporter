@@ -105,6 +105,8 @@ namespace SiBallaImportingData.Utils
         public string Recipients { get; set; } = string.Empty;
         public string? MailjetApiKey { get; set; }
         public string? MailjetApiSecret { get; set; }
+        // se impostato l'email non parte: il testo HTML viene salvato in questo file (per provare il batch)
+        public string? PreviewFile { get; set; }
 
         public bool HasMailjetKeys => !string.IsNullOrWhiteSpace(MailjetApiKey) && !string.IsNullOrWhiteSpace(MailjetApiSecret);
     }
