@@ -1,0 +1,376 @@
+﻿{
+  "sauerlandhop tanz in der flache|brilon": {
+    "default": {
+      "organizer": "Sauerlandhop - Tanz in der Fläche ",
+      "city": "Brilon",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Scharfenberger Str 25 · 59929",
+      "lat": 51.4013508,
+      "lng": 8.5658611,
+      "geocodedAddress": "Scharfenberger Str 25 · 59929",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "sauerlandhop lindy hop solo jazz wochenende": {
+        "organizer": null,
+        "city": "Brilon",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Scharfenberger Str 25",
+        "lat": 51.4013508,
+        "lng": 8.5658611,
+        "geocodedAddress": "Scharfenberger Str 25",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "blue energy rock|verona": {
+    "default": {
+      "organizer": "Blue Energy Rock",
+      "city": "Verona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "via Cason Forte Lugagnano",
+      "lat": 45.4347866,
+      "lng": 10.9298224,
+      "geocodedAddress": "via Cason Forte Lugagnano",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing master series": {
+        "organizer": null,
+        "city": "Verona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "via Cason Forte Lugagnano",
+        "lat": 45.4347866,
+        "lng": 10.9298224,
+        "geocodedAddress": "via Cason Forte Lugagnano",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "perry boogie|ferrara": {
+    "default": {
+      "organizer": "Perry Boogie",
+      "city": "Ferrara",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Ravenna 104",
+      "lat": 44.8189277,
+      "lng": 11.6277454,
+      "geocodedAddress": "Via Ravenna 104",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "perry boogie clai stones revue bowling seventies rimini": {
+        "organizer": null,
+        "city": "Ferrara",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via Ravenna 104",
+        "lat": 44.8189277,
+        "lng": 11.6277454,
+        "geocodedAddress": "Via Ravenna 104",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "digiei lindbergh|ancona": {
+    "default": {
+      "organizer": "DiGiei Lindbergh",
+      "city": "Ancona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Arceviese Km9",
+      "lat": 43.64876174926758,
+      "lng": 13.160240173339844,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": "sheet",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "serata musica e balli anni con digiei lindbergh": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via Arceviese Km9",
+        "lat": 43.64876174926758,
+        "lng": 13.160240173339844,
+        "geocodedAddress": null,
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "savoy swing italy|roma": {
+    "default": {
+      "organizer": "Savoy Swing Italy",
+      "city": "Roma",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "via delle Isole Curzolane 75",
+      "lat": 41.9487346,
+      "lng": 12.5311663,
+      "geocodedAddress": "via delle Isole Curzolane 75",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "defrag swing party opening night": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "via delle Isole Curzolane 75",
+        "lat": 41.9487346,
+        "lng": 12.5311663,
+        "geocodedAddress": "via delle Isole Curzolane 75",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "discoteca vivi le grotte|bologna": {
+    "default": {
+      "organizer": "Discoteca Vivi - Le Grotte",
+      "city": "Bologna",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Oberdan 21",
+      "lat": 44.4969035,
+      "lng": 11.3461758,
+      "geocodedAddress": "Via Oberdan 21",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "speciale enerdi ive tradizionale rock n boogie swing ale musicali": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via Oberdan 21",
+        "lat": 44.4969035,
+        "lng": 11.3461758,
+        "geocodedAddress": "Via Oberdan 21",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "le cupole discoteca|castel bolognese": {
+    "default": {
+      "organizer": "Le Cupole Discoteca",
+      "city": "Castel Bolognese",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Casanola 2",
+      "lat": 44.3207722,
+      "lng": 11.8136498,
+      "geocodedAddress": "Via Casanola 2",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "le cupole venerdi cupole con mama band live venerdi ottobre": {
+        "organizer": null,
+        "city": "Castel Bolognese",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via Casanola 2",
+        "lat": 44.3207722,
+        "lng": 11.8136498,
+        "geocodedAddress": "Via Casanola 2",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "minu sweet melody e mauri roller|torino": {
+    "default": {
+      "organizer": "Minù - Sweet Melody e Mauri Roller",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via S. Gillio 229",
+      "lat": 45.0922948,
+      "lng": 7.6542668,
+      "geocodedAddress": "Via S. Gillio 229",
+      "verified": false,
+      "source": "sheet+photon",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rockeballa": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via S. Gillio 229",
+        "lat": 45.0922948,
+        "lng": 7.6542668,
+        "geocodedAddress": "Via S. Gillio 229",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "lo swing del principe milano|milano": {
+    "default": {
+      "organizer": "Lo swing del Principe Milano",
+      "city": "Milano",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lo swing del principe lindy hop boogie woogie night dj swingin simon": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "viale jenner 67, Milan, Italy, 20158",
+        "lat": 45.4969618,
+        "lng": 9.1768816,
+        "geocodedAddress": "viale jenner 67, Milan, Italy, 20158",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "sicilyinswing|catania": {
+    "default": {
+      "organizer": "Sicilyinswing",
+      "city": "Catania",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "friday swing party": {
+        "organizer": null,
+        "city": "Catania",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "SALA LEVANTE (LAND - Catania)",
+        "lat": 37.500831604003906,
+        "lng": 15.093649864196777,
+        "geocodedAddress": null,
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  },
+  "gabriele gariboldi rocketeer dj e rockin rumble in town event s|pavia": {
+    "default": {
+      "organizer": "Gabriele Gariboldi Rocketeer-Dj e Rockin' Rumble in Town event's",
+      "city": "Pavia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rockin rumble in town": {
+        "organizer": null,
+        "city": "Pavia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Corso Carlo Alberto 72",
+        "lat": 45.1874468,
+        "lng": 9.1577064,
+        "geocodedAddress": "Corso Carlo Alberto 72",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-10-30",
+        "notes": null
+      }
+    }
+  }
+}

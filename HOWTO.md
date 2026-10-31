@@ -113,4 +113,13 @@ scrivere niente da nessuna parte:
 - `--test-indirizzi`: prova a trovare con Gemini l'indirizzo dei locali mancanti
 
 Sul PC le chiavi si mettono con `dotnet user-secrets` (es. `Email:MailjetApiKey`,
-`Gemini:ApiKey`). I file di dati vanno in `%LOCALAPPDATA%\SiBallaImporter`.
+`Gemini:ApiKey`). Il dizionario dei luoghi (`DizionarioEventiInfo.json`) sta nella cartella del
+programma (`bin\...`), gli altri file di dati in `%LOCALAPPDATA%\SiBallaImporter`.
+
+La copia di riferimento del dizionario è nel repo, in `data/DizionarioEventiInfo.json`:
+
+- **all'avvio** il programma fa `git pull` e copia quel file in `bin`;
+- **a fine giro** lo riporta in `data/` e, se è cambiato, fa commit (solo di quel file) e push.
+
+Su GitHub succede lo stesso, ma commit e push li fa il workflow. Se il pull o il push non riescono il
+programma lo scrive nel log e va avanti; il commit resta in locale e lo pubblichi tu con un push.

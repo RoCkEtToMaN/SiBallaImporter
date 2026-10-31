@@ -20,8 +20,11 @@ DataPaths.Initialize(settings.Paths.DataDirectory);
 settings.Print();
 var opzioni = settings.Import;
 
-// nel punto di avvio dell'import (Program.cs o dove chiami il filtro)
-var store =KnownVenueStore.Load(DataPaths.Get("DizionarioEventiInfo.json"));
+// dizionario dei luoghi: sta accanto all'eseguibile (bin), ma la copia buona è nel repo (data/):
+// la prendo da lì all'avvio e ce la rimetto con un commit dopo il salvataggio
+var dizionarioPath = Path.Combine(AppContext.BaseDirectory, "DizionarioEventiInfo.json");
+DictionaryRepoSync.PullIntoBin(dizionarioPath);
+var store =KnownVenueStore.Load(dizionarioPath);
 var resolver = new AddressResolver(store);
 Console.WriteLine("Caricamento codici ISTAT in corso...");
 Console.WriteLine("Inizializzazione dati geografici...");
@@ -206,6 +209,7 @@ finally
 {
     // 3. scrivo il file, anche se l'import va in errore a metà
     store.Save();
+    DictionaryRepoSync.PushFromBin(dizionarioPath);
 }
 
 if (eventsMerge.Any(x => x.City == "undefined"))
