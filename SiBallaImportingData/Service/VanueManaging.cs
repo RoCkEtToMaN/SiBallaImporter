@@ -147,7 +147,13 @@ public class KnownVenueStore
         return n;
     }
 
-    /// <summary>Voce vuota per un evento senza indirizzo; non tocca quelle che esistono già.</summary>
+    public const string SourceInitial = "iniziale";   // coordinate della riga, il default aspetta il geocoding inverso
+
+    /// <summary>
+    /// Voce vuota per un evento senza indirizzo, con le coordinate iniziali della riga (colonna F).
+    /// Il default dell'organizzatore prende le stesse coordinate solo se non ne ha: poi non cambia più.
+    /// Non tocca le voci già compilate.
+    /// </summary>
     private bool AddEmpty(Event e, string title)
     {
         var key = MakeKey(e.Organizer!, e.City!);
@@ -155,13 +161,52 @@ public class KnownVenueStore
         {
             org = new OrganizerVenues { Default = new VenueInfo { Organizer = e.Organizer, City = e.City, Country = e.Country } };
             _data[key] = org;
+            _dirty = true;
         }
-        else if (org.Events.ContainsKey(title))
-            return false;
 
-        org.Events[title] = new VenueInfo { City = e.City, Country = e.Country };
+        double? lat = e.EventDetail?.Latitude, lng = e.EventDetail?.Longitude;
+        var hasCoords = lat is double la && lng is double lo && !(la == 0 && lo == 0);
+
+        if (hasCoords && IsEmpty(org.Default))
+        {
+            org.Default.Lat = lat;
+            org.Default.Lng = lng;
+            org.Default.Source = SourceInitial;
+            _dirty = true;
+        }
+
+        var added = false;
+        if (!org.Events.TryGetValue(title, out var ev))
+        {
+            org.Events[title] = ev = new VenueInfo { City = e.City, Country = e.Country };
+            added = true;
+            _dirty = true;
+        }
+        if (hasCoords && IsEmpty(ev))
+        {
+            ev.Lat = lat;
+            ev.Lng = lng;
+            ev.Source = SourceInitial;
+            _dirty = true;
+        }
+        return added;
+    }
+
+    private static bool IsEmpty(VenueInfo v) => !v.Verified && string.IsNullOrWhiteSpace(v.Address) && !HasCoords(v);
+
+    /// <summary>Default con le coordinate iniziali e ancora senza via.</summary>
+    public List<VenueInfo> PendingReverse() =>
+        _data.Values.Select(o => o.Default)
+            .Where(v => v.Source == SourceInitial && string.IsNullOrWhiteSpace(v.Address) && HasCoords(v))
+            .ToList();
+
+    /// <summary>Via trovata dalle coordinate del default (address null = non trovata o centro città): le coordinate restano quelle.</summary>
+    public void SetReverse(VenueInfo v, string? address, string source)
+    {
+        v.Address = address;
+        v.GeocodedAddress = address;
+        v.Source = source;
         _dirty = true;
-        return true;
     }
 
     /// <param name="locked">"ok" nello sheet: anche le coordinate sono controllate, Photon non le cambia</param>
@@ -316,7 +361,9 @@ public class KnownVenueStore
         VenueInfo target;
         if (!HasCoords(org.Default) && string.IsNullOrWhiteSpace(org.Default.Address))
             target = org.Default;
-        else if (org.Default.Address is not null && Norm(org.Default.Address) == Norm(address))
+        // il default con le coordinate iniziali non cambia più
+        else if (org.Default.Address is not null && Norm(org.Default.Address) == Norm(address)
+                 && org.Default.Source?.StartsWith(SourceInitial) != true)
             target = org.Default;
         else
         {

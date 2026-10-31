@@ -166,6 +166,8 @@ if (opzioni.TestIndirizzi)
 }
 // 3. indirizzi nuovi o cambiati -> Photon
 await resolver.GeocodePendingAsync();
+//    default con le coordinate iniziali -> via di quelle coordinate (Photon reverse)
+await resolver.ReverseGeocodeDefaultsAsync();
 
 // 4. luoghi del JSON -> eventi dello sheet: indirizzo copiato dalle altre date dello stesso evento e coordinate di Photon
 //    (in memoria sempre, così vanno sul DB; sullo sheet solo se abilitato, altrimenti è un'anteprima)

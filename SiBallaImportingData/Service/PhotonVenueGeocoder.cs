@@ -58,6 +58,37 @@ public class PhotonVenueGeocoder
         return null;
     }
 
+    /// <summary>
+    /// Geocoding inverso: la via (con il civico se c'è) più vicina alle coordinate, o il nome del luogo se manca la via.
+    /// </summary>
+    public async Task<string?> ReverseAsync(double lat, double lng, CancellationToken ct = default)
+    {
+        var url = "https://photon.komoot.io/reverse?limit=1"
+                + "&lat=" + lat.ToString(CultureInfo.InvariantCulture)
+                + "&lon=" + lng.ToString(CultureInfo.InvariantCulture);
+        try
+        {
+            using var res = await Http.GetAsync(url, ct);
+            if (!res.IsSuccessStatusCode) return null;
+
+            using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct));
+            var features = doc.RootElement.GetProperty("features");
+            if (features.GetArrayLength() == 0 || !features[0].TryGetProperty("properties", out var p)) return null;
+
+            string? Get(string name) => p.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+            var street = Get("street");
+            if (!string.IsNullOrWhiteSpace(street))
+                return string.IsNullOrWhiteSpace(Get("housenumber")) ? street : $"{street} {Get("housenumber")}";
+            return Get("name");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            Console.WriteLine($"Photon: errore nel geocoding inverso di {lat}, {lng}: {ex.Message}");
+        }
+
+        return null;
+    }
+
     public static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
     {
         const double R = 6371;

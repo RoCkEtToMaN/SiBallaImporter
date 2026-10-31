@@ -112,6 +112,36 @@ public class AddressResolver
         }
     }
 
+    /// <summary>
+    /// Default con le coordinate iniziali: cerco la via di quelle coordinate (le coordinate non cambiano).
+    /// Se sono il centro della città (coordinate di ripiego, non del locale) la via non avrebbe senso: la salto.
+    /// </summary>
+    public async Task ReverseGeocodeDefaultsAsync(CancellationToken ct = default)
+    {
+        var pending = _store.PendingReverse();
+        Console.WriteLine($"[default] coordinate iniziali di cui cercare la via: {pending.Count}");
+
+        int found = 0, center = 0;
+        foreach (var v in pending)
+        {
+            var c = OfflineGeocoder.GetCoordinates(v.City, v.Country);
+            if (c != (0.0, 0.0) && DistanceKm(v.Lat!.Value, v.Lng!.Value, c.Item1, c.Item2) < 0.2)
+            {
+                _store.SetReverse(v, null, "iniziale (centro città)");
+                center++;
+                continue;
+            }
+
+            var street = await _geo.ReverseAsync(v.Lat!.Value, v.Lng!.Value, ct);
+            await Task.Delay(1100, ct);                              // Photon pubblico: una richiesta al secondo
+            _store.SetReverse(v, street, street is null ? "iniziale (via non trovata)" : "iniziale+photon-reverse");
+            if (street is not null) found++;
+        }
+
+        if (pending.Count > 0)
+            Console.WriteLine($"[default] via trovata: {found}, centro città (saltate): {center}, non trovata: {pending.Count - found - center}");
+    }
+
     private static double DistanceKm(double lat1, double lng1, double lat2, double lng2)
     {
         static double Rad(double x) => x * Math.PI / 180;
