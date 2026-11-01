@@ -228,6 +228,11 @@ foreach (var eventToCheck in eventsMerge.Where(x => !x.LuogoSconosciuto))
 
 var countExcel = eventFromExcel[TipoEvento.Serate].Count() + eventFromExcel[TipoEvento.Workshop].Count();
 
+// per il bot Telegram (AgenteRust, comando /importa): il calendario dello Sheet, nello stesso formato
+// che va su Appwrite, più gli eventi trovati online e non ancora nello Sheet. Lo scrivo sempre, anche
+// senza import su DB: su GitHub finisce negli artifact del run (out/*.json) e il bot lo scarica da lì
+EventiPerBot.Salva(DataPaths.Get("eventi-bot.json"), eventFromExcel, eventsMergeUfficial);
+
 // eventsMergeUfficial = eventi trovati online e non ancora presenti nello Sheet
 if (enableImportingOnExcel && eventsMergeUfficial.Count > 0)
     await ImportData.PrepareToAppendToGoogleSheet([.. eventsMergeUfficial.OrderBy(x => x.DateStart)], eventFromExcel);
