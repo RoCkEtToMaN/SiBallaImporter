@@ -241,12 +241,23 @@ if (enableSending)
 {
     var eventiEmail = eventsMerge.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni)).ToList();
 
-    // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
-    var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail, settings.Gemini);
-    // senza città non so se sono vicini: sezione a parte invece del bollettino per città
-    await EmailSender.SendWithMailjetAnonymous(
-        eventiSwing.Where(x => !x.LuogoSconosciuto).ToList(), settings, daVerificare,
-        eventiSwing.Where(x => x.LuogoSconosciuto).ToList());
+    // giro quotidiano: niente email (e niente Gemini) se non c'è nessun evento nuovo dall'ultima
+    var nuovi = UltimaEmail.Nuovi(eventiEmail);
+    if (opzioni.EmailSoloSeCambia && nuovi.Count == 0)
+    {
+        Console.WriteLine($"📭 Nessun evento nuovo rispetto all'ultima email ({eventiEmail.Count} eventi): email non inviata");
+    }
+    else
+    {
+        Console.WriteLine($"📬 Eventi nuovi rispetto all'ultima email: {nuovi.Count} su {eventiEmail.Count}");
+        // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
+        var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail, settings.Gemini);
+        // senza città non so se sono vicini: sezione a parte invece del bollettino per città
+        await EmailSender.SendWithMailjetAnonymous(
+            eventiSwing.Where(x => !x.LuogoSconosciuto).ToList(), settings, daVerificare,
+            eventiSwing.Where(x => x.LuogoSconosciuto).ToList());
+        UltimaEmail.Ricorda(eventiEmail);
+    }
 }
 
 if (resetDb)

@@ -66,7 +66,7 @@ namespace SiBallaImportingData.Utils
         {
             Console.WriteLine("Configurazione:");
             Console.WriteLine($"  EnableSearching = {Import.EnableSearching}");
-            Console.WriteLine($"  EnableSending = {Import.EnableSending}");
+            Console.WriteLine($"  EnableSending = {Import.EnableSending}, EmailSoloSeCambia = {Import.EmailSoloSeCambia}");
             Console.WriteLine($"  EnableImportingOnExcel = {Import.EnableImportingOnExcel}");
             Console.WriteLine($"  EnableImportingOnDB = {Import.EnableImportingOnDB}");
             Console.WriteLine($"  UpdateSheetCoordinates = {Import.UpdateSheetCoordinates}");
@@ -82,6 +82,8 @@ namespace SiBallaImportingData.Utils
     {
         public bool EnableSearching { get; set; } = true;
         public bool EnableSending { get; set; }
+        // manda l'email solo se ci sono eventi che l'ultima email non aveva (giro quotidiano su GitHub)
+        public bool EmailSoloSeCambia { get; set; }
         public bool EnableImportingOnExcel { get; set; }
         public bool EnableImportingOnDB { get; set; }
         // riscrive sullo sheet (colonna F) le coordinate trovate da Photon o verificate nel JSON
