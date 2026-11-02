@@ -149,6 +149,7 @@ jobs:
           Email__MailjetApiKey: ${{ secrets.MAILJET_API_KEY }}
           Email__MailjetApiSecret: ${{ secrets.MAILJET_API_SECRET }}
           Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
+          Appwrite__ApiKey: ${{ secrets.APPWRITE_API_KEY }}
           # impostazioni (sovrascrivono appsettings.json)
           Import__EnableSearching: "true"
           Import__EnableSending: ${{ inputs.enable_sending || vars.ENABLE_SENDING || 'true' }}

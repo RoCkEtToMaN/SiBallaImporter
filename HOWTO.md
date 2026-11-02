@@ -26,10 +26,31 @@ I due workflow sono indipendenti: se uno fallisce l'altro gira comunque.
 5. Poi, in base alle impostazioni:
    - **Email** (`EnableSending`): prende gli eventi dei prossimi `Giorni`, li fa controllare a
      Gemini (gli eventi non swing finiscono in una sezione "da verificare") e manda l'email con Mailjet.
-   - **Sheet** (`EnableImportingOnExcel`): aggiunge i nuovi eventi allo Sheet.
+   - **Sheet** (`EnableImportingOnExcel`): aggiunge i nuovi eventi allo Sheet. Se l'evento ha
+     un'immagine, prima la scarica e la carica nel bucket `immagini` di Appwrite Storage, poi scrive
+     `sì` nella colonna **Immagine**.
    - **Coordinate** (`UpdateSheetCoordinates`): riscrive sullo Sheet le coordinate trovate.
    - **Appwrite** (`EnableImportingOnDB`): carica **tutto lo Sheet** sul database Appwrite, sostituendo
-     le collezioni `serate` e `workshop`. È da qui che l'app SiBalla legge gli eventi.
+     le collezioni `serate` e `workshop`. È da qui che l'app SiBalla legge gli eventi. Per le righe
+     con `sì` in **Immagine** mette `HasImage = true` e in `ImageUrl` il link del file su Storage.
+
+### Immagini degli eventi
+
+Il file su Storage si chiama `ev` + un hash di **data di inizio + titolo** della riga. Se cambi la
+data o il titolo nello Sheet il collegamento si perde: al caricamento su Appwrite il log lo segnala
+(`file ... non è su Storage`) e l'evento va sul DB senza immagine. Per un evento inserito a mano
+puoi caricare tu il file nel bucket con quel nome e scrivere `sì` nella colonna.
+
+Configurazione su Appwrite (una volta sola):
+
+1. **Overview → API Keys → Create API key** con gli scope di lettura e scrittura del database
+   (documenti/righe) e di Storage: `buckets.read`, `buckets.write`, `files.read`, `files.write`.
+   La chiave va nel secret `APPWRITE_API_KEY` (GitHub) e in
+   `dotnet user-secrets set "Appwrite:ApiKey" "..."` (PC).
+2. Il bucket `immagini` lo crea il programma la prima volta che serve, con lettura pubblica (ruolo
+   **Any** → **Read**) così l'app vede le immagini senza login.
+3. Nello Sheet, riga 2 di **Serate** e **Workshop**: intestazione `Immagine` dopo l'ultima colonna
+   (entro la Z).
 
 ### Impostazioni dell'esecuzione automatica del lunedì
 
@@ -57,6 +78,8 @@ In **Settings → Secrets and variables → Actions → tab Secrets**:
 - `MAILJET_API_KEY`, `MAILJET_API_SECRET`: invio dell'email
 - `GOOGLE_SERVICE_ACCOUNT_JSON`: accesso al Google Sheet
 - `GEMINI_API_KEY`: controllo degli eventi con l'AI
+- `APPWRITE_API_KEY`: caricamento delle immagini su Appwrite Storage (senza, le righe vanno nello
+  Sheet senza immagine)
 
 ### Dove guardare il risultato
 
