@@ -12,6 +12,8 @@ namespace SiBallaImportingData.Model
         public string? Address { get; set; }
         public string? WebSite { get; set; }        
         public string? ImageUrl { get; set; }
+        // colonna "Immagine" dello Sheet: l'immagine è su Appwrite Storage e ImageUrl ne contiene il link
+        public bool HasImage { get; set; }
         public string When { get; set; }
         //public string Styles { get; set; }
         //public string City { get; set; }

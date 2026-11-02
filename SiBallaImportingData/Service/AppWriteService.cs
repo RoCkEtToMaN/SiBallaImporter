@@ -11,6 +11,7 @@ public class AppWriteService
 {
     private readonly Client _client;
     public Databases Databases { get; private set; }
+    public Storage Storage { get; private set; }
 
     private const string Endpoint = "https://cloud.appwrite.io/v1";
     private const string ProjectId = "6aa5651e00042e1452be";
@@ -18,14 +19,118 @@ public class AppWriteService
     public const string DatabaseId = "6aa638b50000f24a7b92";
     public const string SerateCollectionId = "serate";
     public const string WorkshopsCollectionId = "workshop";
+    public const string ImagesBucketId = "immagini";
 
-    public AppWriteService()
+    // senza chiave valgono i permessi "Any" di collezioni e bucket; con la chiave (Appwrite:ApiKey) i permessi della chiave
+    public AppWriteService(string? apiKey = null)
     {
         _client = new Client()
             .SetEndpoint(Endpoint)
             .SetProject(ProjectId);
+        if (!string.IsNullOrWhiteSpace(apiKey))
+            _client.SetKey(apiKey);
 
         Databases = new Databases(_client);
+        Storage = new Storage(_client);
+    }
+
+    // link pubblico dell'immagine (il bucket deve avere il permesso di lettura "Any")
+    public static string ImageViewUrl(string fileId) =>
+        $"{Endpoint}/storage/buckets/{ImagesBucketId}/files/{fileId}/view?project={ProjectId}";
+
+    /// <summary>
+    /// Crea il bucket delle immagini se non c'è, con lettura pubblica (l'app le apre senza login).
+    /// Serve la chiave API con lo scope buckets.write. Restituisce false se il bucket non è disponibile
+    /// </summary>
+    public async Task<bool> EnsureImagesBucketAsync()
+    {
+        try
+        {
+            await Storage.GetBucket(ImagesBucketId);
+            return true;
+        }
+        catch (AppwriteException ex) when (ex.Code == 404)
+        {
+            try
+            {
+                await Storage.CreateBucket(
+                    bucketId: ImagesBucketId,
+                    name: "Immagini eventi",
+                    permissions: new List<string> { Permission.Read(Role.Any()) },
+                    fileSecurity: false,
+                    maximumFileSize: 10 * 1024 * 1024,
+                    allowedFileExtensions: new List<string> { "jpg", "jpeg", "png", "webp", "gif" }
+                );
+                Console.WriteLine($"✅ Bucket '{ImagesBucketId}' creato su Appwrite Storage");
+                return true;
+            }
+            catch (AppwriteException createEx)
+            {
+                Console.WriteLine($"❌ Bucket '{ImagesBucketId}' non creato [{createEx.Code}]: {createEx.Message}");
+                return false;
+            }
+        }
+        catch (AppwriteException ex)
+        {
+            Console.WriteLine($"❌ Bucket '{ImagesBucketId}' non raggiungibile [{ex.Code}]: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Carica l'immagine nel bucket. Se un file con lo stesso id c'è già (stesso evento) va bene così
+    /// </summary>
+    public async Task<bool> UploadImageAsync(string fileId, byte[] bytes, string fileName, string mimeType)
+    {
+        try
+        {
+            await Storage.CreateFile(
+                bucketId: ImagesBucketId,
+                fileId: fileId,
+                file: InputFile.FromBytes(bytes, fileName, mimeType)
+            );
+            return true;
+        }
+        catch (AppwriteException ex) when (ex.Code == 409)
+        {
+            return true;
+        }
+        catch (AppwriteException ex)
+        {
+            Console.WriteLine($"❌ Errore caricamento immagine {fileId} [{ex.Code}]: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Id di tutti i file del bucket immagini, null se non riesco a leggerli
+    /// </summary>
+    public async Task<HashSet<string>?> GetImageIdsAsync()
+    {
+        try
+        {
+            var ids = new HashSet<string>();
+            string? last = null;
+            while (true)
+            {
+                var queries = new List<string> { Query.Limit(100) };
+                if (last is not null)
+                    queries.Add(Query.CursorAfter(last));
+
+                var response = await Storage.ListFiles(ImagesBucketId, queries);
+                foreach (var file in response.Files)
+                    ids.Add(file.Id);
+
+                if (response.Files.Count < 100)
+                    return ids;
+                last = response.Files[^1].Id;
+            }
+        }
+        catch (AppwriteException ex)
+        {
+            Console.WriteLine($"❌ Errore lettura del bucket '{ImagesBucketId}' [{ex.Code}]: {ex.Message}");
+            return null;
+        }
     }
     /// <summary>
     /// Metodo generico per inserire qualsiasi modello C# in una collezione Appwrite

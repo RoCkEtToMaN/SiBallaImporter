@@ -81,11 +81,13 @@ namespace SiBallaImportingData.Utils
                     if (values != null && values.Count > 2)
                     {
                         // colonna "Luogo verificato": la cerco per nome nell'intestazione (riga 2), così non dipende dalla posizione
-                        int? verifiedCol = values[1].Select((c, i) => (c, i))
-                            .Where(x => string.Equals(x.c?.ToString()?.Trim(), VerifiedHeader, StringComparison.OrdinalIgnoreCase))
-                            .Select(x => (int?)x.i).FirstOrDefault();
+                        int? verifiedCol = FindHeaderColumn(values[1], VerifiedHeader);
                         if (verifiedCol is null)
                             Console.WriteLine($"[sheet] '{sheet.Properties.Title}': manca la colonna '{VerifiedHeader}' (scrivi l'intestazione nella riga 2, dopo l'ultima colonna)");
+                        // colonna "Immagine": "sì" = l'immagine è su Appwrite Storage
+                        int? imageCol = FindHeaderColumn(values[1], ImageHeader);
+                        if (imageCol is null)
+                            Console.WriteLine($"[sheet] '{sheet.Properties.Title}': manca la colonna '{ImageHeader}' (scrivi l'intestazione nella riga 2, dopo l'ultima colonna)");
 
                         foreach (var row in values)
                         {
@@ -163,7 +165,8 @@ namespace SiBallaImportingData.Utils
                                         Latitude = loc.Lat,
                                         Longitude = loc.Lng,
                                         Styles = stiliEvento,
-                                        WebSite = webSite
+                                        WebSite = webSite,
+                                        HasImage = imageCol is int ic && row.Count > ic && IsYes(row[ic]?.ToString())
                                     },
                                     Organizer = (row != null && row.Count > 6 && row[6] != null)
                                         ? row[6].ToString()
@@ -327,7 +330,13 @@ namespace SiBallaImportingData.Utils
                 //}
                 //Console.WriteLine("---------------------------------------------");
 
-                // 2. Mappatura e formattazione dei dati dagli eventi                
+                // colonna "Immagine": la cerco nell'intestazione (riga 2) per scriverci "sì" se l'immagine è su Storage
+                var header = service.Spreadsheets.Values.Get(spreadsheetId, $"'{sheetName}'!2:2").Execute().Values?.FirstOrDefault();
+                int? imageCol = header is null ? null : FindHeaderColumn(header, ImageHeader);
+                if (imageCol is null && events.Any(x => x.EventDetail?.HasImage == true))
+                    Console.WriteLine($"[sheet] '{sheetName}': manca la colonna '{ImageHeader}', le immagini caricate non vengono segnate");
+
+                // 2. Mappatura e formattazione dei dati dagli eventi
 
                 var newData = events.Select(ev =>
                 {
@@ -345,7 +354,7 @@ namespace SiBallaImportingData.Utils
 
                     bool isWorkshop = Type.Serate.ToString().ToLower() != sheetName.ToLower() ? true: false;
 
-                    return (IList<object>)new List<object>
+                    var row = new List<object>
                     {
                         ev.DateStart.ToString("yyyy-MM-dd"),                                             // Colonna A
                         datefinish.ToString("yyyy-MM-dd"),                                               // Colonna B
@@ -371,6 +380,14 @@ namespace SiBallaImportingData.Utils
                         "",
                         "",// Colonna R
                     };
+
+                    if (imageCol is int ic && ev.EventDetail?.HasImage == true)
+                    {
+                        while (row.Count <= ic)
+                            row.Add("");
+                        row[ic] = ImageYes;
+                    }
+                    return (IList<object>)row;
                 }).ToList();
 
                 var valueRange = new ValueRange
@@ -559,6 +576,18 @@ namespace SiBallaImportingData.Utils
         public const string VerifiedHeader = "Luogo verificato";
         public const string VerifiedAuto = "auto";   // indirizzo copiato dal dizionario
         public const string VerifiedOk = "ok";       // indirizzo e coordinate controllati a mano
+
+        public const string ImageHeader = "Immagine";
+        public const string ImageYes = "sì";
+
+        // indice (0 = A) della colonna con questa intestazione, null se manca
+        private static int? FindHeaderColumn(IList<object> headerRow, string name) =>
+            headerRow.Select((c, i) => (c, i))
+                .Where(x => string.Equals(x.c?.ToString()?.Trim(), name, StringComparison.OrdinalIgnoreCase))
+                .Select(x => (int?)x.i).FirstOrDefault();
+
+        private static bool IsYes(string? value) =>
+            value?.Trim().ToLowerInvariant() is "sì" or "si" or "x" or "yes" or "true" or "1";
 
         public record LocationCell(string? Country, string? City, string? Address, double? Lat, double? Lng);
 

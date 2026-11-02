@@ -12,6 +12,7 @@ namespace SiBallaImportingData.Utils
         public EmailOptions Email { get; set; } = new();
         public GeminiOptions Gemini { get; set; } = new();
         public PathsOptions Paths { get; set; } = new();
+        public AppwriteOptions Appwrite { get; set; } = new();
 
         // scorciatoie per la riga di comando
         private static readonly Dictionary<string, string> SwitchMappings = new()
@@ -75,6 +76,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
+            Console.WriteLine($"  Appwrite chiave API = {(string.IsNullOrWhiteSpace(Appwrite.ApiKey) ? "mancante (solo permessi Any)" : "configurata")}");
         }
     }
 
@@ -117,6 +119,12 @@ namespace SiBallaImportingData.Utils
     {
         // vuoto = %LOCALAPPDATA%\SiBallaImporter (vedi DataPaths)
         public string? DataDirectory { get; set; }
+    }
+
+    public class AppwriteOptions
+    {
+        // chiave API del progetto (scope databases + files): serve per caricare le immagini su Storage
+        public string? ApiKey { get; set; }
     }
 
     public class GeminiOptions

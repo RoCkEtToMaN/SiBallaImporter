@@ -93,7 +93,7 @@ bool enableSearching = opzioni.EnableSearching;
 bool enableSending = opzioni.EnableSending;
 bool resetDb = opzioni.ResetDb;
 //var firebaseDbService = new FirebaseDbService(databaseUrl);
-var appWriteService = new AppWriteService();
+var appWriteService = new AppWriteService(settings.Appwrite.ApiKey);
 
 var eventiESwing = new List<Event>();
 var swingPlanitEvent = new List<Event>();
@@ -237,7 +237,11 @@ EventiPerBot.Salva(DataPaths.Get("eventi-bot.json"), eventFromExcel, eventsMerge
 
 // eventsMergeUfficial = eventi trovati online e non ancora presenti nello Sheet
 if (enableImportingOnExcel && eventsMergeUfficial.Count > 0)
+{
+    // immagine su Storage prima di scrivere la riga: il link online (es. Facebook) scade, la copia no
+    await EventImages.UploadAsync(eventsMergeUfficial, appWriteService);
     await ImportData.PrepareToAppendToGoogleSheet([.. eventsMergeUfficial.OrderBy(x => x.DateStart)], eventFromExcel);
+}
 
 if (enableSending)
 {
@@ -283,6 +287,9 @@ if (enableImportingOnDB)
     #endregion
 
     #region  AppWrite
+    // "sì" nella colonna Immagine -> link di Storage in EventDetail.ImageUrl
+    await EventImages.ApplyToSheetEventsAsync(sheetEvents, appWriteService);
+
     // il DB è la copia dello Sheet: sostituisco tutto, così arrivano anche modifiche e cancellazioni.
     // Con lo Sheet vuoto (lettura fallita) non tocco la collezione per non svuotarla
     if (eventFromExcel.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
