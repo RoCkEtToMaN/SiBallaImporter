@@ -7,7 +7,8 @@ namespace SiBallaImportingData.Utils
 {
     public static class EmailSender
     {
-        public static async Task SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
+        /// <summary>true se l'email è partita (o è stata salvata l'anteprima)</summary>
+        public static async Task<bool> SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
         {
             try
             {
@@ -15,7 +16,7 @@ namespace SiBallaImportingData.Utils
                 {
                     await File.WriteAllTextAsync(settings.Email.PreviewFile, TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare));
                     Console.WriteLine($"📄 Email non inviata, anteprima salvata in {settings.Email.PreviewFile}");
-                    return;
+                    return true;
                 }
 
                 //var textEm = TextEmail(eventi);
@@ -25,7 +26,7 @@ namespace SiBallaImportingData.Utils
                 if (!settings.Email.HasMailjetKeys)
                 {
                     Console.WriteLine("❌ Chiavi Mailjet mancanti: dotnet user-secrets set \"Email:MailjetApiKey\" \"...\" (e Email:MailjetApiSecret)");
-                    return;
+                    return false;
                 }
 
                 //using var client = new HttpClient();
@@ -76,6 +77,7 @@ namespace SiBallaImportingData.Utils
                     if (response.IsSuccessStatusCode)
                     {
                         Console.WriteLine($"✅ Successo ({(int)response.StatusCode})");
+                        return true;
                     }
                     else
                     {
@@ -103,7 +105,7 @@ namespace SiBallaImportingData.Utils
             {
                 Console.WriteLine($"❌ Eccezione: {ex.Message}");
             }
-
+            return false;
         }
         private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
         {

@@ -253,10 +253,15 @@ if (enableSending)
         // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
         var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail, settings.Gemini);
         // senza città non so se sono vicini: sezione a parte invece del bollettino per città
-        await EmailSender.SendWithMailjetAnonymous(
+        var inviata = await EmailSender.SendWithMailjetAnonymous(
             eventiSwing.Where(x => !x.LuogoSconosciuto).ToList(), settings, daVerificare,
             eventiSwing.Where(x => x.LuogoSconosciuto).ToList());
-        UltimaEmail.Ricorda(eventiEmail);
+        // se non è partita gli eventi restano "nuovi" e il programma esce con errore:
+        // su GitHub il run fallisce (arriva la mail) e il tentativo dell'ora dopo la rimanda
+        if (inviata)
+            UltimaEmail.Ricorda(eventiEmail);
+        else
+            Environment.ExitCode = 1;
     }
 }
 
