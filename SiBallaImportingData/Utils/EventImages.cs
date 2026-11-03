@@ -96,6 +96,122 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"🖼️ Eventi dello Sheet con immagine: {conImmagine.Count - mancanti}, file mancanti: {mancanti}");
         }
 
+        /// <summary>
+        /// Righe future dello Sheet con la colonna "Immagine" vuota: se il file è già su Storage scrive "sì",
+        /// altrimenti prende l'immagine di anteprima (og:image) del sito in "Riferimento", la carica e scrive "sì";
+        /// se il sito non ne ha scrive "no", così al giro dopo non la ricerca. Al massimo max righe per giro
+        /// </summary>
+        public static async Task BackfillSheetAsync(IEnumerable<Event> sheetEvents, AppWriteService appWrite, int max)
+        {
+            var daCercare = sheetEvents
+                .Where(e => e.DateStart.Date >= DateTime.Today && e.SheetImageColumn is not null && string.IsNullOrWhiteSpace(e.SheetImageRaw))
+                .OrderBy(e => e.DateStart)
+                .ToList();
+            Console.WriteLine($"\n===== Immagini per le righe dello Sheet: {daCercare.Count} righe future senza valore in '{ImportData.ImageHeader}' (max {max} per giro) =====");
+            if (daCercare.Count == 0 || !await appWrite.EnsureImagesBucketAsync()) return;
+
+            // file già caricati (es. evento trovato online e scartato perché nello Sheet c'era già con un nome scritto diverso)
+            var ids = await appWrite.GetImageIdsAsync() ?? new HashSet<string>();
+            var celle = new List<(Event Event, string Value)>();
+            foreach (var ev in daCercare.Where(e => ids.Contains(FileId(e))))
+                celle.Add((ev, ImportData.ImageYes));
+            Console.WriteLine($"🖼️ Già su Storage: {celle.Count}");
+
+            // stesso sito su più righe (pagina dell'organizzatore): lo leggo una volta sola per giro
+            var perSito = new Dictionary<string, (byte[] Bytes, string MimeType, string Extension)?>(StringComparer.OrdinalIgnoreCase);
+            int caricate = 0, senza = 0;
+            foreach (var ev in daCercare.Where(e => !ids.Contains(FileId(e))).Take(max))
+            {
+                var site = NormalizeSite(ev.EventDetail?.WebSite);
+                if (site is null)
+                {
+                    celle.Add((ev, ImportData.ImageNo));
+                    senza++;
+                    continue;
+                }
+
+                if (!perSito.TryGetValue(site, out var image))
+                {
+                    var imageUrl = await FindPreviewImageAsync(site);
+                    image = imageUrl is null ? null : await DownloadAsync(imageUrl);
+                    perSito[site] = image;
+                    Console.WriteLine($"{(image is null ? "❌" : "✅")} {site}{(imageUrl is null ? "" : " -> " + imageUrl)}");
+                    await Task.Delay(500);
+                }
+
+                var fileId = FileId(ev);
+                if (image is not null && await appWrite.UploadImageAsync(fileId, image.Value.Bytes, fileId + image.Value.Extension, image.Value.MimeType))
+                {
+                    celle.Add((ev, ImportData.ImageYes));
+                    caricate++;
+                }
+                else if (image is null)
+                {
+                    celle.Add((ev, ImportData.ImageNo));
+                    senza++;
+                }
+                // caricamento fallito: cella vuota, riprovo al prossimo giro
+            }
+
+            foreach (var (ev, value) in celle.Where(x => x.Value == ImportData.ImageYes))
+                ev.EventDetail.HasImage = true;
+            Console.WriteLine($"🖼️ Righe dello Sheet: {caricate} immagini caricate, {senza} senza immagine sul sito ({perSito.Count} siti letti)");
+            await ImportData.UpdateSheetImageCellsAsync(celle);
+        }
+
+        // primo sito della cella "Riferimento" (a volte più link separati da ';'), con https:// se manca
+        private static string? NormalizeSite(string? webSite)
+        {
+            var site = webSite?.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(site) || site.Contains(' ')) return null;
+            if (!site.StartsWith("http", StringComparison.OrdinalIgnoreCase)) site = "https://" + site;
+            return Uri.TryCreate(site, UriKind.Absolute, out _) ? site : null;
+        }
+
+        private static readonly string[] GenericImages =
+        {
+            "static.fillout.com/fillout-og-image",
+            "dice.fm/static/images/dice-fan-social",
+        };
+
+        // link a gruppi WhatsApp/Telegram o a moduli Google: l'anteprima non è dell'evento né dell'organizzatore
+        private static bool IsChatLink(Uri uri) =>
+            new[] { "whatsapp.com", "whatsapp.net", "wa.me", "t.me", "telegram.org", "forms.gle" }
+                .Any(h => uri.Host.Equals(h, StringComparison.OrdinalIgnoreCase) || uri.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase))
+            || (uri.Host.Equals("docs.google.com", StringComparison.OrdinalIgnoreCase) && uri.AbsolutePath.StartsWith("/forms", StringComparison.OrdinalIgnoreCase));
+
+        // immagine di anteprima dichiarata dalla pagina stessa (og:image, poi twitter:image)
+        private static async Task<string?> FindPreviewImageAsync(string site)
+        {
+            try
+            {
+                using var response = await _client.GetAsync(site);
+                if (!response.IsSuccessStatusCode) return null;
+
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(await response.Content.ReadAsStringAsync());
+                var content = doc.DocumentNode
+                    .SelectNodes("//meta[@property='og:image' or @property='og:image:url' or @property='og:image:secure_url' or @name='twitter:image']")
+                    ?.Select(m => m.GetAttributeValue("content", "").Trim())
+                    .FirstOrDefault(c => c.Length > 0);
+                if (content is null) return null;
+
+                // può essere relativo alla pagina (dopo eventuali redirect)
+                var baseUri = response.RequestMessage?.RequestUri ?? new Uri(site);
+                if (IsChatLink(baseUri) || !Uri.TryCreate(baseUri, System.Net.WebUtility.HtmlDecode(content), out var abs) || IsChatLink(abs))
+                    return null;
+                // immagine standard della piattaforma (moduli, biglietterie), uguale per tutti gli eventi
+                if (GenericImages.Any(g => abs.ToString().Contains(g, StringComparison.OrdinalIgnoreCase)))
+                    return null;
+                return abs.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Sito non letto '{site}': {ex.Message}");
+                return null;
+            }
+        }
+
         private static async Task<(byte[] Bytes, string MimeType, string Extension)?> DownloadAsync(string url)
         {
             try
@@ -121,13 +237,20 @@ namespace SiBallaImportingData.Utils
                     return null;
                 }
 
-                var extension = mime.ToLowerInvariant() switch
+                // solo i formati che l'app sa mostrare (niente avif, svg, ico...)
+                string? extension = mime.ToLowerInvariant() switch
                 {
+                    "image/jpeg" or "image/jpg" or "image/pjpeg" => ".jpg",
                     "image/png" => ".png",
                     "image/webp" => ".webp",
                     "image/gif" => ".gif",
-                    _ => ".jpg"
+                    _ => null
                 };
+                if (extension is null)
+                {
+                    Console.WriteLine($"Formato immagine non supportato ({mime}): {url}");
+                    return null;
+                }
                 return (bytes, mime, extension);
             }
             catch (Exception ex)

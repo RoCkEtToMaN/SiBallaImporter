@@ -20,6 +20,9 @@ namespace SiBallaImportingData.Model
         // colonna "Luogo verificato" dello sheet: vuoto = indirizzo scritto da te, "auto" = copiato dal programma, "ok" = controllato
         [JsonIgnore] public string? LuogoVerificato { get; set; }
         [JsonIgnore] public int? SheetVerifiedColumn { get; set; }   // indice della colonna (0 = A), null se manca l'intestazione
+        // colonna "Immagine" dello sheet: "sì" = file su Storage, "no" = cercata sul sito senza trovarla, vuoto = da cercare
+        [JsonIgnore] public string? SheetImageRaw { get; set; }
+        [JsonIgnore] public int? SheetImageColumn { get; set; }
         public EventDetail EventDetail { get; set; } 
         public string? PartyName { get; set; }
         public string? WorkshopName { get; set; }

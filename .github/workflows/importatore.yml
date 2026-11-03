@@ -159,6 +159,7 @@ jobs:
           Import__EnableImportingOnDB: ${{ inputs.enable_importing_on_db || vars.ENABLE_IMPORTING_ON_DB || 'false' }}
           Import__UpdateSheetCoordinates: ${{ inputs.update_sheet_coordinates || vars.UPDATE_SHEET_COORDINATES || 'false' }}
           Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
+          Import__CercaImmaginiSheet: ${{ vars.CERCA_IMMAGINI_SHEET || 'false' }}
           Import__ResetDb: "false"
           Import__TestImmagini: "false"
           Import__TestSwing: "false"

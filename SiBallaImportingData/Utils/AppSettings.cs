@@ -24,6 +24,7 @@ namespace SiBallaImportingData.Utils
             ["--coords"] = "Import:UpdateSheetCoordinates",
             ["--reset-db"] = "Import:ResetDb",
             ["--test-immagini"] = "Import:TestImmagini",
+            ["--immagini-sheet"] = "Import:CercaImmaginiSheet",
             ["--test-swing"] = "Import:TestSwing",
             ["--test-indirizzi"] = "Import:TestIndirizzi",
             ["--giorni"] = "Import:Giorni",
@@ -72,6 +73,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  EnableImportingOnDB = {Import.EnableImportingOnDB}");
             Console.WriteLine($"  UpdateSheetCoordinates = {Import.UpdateSheetCoordinates}");
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
+            Console.WriteLine($"  CercaImmaginiSheet = {Import.CercaImmaginiSheet} (max {Import.CercaImmaginiSheetMax} righe)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
@@ -91,6 +93,9 @@ namespace SiBallaImportingData.Utils
         // riscrive sullo sheet (colonna F) le coordinate trovate da Photon o verificate nel JSON
         public bool UpdateSheetCoordinates { get; set; }
         public bool ResetDb { get; set; }
+        // righe future dello Sheet senza immagine: la cerca sul sito in "Riferimento" e scrive "sì"/"no" nella colonna "Immagine"
+        public bool CercaImmaginiSheet { get; set; }
+        public int CercaImmaginiSheetMax { get; set; } = 100;
         // conta solo le immagini trovate, senza scrivere su foglio/DB
         public bool TestImmagini { get; set; }
         // classifica con Gemini gli eventi dei prossimi Giorni e stampa le liste, senza email/foglio/DB

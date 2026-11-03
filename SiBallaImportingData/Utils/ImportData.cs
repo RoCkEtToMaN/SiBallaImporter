@@ -149,6 +149,8 @@ namespace SiBallaImportingData.Utils
                                     SheetRow = values.IndexOf(row) + 1,
                                     SheetLocationRaw = row[5]?.ToString(),
                                     SheetVerifiedColumn = verifiedCol,
+                                    SheetImageColumn = imageCol,
+                                    SheetImageRaw = imageCol is int ir && row.Count > ir ? row[ir]?.ToString()?.Trim() : null,
                                     LuogoVerificato = verifiedCol is int vc && row.Count > vc ? row[vc]?.ToString()?.Trim().ToLowerInvariant() : null,
                                     DateStart = Convert.ToDateTime(row[0]),
                                     DateFinish = Convert.ToDateTime(row[1]),
@@ -579,6 +581,39 @@ namespace SiBallaImportingData.Utils
 
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";
+        public const string ImageNo = "no";   // cercata sul sito della riga senza trovarla: non la ricerco a ogni giro
+
+        /// <summary>
+        /// Scrive "sì"/"no" nella colonna "Immagine" delle righe indicate
+        /// </summary>
+        public static async Task UpdateSheetImageCellsAsync(IEnumerable<(Event Event, string Value)> cells)
+        {
+            var data = cells
+                .Where(x => x.Event.SheetName is not null && x.Event.SheetRow is not null && x.Event.SheetImageColumn is not null)
+                .Select(x => new ValueRange
+                {
+                    Range = $"'{x.Event.SheetName}'!{(char)('A' + x.Event.SheetImageColumn!.Value)}{x.Event.SheetRow}",
+                    Values = new List<IList<object>> { new List<object> { x.Value } }
+                }).ToList();
+            if (data.Count == 0) return;
+
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+
+            var response = await service.Spreadsheets.Values.BatchUpdate(new BatchUpdateValuesRequest
+            {
+                ValueInputOption = "RAW",
+                Data = data
+            }, "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo").ExecuteAsync();
+            Console.WriteLine($"[sheet] colonna '{ImageHeader}' aggiornata: {response.TotalUpdatedCells} celle");
+        }
 
         // indice (0 = A) della colonna con questa intestazione, null se manca
         private static int? FindHeaderColumn(IList<object> headerRow, string name) =>

@@ -176,6 +176,10 @@ Console.WriteLine($"\nEventi dello sheet aggiornati dal dizionario: {aggiornati.
 if (aggiornati.Count > 0)
     await ImportData.UpdateSheetLocationsAsync(aggiornati, write: opzioni.UpdateSheetCoordinates);
 
+// righe dello sheet senza immagine: la cerco sul sito della riga (così arriva sul DB già in questo giro)
+if (opzioni.CercaImmaginiSheet)
+    await EventImages.BackfillSheetAsync(sheetEvents, appWriteService, opzioni.CercaImmaginiSheetMax);
+
 // 5. report: eventi futuri che si ripetono e non hanno ancora un indirizzo, i più frequenti prima
 //    (basta scriverlo in una riga e il prossimo giro lo copia sulle altre)
 var ricorrentiSenzaIndirizzo = sheetEvents

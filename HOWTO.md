@@ -41,6 +41,15 @@ data o il titolo nello Sheet il collegamento si perde: al caricamento su Appwrit
 (`file ... non è su Storage`) e l'evento va sul DB senza immagine. Per un evento inserito a mano
 puoi caricare tu il file nel bucket con quel nome e scrivere `sì` nella colonna.
 
+Per le righe già nello Sheet c'è `CercaImmaginiSheet` (flag `--immagini-sheet`, Variable di GitHub
+`CERCA_IMMAGINI_SHEET`): per le righe future con la colonna **Immagine** vuota legge il sito in
+"Riferimento", prende l'immagine di anteprima che il sito dichiara (`og:image`), la carica e scrive
+`sì`; se il sito non ne ha scrive `no`, così non la ricerca a ogni giro (cancella il `no` per
+riprovare). Al massimo `CercaImmaginiSheetMax` righe per giro (default 100). Con le pagine Facebook
+di solito non funziona: senza login non mostrano l'anteprima. Vengono scartati i link a WhatsApp,
+Telegram e moduli Google, le immagini standard delle piattaforme (Fillout, DICE) e i formati che non
+sono jpg, png, webp o gif.
+
 Configurazione su Appwrite (una volta sola):
 
 1. **Overview → API Keys → Create API key** con gli scope di lettura e scrittura del database
@@ -60,6 +69,7 @@ Configurazione su Appwrite (una volta sola):
 | Aggiunta allo Sheet | no | `ENABLE_IMPORTING_ON_EXCEL` |
 | Caricamento su Appwrite | no | `ENABLE_IMPORTING_ON_DB` |
 | Coordinate sullo Sheet | no | `UPDATE_SHEET_COORDINATES` |
+| Immagini per le righe dello Sheet | no | `CERCA_IMMAGINI_SHEET` |
 | Giorni coperti dall'email | 7 | `GIORNI` |
 
 Le Variables si impostano in **Settings → Secrets and variables → Actions → tab Variables**,
