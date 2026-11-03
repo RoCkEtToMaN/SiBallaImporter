@@ -101,6 +101,8 @@ public class KnownVenueStore
         foreach (var e in sheetEvents.OrderBy(x => x.DateStart))
         {
             if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
+            // aggiunta dal programma e non ancora controllata: indirizzo e coordinate non sono una fonte
+            if (e.LuogoVerificato == ImportData.VerifiedPending) continue;
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0) continue;
@@ -278,6 +280,8 @@ public class KnownVenueStore
         foreach (var e in sheetEvents)
         {
             if (e.EventDetail is null || string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
+            // non la tocco: riscrivendola diventerebbe "auto" e finirebbe sul DB senza che tu l'abbia controllata
+            if (e.LuogoVerificato == ImportData.VerifiedPending) continue;
             if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) continue;
 
             var t = NormalizeTitle(e.PartyName);

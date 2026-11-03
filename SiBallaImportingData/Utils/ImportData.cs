@@ -337,6 +337,10 @@ namespace SiBallaImportingData.Utils
                 int? imageCol = header is null ? null : FindHeaderColumn(header, ImageHeader);
                 if (imageCol is null && events.Any(x => x.EventDetail?.HasImage == true))
                     Console.WriteLine($"[sheet] '{sheetName}': manca la colonna '{ImageHeader}', le immagini caricate non vengono segnate");
+                // "da verificare" in "Luogo verificato": l'indirizzo viene dal sito, va controllato prima del DB
+                int? verifiedCol = header is null ? null : FindHeaderColumn(header, VerifiedHeader);
+                if (verifiedCol is null)
+                    Console.WriteLine($"[sheet] '{sheetName}': manca la colonna '{VerifiedHeader}', le righe nuove non vengono segnate '{VerifiedPending}' e andranno sul DB");
 
                 // 2. Mappatura e formattazione dei dati dagli eventi
 
@@ -383,12 +387,16 @@ namespace SiBallaImportingData.Utils
                         "",// Colonna R
                     };
 
-                    if (imageCol is int ic && ev.EventDetail?.HasImage == true)
+                    void Set(int col, string value)
                     {
-                        while (row.Count <= ic)
+                        while (row.Count <= col)
                             row.Add("");
-                        row[ic] = ImageYes;
+                        row[col] = value;
                     }
+                    if (imageCol is int ic && ev.EventDetail?.HasImage == true)
+                        Set(ic, ImageYes);
+                    if (verifiedCol is int vc)
+                        Set(vc, VerifiedPending);
                     return (IList<object>)row;
                 }).ToList();
 
@@ -578,6 +586,9 @@ namespace SiBallaImportingData.Utils
         public const string VerifiedHeader = "Luogo verificato";
         public const string VerifiedAuto = "auto";   // indirizzo copiato dal dizionario
         public const string VerifiedOk = "ok";       // indirizzo e coordinate controllati a mano
+        // riga aggiunta dal programma con l'evento trovato online: non va sul DB e non insegna niente al dizionario
+        // finché non scrivi "ok" (o svuoti la cella)
+        public const string VerifiedPending = "da verificare";
 
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";

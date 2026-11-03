@@ -28,7 +28,10 @@ I due workflow sono indipendenti: se uno fallisce l'altro gira comunque.
      Gemini (gli eventi non swing finiscono in una sezione "da verificare") e manda l'email con Mailjet.
    - **Sheet** (`EnableImportingOnExcel`): aggiunge i nuovi eventi allo Sheet. Se l'evento ha
      un'immagine, prima la scarica e la carica nel bucket `immagini` di Appwrite Storage, poi scrive
-     `sì` nella colonna **Immagine**.
+     `sì` nella colonna **Immagine**. In **Luogo verificato** scrive `da verificare`: finché resta
+     così la riga **non va su Appwrite** e il dizionario dei luoghi non ne impara l'indirizzo.
+     Controllato l'indirizzo (e che l'evento ti interessi), scrivi `ok` o svuota la cella: al
+     caricamento successivo su Appwrite la riga arriva nell'app, con la sua immagine.
    - **Coordinate** (`UpdateSheetCoordinates`): riscrive sullo Sheet le coordinate trovate.
    - **Appwrite** (`EnableImportingOnDB`): carica **tutto lo Sheet** sul database Appwrite, sostituendo
      le collezioni `serate` e `workshop`. È da qui che l'app SiBalla legge gli eventi. Per le righe

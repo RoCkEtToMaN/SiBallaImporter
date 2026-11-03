@@ -295,11 +295,19 @@ if (enableImportingOnDB)
     await EventImages.ApplyToSheetEventsAsync(sheetEvents, appWriteService);
 
     // il DB è la copia dello Sheet: sostituisco tutto, così arrivano anche modifiche e cancellazioni.
+    // Le righe "da verificare" (aggiunte dal programma, indirizzo non controllato) restano fuori finché non scrivi "ok".
     // Con lo Sheet vuoto (lettura fallita) non tocco la collezione per non svuotarla
+    List<Event> Confermati(List<Event> eventi)
+    {
+        var ok = eventi.Where(x => x.LuogoVerificato != ImportData.VerifiedPending).ToList();
+        if (ok.Count < eventi.Count)
+            Console.WriteLine($"⏳ {eventi.Count - ok.Count} righe '{ImportData.VerifiedPending}' non vanno sul DB");
+        return ok;
+    }
     if (eventFromExcel.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
-        await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.SerateCollectionId, serate);
+        await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.SerateCollectionId, Confermati(serate));
     if (eventFromExcel.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
-        await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.WorkshopsCollectionId, workshops);
+        await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.WorkshopsCollectionId, Confermati(workshops));
     #endregion
 }
 
