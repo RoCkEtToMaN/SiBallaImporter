@@ -320,11 +320,16 @@ namespace SiBallaImportingData.Utils
 
                 var months = initialData?.DocumentNode.SelectNodes("//h3[contains(@class, 'swingtag')]");
 
-                if (months == null || !months.Any()) return null;
+                // sito giù o pagina cambiata: si va avanti con gli eventi delle altre fonti
+                if (months == null || !months.Any())
+                {
+                    Console.WriteLine("⚠️ SwingPlanit: nessun mese trovato nella pagina, eventi SwingPlanit saltati");
+                    return workshops;
+                }
 
                 foreach (var month in months)
                 {
-                    workshops.AddRange(await SearchSwingPlanitAsync(initialData, month));
+                    workshops.AddRange(await SearchSwingPlanitAsync(initialData!, month) ?? []);
                 }
 
                 return workshops;
@@ -863,6 +868,8 @@ namespace SiBallaImportingData.Utils
                     string jsonResponse = await response.Content.ReadAsStringAsync();
                     doc.LoadHtml(jsonResponse);
                 }
+                else
+                    Console.WriteLine($"⚠️ SwingPlanit: risposta {(int)response.StatusCode} {response.ReasonPhrase}");
 
                 return doc;
             }

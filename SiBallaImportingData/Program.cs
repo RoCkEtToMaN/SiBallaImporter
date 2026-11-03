@@ -196,9 +196,11 @@ try
 {
     if (enableSearching)
     {
-        eventsMerge.AddRange(await EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing(), store, resolver, opzioni.Radius));
+        eventsMerge.AddRange(await DaFonte("e-swing", async () =>
+            await EventFilter.FilterESwingItEventsByDateRange(await importDataFromWeb.GetESwing(), store, resolver, opzioni.Radius)));
         var undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
-        eventsMerge.AddRange(await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await importDataFromWeb.GetSwingPlanit(), store, resolver, opzioni.Radius));
+        eventsMerge.AddRange(await DaFonte("SwingPlanit", async () =>
+            await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await importDataFromWeb.GetSwingPlanit(), store, resolver, opzioni.Radius)));
         undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
 
 
@@ -296,3 +298,17 @@ if (enableImportingOnDB)
 
 
 
+
+// una fonte che non risponde (sito giù, timeout) non deve fermare il giro: si va avanti con le altre
+static async Task<List<Event>> DaFonte(string nome, Func<Task<List<Event>>> leggi)
+{
+    try
+    {
+        return await leggi();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ {nome}: {ex.GetType().Name}: {ex.Message} -> eventi {nome} saltati");
+        return [];
+    }
+}
