@@ -61,7 +61,10 @@ namespace SiBallaImportingData.Utils
                     caricate++;
                 }
                 else
+                {
                     fallite++;
+                    Console.WriteLine($"   immagine di '{ev.PartyName?.Trim()}' ({ev.DateStart:yyyy-MM-dd}): {url}");
+                }
             }
             Console.WriteLine($"🖼️ Immagini caricate su Storage: {caricate}, non riuscite: {fallite}");
         }

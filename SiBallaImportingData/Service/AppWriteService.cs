@@ -82,23 +82,37 @@ public class AppWriteService
     /// </summary>
     public async Task<bool> UploadImageAsync(string fileId, byte[] bytes, string fileName, string mimeType)
     {
-        try
+        // errori di rete (es. connessione chiusa dal server a metà invio): riprovo una volta, poi lascio perdere quest'immagine
+        for (int tentativo = 1; ; tentativo++)
         {
-            await Storage.CreateFile(
-                bucketId: ImagesBucketId,
-                fileId: fileId,
-                file: InputFile.FromBytes(bytes, fileName, mimeType)
-            );
-            return true;
-        }
-        catch (AppwriteException ex) when (ex.Code == 409)
-        {
-            return true;
-        }
-        catch (AppwriteException ex)
-        {
-            Console.WriteLine($"❌ Errore caricamento immagine {fileId} [{ex.Code}]: {ex.Message}");
-            return false;
+            try
+            {
+                await Storage.CreateFile(
+                    bucketId: ImagesBucketId,
+                    fileId: fileId,
+                    file: InputFile.FromBytes(bytes, fileName, mimeType)
+                );
+                return true;
+            }
+            catch (AppwriteException ex) when (ex.Code == 409)
+            {
+                return true;
+            }
+            catch (AppwriteException ex)
+            {
+                Console.WriteLine($"❌ Errore caricamento immagine {fileId} [{ex.Code}]: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex) when (tentativo < 2)
+            {
+                Console.WriteLine($"⚠️ Caricamento immagine {fileId} interrotto ({ex.Message}), riprovo");
+                await Task.Delay(2000);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Caricamento immagine {fileId} non riuscito ({bytes.Length / 1024} KB, {mimeType}): {ex.Message}");
+                return false;
+            }
         }
     }
 
