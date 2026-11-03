@@ -392,6 +392,21 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "lo swing del principe lindy hop boogie woogie night dj mr barini": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.49631118774414,
+        "lng": 9.173330307006836,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
       }
     }
   },
@@ -1129,6 +1144,21 @@
         "address": null,
         "lat": 43.73286819458008,
         "lng": 13.188770294189453,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      },
+      "swing socialdance senigallia an college": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.73289108276367,
+        "lng": 13.188969612121582,
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
@@ -2329,6 +2359,21 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "swing big apple polaris": {
+        "organizer": null,
+        "city": "Monza e Brianza",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.661529541015625,
+        "lng": 9.225310325622559,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
       }
     }
   },
@@ -2667,6 +2712,21 @@
         "notes": null
       },
       "swing the boat with djs waldorf statler": {
+        "organizer": null,
+        "city": "Vienna",
+        "country": "Austria",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 48.21158981323242,
+        "lng": 16.381120681762695,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      },
+      "swingclub swing session quintet": {
         "organizer": null,
         "city": "Vienna",
         "country": "Austria",
@@ -3707,6 +3767,21 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "lindy land": {
+        "organizer": null,
+        "city": "Pisa",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.712608337402344,
+        "lng": 10.406100273132324,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
       }
     }
   },
@@ -3860,6 +3935,21 @@
     },
     "events": {
       "perry boogie clai stones revue bowling seventies venerdi novembre": {
+        "organizer": null,
+        "city": "Rimini",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.98849868774414,
+        "lng": 12.528940200805664,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      },
+      "perry boogie meets sery lee bowling seventies venerdi novembre": {
         "organizer": null,
         "city": "Rimini",
         "country": "Italia",
@@ -4745,6 +4835,21 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "i weekend di balbo novembre con iacopo longo": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.640411376953125,
+        "lng": 11.186650276184082,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
       }
     }
   },
@@ -4966,6 +5071,21 @@
         "notes": null
       },
       "swing blues the cap ballroom dj night": {
+        "organizer": null,
+        "city": "Genova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.40959167480469,
+        "lng": 8.906359672546387,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      },
+      "swing blues dabstep jazz band stefano d angelo": {
         "organizer": null,
         "city": "Genova",
         "country": "Italia",
@@ -14478,6 +14598,584 @@
         "address": null,
         "lat": 45.68238067626953,
         "lng": 13.75098991394043,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "bellmer balboa|berlin": {
+    "default": {
+      "organizer": "Bellmer Balboa",
+      "city": "Berlin",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Revaler Straße 99",
+      "lat": 52.50761032104492,
+      "lng": 13.45481014251709,
+      "geocodedAddress": "Revaler Straße 99",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bellmer balboa w the roaring cats live": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 52.50761032104492,
+        "lng": 13.45481014251709,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "le cupole discoteca|ravenna": {
+    "default": {
+      "organizer": "Le Cupole Discoteca",
+      "city": "Ravenna",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Casanola 27",
+      "lat": 44.31972885131836,
+      "lng": 11.81132984161377,
+      "geocodedAddress": "Via Casanola 27",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "le cupole venerdi cupole con stereo band venerdi novembre": {
+        "organizer": null,
+        "city": "Ravenna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.31972885131836,
+        "lng": 11.81132984161377,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "swingin napoli|napoli": {
+    "default": {
+      "organizer": "Swingin' Napoli",
+      "city": "Napoli",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Salita del Petraio",
+      "lat": 40.84135055541992,
+      "lng": 14.23855972290039,
+      "geocodedAddress": "Salita del Petraio",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swinginpratica": {
+        "organizer": null,
+        "city": "Napoli",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 40.84135055541992,
+        "lng": 14.23855972290039,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "battilana lino|torino": {
+    "default": {
+      "organizer": "Battilana Lino",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Corso Mortara",
+      "lat": 45.08993148803711,
+      "lng": 7.6732401847839355,
+      "geocodedAddress": "Corso Mortara",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "double roll party": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.08993148803711,
+        "lng": 7.6732401847839355,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "instabile culture in movimento|firenze": {
+    "default": {
+      "organizer": "InStabile - Culture in movimento",
+      "city": "Firenze",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Ponte Giovanni Falcone",
+      "lat": 43.76408004760742,
+      "lng": 11.304010391235352,
+      "geocodedAddress": "Ponte Giovanni Falcone",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rchestra bballak n tabile": {
+        "organizer": null,
+        "city": "Firenze",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.76408004760742,
+        "lng": 11.304010391235352,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "mr barini music designer|novara": {
+    "default": {
+      "organizer": "Mr Barini  - music designer",
+      "city": "Novara",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Giuseppe Regaldi",
+      "lat": 45.4476203918457,
+      "lng": 8.616120338439941,
+      "geocodedAddress": "Via Giuseppe Regaldi",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "roots": {
+        "organizer": null,
+        "city": "Novara",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.4476203918457,
+        "lng": 8.616120338439941,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "exwide|pisa": {
+    "default": {
+      "organizer": "Exwide",
+      "city": "Pisa",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Franceschi 13",
+      "lat": 43.71464157104492,
+      "lng": 10.402299880981445,
+      "geocodedAddress": "Via Franceschi 13",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing before dinner jazz wide jam": {
+        "organizer": null,
+        "city": "Pisa",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.71464157104492,
+        "lng": 10.402299880981445,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "scuola di ballo baila|forli cesena": {
+    "default": {
+      "organizer": "Scuola di ballo Baila",
+      "city": "Forlì-Cesena",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Antonio Meucci 15",
+      "lat": 44.227291107177734,
+      "lng": 12.079520225524902,
+      "geocodedAddress": "Via Antonio Meucci 15",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing circle": {
+        "organizer": null,
+        "city": "Forlì-Cesena",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.227291107177734,
+        "lng": 12.079520225524902,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "feel good swing|torino": {
+    "default": {
+      "organizer": "Feel Good Swing",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Parma 29l",
+      "lat": 45.078369140625,
+      "lng": 7.693280220031738,
+      "geocodedAddress": "Via Parma 29l",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "friday night hop torna dance with me social practice": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.078369140625,
+        "lng": 7.693280220031738,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "west coast swing zurich e nicolas handschuh|district zurich": {
+    "default": {
+      "organizer": "West Coast Swing Zürich e Nicolas Handschuh",
+      "city": "District Zurich",
+      "country": "Switzerland",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Förrlibuckstrasse 66",
+      "lat": 47.39186096191406,
+      "lng": 8.51453971862793,
+      "geocodedAddress": "Förrlibuckstrasse 66",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "wcs party in silbando with dj florence": {
+        "organizer": null,
+        "city": "District Zurich",
+        "country": "Switzerland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 47.39186096191406,
+        "lng": 8.51453971862793,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "swing s angels dance cool|modena": {
+    "default": {
+      "organizer": "Swing's Angels - dance cool",
+      "city": "Modena",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Don Pasquino Fiorenzi 135",
+      "lat": 44.65510940551758,
+      "lng": 10.895050048828125,
+      "geocodedAddress": "Via Don Pasquino Fiorenzi 135",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "mad swing": {
+        "organizer": null,
+        "city": "Modena",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.65510940551758,
+        "lng": 10.895050048828125,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "jam jar of art meltingpot e lucio vallisneri|parma": {
+    "default": {
+      "organizer": "JAM   jar_of_art_meltingpot e Lucio Vallisneri",
+      "city": "Parma",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Giuseppe Meazza 23a",
+      "lat": 44.78717041015625,
+      "lng": 10.377909660339355,
+      "geocodedAddress": "Via Giuseppe Meazza 23a",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "november swing con lucio vallisneri": {
+        "organizer": null,
+        "city": "Parma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.78717041015625,
+        "lng": 10.377909660339355,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "dance point asd spaghetti gang e ivano zambet|treviso": {
+    "default": {
+      "organizer": "Dance Point asd, Spaghetti Gang e Ivano Zambet",
+      "city": "Treviso",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Roma 31",
+      "lat": 45.917240142822266,
+      "lng": 12.163570404052734,
+      "geocodedAddress": "Via Roma 31",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "seconda serata boogie woogie rock n roll a pieve di soligo": {
+        "organizer": null,
+        "city": "Treviso",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.917240142822266,
+        "lng": 12.163570404052734,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "swingfly dance e lucio vallisneri|reggio emilia": {
+    "default": {
+      "organizer": "SwingFly Dance e Lucio Vallisneri",
+      "city": "Reggio Emilia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Rio Rocca 5a",
+      "lat": 44.54981994628906,
+      "lng": 10.76045036315918,
+      "geocodedAddress": "Via Rio Rocca 5a",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "we dance we drink we have fun": {
+        "organizer": null,
+        "city": "Reggio Emilia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.54981994628906,
+        "lng": 10.76045036315918,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "amici astro dance|milano": {
+    "default": {
+      "organizer": "Amici Astro Dance",
+      "city": "Milano",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Varese 118",
+      "lat": 45.57582092285156,
+      "lng": 9.073410034179688,
+      "geocodedAddress": "Via Varese 118",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "pomeriggio country a garbagnate milanese": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.57582092285156,
+        "lng": 9.073410034179688,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "college 66|pesaro e urbino": {
+    "default": {
+      "organizer": "College 66",
+      "city": "Pesaro e Urbino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Parrocchia San Venanzio 88",
+      "lat": 43.672821044921875,
+      "lng": 12.789719581604004,
+      "geocodedAddress": "Parrocchia San Venanzio 88",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing dinner dance collina delle fate pu college": {
+        "organizer": null,
+        "city": "Pesaro e Urbino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.672821044921875,
+        "lng": 12.789719581604004,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "west auvergn swing|metropolitan france": {
+    "default": {
+      "organizer": "West Auvergn' Swing",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Château de Gondole",
+      "lat": 45.717498779296875,
+      "lng": 3.205349922180176,
+      "geocodedAddress": "Château de Gondole",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "west auvergn swing": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.717498779296875,
+        "lng": 3.205349922180176,
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
