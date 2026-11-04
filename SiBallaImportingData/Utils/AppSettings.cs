@@ -27,6 +27,9 @@ namespace SiBallaImportingData.Utils
             ["--immagini-sheet"] = "Import:CercaImmaginiSheet",
             ["--test-swing"] = "Import:TestSwing",
             ["--test-indirizzi"] = "Import:TestIndirizzi",
+            ["--pulisci-lezioni"] = "Import:PulisciLezioni",
+            ["--pulisci-lezioni-scrivi"] = "Import:PulisciLezioniScrivi",
+            ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
         };
@@ -75,6 +78,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
             Console.WriteLine($"  CercaImmaginiSheet = {Import.CercaImmaginiSheet} (max {Import.CercaImmaginiSheetMax} righe)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
+            Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
@@ -103,6 +107,13 @@ namespace SiBallaImportingData.Utils
         // cerca con Gemini il locale degli eventi dello sheet senza indirizzo e stampa i risultati, senza scrivere nulla
         public bool TestIndirizzi { get; set; }
         public int TestIndirizziMax { get; set; } = 10;
+        // righe future dello Sheet che sembrano lezioni (EventFilter.IsLesson): elenca e basta
+        public bool PulisciLezioni { get; set; }
+        // come PulisciLezioni, ma le cancella davvero dallo Sheet
+        public bool PulisciLezioniScrivi { get; set; }
+        // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
+        // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
+        public bool ResetExcel { get; set; }
         public int Giorni { get; set; } = 7;
         public float Radius { get; set; } = 300;
         public string Centro { get; set; } = "Genova";

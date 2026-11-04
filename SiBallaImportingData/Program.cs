@@ -20,6 +20,23 @@ DataPaths.Initialize(settings.Paths.DataDirectory);
 settings.Print();
 var opzioni = settings.Import;
 
+// RESET: svuota lo Sheet dalla riga 3 (intestazioni, formati e macro restano) dopo averne salvato una copia, poi si ferma.
+// Su GitHub Actions no: un "ResetExcel": true finito per sbaglio nel repo svuoterebbe lo Sheet a ogni giro
+if (opzioni.ResetExcel)
+{
+    if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+    {
+        Console.WriteLine("⛔ ResetExcel ignorato su GitHub Actions: si lancia solo dal PC");
+    }
+    else
+    {
+        Console.WriteLine("⚠️ ResetExcel: svuoto lo Sheet dalla riga 3 (copia di sicurezza prima)...");
+        await ImportData.ResetSheetAsync();
+        Console.WriteLine("Fatto. Rimetti \"ResetExcel\": false in appsettings.json");
+        return;
+    }
+}
+
 // dizionario dei luoghi: sta accanto all'eseguibile (bin), ma la copia buona è nel repo (data/):
 // la prendo da lì all'avvio e ce la rimetto con un commit dopo il salvataggio
 var dizionarioPath = Path.Combine(AppContext.BaseDirectory, "DizionarioEventiInfo.json");
@@ -101,6 +118,31 @@ var eventsMerge = new List<Event>();
 var importDataFromWeb = new ImportDataFromWeb();
 var eventFromExcel = ImportData.LoadFile();
 var sheetEvents = eventFromExcel.Values.SelectMany(x => x).ToList();
+
+// PULIZIA: righe future dello Sheet che sono lezioni e non eventi (stessa regola del filtro sugli eventi trovati online)
+// --pulisci-lezioni le elenca soltanto, --pulisci-lezioni-scrivi le cancella dallo Sheet. Poi il programma si ferma
+if (opzioni.PulisciLezioni || opzioni.PulisciLezioniScrivi)
+{
+    var lezioni = sheetEvents
+        .Where(e => e.DateStart.Date >= DateTime.Today)
+        .Where(e => EventFilter.IsLesson(e.PartyName, e.EventDetail?.WebSite))
+        .OrderBy(e => e.SheetName).ThenBy(e => e.SheetRow)
+        .ToList();
+
+    Console.WriteLine($"\n===== Lezioni nello Sheet: {lezioni.Count} righe future =====");
+    foreach (var g in lezioni.GroupBy(e => $"{e.Organizer?.Trim()} ({e.City})").OrderByDescending(g => g.Count()))
+    {
+        Console.WriteLine($"\n🎓 {g.Key}: {g.Count()} righe");
+        foreach (var ev in g)
+            Console.WriteLine($"   {ev.SheetName} riga {ev.SheetRow} | {ev.DateStart:yyyy-MM-dd} | {ev.PartyName?.Trim()}");
+    }
+
+    if (opzioni.PulisciLezioniScrivi)
+        await ImportData.DeleteSheetRowsAsync(lezioni);
+    else
+        Console.WriteLine("\nAnteprima: niente cancellato. Per cancellarle: --pulisci-lezioni-scrivi");
+    return;
+}
 
 // 1. righe con indirizzo -> luoghi verificati
 store.ImportFromSheet(sheetEvents);

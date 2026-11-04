@@ -630,6 +630,99 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"[sheet] colonna '{ImageHeader}' aggiornata: {response.TotalUpdatedCells} celle");
         }
 
+        /// <summary>
+        /// Svuota tutti i fogli dalla riga 3 in giù (solo i valori): restano le intestazioni (righe 1-2),
+        /// la formattazione, le convalide e le macro (Apps Script, che non sta nelle celle).
+        /// Prima salva una copia di tutti i valori in un JSON nella cartella dati. Restituisce il percorso della copia.
+        /// </summary>
+        public static async Task<string?> ResetSheetAsync()
+        {
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+
+            // 1. copia di sicurezza: tutti i valori di tutti i fogli (con FORMULA restano anche le formule)
+            var backup = new Dictionary<string, IList<IList<object>>>();
+            foreach (var sheet in spreadsheet.Sheets)
+            {
+                var get = service.Spreadsheets.Values.Get(spreadsheetId, $"'{sheet.Properties.Title}'");
+                get.ValueRenderOption = SpreadsheetsResource.ValuesResource.GetRequest.ValueRenderOptionEnum.FORMULA;
+                backup[sheet.Properties.Title] = (await get.ExecuteAsync()).Values ?? new List<IList<object>>();
+            }
+            var backupPath = DataPaths.Get($"backup-sheet-{DateTime.Now:yyyyMMdd-HHmmss}.json");
+            File.WriteAllText(backupPath, System.Text.Json.JsonSerializer.Serialize(backup));
+            Console.WriteLine($"[sheet] 💾 copia dello Sheet salvata in {backupPath}");
+
+            // 2. svuoto dalla riga 3 all'ultima di ogni foglio
+            var ranges = spreadsheet.Sheets
+                .Where(s => (s.Properties.GridProperties?.RowCount ?? 0) >= 3)
+                .Select(s => $"'{s.Properties.Title}'!3:{s.Properties.GridProperties.RowCount}")
+                .ToList();
+            if (ranges.Count == 0) return backupPath;
+
+            await service.Spreadsheets.Values.BatchClear(new BatchClearValuesRequest { Ranges = ranges }, spreadsheetId).ExecuteAsync();
+            foreach (var s in spreadsheet.Sheets)
+                Console.WriteLine($"[sheet] 🧹 '{s.Properties.Title}': {Math.Max(0, backup[s.Properties.Title].Count - 2)} righe svuotate");
+            return backupPath;
+        }
+
+        /// <summary>
+        /// Cancella dallo Sheet le righe degli eventi indicati (intere righe, le successive salgono).
+        /// Dal basso verso l'alto in un'unica richiesta, così i numeri di riga letti restano validi.
+        /// </summary>
+        public static async Task DeleteSheetRowsAsync(IEnumerable<Event> events)
+        {
+            var righe = events
+                .Where(x => x.SheetName is not null && x.SheetRow is int r && r > 2)   // le prime due righe sono intestazioni
+                .Select(x => (Sheet: x.SheetName!, Row: x.SheetRow!.Value))
+                .Distinct()
+                .ToList();
+            if (righe.Count == 0) return;
+
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+
+            var requests = righe
+                .Where(x => sheetIds.ContainsKey(x.Sheet))
+                .OrderBy(x => x.Sheet).ThenByDescending(x => x.Row)
+                .Select(x => new Request
+                {
+                    DeleteDimension = new DeleteDimensionRequest
+                    {
+                        Range = new DimensionRange
+                        {
+                            SheetId = sheetIds[x.Sheet],
+                            Dimension = "ROWS",
+                            StartIndex = x.Row - 1,   // SheetRow parte da 1, l'API da 0
+                            EndIndex = x.Row
+                        }
+                    }
+                }).ToList();
+
+            await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
+            Console.WriteLine($"[sheet] 🗑️ cancellate {requests.Count} righe di lezioni");
+        }
+
         // indice (0 = A) della colonna con questa intestazione, null se manca
         private static int? FindHeaderColumn(IList<object> headerRow, string name) =>
             headerRow.Select((c, i) => (c, i))
