@@ -43,9 +43,21 @@ namespace SiBallaImportingData.Utils
                 return;
             }
 
-            int caricate = 0, fallite = 0;
+            // file già su Storage (evento caricato in un giro precedente, o già visto in questo giro): non lo riscarico.
+            // Se l'elenco non è disponibile provo a caricare tutto (il 409 lo gestisce UploadImageAsync)
+            var ids = new HashSet<string>((await appWrite.GetImageFilesAsync())?.Keys ?? Enumerable.Empty<string>());
+
+            int caricate = 0, fallite = 0, presenti = 0;
             foreach (var ev in conImmagine)
             {
+                var fileId = FileId(ev);
+                if (ids.Contains(fileId))
+                {
+                    ev.EventDetail.HasImage = true;
+                    presenti++;
+                    continue;
+                }
+
                 var url = ev.EventDetail.ImageUrl!;
                 var image = await DownloadAsync(url);
                 if (image is null)
@@ -54,10 +66,10 @@ namespace SiBallaImportingData.Utils
                     continue;
                 }
 
-                var fileId = FileId(ev);
                 if (await appWrite.UploadImageAsync(fileId, image.Value.Bytes, fileId + image.Value.Extension, image.Value.MimeType))
                 {
                     ev.EventDetail.HasImage = true;
+                    ids.Add(fileId);
                     caricate++;
                 }
                 else
@@ -66,7 +78,7 @@ namespace SiBallaImportingData.Utils
                     Console.WriteLine($"   immagine di '{ev.PartyName?.Trim()}' ({ev.DateStart:yyyy-MM-dd}): {url}");
                 }
             }
-            Console.WriteLine($"🖼️ Immagini caricate su Storage: {caricate}, non riuscite: {fallite}");
+            Console.WriteLine($"🖼️ Immagini caricate su Storage: {caricate}, già presenti: {presenti}, non riuscite: {fallite}");
         }
 
         /// <summary>

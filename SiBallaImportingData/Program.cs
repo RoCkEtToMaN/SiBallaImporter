@@ -220,11 +220,7 @@ if (aggiornati.Count > 0)
 
 // righe dello sheet senza immagine: la cerco sul sito della riga (così arriva sul DB già in questo giro)
 if (opzioni.CercaImmaginiSheet)
-{
     await EventImages.BackfillSheetAsync(sheetEvents, appWriteService, opzioni.CercaImmaginiSheetMax);
-    // righe rimaste senza immagine ("no"): logo dell'organizzatore, se c'è in data/loghi
-    await EventImages.ApplyLogosAsync(sheetEvents, appWriteService);
-}
 
 // 5. report: eventi futuri che si ripetono e non hanno ancora un indirizzo, i più frequenti prima
 //    (basta scriverlo in una riga e il prossimo giro lo copia sulle altre)
@@ -252,6 +248,7 @@ try
         eventsMerge.AddRange(await DaFonte("SwingPlanit", async () =>
             await EventFilter.FilterSwingPlanitEventsByDateRangeAsync(await importDataFromWeb.GetSwingPlanit(), store, resolver, opzioni.Radius)));
         undinfed = eventsMerge.Where(x => x.City == "undefined").ToList();
+        undinfed = eventsMerge.Where(x => x.City.ToLower() == "parma").ToList();
 
 
         //var daCompilare = eventsMerge.Where(e => store.Find(e) is null).ToList();
