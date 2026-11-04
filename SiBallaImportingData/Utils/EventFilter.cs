@@ -13,6 +13,23 @@ namespace SiBallaImportingData.Utils
 
             return distanzaMetri <= radiusMetri;
         }
+        // Parole che indicano una lezione o un corso, non un evento (tutte in minuscolo, confronto per sottostringa)
+        private static readonly string[] LessonTitleWords = {
+            "lezion", "prova", "prove", "corsi", "corso", "classe", "classi", "livello", "livelli",
+            "open level", "principianti", "intermedi", "avanzati", "beginner", "intermediate", "advanced"
+        };
+
+        /// <summary>
+        /// True se dal titolo o dal sito sembra una lezione (di prova, a livelli, corso) e non un evento.
+        /// Vale per tutte le fonti (e-swing e SwingPlanit).
+        /// </summary>
+        public static bool IsLesson(string? title, string? url)
+        {
+            var t = title?.ToLower() ?? string.Empty;
+            var u = url?.ToLower() ?? string.Empty;
+            return LessonTitleWords.Any(word => t.Contains(word)) || u.Contains("cors") || u.Contains("lezion");
+        }
+
         public static async Task<List<Event>> FilterESwingItEventsByDateRange(List<ESwingIt> events, KnownVenueStore store, AddressResolver resolver, float radiusKm)
         {
             KnownVenueStore.Load(DataPaths.Get("venues.json"));
@@ -20,9 +37,9 @@ namespace SiBallaImportingData.Utils
             var eventList = new List<Event>();
             //DateTime.Today <= x.Start && x.Start <= DateTime.Today.AddDays(Convert.ToInt32(ConfigurationManager.AppSettings["Giorni"])) &&
 
-            // Elenco delle parole da escludere nel titolo (tutte rigorosamente in minuscolo)
+            // Parole escluse solo per e-swing (in minuscolo): stage e workshop arrivano già da SwingPlanit
             string[] excludedTitleWords = {
-                "prova", "prove", "stage", "corsi", "corso", "workshop", "blues dance - tutti i mercoledi"
+                "stage", "workshop", "blues dance - tutti i mercoledi"
             };
 
             var filteredEvents = events.Where(x =>
@@ -30,19 +47,21 @@ namespace SiBallaImportingData.Utils
                 // Normalizzazione sicura (gestisce eventuali null senza crashare)
                 var title = x.Title?.ToLower() ?? string.Empty;
                 var desc = x.Description?.ToLower() ?? string.Empty;
-                var url = x.Url?.ToLower() ?? string.Empty;
                 var dateStart = x.Start;
 
-                // 1. Controlla se il titolo contiene una delle parole escluse
+                // 1. Lezioni e corsi (titolo o URL)
+                if (IsLesson(x.Title, x.Url))
+                {
+                    Console.WriteLine($"🎓 Lezione scartata: {x.Title}");
+                    return false;
+                }
+
+                // 2. Controlla se il titolo contiene una delle parole escluse
                 if (excludedTitleWords.Any(word => title.Contains(word)))
                     return false;
 
-                // 2. Controlla la descrizione
+                // 3. Controlla la descrizione
                 if (desc.Contains("kirsten"))
-                    return false;
-
-                // 3. Controlla l'URL
-                if (url.Contains("cors"))
                     return false;
 
                 if (DateTime.SpecifyKind(dateStart.Date, DateTimeKind.Local) < DateTime.Today)
@@ -120,6 +139,12 @@ namespace SiBallaImportingData.Utils
 
             var filteredEvents2 = events
                 .Where(x => DateTime.SpecifyKind(x.DateStart, DateTimeKind.Local) >= oggi)
+                .Where(x =>
+                {
+                    if (!IsLesson(x.PartyName, x.EventDetail?.WebSite)) return true;
+                    Console.WriteLine($"🎓 Lezione scartata: {x.PartyName}");
+                    return false;
+                })
                 .ToList();
 
             foreach (var e in filteredEvents2)

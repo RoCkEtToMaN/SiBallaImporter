@@ -19,7 +19,9 @@ namespace SiBallaImportingData.Service
             "NON sono swing: liscio, balli di gruppo, rock'n'roll acrobatico sportivo, West Coast Swing se è l'unico stile, " +
             "fiere o mercatini vintage senza una parte di ballo, concerti rockabilly senza riferimenti al ballo swing, " +
             "eventi non legati al ballo. Se l'evento è misto ma include una parte swing, consideralo swing. " +
-            "Se sono eventi lezioni di prova senza una parte di ballo, considerali non swing. " +
+            "Lezioni, lezioni di prova, corsi, classi a livelli (es. 'Livello aperto', 'Principianti') e open class " +
+            "NON sono eventi: considerali non swing anche se sono di Lindy Hop, Charleston o altri stili swing. " +
+            "Sono eventi solo serate sociali, feste, festival, stage/workshop weekend e serate con musica dal vivo o DJ. " +
             "Per ogni evento rispondi con id, isSwing e un motivo breve in italiano (max 15 parole).";
 
         public static async Task<(List<Event> Swing, List<(Event Evento, string Motivo)> Altri)> ClassifyAsync(List<Event> eventi, GeminiOptions gemini)
