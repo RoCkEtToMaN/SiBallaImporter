@@ -116,14 +116,28 @@ public class AppWriteService
         }
     }
 
-    /// <summary>
-    /// Id di tutti i file del bucket immagini, null se non riesco a leggerli
-    /// </summary>
-    public async Task<HashSet<string>?> GetImageIdsAsync()
+    public async Task<bool> DeleteImageAsync(string fileId)
     {
         try
         {
-            var ids = new HashSet<string>();
+            await Storage.DeleteFile(ImagesBucketId, fileId);
+            return true;
+        }
+        catch (AppwriteException ex)
+        {
+            Console.WriteLine($"❌ Errore cancellazione immagine {fileId} [{ex.Code}]: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Id e nome di tutti i file del bucket immagini, null se non riesco a leggerli
+    /// </summary>
+    public async Task<Dictionary<string, string>?> GetImageFilesAsync()
+    {
+        try
+        {
+            var ids = new Dictionary<string, string>();
             string? last = null;
             while (true)
             {
@@ -133,7 +147,7 @@ public class AppWriteService
 
                 var response = await Storage.ListFiles(ImagesBucketId, queries);
                 foreach (var file in response.Files)
-                    ids.Add(file.Id);
+                    ids[file.Id] = file.Name;
 
                 if (response.Files.Count < 100)
                     return ids;

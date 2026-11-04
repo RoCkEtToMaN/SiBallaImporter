@@ -16,6 +16,9 @@ namespace SiBallaImportingData.Utils
 
         private static string RepoFile => Path.Combine(RepoRoot!, RepoRelativePath);
 
+        // percorso di un file o cartella del repo (es. data/loghi), null se il programma non gira dentro il repo
+        public static string? RepoPath(string relativePath) => RepoRoot is null ? null : Path.Combine(RepoRoot, relativePath);
+
         public static void PullIntoBin(string binPath)
         {
             if (RepoRoot is null)

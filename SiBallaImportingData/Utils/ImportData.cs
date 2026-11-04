@@ -168,7 +168,7 @@ namespace SiBallaImportingData.Utils
                                         Longitude = loc.Lng,
                                         Styles = stiliEvento,
                                         WebSite = webSite,
-                                        HasImage = imageCol is int ic && row.Count > ic && IsYes(row[ic]?.ToString())
+                                        HasImage = imageCol is int ic && row.Count > ic && (IsYes(row[ic]?.ToString()) || IsLogo(row[ic]?.ToString()))
                                     },
                                     Organizer = (row != null && row.Count > 6 && row[6] != null)
                                         ? row[6].ToString()
@@ -593,6 +593,10 @@ namespace SiBallaImportingData.Utils
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";
         public const string ImageNo = "no";   // cercata sul sito della riga senza trovarla: non la ricerco a ogni giro
+        public const string ImageLogo = "logo";   // nessuna immagine dell'evento: logo dell'organizzatore (data/loghi)
+
+        public static bool IsLogo(string? value) =>
+            string.Equals(value?.Trim(), ImageLogo, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Scrive "sì"/"no" nella colonna "Immagine" delle righe indicate

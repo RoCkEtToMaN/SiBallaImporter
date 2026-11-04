@@ -79,16 +79,19 @@ namespace SiBallaImportingData.Utils
             if (conImmagine.Count == 0) return;
 
             // null = elenco non disponibile: mi fido dello Sheet
-            var ids = await appWrite.GetImageIdsAsync();
+            var ids = await appWrite.GetImageFilesAsync();
             int mancanti = 0;
             foreach (var ev in conImmagine)
             {
-                var fileId = FileId(ev);
-                if (ids is not null && !ids.Contains(fileId))
+                var logo = ImportData.IsLogo(ev.SheetImageRaw);
+                var fileId = logo ? LogoFileId(ev.Organizer, ev.City) : FileId(ev);
+                if (ids is not null && !ids.ContainsKey(fileId))
                 {
                     mancanti++;
                     ev.EventDetail.HasImage = false;
-                    Console.WriteLine($"⚠️ {ev.SheetName} riga {ev.SheetRow}: '{ImportData.ImageHeader}' = sì ma il file {fileId} non è su Storage (data o titolo cambiati?)");
+                    Console.WriteLine(logo
+                        ? $"⚠️ {ev.SheetName} riga {ev.SheetRow}: '{ImportData.ImageHeader}' = logo ma il logo di '{ev.Organizer?.Trim()}' ({ev.City}) non è su Storage (manca data/loghi/{LogoSlug(ev.Organizer, ev.City)}.jpg?)"
+                        : $"⚠️ {ev.SheetName} riga {ev.SheetRow}: '{ImportData.ImageHeader}' = sì ma il file {fileId} non è su Storage (data o titolo cambiati?)");
                     continue;
                 }
                 ev.EventDetail.ImageUrl = AppWriteService.ImageViewUrl(fileId);
@@ -111,16 +114,16 @@ namespace SiBallaImportingData.Utils
             if (daCercare.Count == 0 || !await appWrite.EnsureImagesBucketAsync()) return;
 
             // file già caricati (es. evento trovato online e scartato perché nello Sheet c'era già con un nome scritto diverso)
-            var ids = await appWrite.GetImageIdsAsync() ?? new HashSet<string>();
+            var ids = await appWrite.GetImageFilesAsync() ?? new Dictionary<string, string>();
             var celle = new List<(Event Event, string Value)>();
-            foreach (var ev in daCercare.Where(e => ids.Contains(FileId(e))))
+            foreach (var ev in daCercare.Where(e => ids.ContainsKey(FileId(e))))
                 celle.Add((ev, ImportData.ImageYes));
             Console.WriteLine($"🖼️ Già su Storage: {celle.Count}");
 
             // stesso sito su più righe (pagina dell'organizzatore): lo leggo una volta sola per giro
             var perSito = new Dictionary<string, (byte[] Bytes, string MimeType, string Extension)?>(StringComparer.OrdinalIgnoreCase);
             int caricate = 0, senza = 0;
-            foreach (var ev in daCercare.Where(e => !ids.Contains(FileId(e))).Take(max))
+            foreach (var ev in daCercare.Where(e => !ids.ContainsKey(FileId(e))).Take(max))
             {
                 var site = NormalizeSite(ev.EventDetail?.WebSite);
                 if (site is null)
@@ -153,10 +156,91 @@ namespace SiBallaImportingData.Utils
                 // caricamento fallito: cella vuota, riprovo al prossimo giro
             }
 
-            foreach (var (ev, value) in celle.Where(x => x.Value == ImportData.ImageYes))
-                ev.EventDetail.HasImage = true;
+            // in memoria come sullo sheet: il passaggio dei loghi parte dalle righe "no"
+            foreach (var (ev, value) in celle)
+            {
+                ev.SheetImageRaw = value;
+                if (value == ImportData.ImageYes)
+                    ev.EventDetail.HasImage = true;
+            }
             Console.WriteLine($"🖼️ Righe dello Sheet: {caricate} immagini caricate, {senza} senza immagine sul sito ({perSito.Count} siti letti)");
             await ImportData.UpdateSheetImageCellsAsync(celle);
+        }
+
+        // ---------- Loghi degli organizzatori (data/loghi) ----------
+
+        public const string LogoFolder = "data/loghi";
+
+        // nome del file del logo: organizzatore e città normalizzati come nel dizionario dei luoghi, es. "simone-scanzoni_roma"
+        public static string LogoSlug(string? organizer, string? city) =>
+            KnownVenueStore.MakeKey(organizer ?? "", city ?? "").Replace(' ', '-').Replace('|', '_');
+
+        public static string LogoFileId(string? organizer, string? city) => LogoFileId(LogoSlug(organizer, city));
+
+        /// <summary>
+        /// Loghi in data/loghi (un file per organizzatore, es. simone-scanzoni_roma.jpg): li carica su Storage (di nuovo se il file cambia)
+        /// e alle righe future con "no" in "Immagine" di quell'organizzatore scrive "logo"
+        /// </summary>
+        public static async Task ApplyLogosAsync(IEnumerable<Event> sheetEvents, AppWriteService appWrite)
+        {
+            var dir = DictionaryRepoSync.RepoPath(LogoFolder);
+            if (dir is null || !Directory.Exists(dir)) return;
+
+            var mimeTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [".jpg"] = "image/jpeg", [".jpeg"] = "image/jpeg", [".png"] = "image/png", [".webp"] = "image/webp"
+            };
+            var loghi = Directory.GetFiles(dir)
+                .Where(f => mimeTypes.ContainsKey(Path.GetExtension(f)))
+                .GroupBy(f => Path.GetFileNameWithoutExtension(f).Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            Console.WriteLine($"\n===== Loghi degli organizzatori: {loghi.Count} file in {LogoFolder} =====");
+            if (loghi.Count == 0 || !await appWrite.EnsureImagesBucketAsync()) return;
+
+            // il nome su Storage contiene l'hash del contenuto: se sostituisci il file nella cartella lo ricarico
+            var files = await appWrite.GetImageFilesAsync() ?? new Dictionary<string, string>();
+            var pronti = new HashSet<string>();
+            foreach (var (slug, path) in loghi)
+            {
+                var bytes = await File.ReadAllBytesAsync(path);
+                var ext = Path.GetExtension(path).ToLowerInvariant();
+                var name = $"{slug}-{Convert.ToHexString(SHA256.HashData(bytes))[..8].ToLowerInvariant()}{ext}";
+                var fileId = LogoFileId(slug);
+                if (files.TryGetValue(fileId, out var current))
+                {
+                    if (current == name)
+                    {
+                        pronti.Add(slug);
+                        continue;
+                    }
+                    await appWrite.DeleteImageAsync(fileId);
+                }
+                if (await appWrite.UploadImageAsync(fileId, bytes, name, mimeTypes[ext]))
+                {
+                    pronti.Add(slug);
+                    Console.WriteLine($"✅ Logo caricato: {Path.GetFileName(path)}");
+                }
+            }
+
+            var celle = sheetEvents
+                .Where(e => e.DateStart.Date >= DateTime.Today && e.SheetImageColumn is not null && e.SheetImageRaw?.Trim().ToLowerInvariant() == ImportData.ImageNo)
+                .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City) && pronti.Contains(LogoSlug(e.Organizer, e.City)))
+                .Select(e => (Event: e, Value: ImportData.ImageLogo))
+                .ToList();
+            foreach (var (ev, value) in celle)
+            {
+                ev.SheetImageRaw = value;
+                ev.EventDetail.HasImage = true;
+            }
+            Console.WriteLine($"🖼️ Righe con il logo dell'organizzatore: {celle.Count}");
+            await ImportData.UpdateSheetImageCellsAsync(celle);
+        }
+
+        // id dal nome del file (già normalizzato)
+        private static string LogoFileId(string slug)
+        {
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(slug))).ToLowerInvariant();
+            return "lg" + hash[..32];
         }
 
         // primo sito della cella "Riferimento" (a volte più link separati da ';'), con https:// se manca

@@ -53,6 +53,9 @@ di solito non funziona: senza login non mostrano l'anteprima. Vengono scartati i
 Telegram e moduli Google, le immagini standard delle piattaforme (Fillout, DICE) e i formati che non
 sono jpg, png, webp o gif.
 
+Le righe rimaste a `no` prendono il **logo dell'organizzatore**, se c'è in `data/loghi/` (regole e
+nomi dei file nel [README della cartella](data/loghi/README.md)): nella colonna diventa `logo`.
+
 Configurazione su Appwrite (una volta sola):
 
 1. **Overview → API Keys → Create API key** con gli scope di lettura e scrittura del database
