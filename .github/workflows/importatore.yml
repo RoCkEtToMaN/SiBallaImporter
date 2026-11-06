@@ -161,6 +161,9 @@ jobs:
           Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
           Import__CercaImmaginiSheet: ${{ vars.CERCA_IMMAGINI_SHEET || 'false' }}
           Import__ResetDb: "false"
+          Import__ResetExcel: "false"
+          Import__PulisciLezioni: "false"
+          Import__PulisciLezioniScrivi: "false"
           Import__TestImmagini: "false"
           Import__TestSwing: "false"
           Import__TestIndirizzi: "false"
