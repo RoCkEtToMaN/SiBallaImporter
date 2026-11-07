@@ -211,14 +211,14 @@ public class AppWriteService
     }
 
     /// <summary>
-    /// Elimina tutti i documenti della collezione. Restituisce false se qualcosa è andato storto
+    /// Elimina tutti i documenti della collezione, tranne keepId se indicato. Restituisce false se qualcosa è andato storto
     /// </summary>
-    public async Task<bool> ClearCollectionAsync(string collectionId)
+    public async Task<bool> ClearCollectionAsync(string collectionId, string? keepId = null)
     {
         try
         {
 #pragma warning disable CS0618
-            // ListDocuments restituisce al massimo 25 documenti per volta: ripeto finché la collezione è vuota
+            // ListDocuments restituisce al massimo 25 documenti per volta: ripeto finché resta solo keepId (o niente)
             while (true)
             {
                 // 1. Recupera i documenti presenti nella collezione
@@ -227,11 +227,12 @@ public class AppWriteService
                     collectionId: collectionId
                 );
 
-                if (response.Documents.Count == 0)
+                var daEliminare = response.Documents.Where(d => d.Id != keepId).ToList();
+                if (daEliminare.Count == 0)
                     return true;
 
                 // 2. Elimina ogni documento tramite il suo ID univoco
-                foreach (var doc in response.Documents)
+                foreach (var doc in daEliminare)
                 {
                     await Databases.DeleteDocument(
                         databaseId: DatabaseId,
@@ -250,15 +251,25 @@ public class AppWriteService
     }
 
     /// <summary>
-    /// Sostituisce il contenuto della collezione con un unico documento: app e bot leggono sempre una sola copia dello Sheet
+    /// Sostituisce il contenuto della collezione con un unico documento: app e bot leggono sempre una sola copia dello Sheet.
+    /// Prima salva il nuovo e poi cancella i vecchi: se il salvataggio fallisce restano i dati del giro prima,
+    /// invece di una collezione vuota. Per qualche secondo ci sono due copie
     /// </summary>
     public async Task<Document?> ReplaceCollectionAsJsonAsync<T>(string collectionId, List<T> itemsList)
     {
-        // se lo svuotamento fallisce non salvo: meglio i dati vecchi che una seconda copia
-        if (!await ClearCollectionAsync(collectionId))
+        var nuovo = await SaveCollectionAsJsonAsync(collectionId, itemsList);
+        if (nuovo is null)
+        {
+            Console.WriteLine($"⚠️ '{collectionId}': salvataggio fallito, restano i dati precedenti");
+            Environment.ExitCode = 1;
             return null;
+        }
 
-        return await SaveCollectionAsJsonAsync(collectionId, itemsList);
+        // se la cancellazione dei vecchi fallisce il giro dopo li ripulisce (cancella tutto tranne il documento nuovo)
+        if (!await ClearCollectionAsync(collectionId, keepId: nuovo.Id))
+            Environment.ExitCode = 1;
+
+        return nuovo;
     }
 
     public async Task<List<Event>> GetEventsAsync(string collectionId)
