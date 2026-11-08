@@ -16126,5 +16126,39 @@
         "geminiNonTrovato": "2026-11-08"
       }
     }
+  },
+  "serena clerici|fermo": {
+    "default": {
+      "organizer": "Serena Clerici",
+      "city": "Fermo",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "San Venanzo",
+      "lat": 43.17559051513672,
+      "lng": 13.606829643249512,
+      "geocodedAddress": "San Venanzo",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "serata di balli swing al baladi di torre san patrizio fm": {
+        "organizer": null,
+        "city": "Fermo",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.17559051513672,
+        "lng": 13.606829643249512,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
   }
 }
