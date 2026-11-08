@@ -31,7 +31,7 @@ namespace SiBallaImportingData.Service
                 int status = (int)response.StatusCode;
                 bool temporaneo = status == 429 || status >= 500;
                 if (!temporaneo || tentativo > AttesePerRiprovare.Length)
-                    throw new HttpRequestException($"Gemini {status}: {responseBody}");
+                    throw new HttpRequestException($"Gemini {status}: {responseBody}", null, response.StatusCode);
 
                 var attesa = response.Headers.RetryAfter?.Delta ?? AttesePerRiprovare[tentativo - 1];
                 Console.WriteLine($"[AI] Gemini {status}, nuovo tentativo tra {attesa.TotalSeconds:F0} s ({tentativo}/{AttesePerRiprovare.Length})");

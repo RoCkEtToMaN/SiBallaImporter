@@ -150,6 +150,49 @@ public class AddressResolver
         return 6371 * 2 * Math.Asin(Math.Sqrt(h));
     }
 
+    // parole troppo generiche per dire che due nomi di locale sono lo stesso posto
+    private static readonly HashSet<string> ParoleGeneriche = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "the", "and", "del", "della", "dei", "di", "da", "la", "il", "lo", "le", "al", "alla", "des", "les", "der", "die", "das",
+        "club", "bar", "pub", "cafe", "caffe", "sala", "teatro", "circolo", "spazio", "centro", "ristorante", "hotel",
+        "jazz", "swing", "dance", "ballo", "scuola", "studio", "live", "music", "musica", "arci", "asd", "aps"
+    };
+
+    private static List<string> ParoleSignificative(string? s)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return new();
+        var senzaAccenti = new string(s.Normalize(System.Text.NormalizationForm.FormD)
+            .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            .ToArray()).ToLowerInvariant();
+        return System.Text.RegularExpressions.Regex.Split(senzaAccenti, @"[^a-z0-9]+")
+            .Where(w => w.Length >= 3 && !ParoleGeneriche.Contains(w))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Cerca un locale per nome con Photon (entro 10 km dalla città). Vale solo se il nome trovato ha almeno una parola
+    /// significativa in comune con quello cercato, così non si prende per buono il centro città o un posto qualsiasi.
+    /// Restituisce coordinate, nome trovato e via (geocoding inverso, null se non c'è)
+    /// </summary>
+    public async Task<(double Lat, double Lng, string? Nome, string? Via)?> CercaLocaleAsync(string nome, string? city, string? country, CancellationToken ct = default)
+    {
+        var cercate = ParoleSignificative(nome);
+        if (cercate.Count == 0) return null;
+
+        var center = OfflineGeocoder.GetCoordinates(city, country);
+        var maxKm = center == (0.0, 0.0) ? double.MaxValue : 10;
+        var hit = await _geo.FindAsync($"{nome}, {city}, {country}", center, maxKm, ct);
+        await Task.Delay(1100, ct);                                  // Photon pubblico: una richiesta al secondo
+        if (hit is null || !ParoleSignificative(hit.Value.Name).Intersect(cercate).Any()) return null;
+
+        var via = await _geo.ReverseAsync(hit.Value.Lat, hit.Value.Lng, ct);
+        await Task.Delay(1100, ct);
+        // il reverse a volte restituisce di nuovo il nome del locale: non è una via
+        if (via is not null && ParoleSignificative(via).Intersect(cercate).Any()) via = null;
+
+        return (hit.Value.Lat, hit.Value.Lng, hit.Value.Name, via);
+    }
+
     /// <summary>Photon con controllo di distanza (10 km dal centro città). Non salva nulla nel JSON.</summary>
     public async Task<(double Lat, double Lng)?> GeocodeAsync(string address, string? city, string? country, CancellationToken ct = default)
     {

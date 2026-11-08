@@ -25,6 +25,14 @@ Da fare
     lista vuota e l'app non mostra eventi. Valutare se estendere la protezione a questo caso.
 
 
+Da valutare
+-----------
+
+[ ] Ricerca Google di Gemini (Gemini:UseGoogleSearch) - richiede il piano a pagamento
+    Oggi Gemini legge solo il sito in "Riferimento": 200 eventi su ~300 senza indirizzo vengono
+    saltati perché il link è Facebook/Instagram/WhatsApp/Telegram. Con la ricerca Google li potrebbe cercare.
+
+
 Da verificare
 -------------
 
@@ -42,10 +50,14 @@ Da verificare
     compaiano nell'app.
 
 [ ] Qualità degli indirizzi trovati da Gemini (righe "gemini")
+    Prova dell'8/11: 8 trovati su 20 (il giorno prima 1 su 20). Il miglioramento viene dal saltare
+    i link Facebook & co.: tutti gli 8 sono indirizzi di Gemini confermati da Photon, la ricerca
+    del locale per nome con Photon non è ancora servita. Da vedere nei prossimi giri.
+    Da controllare in particolare i casi in cui potrebbe essere l'indirizzo dell'organizzatore
+    invece del locale (es. "Swing Productions, Röschibachstrasse 22" a Zurigo).
     Guardare le note sulla colonna F: fonte, confidenza, locale. Se gli indirizzi sono buoni
     scrivere "ok"; se sono spesso sbagliati valutare di accettare solo confidenza "alta"
     o di abbassare CercaIndirizziMax.
 
-[ ] Righe vuote "geminiNonTrovato": null nel dizionario
-    Sono finite nel commit b0637d1. Il codice ora non le scrive più: al prossimo salvataggio
-    del dizionario devono sparire (diff grande una volta sola).
+[x] Righe vuote "geminiNonTrovato": null nel dizionario
+    Finite nel commit b0637d1, sparite al salvataggio successivo.

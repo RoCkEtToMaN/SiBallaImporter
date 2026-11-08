@@ -83,11 +83,18 @@ Con `CercaIndirizzi` (flag `--indirizzi`, Variable di GitHub `CERCA_INDIRIZZI`) 
 il locale delle righe **future senza indirizzo** dopo la città nella colonna F:
 
 1. le date dello stesso evento (stesso organizzatore, città e titolo) contano come una sola ricerca;
-2. Gemini legge il sito in **Riferimento** e propone locale e indirizzo (senza ricerca Google, cioè
-   con `Gemini:UseGoogleSearch` = false, le righe senza sito vengono saltate);
+2. Gemini legge il sito in **Riferimento** e propone locale e indirizzo. Senza ricerca Google (cioè
+   con `Gemini:UseGoogleSearch` = false) vengono saltate le righe senza sito e quelle con un link a
+   Facebook, Instagram, WhatsApp o Telegram, che Gemini senza login non riesce a leggere: nel log
+   compare quante sono. Non vengono segnate, quindi se cambi il link ripartono;
 3. l'indirizzo vale solo se Gemini non ha confidenza "bassa" **e** Photon lo trova entro 10 km dalla città;
-4. se vale, su tutte le date dell'evento scrive nella colonna F `Paese, Città, Indirizzo(lat;lng)`,
-   con una **nota** sulla cella (locale, fonte, confidenza, motivo), e `gemini` in **Luogo verificato**.
+4. se Gemini conosce il nome del locale ma non la via (o Photon non trova la via), Photon cerca il
+   **locale per nome** entro 10 km dalla città. Il risultato vale solo se il nome trovato ha almeno una
+   parola in comune con quello indicato da Gemini (parole generiche come "club", "bar", "teatro" non
+   contano); la via la prende dal geocoding inverso, se non c'è usa il nome del locale;
+5. se vale, su tutte le date dell'evento scrive nella colonna F `Paese, Città, Indirizzo(lat;lng)`,
+   con una **nota** sulla cella (locale, come è stato trovato, confidenza, motivo, fonte), e `gemini`
+   in **Luogo verificato**.
 
 Le righe `gemini` vanno su Appwrite già nello stesso giro. Il dizionario impara l'indirizzo solo dopo
 che l'hai controllato e hai scritto `ok`. Se lo stesso evento ha già un indirizzo verificato da te in
@@ -97,8 +104,12 @@ sbagliato, correggi la colonna F e scrivi `ok`.
 Cosa resta fuori:
 - le righe `da verificare`: prima decidi tu se l'evento ti interessa;
 - gli eventi cercati senza risultato: il dizionario se lo segna (`geminiNonTrovato` con la data) e
-  li ricerca solo dopo 30 giorni, perché nel frattempo il sito può essere aggiornato. Se Gemini va in
-  errore (es. 503 anche dopo i nuovi tentativi), l'evento non viene segnato e si riprova al giro dopo.
+  li ricerca solo dopo 30 giorni, perché nel frattempo il sito può essere aggiornato. Lo stesso vale
+  quando Gemini rifiuta la richiesta per quell'evento (es. `400 INVALID_ARGUMENT`, di solito un link
+  che non riesce ad aprire). Se invece l'errore è temporaneo (es. 503 anche dopo i nuovi tentativi) o
+  riguarda la chiave, l'evento non viene segnato e si riprova al giro dopo. Per far ricercare subito
+  tutto (es. dopo aver migliorato la ricerca) basta togliere le righe `geminiNonTrovato` dal
+  dizionario in `data/`.
 
 Al massimo `CercaIndirizziMax` eventi per giro (default 20, Variable `CERCA_INDIRIZZI_MAX`), i più
 vicini nel tempo per primi, con 4 s di pausa tra uno e l'altro per il piano gratuito di Gemini. Con 20
