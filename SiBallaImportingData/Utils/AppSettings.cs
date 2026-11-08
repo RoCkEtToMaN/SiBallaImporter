@@ -25,6 +25,7 @@ namespace SiBallaImportingData.Utils
             ["--reset-db"] = "Import:ResetDb",
             ["--test-immagini"] = "Import:TestImmagini",
             ["--immagini-sheet"] = "Import:CercaImmaginiSheet",
+            ["--indirizzi"] = "Import:CercaIndirizzi",
             ["--test-swing"] = "Import:TestSwing",
             ["--test-indirizzi"] = "Import:TestIndirizzi",
             ["--pulisci-lezioni"] = "Import:PulisciLezioni",
@@ -77,6 +78,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  UpdateSheetCoordinates = {Import.UpdateSheetCoordinates}");
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
             Console.WriteLine($"  CercaImmaginiSheet = {Import.CercaImmaginiSheet} (max {Import.CercaImmaginiSheetMax} righe)");
+            Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
@@ -100,6 +102,9 @@ namespace SiBallaImportingData.Utils
         // righe future dello Sheet senza immagine: la cerca sul sito in "Riferimento" e scrive "sì"/"no" nella colonna "Immagine"
         public bool CercaImmaginiSheet { get; set; }
         public int CercaImmaginiSheetMax { get; set; } = 100;
+        // righe future dello Sheet senza indirizzo: cerca il locale con Gemini, lo conferma con Photon e lo scrive (stato "gemini")
+        public bool CercaIndirizzi { get; set; }
+        public int CercaIndirizziMax { get; set; } = 20;
         // conta solo le immagini trovate, senza scrivere su foglio/DB
         public bool TestImmagini { get; set; }
         // classifica con Gemini gli eventi dei prossimi Giorni e stampa le liste, senza email/foglio/DB

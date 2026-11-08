@@ -10,8 +10,6 @@ namespace SiBallaImportingData.Service
     // Restituisce solo l'indirizzo: le coordinate le calcola Photon, che fa anche da controllo contro gli indirizzi inventati.
     public static class VenueAddressFinder
     {
-        private static readonly HttpClient _client = new() { Timeout = TimeSpan.FromSeconds(90) };
-
         private const string Istruzioni =
             "Trovi il luogo esatto di eventi di ballo swing. Per l'evento indicato leggi la pagina indicata in 'sito' " +
             "(e, se puoi cercare sul web, le pagine dell'organizzatore o di siti di eventi) e trova il locale dove si svolge in quella data. " +
@@ -74,15 +72,8 @@ namespace SiBallaImportingData.Service
             if (tools.Count > 0)
                 body["tools"] = tools;
 
-            using var request = new HttpRequestMessage(HttpMethod.Post,
-                $"https://generativelanguage.googleapis.com/v1beta/models/{gemini.Model}:generateContent");
-            request.Headers.Add("x-goog-api-key", gemini.ApiKey);
-            request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-
-            var response = await _client.SendAsync(request, ct);
-            var responseBody = await response.Content.ReadAsStringAsync(ct);
-            if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException($"Gemini {(int)response.StatusCode}: {responseBody}");
+            // 429 e 5xx (es. 503 "high demand") vengono riprovati dentro GeminiHttp
+            var responseBody = await GeminiHttp.GenerateContentAsync(gemini.Model!, gemini.ApiKey!, JsonSerializer.Serialize(body), ct);
 
             using var doc = JsonDocument.Parse(responseBody);
             var candidate = doc.RootElement.GetProperty("candidates")[0];

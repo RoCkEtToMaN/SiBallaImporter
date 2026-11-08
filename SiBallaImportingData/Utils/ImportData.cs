@@ -337,10 +337,10 @@ namespace SiBallaImportingData.Utils
                 int? imageCol = header is null ? null : FindHeaderColumn(header, ImageHeader);
                 if (imageCol is null && events.Any(x => x.EventDetail?.HasImage == true))
                     Console.WriteLine($"[sheet] '{sheetName}': manca la colonna '{ImageHeader}', le immagini caricate non vengono segnate");
-                // "da verificare" in "Luogo verificato": l'indirizzo viene dal sito, va controllato prima del DB
+                // "Luogo verificato": "nuovo" se Gemini lo considera swing (va sul DB), altrimenti "da verificare" (resta fuori finché non scrivi "ok")
                 int? verifiedCol = header is null ? null : FindHeaderColumn(header, VerifiedHeader);
                 if (verifiedCol is null)
-                    Console.WriteLine($"[sheet] '{sheetName}': manca la colonna '{VerifiedHeader}', le righe nuove non vengono segnate '{VerifiedPending}' e andranno sul DB");
+                    Console.WriteLine($"[sheet] '{sheetName}': manca la colonna '{VerifiedHeader}', le righe nuove non vengono segnate e andranno tutte sul DB");
 
                 // 2. Mappatura e formattazione dei dati dagli eventi
 
@@ -396,7 +396,7 @@ namespace SiBallaImportingData.Utils
                     if (imageCol is int ic && ev.EventDetail?.HasImage == true)
                         Set(ic, ImageYes);
                     if (verifiedCol is int vc)
-                        Set(vc, VerifiedPending);
+                        Set(vc, ev.StatoNuovaRiga ?? VerifiedPending);
                     return (IList<object>)row;
                 }).ToList();
 
@@ -414,6 +414,11 @@ namespace SiBallaImportingData.Utils
 
                 // 4. Esecuzione asincrona dell'inserimento
                 var response = appendRequest.Execute();
+
+                // 5. righe "da verificare": colore di sfondo e motivo di Gemini nella nota della cella "Luogo verificato"
+                if (verifiedCol is int colonnaVerifica)
+                    await EvidenziaDaVerificareAsync(service, spreadsheetId, spreadsheet, sheetName, response.Updates?.UpdatedRange,
+                        events, colonnaVerifica, newData.Max(r => r.Count));
 
 #if DEBUG
 
@@ -461,6 +466,191 @@ namespace SiBallaImportingData.Utils
                 throw;
             }
         }
+        // arancione chiaro delle righe "da verificare": è anche il segno con cui le riconosco per togliere il colore
+        private static readonly Color ColoreDaVerificare = new() { Red = 252 / 255f, Green = 229 / 255f, Blue = 205 / 255f };
+
+        private static bool IsColoreDaVerificare(Color? c) =>
+            c is not null
+            && Math.Abs((c.Red ?? 0) - ColoreDaVerificare.Red!.Value) < 0.01
+            && Math.Abs((c.Green ?? 0) - ColoreDaVerificare.Green!.Value) < 0.01
+            && Math.Abs((c.Blue ?? 0) - ColoreDaVerificare.Blue!.Value) < 0.01;
+
+        // colora le righe appena aggiunte che sono "da verificare" e mette il motivo nella nota (passandoci sopra col mouse)
+        private static async Task EvidenziaDaVerificareAsync(SheetsService service, string spreadsheetId, Spreadsheet spreadsheet,
+            string sheetName, string? updatedRange, List<Event> events, int verifiedCol, int colonne)
+        {
+            // es. "Serate!A15:V20" o "'Serate'!A15:V20": la prima riga scritta è la 15
+            var m = Regex.Match(updatedRange ?? "", @"![A-Z]+(\d+)");
+            var sheetId = spreadsheet.Sheets.FirstOrDefault(s => s.Properties.Title == sheetName)?.Properties.SheetId;
+            if (!m.Success || sheetId is null)
+            {
+                Console.WriteLine($"[sheet] '{sheetName}': non so in che righe sono finiti gli eventi ({updatedRange}), righe da verificare non colorate");
+                return;
+            }
+            int primaRiga = int.Parse(m.Groups[1].Value) - 1;   // l'API conta da 0
+
+            var requests = new List<Request>();
+            for (int i = 0; i < events.Count; i++)
+            {
+                var ev = events[i];
+                if ((ev.StatoNuovaRiga ?? VerifiedPending) != VerifiedPending) continue;
+
+                requests.Add(new Request
+                {
+                    RepeatCell = new RepeatCellRequest
+                    {
+                        Range = new GridRange { SheetId = sheetId, StartRowIndex = primaRiga + i, EndRowIndex = primaRiga + i + 1, StartColumnIndex = 0, EndColumnIndex = colonne },
+                        Cell = new CellData { UserEnteredFormat = new CellFormat { BackgroundColor = ColoreDaVerificare } },
+                        Fields = "userEnteredFormat.backgroundColor"
+                    }
+                });
+                if (!string.IsNullOrWhiteSpace(ev.MotivoVerifica))
+                    requests.Add(new Request
+                    {
+                        UpdateCells = new UpdateCellsRequest
+                        {
+                            Start = new GridCoordinate { SheetId = sheetId, RowIndex = primaRiga + i, ColumnIndex = verifiedCol },
+                            Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = ev.MotivoVerifica } } } },
+                            Fields = "note"
+                        }
+                    });
+            }
+            if (requests.Count == 0) return;
+
+            await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
+            Console.WriteLine($"[sheet] '{sheetName}': {requests.Count(r => r.RepeatCell is not null)} righe '{VerifiedPending}' colorate");
+        }
+
+        /// <summary>
+        /// Toglie colore e nota alle righe colorate "da verificare" che hai controllato (in "Luogo verificato" non c'è più "da verificare").
+        /// Tocca solo le righe con il colore messo dal programma: gli altri colori dello Sheet restano
+        /// </summary>
+        public static async Task TogliEvidenziazioniAsync(IEnumerable<Event> sheetEvents)
+        {
+            var controllate = sheetEvents
+                .Where(e => e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null && e.LuogoVerificato != VerifiedPending)
+                .ToList();
+            if (controllate.Count == 0) return;
+
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+
+            // leggo solo il formato della colonna "Luogo verificato" di ogni foglio, dalla riga 3 all'ultima
+            var perFoglio = controllate.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.ToDictionary(e => e.SheetRow!.Value));
+            var colonne = controllate.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.First().SheetVerifiedColumn!.Value);
+            var get = service.Spreadsheets.Get(spreadsheetId);
+            get.Ranges = perFoglio.Select(f => $"'{f.Key}'!{(char)('A' + colonne[f.Key])}3:{(char)('A' + colonne[f.Key])}{f.Value.Keys.Max()}").ToList();
+            get.IncludeGridData = true;
+            get.Fields = "sheets(properties(sheetId,title),data(startRow,rowData(values(userEnteredFormat(backgroundColor)))))";
+            var spreadsheet = await get.ExecuteAsync();
+
+            var requests = new List<Request>();
+            foreach (var sheet in spreadsheet.Sheets)
+            {
+                if (!perFoglio.TryGetValue(sheet.Properties.Title, out var righe)) continue;
+                foreach (var data in sheet.Data ?? new List<GridData>())
+                {
+                    int start = data.StartRow ?? 0;
+                    for (int i = 0; i < (data.RowData?.Count ?? 0); i++)
+                    {
+                        int riga = start + i + 1;   // numero di riga come in SheetRow (1 = prima)
+                        var colore = data.RowData![i].Values?.FirstOrDefault()?.UserEnteredFormat?.BackgroundColor;
+                        if (!righe.ContainsKey(riga) || !IsColoreDaVerificare(colore)) continue;
+
+                        requests.Add(new Request
+                        {
+                            RepeatCell = new RepeatCellRequest
+                            {
+                                Range = new GridRange { SheetId = sheet.Properties.SheetId, StartRowIndex = riga - 1, EndRowIndex = riga, StartColumnIndex = 0, EndColumnIndex = 26 },
+                                Cell = new CellData { UserEnteredFormat = new CellFormat() },
+                                Fields = "userEnteredFormat.backgroundColor"
+                            }
+                        });
+                        requests.Add(new Request
+                        {
+                            UpdateCells = new UpdateCellsRequest
+                            {
+                                Start = new GridCoordinate { SheetId = sheet.Properties.SheetId, RowIndex = riga - 1, ColumnIndex = colonne[sheet.Properties.Title] },
+                                Rows = new List<RowData> { new() { Values = new List<CellData> { new() } } },
+                                Fields = "note"
+                            }
+                        });
+                    }
+                }
+            }
+            if (requests.Count == 0) return;
+
+            await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
+            Console.WriteLine($"[sheet] 🎨 tolto il colore a {requests.Count / 2} righe controllate");
+        }
+
+        /// <summary>
+        /// Scrive sullo Sheet gli indirizzi trovati da Gemini: colonna F "Paese, Città, Indirizzo(lat;lng)" con la nota
+        /// (locale, fonte, confidenza) e "gemini" in "Luogo verificato"
+        /// </summary>
+        public static async Task ScriviIndirizziGeminiAsync(IEnumerable<(Event Event, string Nota)> righe)
+        {
+            var lista = righe.Where(x => x.Event.SheetName is not null && x.Event.SheetRow is not null
+                                         && x.Event.EventDetail?.Latitude is not null && x.Event.EventDetail.Longitude is not null).ToList();
+            if (lista.Count == 0) return;
+
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+            var service = new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+
+            var valori = new List<ValueRange>();
+            foreach (var (ev, _) in lista)
+            {
+                var loc = ParseLocationCell(ev.SheetLocationRaw);
+                var lat = ev.EventDetail.Latitude!.Value.ToString("0.0000000", CultureInfo.InvariantCulture);
+                var lng = ev.EventDetail.Longitude!.Value.ToString("0.0000000", CultureInfo.InvariantCulture);
+                valori.Add(new ValueRange
+                {
+                    Range = $"'{ev.SheetName}'!F{ev.SheetRow}",
+                    Values = new List<IList<object>> { new List<object> { $"{loc.Country ?? ev.Country}, {loc.City ?? ev.City}, {ev.EventDetail.Address}({lat};{lng})" } }
+                });
+                if (ev.SheetVerifiedColumn is int vc)
+                    valori.Add(new ValueRange
+                    {
+                        Range = $"'{ev.SheetName}'!{(char)('A' + vc)}{ev.SheetRow}",
+                        Values = new List<IList<object>> { new List<object> { VerifiedGemini } }
+                    });
+            }
+            await service.Spreadsheets.Values.BatchUpdate(new BatchUpdateValuesRequest { ValueInputOption = "RAW", Data = valori }, spreadsheetId).ExecuteAsync();
+
+            // nota sulla cella F: da dove viene l'indirizzo (passandoci sopra col mouse)
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+            var note = lista
+                .Where(x => sheetIds.ContainsKey(x.Event.SheetName!))
+                .Select(x => new Request
+                {
+                    UpdateCells = new UpdateCellsRequest
+                    {
+                        Start = new GridCoordinate { SheetId = sheetIds[x.Event.SheetName!], RowIndex = x.Event.SheetRow!.Value - 1, ColumnIndex = 5 },
+                        Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = x.Nota } } } },
+                        Fields = "note"
+                    }
+                }).ToList();
+            if (note.Count > 0)
+                await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = note }, spreadsheetId).ExecuteAsync();
+
+            Console.WriteLine($"[sheet] 🤖 indirizzi di Gemini scritti su {lista.Count} righe ('{VerifiedGemini}' in '{VerifiedHeader}')");
+        }
+
         private static bool DetermineIfFree(string sheetTitle, IList<object> row)
         {
             var conditions = new List<Func<bool>>
@@ -589,6 +779,10 @@ namespace SiBallaImportingData.Utils
         // riga aggiunta dal programma con l'evento trovato online: non va sul DB e non insegna niente al dizionario
         // finché non scrivi "ok" (o svuoti la cella)
         public const string VerifiedPending = "da verificare";
+        // riga aggiunta dal programma che Gemini considera swing: va sul DB, ma non insegna niente al dizionario finché non scrivi "ok"
+        public const string VerifiedNew = "nuovo";
+        // indirizzo trovato da Gemini e confermato da Photon: va sul DB, ma non insegna niente al dizionario finché non scrivi "ok"
+        public const string VerifiedGemini = "gemini";
 
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";

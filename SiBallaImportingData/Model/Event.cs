@@ -17,9 +17,14 @@ namespace SiBallaImportingData.Model
         [JsonIgnore] public bool LuogoSconosciuto { get; set; }
         // indirizzo copiato da un'altra riga dello stesso evento (dizionario dei luoghi): da riscrivere nella colonna F
         [JsonIgnore] public bool IndirizzoDalDizionario { get; set; }
-        // colonna "Luogo verificato" dello sheet: vuoto = indirizzo scritto da te, "auto" = copiato dal programma, "ok" = controllato
+        // colonna "Luogo verificato" dello sheet: vuoto = indirizzo scritto da te, "auto" = copiato dal programma, "ok" = controllato,
+        // "nuovo" = aggiunta dal programma e swing per Gemini, "da verificare" = aggiunta dal programma e da controllare
         [JsonIgnore] public string? LuogoVerificato { get; set; }
         [JsonIgnore] public int? SheetVerifiedColumn { get; set; }   // indice della colonna (0 = A), null se manca l'intestazione
+        // per gli eventi trovati online da aggiungere allo sheet: valore di "Luogo verificato" deciso da Gemini
+        // ("nuovo" o "da verificare"; null = non classificato, la riga va "da verificare") e il motivo da mettere nella nota
+        [JsonIgnore] public string? StatoNuovaRiga { get; set; }
+        [JsonIgnore] public string? MotivoVerifica { get; set; }
         // colonna "Immagine" dello sheet: "sì" = file su Storage, "no" = cercata sul sito senza trovarla, vuoto = da cercare
         [JsonIgnore] public string? SheetImageRaw { get; set; }
         [JsonIgnore] public int? SheetImageColumn { get; set; }

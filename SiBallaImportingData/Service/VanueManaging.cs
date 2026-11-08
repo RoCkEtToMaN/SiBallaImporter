@@ -21,6 +21,10 @@ public class VenueInfo
     public string? Source { get; set; }      // "manuale", "photon", "ai", ...
     public string? VerifiedOn { get; set; }
     public string? Notes { get; set; }
+    // data (yyyy-MM-dd) dell'ultima ricerca dell'indirizzo con Gemini finita senza risultato: per un po' non la ripeto
+    // (scritto nel file solo se c'è, per non aggiungere una riga vuota a ogni voce)
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? GeminiNonTrovato { get; set; }
 }
 
 public class OrganizerVenues
@@ -101,8 +105,8 @@ public class KnownVenueStore
         foreach (var e in sheetEvents.OrderBy(x => x.DateStart))
         {
             if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
-            // aggiunta dal programma e non ancora controllata: indirizzo e coordinate non sono una fonte
-            if (e.LuogoVerificato == ImportData.VerifiedPending) continue;
+            // scritta dal programma e non ancora controllata ("da verificare", "nuovo", "gemini"): indirizzo e coordinate non sono una fonte
+            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini) continue;
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0) continue;
@@ -192,6 +196,32 @@ public class KnownVenueStore
             _dirty = true;
         }
         return added;
+    }
+
+    /// <summary>Data dell'ultima ricerca con Gemini senza risultato per questo evento, null se mai cercato (o trovato)</summary>
+    public DateTime? GeminiNonTrovato(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return null;
+        if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) return null;
+        if (!org.Events.TryGetValue(NormalizeTitle(e.PartyName), out var v)) return null;
+        return DateTime.TryParseExact(v.GeminiNonTrovato, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+    }
+
+    /// <summary>Ricerca con Gemini senza risultato: lo segno nella voce dell'evento (creata se manca) per non ripeterla ogni giro</summary>
+    public void SegnaGeminiNonTrovato(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return;
+        var t = NormalizeTitle(e.PartyName);
+        if (t.Length == 0) return;
+
+        var key = MakeKey(e.Organizer, e.City);
+        if (!_data.TryGetValue(key, out var org))
+            _data[key] = org = new OrganizerVenues { Default = new VenueInfo { Organizer = e.Organizer, City = e.City, Country = e.Country } };
+        if (!org.Events.TryGetValue(t, out var v))
+            org.Events[t] = v = new VenueInfo { City = e.City, Country = e.Country };
+
+        v.GeminiNonTrovato = DateTime.Today.ToString("yyyy-MM-dd");
+        _dirty = true;
     }
 
     private static bool IsEmpty(VenueInfo v) => !v.Verified && string.IsNullOrWhiteSpace(v.Address) && !HasCoords(v);
@@ -288,10 +318,11 @@ public class KnownVenueStore
             if (t.Length == 0 || !org.Events.TryGetValue(t, out var v)) continue;
 
             var rowAddress = e.EventDetail.Address;
-            // righe "auto" seguono sempre il dizionario: se correggi la riga sorgente, la correzione arriva anche qui
+            // righe "auto" seguono sempre il dizionario: se correggi la riga sorgente, la correzione arriva anche qui.
+            // Lo stesso per le righe "gemini": un indirizzo verificato da te vale più di quello trovato da Gemini
             var copyAddress = v.Verified && !string.IsNullOrWhiteSpace(v.Address)
                 && (string.IsNullOrWhiteSpace(rowAddress)
-                    || (e.LuogoVerificato == ImportData.VerifiedAuto && Norm(rowAddress) != Norm(v.Address)));
+                    || (e.LuogoVerificato is ImportData.VerifiedAuto or ImportData.VerifiedGemini && Norm(rowAddress) != Norm(v.Address)));
             var sameAddress = !string.IsNullOrWhiteSpace(rowAddress) && v.GeocodedAddress is not null
                               && Norm(v.GeocodedAddress) == Norm(rowAddress);
             if (!copyAddress && !sameAddress) continue;

@@ -219,8 +219,22 @@ if (aggiornati.Count > 0)
     await ImportData.UpdateSheetLocationsAsync(aggiornati, write: opzioni.UpdateSheetCoordinates);
 
 // righe dello sheet senza immagine: la cerco sul sito della riga (così arriva sul DB già in questo giro)
+// righe future senza indirizzo: locale cercato da Gemini e confermato da Photon, scritto nello Sheet come "gemini"
+if (opzioni.CercaIndirizzi)
+    await IndirizziGemini.CercaAsync(sheetEvents, store, resolver, settings.Gemini, opzioni.CercaIndirizziMax);
+
 if (opzioni.CercaImmaginiSheet)
     await EventImages.BackfillSheetAsync(sheetEvents, appWriteService, opzioni.CercaImmaginiSheetMax);
+
+// righe colorate "da verificare" che hai controllato (scritto "ok" o svuotato la cella): via colore e nota
+try
+{
+    await ImportData.TogliEvidenziazioniAsync(sheetEvents);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[sheet] ⚠️ colore delle righe controllate non tolto: {ex.Message}");
+}
 
 // 5. report: eventi futuri che si ripetono e non hanno ancora un indirizzo, i più frequenti prima
 //    (basta scriverlo in una riga e il prossimo giro lo copia sulle altre)
@@ -285,6 +299,9 @@ EventiPerBot.Salva(DataPaths.Get("eventi-bot.json"), eventFromExcel, eventsMerge
 // eventsMergeUfficial = eventi trovati online e non ancora presenti nello Sheet
 if (enableImportingOnExcel && eventsMergeUfficial.Count > 0)
 {
+    // Gemini decide lo stato delle righe: swing -> "nuovo" (va sul DB), gli altri -> "da verificare" colorati.
+    // La classificazione resta in memoria e l'email più sotto la riusa
+    await SwingEventClassifier.SegnaPerSheetAsync(eventsMergeUfficial, settings.Gemini);
     // immagine su Storage prima di scrivere la riga: il link online (es. Facebook) scade, la copia no
     await EventImages.UploadAsync(eventsMergeUfficial, appWriteService);
     await ImportData.PrepareToAppendToGoogleSheet([.. eventsMergeUfficial.OrderBy(x => x.DateStart)], eventFromExcel);

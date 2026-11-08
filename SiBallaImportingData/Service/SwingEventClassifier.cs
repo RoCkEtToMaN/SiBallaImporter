@@ -9,7 +9,6 @@ namespace SiBallaImportingData.Service
     // Se l'API non è configurata o va in errore, tutti gli eventi restano nella lista swing (l'email parte comunque).
     public static class SwingEventClassifier
     {
-        private static readonly HttpClient _client = new() { Timeout = TimeSpan.FromSeconds(90) };
         private const int DimensioneGruppo = 20;
 
         private const string Istruzioni =
@@ -24,58 +23,96 @@ namespace SiBallaImportingData.Service
             "Sono eventi solo serate sociali, feste, festival, stage/workshop weekend e serate con musica dal vivo o DJ. " +
             "Per ogni evento rispondi con id, isSwing e un motivo breve in italiano (max 15 parole).";
 
+        // esiti di Gemini di questo giro, per evento: lo Sheet e l'email usano la stessa classificazione senza richiederla due volte
+        private static readonly Dictionary<Event, (bool IsSwing, string Motivo)> _esiti = new(ReferenceEqualityComparer.Instance);
+
+        /// <summary>
+        /// Per l'email: separa gli eventi swing dagli altri. Se Gemini non risponde l'evento resta tra gli swing (l'email parte comunque)
+        /// </summary>
         public static async Task<(List<Event> Swing, List<(Event Evento, string Motivo)> Altri)> ClassifyAsync(List<Event> eventi, GeminiOptions gemini)
         {
-            var swing = new List<Event>(eventi);
+            await ClassificaAsync(eventi, gemini);
+
+            var swing = new List<Event>();
             var altri = new List<(Event, string)>();
-
-            var apiKey = gemini.ApiKey;
-            var model = gemini.Model;
-            if (eventi.Count == 0 || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(model))
+            foreach (var ev in eventi)
             {
-                if (eventi.Count != 0)
-                    Console.WriteLine("[AI] Chiave Gemini (Gemini:ApiKey o GEMINI_API_KEY) o modello non impostati: controllo saltato.");
-                return (swing, altri);
-            }
-
-            // a gruppi: richieste brevi, e se un gruppo fallisce i suoi eventi restano semplicemente nella lista swing
-            var nonSwing = new Dictionary<int, string>();
-            int gruppi = (eventi.Count + DimensioneGruppo - 1) / DimensioneGruppo;
-            for (int g = 0; g < gruppi; g++)
-            {
-                int inizio = g * DimensioneGruppo;
-                int quanti = Math.Min(DimensioneGruppo, eventi.Count - inizio);
-                var cronometro = System.Diagnostics.Stopwatch.StartNew();
-                try
+                if (_esiti.TryGetValue(ev, out var esito) && !esito.IsSwing)
                 {
-                    foreach (var (id, motivo) in await ClassifyGroupAsync(eventi, inizio, quanti, apiKey, model))
-                        nonSwing[id] = motivo;
-                    Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi}: {quanti} eventi in {cronometro.Elapsed.TotalSeconds:F1} s");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi} non classificato dopo {cronometro.Elapsed.TotalSeconds:F1} s, eventi lasciati nella lista: {ex.Message}");
-                }
-            }
-
-            swing.Clear();
-            for (int i = 0; i < eventi.Count; i++)
-            {
-                if (nonSwing.TryGetValue(i, out var motivo))
-                {
-                    altri.Add((eventi[i], motivo));
-                    Console.WriteLine($"[AI] Non swing: {eventi[i].PartyName} -> {motivo}");
+                    altri.Add((ev, esito.Motivo));
+                    Console.WriteLine($"[AI] Non swing: {ev.PartyName} -> {esito.Motivo}");
                 }
                 else
-                    swing.Add(eventi[i]);
+                    swing.Add(ev);
             }
 
             Console.WriteLine($"[AI] Eventi swing: {swing.Count}, da verificare: {altri.Count}");
             return (swing, altri);
         }
 
-        // classifica gli eventi [inizio, inizio + quanti) e restituisce quelli non swing con il motivo (id = indice nella lista completa)
-        private static async Task<Dictionary<int, string>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model)
+        /// <summary>
+        /// Per le righe nuove dello Sheet: swing -> "nuovo" (va sul DB), non swing o non classificato -> "da verificare"
+        /// con il motivo (riga colorata, non va sul DB). Al contrario dell'email, nel dubbio la riga aspetta il tuo controllo
+        /// </summary>
+        public static async Task SegnaPerSheetAsync(List<Event> eventi, GeminiOptions gemini)
+        {
+            await ClassificaAsync(eventi, gemini);
+
+            foreach (var ev in eventi)
+            {
+                if (_esiti.TryGetValue(ev, out var esito))
+                {
+                    ev.StatoNuovaRiga = esito.IsSwing ? ImportData.VerifiedNew : ImportData.VerifiedPending;
+                    ev.MotivoVerifica = esito.IsSwing ? null : $"Gemini: {esito.Motivo}";
+                }
+                else
+                {
+                    ev.StatoNuovaRiga = ImportData.VerifiedPending;
+                    ev.MotivoVerifica = "Gemini non ha classificato l'evento: controlla tu";
+                }
+            }
+
+            int nuovi = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNew);
+            Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), {eventi.Count - nuovi} '{ImportData.VerifiedPending}' (colorate)");
+        }
+
+        // classifica con Gemini gli eventi che in questo giro non lo sono ancora; quelli di un gruppo fallito restano senza esito
+        private static async Task ClassificaAsync(List<Event> eventi, GeminiOptions gemini)
+        {
+            var daFare = eventi.Where(e => !_esiti.ContainsKey(e)).Distinct(ReferenceEqualityComparer.Instance).Cast<Event>().ToList();
+            if (daFare.Count == 0)
+                return;
+
+            var apiKey = gemini.ApiKey;
+            var model = gemini.Model;
+            if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(model))
+            {
+                Console.WriteLine("[AI] Chiave Gemini (Gemini:ApiKey o GEMINI_API_KEY) o modello non impostati: controllo saltato.");
+                return;
+            }
+
+            // a gruppi: richieste brevi, e se un gruppo fallisce gli altri vanno avanti
+            int gruppi = (daFare.Count + DimensioneGruppo - 1) / DimensioneGruppo;
+            for (int g = 0; g < gruppi; g++)
+            {
+                int inizio = g * DimensioneGruppo;
+                int quanti = Math.Min(DimensioneGruppo, daFare.Count - inizio);
+                var cronometro = System.Diagnostics.Stopwatch.StartNew();
+                try
+                {
+                    foreach (var (id, esito) in await ClassifyGroupAsync(daFare, inizio, quanti, apiKey, model))
+                        _esiti[daFare[id]] = esito;
+                    Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi}: {quanti} eventi in {cronometro.Elapsed.TotalSeconds:F1} s");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi} non classificato dopo {cronometro.Elapsed.TotalSeconds:F1} s: {ex.Message}");
+                }
+            }
+        }
+
+        // classifica gli eventi [inizio, inizio + quanti) e restituisce l'esito di quelli a cui il modello ha risposto (id = indice nella lista)
+        private static async Task<Dictionary<int, (bool IsSwing, string Motivo)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model)
         {
             var elenco = new StringBuilder();
             for (int i = inizio; i < inizio + quanti; i++)
@@ -119,15 +156,8 @@ namespace SiBallaImportingData.Service
                 }
             };
 
-            using var request = new HttpRequestMessage(HttpMethod.Post,
-                $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent");
-            request.Headers.Add("x-goog-api-key", apiKey);
-            request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-
-            var response = await _client.SendAsync(request);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException($"Gemini {(int)response.StatusCode}: {responseBody}");
+            // 429 e 5xx (es. 503 "high demand") vengono riprovati dentro GeminiHttp
+            var responseBody = await GeminiHttp.GenerateContentAsync(model, apiKey, JsonSerializer.Serialize(body));
 
             using var doc = JsonDocument.Parse(responseBody);
             var text = doc.RootElement.GetProperty("candidates")[0]
@@ -135,16 +165,16 @@ namespace SiBallaImportingData.Service
                 .GetProperty("text").GetString();
 
             using var risultati = JsonDocument.Parse(text ?? "[]");
-            var nonSwing = new Dictionary<int, string>();
+            var esiti = new Dictionary<int, (bool, string)>();
             foreach (var r in risultati.RootElement.EnumerateArray())
             {
                 int id = r.GetProperty("id").GetInt32();
                 // ignora id fuori dal gruppo, se il modello ne inventa
-                if (id >= inizio && id < inizio + quanti && !r.GetProperty("isSwing").GetBoolean())
-                    nonSwing[id] = r.GetProperty("motivo").GetString() ?? string.Empty;
+                if (id >= inizio && id < inizio + quanti)
+                    esiti[id] = (r.GetProperty("isSwing").GetBoolean(), r.GetProperty("motivo").GetString() ?? string.Empty);
             }
 
-            return nonSwing;
+            return esiti;
         }
     }
 }

@@ -7,7 +7,8 @@
 #
 # Variables opzionali (stessa pagina, tab Variables) per cambiare il comportamento
 # dell'esecuzione pianificata senza toccare questo file:
-#   ENABLE_SENDING, ENABLE_IMPORTING_ON_EXCEL, ENABLE_IMPORTING_ON_DB, UPDATE_SHEET_COORDINATES, GIORNI
+#   ENABLE_SENDING, ENABLE_IMPORTING_ON_EXCEL, ENABLE_IMPORTING_ON_DB, UPDATE_SHEET_COORDINATES, GIORNI,
+#   CERCA_IMMAGINI_SHEET, CERCA_INDIRIZZI, CERCA_INDIRIZZI_MAX
 #
 # Il programma legge la configurazione a strati (appsettings.json -> variabili d'ambiente -> riga di comando):
 # qui le impostazioni e le chiavi arrivano come variabili d'ambiente Sezione__Chiave (es. Import__EnableSending).
@@ -160,6 +161,8 @@ jobs:
           Import__UpdateSheetCoordinates: ${{ inputs.update_sheet_coordinates || vars.UPDATE_SHEET_COORDINATES || 'false' }}
           Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
           Import__CercaImmaginiSheet: ${{ vars.CERCA_IMMAGINI_SHEET || 'false' }}
+          Import__CercaIndirizzi: ${{ vars.CERCA_INDIRIZZI || 'false' }}
+          Import__CercaIndirizziMax: ${{ vars.CERCA_INDIRIZZI_MAX || '20' }}
           Import__ResetDb: "false"
           Import__ResetExcel: "false"
           Import__PulisciLezioni: "false"
