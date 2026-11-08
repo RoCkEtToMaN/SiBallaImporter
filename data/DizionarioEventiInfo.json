@@ -376,8 +376,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       },
       "lo swing del principe 3rd febbraio": {
         "organizer": null,
@@ -471,8 +470,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -2118,8 +2116,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -2391,7 +2388,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       },
       "swing big apple polaris": {
         "organizer": null,
@@ -2772,8 +2770,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -5609,8 +5606,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       },
       "roffa fast feet dec": {
         "organizer": null,
@@ -5761,8 +5757,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -5796,8 +5791,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -5876,8 +5870,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -5945,8 +5938,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -6014,8 +6006,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -6049,8 +6040,7 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -6552,7 +6542,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -6586,7 +6577,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -6620,7 +6612,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -6654,7 +6647,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -7009,8 +7003,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -7142,7 +7135,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -7308,7 +7302,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -7625,7 +7620,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
       }
     }
   },
@@ -11929,8 +11925,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -15338,8 +15333,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -15373,8 +15367,7 @@
         "verified": false,
         "source": null,
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-08"
+        "notes": null
       }
     }
   },
@@ -15399,6 +15392,41 @@
         "organizer": null,
         "city": "Ile-de-France",
         "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-08"
+      }
+    }
+  },
+  "movin re|reggio emilia": {
+    "default": {
+      "organizer": "Movin'RE",
+      "city": "Reggio Emilia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "movin re festival di musica e ballo swing a reggio emilia italy": {
+        "organizer": null,
+        "city": "Reggio Emilia",
+        "country": "Italia",
         "eventCount": null,
         "venueName": null,
         "address": null,
