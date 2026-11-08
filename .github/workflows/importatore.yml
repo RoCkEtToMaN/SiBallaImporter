@@ -161,7 +161,8 @@ jobs:
           Import__UpdateSheetCoordinates: ${{ inputs.update_sheet_coordinates || vars.UPDATE_SHEET_COORDINATES || 'false' }}
           Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
           Import__CercaImmaginiSheet: ${{ vars.CERCA_IMMAGINI_SHEET || 'false' }}
-          Import__CercaIndirizzi: ${{ vars.CERCA_INDIRIZZI || 'false' }}
+          # righe future dello Sheet senza indirizzo: Gemini cerca il locale e lo scrive come "gemini" (max 20 per giro)
+          Import__CercaIndirizzi: ${{ vars.CERCA_INDIRIZZI || 'true' }}
           Import__CercaIndirizziMax: ${{ vars.CERCA_INDIRIZZI_MAX || '20' }}
           Import__ResetDb: "false"
           Import__ResetExcel: "false"

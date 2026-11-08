@@ -102,8 +102,9 @@ Cosa resta fuori:
 
 Al massimo `CercaIndirizziMax` eventi per giro (default 20, Variable `CERCA_INDIRIZZI_MAX`), i più
 vicini nel tempo per primi, con 4 s di pausa tra uno e l'altro per il piano gratuito di Gemini. Con 20
-eventi il giro dura qualche minuto in più. Di default è **attivo sul PC** (`appsettings.json`) e
-**spento su GitHub**.
+eventi il giro dura qualche minuto in più. Di default è **attivo** sia sul PC (`appsettings.json`)
+sia su GitHub (si spegne con la Variable `CERCA_INDIRIZZI` = `false`). Su GitHub scrive sullo Sheet
+anche se l'aggiunta dei nuovi eventi (`ENABLE_IMPORTING_ON_EXCEL`) è spenta.
 
 `--test-indirizzi` resta per provare: stampa cosa troverebbe, senza scrivere niente.
 
@@ -173,7 +174,7 @@ Configurazione su Appwrite (una volta sola):
 | Caricamento su Appwrite | no | `ENABLE_IMPORTING_ON_DB` |
 | Coordinate sullo Sheet | no | `UPDATE_SHEET_COORDINATES` |
 | Immagini per le righe dello Sheet | no | `CERCA_IMMAGINI_SHEET` |
-| Indirizzi con Gemini per le righe dello Sheet | no | `CERCA_INDIRIZZI` (max per giro: `CERCA_INDIRIZZI_MAX`, default 20) |
+| Indirizzi con Gemini per le righe dello Sheet | **sì** | `CERCA_INDIRIZZI` (`false` per spegnerla; max per giro: `CERCA_INDIRIZZI_MAX`, default 20) |
 | Giorni coperti dall'email | 7 | `GIORNI` |
 
 Le Variables si impostano in **Settings → Secrets and variables → Actions → tab Variables**,
