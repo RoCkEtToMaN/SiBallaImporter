@@ -1,0 +1,51 @@
+ToDo - SiBalla Importer
+=======================
+
+Da fare
+-------
+
+[ ] Righe "da verificare" vecchie nello Sheet (centinaia, aggiunte prima dei colori)
+    Non sono colorate, non hanno il motivo di Gemini e la ricerca degli indirizzi le salta.
+    Idea: passaggio una tantum --riclassifica-sheet che le fa classificare da Gemini:
+    swing -> "nuovo", le altre -> colorate con il motivo nella nota. Le righe "ok" non le tocca.
+    In alternativa: cancellarle a mano e rilanciare con l'aggiunta allo Sheet attiva.
+
+[ ] Prove dal PC che fanno commit e push del dizionario da sole
+    A fine giro il programma salva DizionarioEventiInfo.json e fa commit + push: così vengono
+    pubblicati anche i commit locali non ancora pushati (è già successo).
+    Idea: opzione per non fare commit/push durante i test (es. --no-push).
+
+[ ] App SiBalla (repo SiBallaApp): leggere solo il documento più recente
+    Durante il salvataggio su Appwrite, per qualche secondo ogni collezione ha due documenti
+    (prima salva il nuovo, poi cancella il vecchio). Se l'app li unisce, in quei secondi
+    vede gli eventi doppi. Controllare come li legge.
+
+[ ] DB vuoto se nello Sheet ci sono solo righe "da verificare"
+    Con lo Sheet vuoto il DB non viene toccato, ma con solo righe "da verificare" sul DB va una
+    lista vuota e l'app non mostra eventi. Valutare se estendere la protezione a questo caso.
+
+
+Da verificare
+-------------
+
+[ ] Log del run #26 su GitHub (e dei prossimi giri notturni)
+    Controllare che il nuovo codice giri bene sul runner Linux: classificazione Gemini con i
+    nuovi tentativi, pulizia dei colori, ricerca indirizzi (attiva da stanotte, max 20 eventi).
+
+[ ] Colori delle righe "da verificare"
+    Scrivere "ok" su una riga arancione e rilanciare: nel log deve comparire
+    "tolto il colore a 1 righe controllate" e la riga deve tornare bianca, senza nota.
+
+[ ] Righe "nuovo" e "ok" sul DB
+    Dopo aver messo "ok" (o lasciato "nuovo") su qualche riga, caricare su Appwrite
+    (--search=false --send=false --excel=false --db=true) e controllare che gli eventi
+    compaiano nell'app.
+
+[ ] Qualità degli indirizzi trovati da Gemini (righe "gemini")
+    Guardare le note sulla colonna F: fonte, confidenza, locale. Se gli indirizzi sono buoni
+    scrivere "ok"; se sono spesso sbagliati valutare di accettare solo confidenza "alta"
+    o di abbassare CercaIndirizziMax.
+
+[ ] Righe vuote "geminiNonTrovato": null nel dizionario
+    Sono finite nel commit b0637d1. Il codice ora non le scrive più: al prossimo salvataggio
+    del dizionario devono sparire (diff grande una volta sola).
