@@ -617,7 +617,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -1104,7 +1105,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "college dj marco diana ancona": {
         "organizer": null,
@@ -1119,7 +1121,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "college dj fishtail fano": {
         "organizer": null,
@@ -3733,7 +3736,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -7070,7 +7074,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10014,7 +10019,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10248,7 +10254,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "jazz break party live music by alex b swing 4tet": {
         "organizer": null,
@@ -10263,7 +10270,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10346,7 +10354,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10614,7 +10623,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "big band borsound jazz legs pesca dei regali trash": {
         "organizer": null,
@@ -10799,7 +10809,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10833,7 +10844,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10901,7 +10913,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10935,7 +10948,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10969,7 +10983,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -11003,7 +11018,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -11071,7 +11087,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -11173,7 +11190,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -15559,6 +15577,41 @@
         "organizer": null,
         "city": "Milano",
         "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
+      }
+    }
+  },
+  "blues fever festival e hamed jenabi|vienna": {
+    "default": {
+      "organizer": "Blues Fever Festival e Hamed Jenabi",
+      "city": "Vienna",
+      "country": "Austria",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "blues fever festival": {
+        "organizer": null,
+        "city": "Vienna",
+        "country": "Austria",
         "eventCount": null,
         "venueName": null,
         "address": null,
