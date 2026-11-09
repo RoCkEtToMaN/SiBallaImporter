@@ -1043,7 +1043,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "halloween swing senigallia an college": {
         "organizer": null,
@@ -2536,7 +2537,24 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
+      },
+      "flying feet swing night lindy hop shag balboa": {
+        "organizer": null,
+        "city": "Prato",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -8078,7 +8096,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "garage hoppers festival": {
         "organizer": null,
@@ -8195,7 +8214,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -8433,7 +8453,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -8467,7 +8488,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -8599,7 +8621,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -8667,7 +8690,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "a night of swing im balou": {
         "organizer": null,
@@ -9422,7 +9446,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -9886,7 +9911,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -15163,7 +15189,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -15438,6 +15465,111 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-08"
+      }
+    }
+  },
+  "pilsner jazz band|plzen region": {
+    "default": {
+      "organizer": "Pilsner Jazz Band",
+      "city": "Plzeň Region",
+      "country": "Czechia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lindy hop herbst camp": {
+        "organizer": null,
+        "city": "Plzeň Region",
+        "country": "Czechia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
+      }
+    }
+  },
+  "alain tolet e dario intercult|brussels capital": {
+    "default": {
+      "organizer": "Alain Tolet e Dario Intercult",
+      "city": "Brussels-Capital",
+      "country": "Belgium",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "stomping saint gilles swing night": {
+        "organizer": null,
+        "city": "Brussels-Capital",
+        "country": "Belgium",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
+      }
+    }
+  },
+  "swingadoo mad swing team e altri 5|milano": {
+    "default": {
+      "organizer": "Swingadoo, MAD Swing Team e altri 5",
+      "city": "Milano",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swingadoo the great opening party": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   }
