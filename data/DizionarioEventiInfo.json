@@ -1137,7 +1137,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "college live music cross stompers swing band": {
         "organizer": null,
@@ -1167,7 +1168,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       },
       "swing socialdance senigallia an college": {
         "organizer": null,
@@ -5088,7 +5090,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -8711,7 +8714,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -10639,7 +10643,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -11497,7 +11502,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -11648,7 +11654,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -11682,7 +11689,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -12441,7 +12449,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -15276,7 +15285,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
       }
     }
   },
@@ -15612,6 +15622,41 @@
         "organizer": null,
         "city": "Vienna",
         "country": "Austria",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-09"
+      }
+    }
+  },
+  "cornebarrieu danse bryan krdc e altri 3|occitania": {
+    "default": {
+      "organizer": "Cornebarrieu Danse, Bryan Krdc e altri 3",
+      "city": "Occitania",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "mond on swing festival swing du lindy au wcs a mondonville": {
+        "organizer": null,
+        "city": "Occitania",
+        "country": "France",
         "eventCount": null,
         "venueName": null,
         "address": null,
