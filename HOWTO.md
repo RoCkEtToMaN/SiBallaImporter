@@ -143,6 +143,9 @@ GitHub il run diventa rosso e arriva la mail). Se fallisce la cancellazione, i d
 toglie il giro dopo. Per qualche secondo, tra i due passaggi, ci sono due documenti: l'app deve
 leggere il più recente, non unirli.
 
+Le righe che il programma aggiunge allo Sheet nello stesso giro arrivano sul DB subito: dopo
+l'aggiunta lo Sheet viene riletto (nel log: `rileggo lo Sheet con le righe appena aggiunte`).
+
 Con lo Sheet vuoto (lettura fallita o foglio svuotato) il DB non viene toccato. Se invece nel foglio ci
 sono solo righe `da verificare`, sul DB va una lista vuota e l'app non mostra eventi.
 

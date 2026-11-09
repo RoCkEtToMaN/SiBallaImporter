@@ -305,6 +305,16 @@ if (enableImportingOnExcel && eventsMergeUfficial.Count > 0)
     // immagine su Storage prima di scrivere la riga: il link online (es. Facebook) scade, la copia no
     await EventImages.UploadAsync(eventsMergeUfficial, appWriteService);
     await ImportData.PrepareToAppendToGoogleSheet([.. eventsMergeUfficial.OrderBy(x => x.DateStart)], eventFromExcel);
+
+    // il DB è la copia dello Sheet letto all'inizio: rileggo, così le righe appena aggiunte arrivano sul DB
+    // in questo giro e non in quello dopo. I luoghi del dizionario vanno riapplicati (in memoria, come al punto 4)
+    if (enableImportingOnDB)
+    {
+        Console.WriteLine("[sheet] rileggo lo Sheet con le righe appena aggiunte, per il caricamento sul DB");
+        eventFromExcel = ImportData.LoadFile();
+        sheetEvents = eventFromExcel.Values.SelectMany(x => x).ToList();
+        store.ApplyToSheetEvents(sheetEvents);
+    }
 }
 
 if (enableSending)
