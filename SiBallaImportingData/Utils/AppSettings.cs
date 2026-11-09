@@ -33,6 +33,7 @@ namespace SiBallaImportingData.Utils
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
+            ["--radius-email"] = "Import:RadiusEmail",
         };
 
         public static AppSettings Load(string[] args)
@@ -81,7 +82,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
-            Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km");
+            Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km, RadiusEmail = {Import.RadiusEmail ?? Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
             Console.WriteLine($"  Appwrite chiave API = {(string.IsNullOrWhiteSpace(Appwrite.ApiKey) ? "mancante (solo permessi Any)" : "configurata")}");
@@ -121,6 +122,8 @@ namespace SiBallaImportingData.Utils
         public bool ResetExcel { get; set; }
         public int Giorni { get; set; } = 7;
         public float Radius { get; set; } = 300;
+        // Se omesso, per le email si usa il raggio di ricerca.
+        public float? RadiusEmail { get; set; }
         public string Centro { get; set; } = "Genova";
     }
 

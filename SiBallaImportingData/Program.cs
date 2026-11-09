@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 
 using Google.Apis.Sheets.v4.Data;
 using SiBalla.Service;
@@ -319,7 +319,12 @@ if (enableImportingOnExcel && eventsMergeUfficial.Count > 0)
 
 if (enableSending)
 {
-    var eventiEmail = eventsMerge.Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni)).ToList();
+    var radiusEmail = opzioni.RadiusEmail ?? opzioni.Radius;
+    var eventiEmail = eventsMerge
+        .Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni))
+        .Where(x => EventFilter.IsWithinEmailRadius(x, radiusEmail))
+        .ToList();
+    Console.WriteLine($"[email] {eventiEmail.Count} eventi entro {radiusEmail} km da Genova nei prossimi {opzioni.Giorni} giorni");
 
     // giro quotidiano: niente email (e niente Gemini) se non c'è nessun evento nuovo dall'ultima
     var nuovi = UltimaEmail.Nuovi(eventiEmail);

@@ -1,4 +1,4 @@
-﻿using SiBallaImportingData.Model;
+using SiBallaImportingData.Model;
 using SiBallaImportingData.Service;
 using System.Diagnostics.Eventing.Reader;
 
@@ -13,6 +13,21 @@ namespace SiBallaImportingData.Utils
 
             return distanzaMetri <= radiusMetri;
         }
+        // Per le email la distanza deve essere verificabile: luogo sconosciuto escluso.
+        public static bool IsWithinEmailRadius(Event ev, float radiusKm)
+        {
+            var lat = ev.EventDetail?.Latitude;
+            var lng = ev.EventDetail?.Longitude;
+            if (!HasCoords(lat, lng))
+            {
+                var city = string.IsNullOrWhiteSpace(ev.City) ? ev.EventDetail?.City : ev.City;
+                var country = string.IsNullOrWhiteSpace(ev.Country) ? ev.EventDetail?.Country : ev.Country;
+                if (!HasCity(city)) return false;
+                (lat, lng) = OfflineGeocoder.GetCoordinates(city!, country);
+            }
+            return HasCoords(lat, lng) && IsInRadius((float)lat!.Value, (float)lng!.Value, radiusKm);
+        }
+
         // Parole che indicano una lezione o un corso, non un evento (tutte in minuscolo, confronto per sottostringa)
         private static readonly string[] LessonTitleWords = {
             "lezion", "prova", "prove", "corsi", "corso", "classe", "classi", "livello", "livelli",
