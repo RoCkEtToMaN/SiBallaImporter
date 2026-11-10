@@ -1,0 +1,59 @@
+# Sito pubblico con gli eventi dello Google Sheet (colonne A-N, solo eventi futuri), ospitato su Cloudflare Pages.
+#
+# Secrets richiesti (Settings > Secrets and variables > Actions > Secrets):
+#   GOOGLE_SERVICE_ACCOUNT_JSON  -> lo stesso dell'importatore (lettura dello Sheet)
+#   CLOUDFLARE_API_TOKEN         -> token Cloudflare con permesso "Cloudflare Pages: Edit"
+#   CLOUDFLARE_ACCOUNT_ID        -> ID dell'account Cloudflare
+# Variable opzionale (tab Variables):
+#   CLOUDFLARE_PAGES_PROJECT     -> nome del progetto Pages (default "siballa" -> https://siballa.pages.dev);
+#                                   se il progetto non esiste viene creato al primo giro
+
+name: Sito pubblico
+
+on:
+  schedule:
+    # ogni ora (al minuto 17: allo scoccare dell'ora GitHub ritarda di più i cron)
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "sito/**"
+      - ".github/workflows/sito.yml"
+
+concurrency:
+  group: sito
+  cancel-in-progress: true
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROGETTO: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'siballa' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dipendenze
+        run: pip install --quiet google-auth==2.35.0 requests==2.32.3 tzdata==2024.2
+
+      - name: Esporta lo Sheet
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python sito/esporta_sheet.py _sito/eventi.json
+
+      - name: Prepara il sito
+        run: cp sito/index.html _sito/
+
+      - name: Pubblica su Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # il primo giro crea il progetto; dopo "create" fallisce perché esiste già e va bene così
+          preCommands: npx wrangler pages project create "$PROGETTO" --production-branch=main || true
+          command: pages deploy _sito --project-name=${{ env.PROGETTO }} --branch=main --commit-dirty=true

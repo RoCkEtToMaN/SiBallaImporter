@@ -31,3 +31,6 @@ email-anteprima.html
 
 # impostazioni personali di Visual Studio
 *.user
+
+# sito pubblico generato dal workflow
+_sito/
