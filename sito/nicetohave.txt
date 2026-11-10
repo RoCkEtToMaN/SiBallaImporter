@@ -7,16 +7,30 @@ GIA' FATTI
 [x] "Vicino a me" (ordina per distanza e mostra "a X km")
 [x] Anteprima quando si condivide il link (og.png)
 [x] Statistiche visite per regione/citta' (pagina nascosta /statistiche?chiave=...)
+[x] Menu ☰ con le sezioni Storia, Scuole, Artisti, Community WhatsApp, App
+    (per ora pagine "In arrivo"; per ora solo sulla versione di prova, ramo "anteprima")
+[x] Versione di prova https://anteprima.siballa.pages.dev, visibile solo con login
+    Cloudflare Access (email dell'account Cloudflare)
 
 DA FARE
 -------
+[ ] Riempire le sezioni del menu (oggi "In arrivo"):
+    - Storia del ballo: testo a capitoli con foto/video d'epoca, glossario degli stili
+    - Scuole: nuova scheda nello Sheet -> esporta_sheet.py; filtro per regione, logo, link
+    - Artisti: nuova scheda nello Sheet; insegnanti/band/DJ; foto e contatti solo con consenso
+    - Community WhatsApp: nuova scheda nello Sheet, per citta'; meglio canali/community
+      con approvazione dell'amministratore (link pubblici = spam)
+    - App mobile: pulsanti degli store; sito installabile sul telefono (PWA)
+    Quando una sezione e' pronta: pronta: true in sito/menu.js e togliere il "noindex".
+[ ] Passare il menu sul sito pubblico: merge del ramo "anteprima" in "master".
 [ ] Pulsanti sulla scheda: "Aggiungi al calendario" (file .ics) e "Condividi"
     (sul telefono apre WhatsApp e le altre app).
 [ ] Pulizia dei nomi "sporchi" nell'esportazione del sito: caratteri in grassetto
     Unicode, barre "┃", "-Italy" in fondo al nome.
 [ ] Filtro per citta' o regione, oppure vista mappa con i segnaposto
     (le coordinate degli eventi ci sono gia').
-[ ] Link all'app SiBalla in fondo alla pagina (se e' sugli store): il sito fa da vetrina.
+[ ] Link all'app SiBalla (se e' sugli store): voce "App mobile" nel menu, piu' magari
+    un pulsante "Scarica l'app" sempre visibile.
 [ ] Dominio vostro, es. eventi.siballa.it al posto di siballa.pages.dev
     (serve il dominio; il collegamento su Cloudflare e' gratis:
     Workers & Pages -> siballa -> Custom domains).
