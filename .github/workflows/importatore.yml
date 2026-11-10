@@ -144,7 +144,10 @@ jobs:
           restore-keys: luoghi-
 
       - name: Esegui importatore
+        id: importatore
         working-directory: out
+        # bash = -eo pipefail: con il tee il passo fallisce comunque se fallisce il programma
+        shell: bash
         env:
           # chiavi
           Email__MailjetApiKey: ${{ secrets.MAILJET_API_KEY }}
@@ -176,7 +179,8 @@ jobs:
           Import__TestIndirizzi: "false"
           # file di dati nella stessa cartella che le cache salvano e ripristinano
           Paths__DataDirectory: ${{ env.OUT }}
-        run: dotnet SiBallaImportingData.dll
+        # output anche in out/importatore.log: va nello ZIP del run e nell'email del log
+        run: dotnet SiBallaImportingData.dll 2>&1 | tee importatore.log
 
       # i tentativi successivi di oggi trovano la chiave e non ripartono (i run sono in fila per la concurrency)
       - name: Segna giorno fatto
@@ -218,8 +222,21 @@ jobs:
           name: importatore-${{ github.run_number }}
           path: |
             out/*.json
+            out/importatore.log
             !out/*.deps.json
             !out/*.runtimeconfig.json
             !out/siballa-*.json
           if-no-files-found: ignore
           retention-days: 30
+
+      # log del giro per email (stessi destinatari dell'email degli eventi) con un riepilogo in cima;
+      # parte anche se il programma è andato in errore e non fa mai fallire il run
+      - name: Email con il log
+        if: always() && steps.importatore.outcome != 'skipped'
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
+          ESITO: ${{ steps.importatore.outcome }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/scripts/email_log.py out/importatore.log SiBallaImportingData/appsettings.json || true
