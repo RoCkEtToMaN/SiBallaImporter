@@ -6,81 +6,106 @@
 <title>Dove siBalla stasera?</title>
 <meta name="description" content="Serate e workshop swing in programma">
 <link rel="icon" href="logo-app.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E0E12">
 <style>
+  /* colori dell'app SiBalla (Resources/Styles/Colors.xaml): tema sempre scuro, accento giallo */
   :root {
-    --bg: #f7f6f3; --surface: #ffffff; --text: #1d1d1f; --muted: #6b6b70;
-    --border: #e3e1dc; --accent: #c2410c; --accent-soft: #fdeee6; --row-alt: #fbfaf8;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #141414; --surface: #1e1e1f; --text: #ededed; --muted: #9a9aa0;
-      --border: #333336; --accent: #fb923c; --accent-soft: #3a2418; --row-alt: #232325; }
+    color-scheme: dark;
+    --bg: #0E0E12; --surface: #1B1B22; --surface-2: #26262F; --text: #FFFFFF; --muted: #9A9AA8;
+    --border: rgba(255,255,255,.14); --accent: #FFD400; --accent-soft: rgba(255,212,0,.14);
+    --on-accent: #0E0E12;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
+  /* bagliore giallo in alto a sinistra, come una luce di scena */
+  body { margin: 0; color: var(--text);
+    background: radial-gradient(900px 420px at 15% -120px, rgba(255,212,0,.17), transparent 70%) no-repeat, var(--bg);
     font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .wrap { max-width: 1400px; margin: 0 auto; padding: 24px 16px 48px; }
-  header { display: flex; align-items: center; gap: 16px; }
-  /* piastrella chiara: il disegno ha lo sfondo trasparente e i contorni neri (sul tema scuro sparirebbero) */
-  header .logo { width: 64px; height: 64px; flex: none; border-radius: 14px; background: #fffaf2;
-    padding: 6px; object-fit: contain; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
-  @media (max-width: 480px) { header .logo { width: 48px; height: 48px; border-radius: 11px; } }
-  header h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
-  header h1 .brand { color: var(--accent); }
-  header .sub { color: var(--text); font-size: 16px; margin-top: 6px; }
-  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0 16px; }
-  .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 4px; }
-  .tabs button { border: 0; background: none; color: var(--muted); font: inherit; font-weight: 600;
-    padding: 6px 14px; border-radius: 7px; cursor: pointer; }
-  .tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); }
-  .tabs .n { font-weight: 400; opacity: .75; margin-left: 4px; }
-  input[type=search] { flex: 1 1 220px; min-width: 0; font: inherit; color: var(--text);
-    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; }
-  input[type=search]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-  .stili { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 16px; }
-  .stili button { font: inherit; font-size: 13px; color: var(--text); background: var(--surface);
-    border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
-  .stili button .n { color: var(--muted); margin-left: 4px; font-size: 12px; }
-  .stili button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .stili button[aria-pressed="true"] .n { color: rgba(255,255,255,.8); }
-  .stili .tutti { color: var(--muted); border-style: dashed; }
   a { color: var(--accent); }
-  .empty { color: var(--muted); padding: 32px 0; text-align: center; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px 56px; }
 
-  /* tabella (schermi larghi) */
-  .table-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--border); }
-  th { position: sticky; top: 0; background: var(--surface); font-size: 12px; text-transform: uppercase;
-    letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
-  tbody tr:nth-child(even) { background: var(--row-alt); }
-  tbody tr:last-child td { border-bottom: 0; }
-  td { min-width: 90px; max-width: 320px; overflow-wrap: anywhere; }
-  td.nowrap { white-space: nowrap; }
-
-  /* schede (telefono) */
-  .cards { display: none; gap: 12px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-  .card h2 { margin: 0 0 2px; font-size: 17px; }
-  .card .when { color: var(--accent); font-weight: 600; font-size: 13px; margin-bottom: 8px; }
-  .card dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 14px; }
-  .card dt { color: var(--muted); }
-  .card dd { margin: 0; overflow-wrap: anywhere; }
-  @media (max-width: 760px) {
-    .table-box { display: none; }
-    .cards { display: grid; }
+  /* intestazione da locandina: bagliore giallo dietro il titolo, come una luce di scena */
+  .hero { padding: 40px 0 28px; }
+  .hero-in { display: flex; align-items: center; gap: 20px; }
+  /* piastrella chiara: il disegno ha lo sfondo trasparente e i contorni neri (sul fondo scuro sparirebbero) */
+  .logo { width: 84px; height: 84px; flex: none; border-radius: 20px; background: #fffaf2; padding: 8px;
+    object-fit: contain; box-shadow: 0 8px 30px rgba(255,212,0,.18), 0 2px 8px rgba(0,0,0,.4); }
+  h1 { margin: 0; font-size: clamp(30px, 6vw, 54px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; }
+  h1 .brand { color: var(--accent); text-shadow: 0 0 28px rgba(255,212,0,.35); }
+  .sub { margin: 8px 0 0; font-size: 17px; color: var(--text); opacity: .9; }
+  .agg { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+  @media (max-width: 520px) {
+    .hero { padding-top: 28px; }
+    .hero-in { gap: 14px; }
+    .logo { width: 60px; height: 60px; border-radius: 15px; padding: 6px; }
   }
+
+  /* comandi */
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 4px; }
+  .tabs button { border: 0; background: none; color: var(--muted); font: inherit; font-weight: 600;
+    padding: 7px 16px; border-radius: 9px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+  .tabs .n { font-weight: 400; opacity: .7; margin-left: 5px; }
+  input[type=search] { flex: 1 1 240px; min-width: 0; font: inherit; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 9px 14px; }
+  input[type=search]::placeholder { color: var(--muted); }
+  input[type=search]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .stili { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .stili button { font: inherit; font-size: 13px; color: var(--text); background: transparent;
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .stili button:hover { border-color: rgba(255,212,0,.5); }
+  .stili button .n { color: var(--muted); margin-left: 4px; font-size: 12px; }
+  .stili button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .stili button[aria-pressed="true"] .n { color: rgba(14,14,18,.7); }
+  .stili .tutti { color: var(--muted); border-style: dashed; }
+
+  /* sezioni per data */
+  .sezione { margin-top: 28px; }
+  .sezione h2 { margin: 0 0 12px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .sezione h2::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .sezione.top h2 { color: var(--accent); font-size: 15px; }
+  .sezione h2 .c { font-weight: 500; letter-spacing: 0; text-transform: none; }
+
+  /* schede evento */
+  .griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  @media (max-width: 520px) { .griglia { grid-template-columns: minmax(0, 1fr); } }
+  .ev { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 14px; min-width: 0; transition: border-color .15s, transform .15s; }
+  .ev:hover { border-color: rgba(255,212,0,.45); transform: translateY(-1px); }
+  .data { flex: none; width: 58px; text-align: center; border-radius: 12px; background: var(--surface-2);
+    padding: 7px 0 8px; align-self: flex-start; }
+  .data .gs { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .data .g { font-size: 26px; font-weight: 800; line-height: 1.05; color: var(--accent); }
+  .data .m { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .data .fino { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .corpo { min-width: 0; flex: 1; }
+  .ev h3 { margin: 0; font-size: 16.5px; line-height: 1.25; overflow-wrap: anywhere; }
+  .dove { margin-top: 4px; font-size: 14px; color: var(--text); opacity: .85; overflow-wrap: anywhere; }
+  .chi { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .tag { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .tag span { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .tag span.gratis { background: rgba(37,211,102,.15); color: #25D366; }
+  .azioni { display: flex; gap: 8px; margin-top: 11px; }
+  .azioni a { font-size: 13px; font-weight: 600; text-decoration: none; padding: 5px 12px; border-radius: 9px;
+    border: 1px solid var(--border); color: var(--text); }
+  .azioni a.info { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .azioni a:hover { border-color: var(--accent); }
+  .stasera { margin: 24px 0 -8px; color: var(--muted); font-size: 14px; }
+  .vuoto { color: var(--muted); padding: 40px 0; text-align: center; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <img class="logo" src="logo-app.svg" alt="" width="64" height="64">
-    <div>
-      <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
-      <p class="sub">Serate e workshop swing</p>
-      <p id="agg">Caricamento…</p>
+  <header class="hero">
+    <div class="hero-in">
+      <img class="logo" src="logo-app.svg" alt="" width="84" height="84">
+      <div>
+        <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+        <p class="sub">Serate e workshop swing</p>
+        <p class="agg" id="agg">Caricamento…</p>
+      </div>
     </div>
   </header>
   <div class="bar">
@@ -88,22 +113,25 @@
     <input type="search" id="q" placeholder="Cerca per nome, città, organizzatore…" aria-label="Cerca">
   </div>
   <div class="stili" id="stili" role="group" aria-label="Filtra per stile"></div>
-  <div class="table-box"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
-  <div class="cards" id="cards"></div>
-  <div class="empty" id="empty" hidden>Nessun evento trovato.</div>
+  <main id="lista"></main>
+  <div class="vuoto" id="vuoto" hidden>Nessun evento trovato.</div>
 </div>
 <script>
 (function () {
-  // indici delle colonne A..N con un ruolo speciale
-  var COL = { inizio: 0, fine: 1, nome: 4, luogo: 5 };
   var dati = null, attivo = 0, scelti = {};
-  // nomi degli stili come nello Sheet -> nome mostrato (stesse regole di ParseStili dell'importatore)
+  var $ = function (id) { return document.getElementById(id); };
+  var GIORNI = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
+  var MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+  var MESI_LUNGHI = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto",
+    "Settembre", "Ottobre", "Novembre", "Dicembre"];
+
+  // nomi degli stili come nello Sheet -> nome mostrato (stesse regole di StiliEvento dell'importatore)
   var SINONIMI = {
     "lindy": "Lindy Hop", "lindy hop": "Lindy Hop", "lindyhop": "Lindy Hop",
     "balboa": "Balboa", "bal": "Balboa",
     "blues": "Blues", "blues dance": "Blues",
     "solo jazz": "Solo Jazz", "solojazz": "Solo Jazz", "solo": "Solo Jazz", "jazz": "Solo Jazz",
-    "boogie": "Boogie Woogie", "boogie woogie": "Boogie Woogie", "boogiewoogie": "Boogie Woogie",
+    "boogie": "Boogie Woogie", "boogie woogie": "Boogie Woogie", "boogiewoogie": "Boogie Woogie", "boogie-woogie": "Boogie Woogie",
     "shag": "Shag", "collegiate shag": "Shag",
     "stlouisshag": "St. Louis Shag", "st. louis shag": "St. Louis Shag", "st louis shag": "St. Louis Shag",
     "slowbal": "Slow Balboa", "slow bal": "Slow Balboa", "slow balboa": "Slow Balboa",
@@ -117,46 +145,97 @@
     });
     return Object.keys(out);
   }
-  var $ = function (id) { return document.getElementById(id); };
-
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  // testo della cella con i link resi cliccabili
-  function linkify(s) {
-    var out = "", last = 0, re = /\b(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/gi, m;
-    while ((m = re.exec(s))) {
-      var url = m[0].replace(/[.,;)]+$/, "");
-      out += esc(s.slice(last, m.index));
-      out += '<a href="' + esc(/^www\./i.test(url) ? "https://" + url : url) + '" target="_blank" rel="noopener">' + esc(url) + "</a>";
-      last = m.index + url.length;
+  // "dd/mm/yyyy" -> Date locale a mezzanotte
+  function data(s) {
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s || "");
+    return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null;
+  }
+  function giorni(a, b) { return Math.round((b - a) / 86400000); }
+  function primoLink(s) {
+    var m = /(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/i.exec(s || "");
+    if (!m) return null;
+    var u = m[0].replace(/[.,;)]+$/, "");
+    return /^www\./i.test(u) ? "https://" + u : u;
+  }
+
+  // prepara ogni evento: date, luogo leggibile, stili, link
+  function prepara(f) {
+    var col = {};
+    f.colonne.forEach(function (c, i) { col[c.trim().toLowerCase()] = i; });
+    var serate = /serat/i.test(f.nome);
+    f.eventi.forEach(function (ev) {
+      var c = ev.celle;
+      ev._inizio = data(c[0]);
+      ev._fine = data(c[1]) || ev._inizio;
+      // una serata finisce il giorno dopo (notte): conta come evento di un giorno solo
+      ev._unGiorno = !ev._inizio || serate || giorni(ev._inizio, ev._fine) <= 1;
+      ev._nome = (c[4] || "Evento").trim();
+      // "Italia, Firenze, via Roma 1" -> "Firenze · via Roma 1" (il paese solo se non è l'Italia)
+      var parti = (c[5] || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+      var paese = parti.shift() || "";
+      ev._dove = parti.length ? parti.join(" · ") + (/^ital/i.test(paese) ? "" : " (" + paese + ")") : paese;
+      ev._chi = (c[6] || "").trim();
+      ev._stili = "stile" in col ? stiliDi(c[col["stile"]]) : [];
+      ev._gratis = "gratis" in col && /^(x|s[iì]|yes|1|true)$/i.test((c[col["gratis"]] || "").trim());
+      ev._link = "riferimento" in col ? primoLink(c[col["riferimento"]]) : null;
+      ev._testo = c.join(" ").toLowerCase();
+    });
+    f._serate = serate;
+  }
+
+  // sezione di un evento rispetto a oggi
+  function sezione(ev, oggi, serate) {
+    if (!ev._inizio) return { k: "z", t: "Data da definire" };
+    var d = giorni(oggi, ev._inizio);
+    // serata iniziata ieri = finita stanotte; un workshop iniziato prima di oggi è ancora in corso
+    if (d < 0) return serate ? null : { k: "0", t: "In corso" };
+    if (d === 0) return { k: "1", t: serate ? "Stasera" : "Oggi", top: true };
+    if (d === 1) return { k: "2", t: "Domani" };
+    // fino alla domenica di questa settimana
+    var finoDomenica = (7 - oggi.getDay()) % 7;
+    if (d <= finoDomenica) {
+      var gs = ev._inizio.getDay();   // 5 ven, 6 sab, 0 dom
+      return gs === 5 || gs === 6 || gs === 0 ? { k: "4", t: "Questo weekend" } : { k: "3", t: "Questa settimana" };
     }
-    return out + esc(s.slice(last));
+    if (d <= finoDomenica + 7) return { k: "5", t: "Settimana prossima" };
+    var y = ev._inizio.getFullYear(), m = ev._inizio.getMonth();
+    return { k: "6" + y + String(m).padStart(2, "0"), t: MESI_LUNGHI[m] + (y !== oggi.getFullYear() ? " " + y : "") };
   }
-  function contenuto(ev, i) {
-    var v = ev.celle[i] || "";
-    if (i === COL.luogo && v && ev.mappa)
-      return linkify(v) + ' · <a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">mappa</a>';
-    return linkify(v);
-  }
-  function quando(ev) {
-    var a = ev.celle[COL.inizio], b = ev.celle[COL.fine];
-    return b && b !== a ? a + " → " + b : a;
+
+  function scheda(ev) {
+    var i = ev._inizio, f = ev._fine;
+    var riquadro = i
+      ? '<div class="gs">' + GIORNI[i.getDay()] + '</div><div class="g">' + i.getDate() + '</div><div class="m">' + MESI[i.getMonth()] + "</div>" +
+        (!ev._unGiorno && f ? '<div class="fino">→ ' + f.getDate() + " " + MESI[f.getMonth()] + "</div>" : "")
+      : '<div class="g">?</div>';
+    var tag = ev._stili.map(function (s) { return "<span>" + esc(s) + "</span>"; }).join("") +
+      (ev._gratis ? '<span class="gratis">Gratis</span>' : "");
+    var azioni = (ev._link ? '<a class="info" href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
+      (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "");
+    return '<article class="ev"><div class="data">' + riquadro + '</div><div class="corpo">' +
+      "<h3>" + esc(ev._nome) + "</h3>" +
+      (ev._dove ? '<div class="dove">' + esc(ev._dove) + "</div>" : "") +
+      (ev._chi ? '<div class="chi">' + esc(ev._chi) + "</div>" : "") +
+      (tag ? '<div class="tag">' + tag + "</div>" : "") +
+      (azioni ? '<div class="azioni">' + azioni + "</div>" : "") +
+      "</div></article>";
   }
 
   function disegna() {
     var foglio = dati.fogli[attivo];
     if (!foglio) return;
     var q = $("q").value.trim().toLowerCase();
-    // stili selezionati presenti in questo foglio: l'evento passa se ne ha almeno uno
     var conteggio = {};
     foglio.eventi.forEach(function (ev) { ev._stili.forEach(function (s) { conteggio[s] = (conteggio[s] || 0) + 1; }); });
     var attivi = Object.keys(scelti).filter(function (s) { return conteggio[s]; });
     var eventi = foglio.eventi.filter(function (ev) {
       if (attivi.length && !ev._stili.some(function (s) { return scelti[s]; })) return false;
-      return !q || ev.celle.join(" ").toLowerCase().indexOf(q) >= 0;
+      return !q || ev._testo.indexOf(q) >= 0;
     });
 
     var elenco = Object.keys(conteggio).sort(function (a, b) { return conteggio[b] - conteggio[a] || a.localeCompare(b); });
@@ -164,33 +243,26 @@
       return '<button type="button" data-stile="' + esc(s) + '" aria-pressed="' + !!scelti[s] + '">' +
         esc(s) + '<span class="n">' + conteggio[s] + "</span></button>";
     }).join("") + (attivi.length ? '<button type="button" class="tutti" data-stile="">Tutti gli stili</button>' : "");
-    // colonne completamente vuote nel foglio: nascoste
-    var usate = foglio.colonne.map(function (_, i) {
-      return foglio.eventi.some(function (ev) { return ev.celle[i]; });
+
+    var oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    var gruppi = {}, ordine = [];
+    eventi.forEach(function (ev) {
+      var s = sezione(ev, oggi, foglio._serate);
+      if (!s) return;
+      if (!gruppi[s.k]) { gruppi[s.k] = { t: s.t, top: s.top, ev: [] }; ordine.push(s.k); }
+      gruppi[s.k].ev.push(ev);
     });
-
-    $("thead").innerHTML = "<tr>" + foglio.colonne.map(function (c, i) {
-      return usate[i] ? "<th>" + esc(c) + "</th>" : "";
-    }).join("") + "</tr>";
-    $("tbody").innerHTML = eventi.map(function (ev) {
-      return "<tr>" + ev.celle.map(function (_, i) {
-        if (!usate[i]) return "";
-        var cls = i === COL.inizio || i === COL.fine ? ' class="nowrap"' : "";
-        return "<td" + cls + ">" + contenuto(ev, i) + "</td>";
-      }).join("") + "</tr>";
+    ordine.sort();
+    // il titolo chiede "stasera": se stasera non c'è niente lo dico, prima delle prossime date
+    var nienteStasera = foglio._serate && eventi.length && !gruppi["1"]
+      ? '<p class="stasera">Stasera nessuna serata' + (q || attivi.length ? " con questi filtri" : "") + ": ecco le prossime.</p>" : "";
+    $("lista").innerHTML = nienteStasera + ordine.map(function (k) {
+      var g = gruppi[k];
+      return '<section class="sezione' + (g.top ? " top" : "") + '"><h2>' + esc(g.t) +
+        ' <span class="c">' + g.ev.length + "</span></h2>" +
+        '<div class="griglia">' + g.ev.map(scheda).join("") + "</div></section>";
     }).join("");
-
-    $("cards").innerHTML = eventi.map(function (ev) {
-      var righe = ev.celle.map(function (v, i) {
-        if (!v || i === COL.inizio || i === COL.fine || i === COL.nome) return "";
-        return "<dt>" + esc(foglio.colonne[i]) + "</dt><dd>" + contenuto(ev, i) + "</dd>";
-      }).join("");
-      return '<article class="card"><h2>' + esc(ev.celle[COL.nome] || "Evento") + "</h2>" +
-        '<div class="when">' + esc(quando(ev)) + "</div><dl>" + righe + "</dl></article>";
-    }).join("");
-
-    $("empty").hidden = eventi.length > 0;
-    document.querySelector(".table-box").hidden = eventi.length === 0;
+    $("vuoto").hidden = eventi.length > 0;
   }
 
   function tabs() {
@@ -221,10 +293,7 @@
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
       dati = d;
-      d.fogli.forEach(function (f) {
-        var i = f.colonne.map(function (c) { return c.trim().toLowerCase(); }).indexOf("stile");
-        f.eventi.forEach(function (ev) { ev._stili = i >= 0 ? stiliDi(ev.celle[i]) : []; });
-      });
+      d.fogli.forEach(prepara);
       var t = new Date(d.aggiornato);
       $("agg").textContent = "Aggiornato il " + t.toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" });
       tabs(); disegna();
