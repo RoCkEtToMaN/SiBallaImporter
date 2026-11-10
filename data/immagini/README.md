@@ -5,6 +5,10 @@ programma la carica su Appwrite Storage al posto di quella trovata online e scri
 **Immagine** dello Sheet. Gira insieme a `CercaImmaginiSheet` (`--immagini-sheet`, Variable di GitHub
 `CERCA_IMMAGINI_SHEET`).
 
+Per non aspettare il giro della notte: nello Sheet **menu SiBalla → Carica immagini e aggiorna
+sito**, dopo 5-10 minuti l'immagine è sul sito. Procedura passo passo nell'[HOWTO](../../HOWTO.md)
+(sezione "Mettere a mano l'immagine di un evento").
+
 Regole:
 
 - un file per evento, **jpg, png o webp**, sotto 10 MB (meglio sotto 1 MB);

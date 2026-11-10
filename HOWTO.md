@@ -155,10 +155,31 @@ Il file su Storage si chiama `ev` + un hash di **data di inizio + titolo** della
 data o il titolo nello Sheet il collegamento si perde: al caricamento su Appwrite il log lo segnala
 (`file ... non è su Storage`) e l'evento va sul DB senza immagine.
 
-Per mettere a mano l'immagine di un evento (es. la copertina di un evento Facebook, che il programma
-non riesce a leggere) salvala in `data/immagini/` con nome `data_titolo`, es.
-`2026-11-20_swing-sul-mare.jpg`: al giro dopo viene caricata su Storage al posto di quella trovata
-online e nella colonna viene scritto `sì` (regole nel [README della cartella](data/immagini/README.md)).
+#### Mettere a mano l'immagine di un evento
+
+Serve per gli eventi senza immagine (`no` nella colonna **Immagine**) o con un'immagine sbagliata, per
+esempio quelli con un link Facebook in "Riferimento": senza login Facebook non dà l'anteprima e il
+programma non riesce a prenderla. Nello Sheet non va cambiato niente.
+
+1. **Scarica l'immagine**: apri l'evento nel browser (da loggato), clic destro sulla copertina →
+   "Salva immagine con nome" (o "Apri immagine in una nuova scheda" e salvala da lì).
+2. **Dagli il nome** `data_titolo`: data di inizio della riga (`aaaa-mm-gg`), `_`, titolo della riga,
+   es. `2026-11-20_swing-sul-mare.jpg`. Maiuscole, accenti, spazi e numeri non contano; formati jpg,
+   png o webp.
+3. **Caricala nella cartella `data/immagini`** del repo:
+   - da GitHub: <https://github.com/RoCkEtToMaN/SiBallaImporter/tree/master/data/immagini> →
+     **Add file → Upload files** → trascina le immagini (anche più insieme) → **Commit changes**;
+   - oppure dal PC in `C:\Iroi\Fork\SiBallaImportingData\data\immagini\` (la cartella principale del
+     repo, **non** `SiBallaImportingData\SiBallaImportingData\data`), poi commit e push.
+4. **Nello Sheet: menu SiBalla → Carica immagini e aggiorna sito.** Dopo 5-10 minuti nella colonna
+   **Immagine** c'è `sì` e il sito mostra l'immagine. Senza questo passo l'immagine arriva col giro
+   della notte.
+
+Se la colonna resta `no`, nel log del giro cerca `===== Immagini messe a mano =====`: dice se il nome
+non corrisponde a nessuna riga (`nessuna riga dello Sheet il ... con titolo ...`). Se poi cambi data o
+titolo della riga, rinomina anche il file; passato l'evento il file si può cancellare. L'immagine
+messa a mano ha la precedenza su quella trovata online e sul logo. Regole complete nel
+[README della cartella](data/immagini/README.md).
 
 Per le righe già nello Sheet c'è `CercaImmaginiSheet` (flag `--immagini-sheet`, Variable di GitHub
 `CERCA_IMMAGINI_SHEET`): per le righe future con la colonna **Immagine** vuota legge il sito in
@@ -200,9 +221,27 @@ senza toccare il file del workflow.
 
 ### Lancio a mano
 
-**Actions → Importatore eventi → Run workflow**: compare un modulo con le stesse opzioni. Serve per
-esempio a caricare lo Sheet su Appwrite dopo averlo modificato (metti "Carica gli eventi dello Sheet
-su Appwrite" a `true` e, se non vuoi l'email, "Invia l'email" a `false`).
+**Dallo Sheet: menu SiBalla → Carica immagini e aggiorna sito.** Lancia il giro veloce ("solo
+immagini", vedi sotto) senza entrare su GitHub: è il modo normale dopo aver aggiunto immagini in
+`data/immagini` o modificato lo Sheet. Ci mette 5-10 minuti; un avviso in basso a destra conferma
+l'avvio.
+
+**Da GitHub: Actions → Importatore eventi → Run workflow**: compare un modulo con le stesse opzioni.
+Serve per esempio a caricare lo Sheet su Appwrite dopo averlo modificato (metti "Carica gli eventi
+dello Sheet su Appwrite" a `true` e, se non vuoi l'email, "Invia l'email" a `false`).
+
+L'opzione **"Giro veloce: solo immagini"** (`solo_immagini`, quella usata dal menu dello Sheet) fa
+solo immagini (data/immagini, siti, loghi) e caricamento sul DB: niente ricerca online, email degli
+eventi e indirizzi con Gemini. Non conta come giro del giorno (quello della notte parte comunque) e
+l'email del log arriva solo se va in errore.
+
+A fine giro, veloce o completo, l'importatore avvia il workflow **Sito pubblico**: righe nuove e
+immagini compaiono sul sito subito, senza aspettare il giro orario.
+
+La voce di menu sta nello script dello Sheet ([sito/apps-script/AggiornaSito.gs](sito/apps-script/AggiornaSito.gs)),
+che non si aggiorna da GitHub: quando cambia il file va ricopiato in **Estensioni → Apps Script**
+(incolla tutto, salva, ricarica lo Sheet). Il token è lo stesso di "Aggiorna sito ora" (proprietà
+script `GITHUB_TOKEN`, permesso **Actions: Read and write** sul repo).
 
 ### Secrets necessari
 
