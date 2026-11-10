@@ -3002,6 +3002,24 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "sugar push nite social dance a torino": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -8374,7 +8392,13 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa",
+        "Blues",
+        "SoloJazz"
+      ]
     },
     "events": {
       "rock n boogie weekend": {
@@ -8393,6 +8417,27 @@
         "notes": null,
         "stili": [
           "Lindy"
+        ]
+      },
+      "social sunday": {
+        "organizer": null,
+        "city": "Firenze",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy",
+          "SoloJazz"
         ]
       }
     }
@@ -11429,7 +11474,10 @@
       "verified": false,
       "source": "iniziale (via non trovata)",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "it s swing party time lindy hop boogie woogie": {
@@ -17547,6 +17595,3794 @@
         "notes": null,
         "stili": [
           "Shag"
+        ]
+      }
+    }
+  },
+  "san marco community center|duval county": {
+    "default": {
+      "organizer": "San Marco Community Center",
+      "city": "Duval County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Lindy",
+        "Shag"
+      ]
+    },
+    "events": {
+      "san marco swing dance": {
+        "organizer": null,
+        "city": "Duval County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "cottontails danseklubb e cafe sanaa|vestland": {
+    "default": {
+      "organizer": "Cottontails Danseklubb e Cafe Sanaa",
+      "city": "Vestland",
+      "country": "Norway",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "balboa sosial cafe sanaa with a free taster class": {
+        "organizer": null,
+        "city": "Vestland",
+        "country": "Norway",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "swing central sydney|new south wales": {
+    "default": {
+      "organizer": "Swing Central Sydney",
+      "city": "New South Wales",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing central social dance and introductory class": {
+        "organizer": null,
+        "city": "New South Wales",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "korea balboa weekend e hj zin gimm|seocho gu": {
+    "default": {
+      "organizer": "Korea Balboa Weekend e HJ Zin Gimm",
+      "city": "Seocho-gu",
+      "country": "South Korea",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "19th korea balboa weekend": {
+        "organizer": null,
+        "city": "Seocho-gu",
+        "country": "South Korea",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "traffic jam swing e john holmstrom|cook county": {
+    "default": {
+      "organizer": "Traffic Jam Swing e John Holmström",
+      "city": "Cook County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "SoloJazz"
+      ]
+    },
+    "events": {
+      "traffic jam dance": {
+        "organizer": null,
+        "city": "Cook County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "empire swing|queensland": {
+    "default": {
+      "organizer": "Empire Swing",
+      "city": "Queensland",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Blues",
+        "Charleston",
+        "Lindy"
+      ]
+    },
+    "events": {
+      "country swing shack brisbane swing dance party": {
+        "organizer": null,
+        "city": "Queensland",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Charleston",
+          "Lindy"
+        ]
+      },
+      "festive shack swing shack brisbane swing dance party": {
+        "organizer": null,
+        "city": "Queensland",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Charleston",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "the rachel b band|washington county": {
+    "default": {
+      "organizer": "The Rachel B Band",
+      "city": "Washington County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "the rachel b band and lindy hop at six twelve coffee": {
+        "organizer": null,
+        "city": "Washington County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "hills big band phijo e valley social|western australia": {
+    "default": {
+      "organizer": "Hills Big Band (PHiJO) e Valley Social",
+      "city": "Western Australia",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hills big band hullabaloo": {
+        "organizer": null,
+        "city": "Western Australia",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "roo voo|greater london": {
+    "default": {
+      "organizer": "Roo Voo",
+      "city": "Greater London",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa"
+      ]
+    },
+    "events": {
+      "jungle joe s dirty swing spot": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      },
+      "henrys place": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing junction let s dance|caldwell county": {
+    "default": {
+      "organizer": "Swing Junction - Let's Dance",
+      "city": "Caldwell County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "25th annual veterans day hangar dinner big band dance": {
+        "organizer": null,
+        "city": "Caldwell County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing sherbrooke|estrie": {
+    "default": {
+      "organizer": "Swing Sherbrooke",
+      "city": "Estrie",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "soiree mixte avec saveur rockabilly jive": {
+        "organizer": null,
+        "city": "Estrie",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "jerry warwick e swingin at the sons|dallas county": {
+    "default": {
+      "organizer": "Jerry Warwick e Swingin' at The Sons",
+      "city": "Dallas County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "savoy swing at swingin": {
+        "organizer": null,
+        "city": "Dallas County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "gotta swing social dance gold coast e gotta swing|queensland": {
+    "default": {
+      "organizer": "Gotta Swing Social Dance - Gold Coast e Gotta Swing",
+      "city": "Queensland",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "gotta swing social dance": {
+        "organizer": null,
+        "city": "Queensland",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "gary tewkesbury|isle of wight": {
+    "default": {
+      "organizer": "Gary Tewkesbury",
+      "city": "Isle of Wight",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "annual isle of wight lindy hop weekender": {
+        "organizer": null,
+        "city": "Isle of Wight",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "red aces dance club|red deer": {
+    "default": {
+      "organizer": "Red Aces Dance Club",
+      "city": "Red Deer",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "the ryan heseltine sextet swing rally dance": {
+        "organizer": null,
+        "city": "Red Deer",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "boozy cats|bucharest": {
+    "default": {
+      "organizer": "Boozy Cats",
+      "city": "Bucharest",
+      "country": "Romania",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "saturday night swing": {
+        "organizer": null,
+        "city": "Bucharest",
+        "country": "Romania",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "cat s corner|montreal": {
+    "default": {
+      "organizer": "Cat's Corner",
+      "city": "Montreal",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa",
+        "Blues",
+        "Charleston",
+        "SoloJazz"
+      ]
+    },
+    "events": {
+      "downtown stomp musique live avec andy king": {
+        "organizer": null,
+        "city": "Montreal",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "downtown stomp musique live avec jennifer bell": {
+        "organizer": null,
+        "city": "Montreal",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Charleston",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "swing toronto e simon threlkeld|toronto": {
+    "default": {
+      "organizer": "Swing Toronto e Simon Threlkeld",
+      "city": "Toronto",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "roaring 20s jazz age saturday night swing ft ben harvey his ornamentals lessons dance": {
+        "organizer": null,
+        "city": "Toronto",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swingdanceuk|greater london": {
+    "default": {
+      "organizer": "Swingdanceuk",
+      "city": "Greater London",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "some like it swing with guest dj janet davis": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "black white ball with piece big band king groovy the horn stars": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "stompin at the club 40th anniversary featuring malcom earle smith swingin all stars": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "anthony david padgett|lancashire": {
+    "default": {
+      "organizer": "Anthony David Padgett",
+      "city": "Lancashire",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "jive swing lindy rock n roll strolls james bond dance party night": {
+        "organizer": null,
+        "city": "Lancashire",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "glasgow jitterbugs|glasgow city": {
+    "default": {
+      "organizer": "Glasgow Jitterbugs",
+      "city": "Glasgow City",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "soul lindy weekend": {
+        "organizer": null,
+        "city": "Glasgow City",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "swingallery e samantha uebel|hamilton county": {
+    "default": {
+      "organizer": "SwinGallery e Samantha Uebel",
+      "city": "Hamilton County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "smorgasbord of swing": {
+        "organizer": null,
+        "city": "Hamilton County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Charleston",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "daegu balboa party|daegu": {
+    "default": {
+      "organizer": "Daegu Balboa Party",
+      "city": "Daegu",
+      "country": "South Korea",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "daegu balboa party": {
+        "organizer": null,
+        "city": "Daegu",
+        "country": "South Korea",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "gottaswing mitch woods e altri 2|montgomery county": {
+    "default": {
+      "organizer": "Gottaswing, Mitch Woods e altri 2",
+      "city": "Montgomery County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing dance with the seth kibel band with special guests daryl davis and mitch woods": {
+        "organizer": null,
+        "city": "Montgomery County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "hannah krogman|ontario": {
+    "default": {
+      "organizer": "Hannah Krogman",
+      "city": "Ontario",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "monthly tuesday lindy hop social dance all welcome": {
+        "organizer": null,
+        "city": "Ontario",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "dancing with shannon bill|hennepin county": {
+    "default": {
+      "organizer": "Dancing with Shannon & Bill",
+      "city": "Hennepin County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "riverside swing band holiday show at swing dance wednesday": {
+        "organizer": null,
+        "city": "Hennepin County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "shanghai lindy festival|xuhui district": {
+    "default": {
+      "organizer": "Shanghai Lindy Festival",
+      "city": "Xuhui District",
+      "country": "China",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "shanghai lindy festival years anniversary": {
+        "organizer": null,
+        "city": "Xuhui District",
+        "country": "China",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "tokyo balboa weekend|setagaya": {
+    "default": {
+      "organizer": "Tokyo Balboa Weekend",
+      "city": "Setagaya",
+      "country": "Japan",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bal x bal": {
+        "organizer": null,
+        "city": "Setagaya",
+        "country": "Japan",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "kulturv rftet|capital region of denmark": {
+    "default": {
+      "organizer": "Kulturværftet",
+      "city": "Capital Region of Denmark",
+      "country": "Denmark",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "solo swingdans i toldkammeret": {
+        "organizer": null,
+        "city": "Capital Region of Denmark",
+        "country": "Denmark",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "swing patrol london swing patrol harringay e altri 5|greater london": {
+    "default": {
+      "organizer": "Swing Patrol London, Swing Patrol Harringay e altri 5",
+      "city": "Greater London",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bishopsgate swing live the christmas party": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "ottawa swing dance society osds|eastern ontario": {
+    "default": {
+      "organizer": "Ottawa Swing Dance Society - OSDS",
+      "city": "Eastern Ontario",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "live band night w ottawa swing dance society": {
+        "organizer": null,
+        "city": "Eastern Ontario",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "kicksteppin in the kapital november": {
+        "organizer": null,
+        "city": "Eastern Ontario",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "gotta swing social dance gold coast the dance collaborative gold coast e gotta swing|queensland": {
+    "default": {
+      "organizer": "Gotta Swing Social Dance - Gold Coast, The Dance Collaborative - Gold Coast  e Gotta Swing",
+      "city": "Queensland",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "gotta swing collaborative xmas social dance": {
+        "organizer": null,
+        "city": "Queensland",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Charleston",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "lindy focus|buncombe county": {
+    "default": {
+      "organizer": "Lindy Focus",
+      "city": "Buncombe County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lindy focus": {
+        "organizer": null,
+        "city": "Buncombe County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues",
+          "Charleston",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "stormy weather jazz dance festival ben white e elaine buchignani|snohomish county": {
+    "default": {
+      "organizer": "Stormy Weather Jazz Dance Festival, Ben White e Elaine Buchignani",
+      "city": "Snohomish County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "stormy weather jazz dance festival": {
+        "organizer": null,
+        "city": "Snohomish County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "carol almond e bluest blues dance club|suffolk": {
+    "default": {
+      "organizer": "Carol Almond e Bluest Blues Dance Club",
+      "city": "Suffolk",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bluest blues epic day new years event": {
+        "organizer": null,
+        "city": "Suffolk",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "swingcats danseklubb birgit walter e altri 2|rogaland": {
+    "default": {
+      "organizer": "SwingCats Danseklubb, Birgit Walter e altri 2",
+      "city": "Rogaland",
+      "country": "Norway",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rogalindy": {
+        "organizer": null,
+        "city": "Rogaland",
+        "country": "Norway",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "cambridge swing dance|cambridgeshire": {
+    "default": {
+      "organizer": "Cambridge Swing Dance",
+      "city": "Cambridgeshire",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "save the fast dance cambridge s shag balboa festival": {
+        "organizer": null,
+        "city": "Cambridgeshire",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "swingum oksana shkiray e altri 3|vasterbotten county": {
+    "default": {
+      "organizer": "Swingum, Oksana Shkiray e altri 3",
+      "city": "Västerbotten County",
+      "country": "Sweden",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "scandinavian shuffle": {
+        "organizer": null,
+        "city": "Västerbotten County",
+        "country": "Sweden",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "caribeswingfest|quintana roo": {
+    "default": {
+      "organizer": "caribeswingfest",
+      "city": "Quintana Roo",
+      "country": "Mexico",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "caribe swing fest": {
+        "organizer": null,
+        "city": "Quintana Roo",
+        "country": "Mexico",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "arizona lindy hop society|orleans parish": {
+    "default": {
+      "organizer": "Arizona Lindy Hop Society",
+      "city": "Orleans Parish",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lindy and balboa cruise from new orleans to the western caribbean": {
+        "organizer": null,
+        "city": "Orleans Parish",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Charleston",
+          "Lindy",
+          "Shag",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "nubalboa|community of madrid": {
+    "default": {
+      "organizer": "Nubalboa",
+      "city": "Community of Madrid",
+      "country": "Spain",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "nubalboa": {
+        "organizer": null,
+        "city": "Community of Madrid",
+        "country": "Spain",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "hot rhythm foundation|travis county": {
+    "default": {
+      "organizer": "Hot Rhythm Foundation",
+      "city": "Travis County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hot rhythm holiday": {
+        "organizer": null,
+        "city": "Travis County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "pobail stomp|dublin 1": {
+    "default": {
+      "organizer": "Pobail Stomp",
+      "city": "Dublin 1",
+      "country": "Ireland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "emerald swing": {
+        "organizer": null,
+        "city": "Dublin 1",
+        "country": "Ireland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "winter jump|oslo": {
+    "default": {
+      "organizer": "Winter Jump",
+      "city": "Oslo",
+      "country": "Norway",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "winter jump": {
+        "organizer": null,
+        "city": "Oslo",
+        "country": "Norway",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "ministry of balboa copenhagen e jon bendtsen|capital region of denmark": {
+    "default": {
+      "organizer": "Ministry of Balboa Copenhagen e Jon Bendtsen",
+      "city": "Capital Region of Denmark",
+      "country": "Denmark",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "copenhagen slow balboa festival": {
+        "organizer": null,
+        "city": "Capital Region of Denmark",
+        "country": "Denmark",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "SlowBal"
+        ]
+      }
+    }
+  },
+  "dance balboa|christchurch and poole": {
+    "default": {
+      "organizer": "Dance Balboa",
+      "city": "Christchurch and Poole",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bal spring break": {
+        "organizer": null,
+        "city": "Christchurch and Poole",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "perth swing dance society|western australia": {
+    "default": {
+      "organizer": "Perth Swing Dance Society",
+      "city": "Western Australia",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hullabaloo": {
+        "organizer": null,
+        "city": "Western Australia",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "dance balboa|devon and torbay": {
+    "default": {
+      "organizer": "Dance Balboa",
+      "city": "Devon and Torbay",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "all slow bal": {
+        "organizer": null,
+        "city": "Devon and Torbay",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "SlowBal"
+        ]
+      }
+    }
+  },
+  "riga swings back|riga": {
+    "default": {
+      "organizer": "Riga Swings Back",
+      "city": "Riga",
+      "country": "Latvia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "riga swing back": {
+        "organizer": null,
+        "city": "Riga",
+        "country": "Latvia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "sunny city swing|calgary": {
+    "default": {
+      "organizer": "Sunny City Swing",
+      "city": "Calgary",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "save the date may calgary get ready": {
+        "organizer": null,
+        "city": "Calgary",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "blue swing|malaga": {
+    "default": {
+      "organizer": "Blue Swing",
+      "city": "Malaga",
+      "country": "Spain",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "malaga balboa weekend": {
+        "organizer": null,
+        "city": "Malaga",
+        "country": "Spain",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "back home again in indiana|marion county": {
+    "default": {
+      "organizer": "Back Home Again in Indiana ",
+      "city": "Marion County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "back home again in indiana": {
+        "organizer": null,
+        "city": "Marion County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "ron reese e rachel kutay|franklin county": {
+    "default": {
+      "organizer": "Ron Reese e Rachel Kutay",
+      "city": "Franklin County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "jammin in july": {
+        "organizer": null,
+        "city": "Franklin County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "bluesla ankara|ankara": {
+    "default": {
+      "organizer": "bluesla.ankara",
+      "city": "Ankara",
+      "country": "Turkey",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bluesla fest": {
+        "organizer": null,
+        "city": "Ankara",
+        "country": "Turkey",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "bluesla fest|ankara": {
+    "default": {
+      "organizer": "Bluesla Fest",
+      "city": "Ankara",
+      "country": "Turkey",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bluesla fest 4th": {
+        "organizer": null,
+        "city": "Ankara",
+        "country": "Turkey",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "austin lindy exchange|travis county": {
+    "default": {
+      "organizer": "Austin Lindy Exchange",
+      "city": "Travis County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "austin lindy exchange": {
+        "organizer": null,
+        "city": "Travis County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Charleston",
+          "Lindy",
+          "Shag",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "new swing generation|hamburg": {
+    "default": {
+      "organizer": "New Swing Generation",
+      "city": "Hamburg",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "back to the roots swing in history": {
+        "organizer": null,
+        "city": "Hamburg",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "rags 2 rhythm yoni magallanes e gina skurka darin|yolo county": {
+    "default": {
+      "organizer": "Rags 2 Rhythm, Yoni Magallanes e Gina Skurka Darin",
+      "city": "Yolo County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "the delta breeze shagboa weekend": {
+        "organizer": null,
+        "city": "Yolo County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "sara white s blues nites e sara white|cambridgeshire and peterborough": {
+    "default": {
+      "organizer": "Sara White's Blues Nites e Sara White",
+      "city": "Cambridgeshire and Peterborough",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "crystal blues challenge": {
+        "organizer": null,
+        "city": "Cambridgeshire and Peterborough",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "erik hofmeister dylan chong e caitlin kilpin|palmerston north city": {
+    "default": {
+      "organizer": "Erik Hofmeister, Dylan Chong e Caitlin Kilpin",
+      "city": "Palmerston North City",
+      "country": "New Zealand",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "balmy palmy": {
+        "organizer": null,
+        "city": "Palmerston North City",
+        "country": "New Zealand",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "the ritz lindy hoppers|ostrobothnia": {
+    "default": {
+      "organizer": "The Ritz Lindy Hoppers",
+      "city": "Ostrobothnia",
+      "country": "Finland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "ritz winter hop": {
+        "organizer": null,
+        "city": "Ostrobothnia",
+        "country": "Finland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing4asturias|asturias": {
+    "default": {
+      "organizer": "Swing4Asturias",
+      "city": "Asturias",
+      "country": "Spain",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing a esgaya": {
+        "organizer": null,
+        "city": "Asturias",
+        "country": "Spain",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "pittstop lindy hop|allegheny county": {
+    "default": {
+      "organizer": "PittStop Lindy Hop",
+      "city": "Allegheny County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "pittstop lindy hop": {
+        "organizer": null,
+        "city": "Allegheny County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "proletarian feminism|western australia": {
+    "default": {
+      "organizer": "Proletarian Feminism",
+      "city": "Western Australia",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "the big green swing": {
+        "organizer": null,
+        "city": "Western Australia",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "dragon swing festival e kmita swing|krakow": {
+    "default": {
+      "organizer": "Dragon Swing Festival e KMiTa Swing",
+      "city": "Krakow",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "dragon swing festival november": {
+        "organizer": null,
+        "city": "Krakow",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Charleston",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "melbourne lindy exchange mlx|city of melbourne": {
+    "default": {
+      "organizer": "Melbourne Lindy Exchange (MLX)",
+      "city": "City of Melbourne",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "mlx save the dates": {
+        "organizer": null,
+        "city": "City of Melbourne",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "pass the bounce the swing project e jessie brooks|cf": {
+    "default": {
+      "organizer": "Pass the Bounce , The Swing Project e Jessie Brooks",
+      "city": "CF",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "pass the bounce lindy hop festival": {
+        "organizer": null,
+        "city": "CF",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "dancemode london brenda jean russell e altri 4|greater london": {
+    "default": {
+      "organizer": "DanceMode London, Brenda Jean Russell e altri 4",
+      "city": "Greater London",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "london blues weekend autumn moon": {
+        "organizer": null,
+        "city": "Greater London",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "tokyo balboa weekend amore hirosuke e altri 2|suginami": {
+    "default": {
+      "organizer": "Tokyo Balboa Weekend, Amore Hirosuke e altri 2",
+      "city": "Suginami",
+      "country": "Japan",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "tokyo balboa weekend": {
+        "organizer": null,
+        "city": "Suginami",
+        "country": "Japan",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "matt cox|dorset": {
+    "default": {
+      "organizer": "Matt Cox",
+      "city": "Dorset",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "sway sync warmwell": {
+        "organizer": null,
+        "city": "Dorset",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "hanoi lindy weekend|hanoi": {
+    "default": {
+      "organizer": "Hanoi Lindy Weekend",
+      "city": "Hanoi",
+      "country": "Vietnam",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hanoi lindy weekend": {
+        "organizer": null,
+        "city": "Hanoi",
+        "country": "Vietnam",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "cider house blues e blue mondays bristol|west of england": {
+    "default": {
+      "organizer": "Cider House Blues e Blue Mondays Bristol",
+      "city": "West of England",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "cider house blues": {
+        "organizer": null,
+        "city": "West of England",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "groove juice swing|monroe county": {
+    "default": {
+      "organizer": "Groove Juice Swing",
+      "city": "Monroe County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "stompology": {
+        "organizer": null,
+        "city": "Monroe County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "breezy swing|prachuap khiri khan": {
+    "default": {
+      "organizer": "Breezy Swing",
+      "city": "Prachuap Khiri Khan",
+      "country": "Thailand",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Charleston",
+        "Lindy",
+        "SoloJazz",
+        "Shag"
+      ]
+    },
+    "events": {
+      "breezy swing camp": {
+        "organizer": null,
+        "city": "Prachuap Khiri Khan",
+        "country": "Thailand",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Charleston",
+          "Lindy",
+          "SoloJazz",
+          "Shag"
+        ]
+      },
+      "breezy swing weekend": {
+        "organizer": null,
+        "city": "Prachuap Khiri Khan",
+        "country": "Thailand",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Charleston",
+          "Lindy",
+          "Shag",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "stardust slow balboa weekend|montgomery county": {
+    "default": {
+      "organizer": "Stardust Slow Balboa Weekend",
+      "city": "Montgomery County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "stardust slow balboa weekend": {
+        "organizer": null,
+        "city": "Montgomery County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "SlowBal"
+        ]
+      }
+    }
+  },
+  "korea blues camp|jung gu": {
+    "default": {
+      "organizer": "Korea Blues Camp",
+      "city": "Jung-gu",
+      "country": "South Korea",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "korea blues camp": {
+        "organizer": null,
+        "city": "Jung-gu",
+        "country": "South Korea",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "mahaveli swing festival e jazz cocoon|reunion": {
+    "default": {
+      "organizer": "Mahaveli Swing Festival e Jazz Cocoon",
+      "city": "Réunion",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "mahaveli swing festival lindy hop solo jazz claquettes la reunion": {
+        "organizer": null,
+        "city": "Réunion",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "swingum|vasterbotten county": {
+    "default": {
+      "organizer": "Swingum",
+      "city": "Västerbotten County",
+      "country": "Sweden",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "shuffle up umea balboa weekend": {
+        "organizer": null,
+        "city": "Västerbotten County",
+        "country": "Sweden",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "swing avenue warsaw|warsaw": {
+    "default": {
+      "organizer": "Swing Avenue Warsaw",
+      "city": "Warsaw",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bal avenue": {
+        "organizer": null,
+        "city": "Warsaw",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "cash bash e stephanie risser|summit county": {
+    "default": {
+      "organizer": "CASH Bash e Stephanie Risser",
+      "city": "Summit County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "cash bash": {
+        "organizer": null,
+        "city": "Summit County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "bach|western australia": {
+    "default": {
+      "organizer": "BACH",
+      "city": "Western Australia",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "balingup spring swing social weekend": {
+        "organizer": null,
+        "city": "Western Australia",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "bota gatherings|porto": {
+    "default": {
+      "organizer": "Bota Gatherings",
+      "city": "Porto",
+      "country": "Portugal",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bg ix hot bota weekend": {
+        "organizer": null,
+        "city": "Porto",
+        "country": "Portugal",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "espanish blues festival|community of madrid": {
+    "default": {
+      "organizer": "ESpanish Blues Festival",
+      "city": "Community of Madrid",
+      "country": "Spain",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Blues"
+      ]
+    },
+    "events": {
+      "esbf winter": {
+        "organizer": null,
+        "city": "Community of Madrid",
+        "country": "Spain",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      },
+      "esbf spring": {
+        "organizer": null,
+        "city": "Community of Madrid",
+        "country": "Spain",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "swing formosa|kaohsiung": {
+    "default": {
+      "organizer": "Swing Formosa",
+      "city": "Kaohsiung",
+      "country": "Taiwan",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "kaohsiung lindy exchange klx": {
+        "organizer": null,
+        "city": "Kaohsiung",
+        "country": "Taiwan",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "nw dance|kitsap county": {
+    "default": {
+      "organizer": "NW Dance",
+      "city": "Kitsap County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "seabeck dance camp": {
+        "organizer": null,
+        "city": "Kitsap County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "cretan swing shots|crete": {
+    "default": {
+      "organizer": "Cretan Swing Shots",
+      "city": "Crete",
+      "country": "Greece",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "festival": {
+        "organizer": null,
+        "city": "Crete",
+        "country": "Greece",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "bcn swing balboa|": {
+    "default": {
+      "organizer": "BCN Swing Balboa",
+      "city": "القاهرة",
+      "country": "مصر",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "balboa nile exchange": {
+        "organizer": null,
+        "city": "القاهرة",
+        "country": "مصر",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "wild west festival gr|peloponnese": {
+    "default": {
+      "organizer": "Wild West Festival GR",
+      "city": "Peloponnese",
+      "country": "Greece",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa",
+        "SoloJazz"
+      ]
+    },
+    "events": {
+      "wwf": {
+        "organizer": null,
+        "city": "Peloponnese",
+        "country": "Greece",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "downtown swing|shanghai": {
+    "default": {
+      "organizer": "Downtown Swing上海摇摆",
+      "city": "Shanghai",
+      "country": "China",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "shanghai lindy festival": {
+        "organizer": null,
+        "city": "Shanghai",
+        "country": "China",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "swingfoshan|nanhai": {
+    "default": {
+      "organizer": "佛山摇摆SwingFoshan",
+      "city": "Nanhai",
+      "country": "China",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "foshan balboa bliss": {
+        "organizer": null,
+        "city": "Nanhai",
+        "country": "China",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "helena|stockholm county": {
+    "default": {
+      "organizer": "Helena",
+      "city": "Stockholm County",
+      "country": "Sweden",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "the snowball": {
+        "organizer": null,
+        "city": "Stockholm County",
+        "country": "Sweden",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "Balboa",
+          "Blues",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "new year s jam festival|krakow": {
+    "default": {
+      "organizer": "New Year's Jam festival",
+      "city": "Krakow",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "new year s jam": {
+        "organizer": null,
+        "city": "Krakow",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "jason annmarie marker|middle tennessee": {
+    "default": {
+      "organizer": "Jason Annmarie Marker",
+      "city": "Middle Tennessee",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "spotlight new year s celebration": {
+        "organizer": null,
+        "city": "Middle Tennessee",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "rhinestone dance co rhinestone dance fest e kiere joi|greenville county": {
+    "default": {
+      "organizer": "Rhinestone Dance Co., Rhinestone Dance Fest e Kière Joi",
+      "city": "Greenville County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rhinestone dance fest": {
+        "organizer": null,
+        "city": "Greenville County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "seoul blues dance festival|seoul": {
+    "default": {
+      "organizer": "Seoul Blues Dance Festival",
+      "city": "Seoul",
+      "country": "South Korea",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "asia blues exchange": {
+        "organizer": null,
+        "city": "Seoul",
+        "country": "South Korea",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
         ]
       }
     }
