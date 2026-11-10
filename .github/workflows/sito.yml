@@ -18,13 +18,14 @@ on:
     - cron: "17 * * * *"
   workflow_dispatch:
   push:
-    branches: [master]
+    # master -> sito pubblico; anteprima -> versione di prova su anteprima.<progetto>.pages.dev
+    branches: [master, anteprima]
     paths:
       - "sito/**"
       - ".github/workflows/sito.yml"
 
 concurrency:
-  group: sito
+  group: sito-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -33,6 +34,8 @@ jobs:
     timeout-minutes: 10
     env:
       PROGETTO: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'siballa' }}
+      # "main" e' il ramo di produzione su Cloudflare; gli altri rami diventano anteprime <ramo>.<progetto>.pages.dev
+      RAMO_CF: ${{ github.ref_name == 'master' && 'main' || github.ref_name }}
     steps:
       - uses: actions/checkout@v5
 
@@ -49,7 +52,7 @@ jobs:
         run: python sito/esporta_sheet.py _sito/eventi.json
 
       - name: Prepara il sito
-        run: cp sito/index.html sito/logo-app.svg sito/og.png _sito/
+        run: cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og.png _sito/
 
       - uses: actions/setup-node@v5
         with:
@@ -72,4 +75,4 @@ jobs:
           fi
           # da sito/ così wrangler include anche sito/functions (contatore visite e pagina statistiche)
           cd sito
-          wrangler pages deploy ../_sito --project-name="$PROGETTO" --branch=main --commit-dirty=true
+          wrangler pages deploy ../_sito --project-name="$PROGETTO" --branch="$RAMO_CF" --commit-dirty=true

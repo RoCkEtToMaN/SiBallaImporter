@@ -125,6 +125,7 @@
   .posizione { font-size: 13px; color: var(--muted); }
   .vuoto { color: var(--muted); padding: 40px 0; text-align: center; }
 </style>
+<link rel="stylesheet" href="menu.css">
 </head>
 <body>
 <div class="wrap">
@@ -406,10 +407,12 @@
     .catch(function () { $("agg").textContent = "Impossibile caricare gli eventi, riprova più tardi."; });
 
   // contatore visite anonimo (solo giorno e luogo approssimativo, niente cookie): vedi functions/api/visita.js
-  if (location.protocol === "https:") {
+  // le versioni di prova (es. anteprima.siballa.pages.dev) non contano
+  if (location.protocol === "https:" && !/\.siballa\.pages\.dev$/.test(location.hostname)) {
     try { navigator.sendBeacon("/api/visita"); } catch (e) {}
   }
 })();
 </script>
+<script src="menu.js"></script>
 </body>
 </html>
