@@ -34,3 +34,6 @@ email-anteprima.html
 
 # sito pubblico generato dal workflow
 _sito/
+
+# file temporanei di Word/Excel (documento aperto)
+~$*
