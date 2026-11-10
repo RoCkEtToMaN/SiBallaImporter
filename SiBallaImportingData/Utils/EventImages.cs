@@ -1,5 +1,6 @@
 using SiBalla.Service;
 using SiBallaImportingData.Model;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -179,6 +180,95 @@ namespace SiBallaImportingData.Utils
             await ImportData.UpdateSheetImageCellsAsync(celle);
         }
 
+        // formati accettati per i file messi nel repo (data/immagini, data/loghi)
+        private static readonly Dictionary<string, string> FolderMimeTypes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            [".jpg"] = "image/jpeg", [".jpeg"] = "image/jpeg", [".png"] = "image/png", [".webp"] = "image/webp"
+        };
+
+        // ---------- Immagini degli eventi messe a mano (data/immagini) ----------
+
+        public const string ManualFolder = "data/immagini";
+
+        /// <summary>
+        /// Immagini in data/immagini, una per evento, nome "data_titolo" (es. 2026-11-20_swing-sul-mare.jpg):
+        /// le carica su Storage al posto di quella trovata online (di nuovo se il file cambia) e scrive "sì"
+        /// nella colonna "Immagine" delle righe future con quella data e quel titolo
+        /// </summary>
+        public static async Task ApplyManualImagesAsync(IEnumerable<Event> sheetEvents, AppWriteService appWrite)
+        {
+            var dir = DictionaryRepoSync.RepoPath(ManualFolder);
+            if (dir is null || !Directory.Exists(dir)) return;
+
+            var files = Directory.GetFiles(dir).Where(f => FolderMimeTypes.ContainsKey(Path.GetExtension(f))).ToList();
+            Console.WriteLine($"\n===== Immagini messe a mano: {files.Count} file in {ManualFolder} =====");
+            if (files.Count == 0) return;
+
+            var righe = sheetEvents.Where(e => e.DateStart.Date >= DateTime.Today && e.SheetImageColumn is not null).ToList();
+            var daCaricare = new List<(string Path, List<Event> Righe)>();
+            foreach (var path in files)
+            {
+                var nome = Path.GetFileNameWithoutExtension(path);
+                var sep = nome.IndexOf('_');
+                if (sep < 0 || !DateTime.TryParseExact(nome[..sep], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var data))
+                {
+                    Console.WriteLine($"⚠️ {Path.GetFileName(path)}: il nome deve essere data_titolo, es. 2026-11-20_swing-sul-mare.jpg");
+                    continue;
+                }
+                if (data < DateTime.Today) continue;   // evento passato: il file si può cancellare
+
+                // titolo normalizzato come per l'id del file: maiuscole, accenti, trattini e numeri non contano
+                var titolo = KnownVenueStore.NormalizeTitle(nome[(sep + 1)..]);
+                var trovate = righe.Where(e => e.DateStart.Date == data && KnownVenueStore.NormalizeTitle(e.PartyName) == titolo).ToList();
+                if (trovate.Count == 0)
+                {
+                    Console.WriteLine($"⚠️ {Path.GetFileName(path)}: nessuna riga dello Sheet il {data:dd/MM/yyyy} con titolo '{titolo}'");
+                    continue;
+                }
+                daCaricare.Add((path, trovate));
+            }
+            if (daCaricare.Count == 0 || !await appWrite.EnsureImagesBucketAsync()) return;
+
+            // il nome su Storage contiene l'hash del contenuto: se sostituisci il file nella cartella lo ricarico
+            var storage = await appWrite.GetImageFilesAsync() ?? new Dictionary<string, string>();
+            var celle = new List<(Event Event, string Value)>();
+            int caricate = 0;
+            foreach (var (path, trovate) in daCaricare)
+            {
+                var bytes = await File.ReadAllBytesAsync(path);
+                if (bytes.Length == 0 || bytes.Length > MaxBytes)
+                {
+                    Console.WriteLine($"⚠️ {Path.GetFileName(path)}: file vuoto o troppo grande ({bytes.Length / 1024} KB)");
+                    continue;
+                }
+                var ext = Path.GetExtension(path).ToLowerInvariant();
+                var fileId = FileId(trovate[0]);   // stessa data e stesso titolo normalizzato -> stesso id per tutte le righe
+                var name = $"{fileId}-{Convert.ToHexString(SHA256.HashData(bytes))[..8].ToLowerInvariant()}{ext}";
+                if (!storage.TryGetValue(fileId, out var current) || current != name)
+                {
+                    // c'era l'immagine trovata online (o una versione precedente del file): la sostituisco
+                    if (current is not null)
+                        await appWrite.DeleteImageAsync(fileId);
+                    if (!await appWrite.UploadImageAsync(fileId, bytes, name, FolderMimeTypes[ext]))
+                        continue;
+                    caricate++;
+                    Console.WriteLine($"✅ Immagine caricata: {Path.GetFileName(path)}");
+                }
+
+                foreach (var ev in trovate)
+                {
+                    ev.EventDetail.HasImage = true;
+                    if (!string.Equals(ev.SheetImageRaw?.Trim(), ImportData.ImageYes, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ev.SheetImageRaw = ImportData.ImageYes;
+                        celle.Add((ev, ImportData.ImageYes));
+                    }
+                }
+            }
+            Console.WriteLine($"🖼️ Immagini messe a mano: {caricate} caricate, {celle.Count} righe dello Sheet aggiornate");
+            await ImportData.UpdateSheetImageCellsAsync(celle);
+        }
+
         // ---------- Loghi degli organizzatori (data/loghi) ----------
 
         public const string LogoFolder = "data/loghi";
@@ -198,10 +288,7 @@ namespace SiBallaImportingData.Utils
             var dir = DictionaryRepoSync.RepoPath(LogoFolder);
             if (dir is null || !Directory.Exists(dir)) return;
 
-            var mimeTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                [".jpg"] = "image/jpeg", [".jpeg"] = "image/jpeg", [".png"] = "image/png", [".webp"] = "image/webp"
-            };
+            var mimeTypes = FolderMimeTypes;
             var loghi = Directory.GetFiles(dir)
                 .Where(f => mimeTypes.ContainsKey(Path.GetExtension(f)))
                 .GroupBy(f => Path.GetFileNameWithoutExtension(f).Trim().ToLowerInvariant())

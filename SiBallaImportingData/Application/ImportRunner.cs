@@ -249,7 +249,13 @@ internal static class ImportRunner
             await IndirizziGemini.CercaAsync(sheetEvents, store, resolver, settings.Gemini, opzioni.CercaIndirizziMax);
 
         if (opzioni.CercaImmaginiSheet)
+        {
+            // prima quelle messe a mano (data/immagini): la riga diventa "sì" e la ricerca sul sito la salta
+            await EventImages.ApplyManualImagesAsync(sheetEvents, appWriteService);
             await EventImages.BackfillSheetAsync(sheetEvents, appWriteService, opzioni.CercaImmaginiSheetMax);
+            // righe rimaste senza immagine ("no"): logo dell'organizzatore, se c'è in data/loghi
+            await EventImages.ApplyLogosAsync(sheetEvents, appWriteService);
+        }
 
         // righe colorate "da verificare" che hai controllato (scritto "ok" o svuotato la cella): via colore e nota
         try

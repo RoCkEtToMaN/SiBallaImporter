@@ -153,8 +153,12 @@ sono solo righe `da verificare`, sul DB va una lista vuota e l'app non mostra ev
 
 Il file su Storage si chiama `ev` + un hash di **data di inizio + titolo** della riga. Se cambi la
 data o il titolo nello Sheet il collegamento si perde: al caricamento su Appwrite il log lo segnala
-(`file ... non è su Storage`) e l'evento va sul DB senza immagine. Per un evento inserito a mano
-puoi caricare tu il file nel bucket con quel nome e scrivere `sì` nella colonna.
+(`file ... non è su Storage`) e l'evento va sul DB senza immagine.
+
+Per mettere a mano l'immagine di un evento (es. la copertina di un evento Facebook, che il programma
+non riesce a leggere) salvala in `data/immagini/` con nome `data_titolo`, es.
+`2026-11-20_swing-sul-mare.jpg`: al giro dopo viene caricata su Storage al posto di quella trovata
+online e nella colonna viene scritto `sì` (regole nel [README della cartella](data/immagini/README.md)).
 
 Per le righe già nello Sheet c'è `CercaImmaginiSheet` (flag `--immagini-sheet`, Variable di GitHub
 `CERCA_IMMAGINI_SHEET`): per le righe future con la colonna **Immagine** vuota legge il sito in
