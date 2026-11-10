@@ -7,8 +7,14 @@ GIA' FATTI
 [x] "Vicino a me" (ordina per distanza e mostra "a X km")
 [x] Anteprima quando si condivide il link (og.png)
 [x] Statistiche visite per regione/citta' (pagina nascosta /statistiche?chiave=...)
+[x] Statistiche arricchite: visitatori unici (giorno/mese/nuovi), pagine piu' viste,
+    provenienza (Instagram, WhatsApp, Google...; nei link condivisi aggiungere
+    ?utm_source=instagram), dispositivi, click su Info/Mappa degli eventi
+[x] Esclusione delle proprie visite: basta aprire /statistiche una volta per browser
+    (oppure ?noconta=1 sul sito; ?noconta=0 per riattivare)
 [x] Menu ☰ con le sezioni Storia, Scuole, Artisti, Community WhatsApp, App
-    (per ora pagine "In arrivo"; per ora solo sulla versione di prova, ramo "anteprima")
+    (per ora pagine "In arrivo"; online ma nascosto sul sito pubblico, visibile solo
+    nella versione di prova)
 [x] Versione di prova https://anteprima.siballa.pages.dev, visibile solo con login
     Cloudflare Access (email dell'account Cloudflare)
 
@@ -22,9 +28,10 @@ DA FARE
       con approvazione dell'amministratore (link pubblici = spam)
     - App mobile: pulsanti degli store; sito installabile sul telefono (PWA)
     Quando una sezione e' pronta: pronta: true in sito/menu.js e togliere il "noindex".
-[ ] Passare il menu sul sito pubblico: merge del ramo "anteprima" in "master".
+[ ] Mostrare il menu sul sito pubblico: MENU_PUBBLICO = true in sito/menu.js.
 [ ] Pulsanti sulla scheda: "Aggiungi al calendario" (file .ics) e "Condividi"
-    (sul telefono apre WhatsApp e le altre app).
+    (sul telefono apre WhatsApp e le altre app). Piu' condivisioni = piu' visite
+    = numeri migliori da mostrare agli sponsor.
 [ ] Pulizia dei nomi "sporchi" nell'esportazione del sito: caratteri in grassetto
     Unicode, barre "┃", "-Italy" in fondo al nome.
 [ ] Filtro per citta' o regione, oppure vista mappa con i segnaposto
@@ -35,6 +42,38 @@ DA FARE
     (serve il dominio; il collegamento su Cloudflare e' gratis:
     Workers & Pages -> siballa -> Custom domains).
 
+IDEE NUOVE (di nicchia ma "di moda")
+------------------------------------
+[ ] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
+    pagina da condividere con numero di eventi, citta' piu' attiva, mese piu'
+    ballato, stili piu' presenti.
+[ ] Playlist per BPM: playlist Spotify divise per velocita' (lente per principianti,
+    medie per social dance, veloci per Balboa/jam). Utili per allenarsi e ai DJ.
+[ ] "Cosa mi metto": guida allo stile vintage (moda anni '40, scarpe, acconciature).
+    Si condivide molto su Instagram e si lega agli sponsor di abbigliamento/scarpe.
+[ ] Passaggi verso festival ed eventi: bacheca per dividere l'auto
+    (sostenibilita' + community).
+[ ] Giornate speciali: 26 maggio, compleanno di Frankie Manning (International
+    Lindy Hop Day); Shim Sham; challenge di solo jazz da ripostare
+    ("balla lo Shim Sham nella tua citta'").
+[ ] Quiz "Che ballerino swing sei?" (Lindy, Balboa, Charleston, Solo jazz).
+[ ] "La mossa della settimana": breve video/GIF con nome del passo e spiegazione,
+    riusabile anche sui social.
+
+ENTRATE / SPONSOR (senza chiedere soldi alle scuole: il sito resta neutrale)
+---------------------------------------------------------------------------
+[ ] Marchi di scarpe da ballo (suola in camoscio, anche italiani).
+[ ] Abbigliamento vintage: negozi e marchi anni '30-'50, sartorie retro'.
+[ ] Viaggi verso i festival: link affiliati Booking/Airbnb "dove dormire vicino
+    al festival" (commissione sulle prenotazioni).
+[ ] Locali e jazz club: "sponsor della serata" su una data.
+[ ] Organizzatori di festival: promozione dell'evento (sponsor "neutro").
+[ ] Merchandising siBalla stampato su richiesta (magliette, borse; niente magazzino).
+[ ] Pulsante donazioni "Offrimi un caffe'" (Ko-fi, Satispay).
+Soglie indicative (visitatori unici al mese, vedi /statistiche):
+    < 500 crescere; 500-2.000 primi piccoli sponsor; 2.000-5.000 sponsor con listino;
+    > 30.000 anche banner pubblicitari (serve banner cookie GDPR).
+
 PICCOLE COSE IN SOSPESO
 -----------------------
 [ ] Attribuzione dell'icona dell'app, se viene da Flaticon (va citato l'autore).
@@ -42,6 +81,7 @@ PICCOLE COSE IN SOSPESO
 
 ORDINE CONSIGLIATO
 ------------------
-1. Pulsanti calendario/condividi + pulizia dei nomi (poco lavoro, si vede subito)
-2. Vista mappa / filtro per citta' o regione
-3. Il resto quando serve
+1. "siBalla 2026 in numeri" (scadenza naturale: dicembre)
+2. Pulsanti calendario/condividi + pulizia dei nomi (poco lavoro, si vede subito)
+3. Vista mappa / filtro per citta' o regione
+4. Il resto quando serve
