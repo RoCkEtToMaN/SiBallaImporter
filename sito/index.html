@@ -404,6 +404,11 @@
       tabs(); disegna();
     })
     .catch(function () { $("agg").textContent = "Impossibile caricare gli eventi, riprova più tardi."; });
+
+  // contatore visite anonimo (solo giorno e luogo approssimativo, niente cookie): vedi functions/api/visita.js
+  if (location.protocol === "https:") {
+    try { navigator.sendBeacon("/api/visita"); } catch (e) {}
+  }
 })();
 </script>
 </body>

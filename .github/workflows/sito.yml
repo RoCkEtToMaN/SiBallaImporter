@@ -7,6 +7,8 @@
 # Variable opzionale (tab Variables):
 #   CLOUDFLARE_PAGES_PROJECT     -> nome del progetto Pages (default "siballa" -> https://siballa.pages.dev);
 #                                   se il progetto non esiste viene creato al primo giro
+# Contatore visite + pagina nascosta /statistiche?chiave=... (sito/functions), da configurare su Cloudflare:
+#   binding D1 "VISITE" (database siballa-visite) e secret "STATS_KEY" nel progetto Pages: vedi il documento.
 
 name: Sito pubblico
 
@@ -68,4 +70,6 @@ jobs:
           if ! grep -qw -- "$PROGETTO" progetti.txt; then
             wrangler pages project create "$PROGETTO" --production-branch=main
           fi
-          wrangler pages deploy _sito --project-name="$PROGETTO" --branch=main --commit-dirty=true
+          # da sito/ così wrangler include anche sito/functions (contatore visite e pagina statistiche)
+          cd sito
+          wrangler pages deploy ../_sito --project-name="$PROGETTO" --branch=main --commit-dirty=true
