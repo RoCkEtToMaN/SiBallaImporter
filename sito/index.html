@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SiBalla · Eventi</title>
+<title>Dove siBalla stasera?</title>
 <meta name="description" content="Serate e workshop swing in programma">
 <style>
   :root {
@@ -20,6 +20,8 @@
   .wrap { max-width: 1400px; margin: 0 auto; padding: 24px 16px 48px; }
   header h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
   header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  header h1 .brand { color: var(--accent); }
+  header .sub { color: var(--text); font-size: 16px; margin-top: 6px; }
   .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0 16px; }
   .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border);
     border-radius: 10px; padding: 4px; }
@@ -61,7 +63,8 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Eventi swing</h1>
+    <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+    <p class="sub">Serate e workshop swing</p>
     <p id="agg">Caricamento…</p>
   </header>
   <div class="bar">
