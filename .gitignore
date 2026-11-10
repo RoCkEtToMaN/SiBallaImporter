@@ -37,3 +37,6 @@ _sito/
 
 # file temporanei di Word/Excel (documento aperto)
 ~$*
+
+# cache di Python
+__pycache__/
