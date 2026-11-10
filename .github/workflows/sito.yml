@@ -47,7 +47,7 @@ jobs:
         run: python sito/esporta_sheet.py _sito/eventi.json
 
       - name: Prepara il sito
-        run: cp sito/index.html sito/logo-app.svg _sito/
+        run: cp sito/index.html sito/logo-app.svg sito/og.png _sito/
 
       - uses: actions/setup-node@v5
         with:

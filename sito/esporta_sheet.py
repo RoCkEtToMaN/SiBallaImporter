@@ -9,14 +9,18 @@ Per ogni foglio dello Sheet:
 - solo eventi futuri o in corso (data fine, o data inizio se manca, >= oggi in Italia);
 - esclude le righe "da verificare" nella colonna "Luogo verificato" (come per il DB);
 - pubblica solo le colonne scelte (COLONNE_PER_FOGLIO / COLONNE_DEFAULT, meno COLONNE_ESCLUSE): le altre
-  servono al massimo per il filtro e non finiscono nel JSON.
+  servono al massimo per il filtro e non finiscono nel JSON;
+- aggiunge le coordinate (per "Vicino a me") e il link dell'immagine su Appwrite Storage se la colonna
+  "Immagine" dice "sì" o "logo" (stesso id calcolato dall'importatore, vedi EventImages.cs).
 """
 
+import hashlib
 import html
 import json
 import os
 import re
 import sys
+import unicodedata
 from datetime import date, datetime, timedelta
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
@@ -37,6 +41,46 @@ VERIFIED_HEADER = "luogo verificato"
 VERIFIED_PENDING = "da verificare"
 COORDINATE = re.compile(r"\(\s*(-?\d+(?:[.,]\d+)?)\s*;\s*(-?\d+(?:[.,]\d+)?)\s*\)")
 EPOCA_SHEETS = date(1899, 12, 30)
+IMAGE_HEADER = "immagine"
+IMMAGINE_SI = {"sì", "si", "x", "yes", "true", "1"}
+# link pubblico di un file del bucket "immagini" (AppWriteService.ImageViewUrl)
+APPWRITE_VIEW = "https://cloud.appwrite.io/v1/storage/buckets/immagini/files/{}/view?project=6aa5651e00042e1452be"
+
+
+# ---- stesse normalizzazioni dell'importatore (KnownVenueStore.Norm / NormalizeTitle, EventImages) ----
+
+def norm(s: str) -> str:
+    d = unicodedata.normalize("NFKD", html.unescape(s).strip().lower())
+    out = "".join(c if ("a" <= c <= "z" or "0" <= c <= "9") else " "
+                  for c in d if unicodedata.category(c) != "Mn")
+    return re.sub(r"\s+", " ", out).strip()
+
+
+def normalizza_titolo(titolo: str) -> str:
+    if not titolo or not titolo.strip():
+        return ""
+    t = norm(titolo)
+    t = re.sub(r"\b(19|20)\d{2}\b", " ", t)
+    t = re.sub(r"\b\d+\s*(a|o)?\s*(edizione|edition|ed)\b", " ", t)
+    t = re.sub(r"\b(edizione|edition|nd|rd|th)\b", " ", t)
+    t = re.sub(r"\b\d+\b", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def sha32(testo: str) -> str:
+    return hashlib.sha256(testo.encode("utf-8")).hexdigest()[:32]
+
+
+def url_immagine(valore: str, inizio: date | None, titolo: str, organizzatore: str, luogo: str) -> str | None:
+    v = valore.strip().lower()
+    if v in IMMAGINE_SI and inizio:
+        return APPWRITE_VIEW.format("ev" + sha32(f"{inizio.isoformat()}|{normalizza_titolo(titolo)}"))
+    if v == "logo":
+        parti = luogo.split(",")
+        citta = parti[1].split("(")[0].strip() if len(parti) > 1 else ""
+        slug = (norm(organizzatore) + "|" + norm(citta)).replace(" ", "-").replace("|", "_")
+        return APPWRITE_VIEW.format("lg" + sha32(slug))
+    return None
 
 
 def lettera(i: int) -> str:
@@ -118,6 +162,9 @@ def main() -> None:
         col_verificato = next(
             (i for i, h in enumerate(intestazione) if str(h).strip().lower() == VERIFIED_HEADER), None
         )
+        col_immagine = next(
+            (i for i, h in enumerate(intestazione) if str(h).strip().lower() == IMAGE_HEADER), None
+        )
 
         eventi = []
         scartate_passate = scartate_verifica = 0
@@ -135,6 +182,8 @@ def main() -> None:
                 scartate_verifica += 1
                 continue
 
+            immagine = url_immagine(cella(rf, col_immagine), inizio, cella(rf, 4), cella(rf, 6), cella(rf, COL_LUOGO)) \
+                if col_immagine is not None else None
             # html.unescape: alcuni nomi arrivano dai siti con entità tipo "&#8217;"
             celle = [html.unescape(cella(rf, i)) for i in range(num_colonne)]
             # date tutte nello stesso formato (nello Sheet ci sono sia 11/11/2026 sia 2026-11-11)
@@ -144,6 +193,8 @@ def main() -> None:
             if fine_scritta:
                 celle[1] = fine_scritta.strftime("%d/%m/%Y")
             evento = {"inizio": inizio.isoformat() if inizio else fine.isoformat(), "celle": celle}
+            if immagine:
+                evento["img"] = immagine
             # colonna F: tolgo le coordinate dal testo e le uso per il link alla mappa
             luogo = celle[COL_LUOGO]
             m = COORDINATE.search(luogo)
@@ -152,6 +203,7 @@ def main() -> None:
                 celle[COL_LUOGO] = luogo[: m.start()].strip().rstrip(",").strip()
                 if lat or lng:
                     evento["mappa"] = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
+                    evento["lat"], evento["lng"] = round(lat, 5), round(lng, 5)
             elif luogo:
                 evento["mappa"] = "https://www.google.com/maps/search/?api=1&query=" + quote(luogo)
             eventi.append(evento)

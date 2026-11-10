@@ -7,6 +7,16 @@
 <meta name="description" content="Serate e workshop swing in programma">
 <link rel="icon" href="logo-app.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0E0E12">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SiBalla">
+<meta property="og:title" content="Dove siBalla stasera?">
+<meta property="og:description" content="Serate e workshop swing: Lindy Hop, Balboa, Blues, Boogie Woogie e altro. Trova dove ballare stasera, anche vicino a te.">
+<meta property="og:url" content="https://siballa.pages.dev/">
+<meta property="og:image" content="https://siballa.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   /* colori dell'app SiBalla (Resources/Styles/Colors.xaml): tema sempre scuro, accento giallo */
   :root {
@@ -71,8 +81,16 @@
   /* schede evento */
   .griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
   @media (max-width: 520px) { .griglia { grid-template-columns: minmax(0, 1fr); } }
-  .ev { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-    padding: 14px; min-width: 0; transition: border-color .15s, transform .15s; }
+  .ev { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    min-width: 0; overflow: hidden; transition: border-color .15s, transform .15s; }
+  .ev .riga { display: flex; gap: 14px; padding: 14px; min-width: 0; flex: 1; }
+  /* immagine dell'evento in cima alla scheda, con la data sovrapposta */
+  .media { position: relative; aspect-ratio: 16 / 9; background: var(--surface-2); overflow: hidden; }
+  .media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .media::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(14,14,18,.55), transparent 45%); pointer-events: none; }
+  .media .data { position: absolute; left: 12px; bottom: 12px; z-index: 1; background: rgba(14,14,18,.82);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0,0,0,.4); }
   .ev:hover { border-color: rgba(255,212,0,.45); transform: translateY(-1px); }
   .data { flex: none; width: 58px; text-align: center; border-radius: 12px; background: var(--surface-2);
     padding: 7px 0 8px; align-self: flex-start; }
@@ -93,6 +111,18 @@
   .azioni a.info { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
   .azioni a:hover { border-color: var(--accent); }
   .stasera { margin: 24px 0 -8px; color: var(--muted); font-size: 14px; }
+  .km { color: var(--accent); font-weight: 600; white-space: nowrap; }
+  /* vicino a me */
+  .vicino { font: inherit; font-weight: 600; color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 9px 14px; cursor: pointer; white-space: nowrap; }
+  .vicino:hover { border-color: rgba(255,212,0,.5); }
+  .vicino[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .raggio { display: none; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
+  .raggio.on { display: flex; }
+  .raggio button { font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 11px; cursor: pointer; }
+  .raggio button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .posizione { font-size: 13px; color: var(--muted); }
   .vuoto { color: var(--muted); padding: 40px 0; text-align: center; }
 </style>
 </head>
@@ -111,6 +141,15 @@
   <div class="bar">
     <div class="tabs" role="tablist" id="tabs"></div>
     <input type="search" id="q" placeholder="Cerca per nome, città, organizzatore…" aria-label="Cerca">
+    <button type="button" class="vicino" id="vicino" aria-pressed="false">📍 Vicino a me</button>
+  </div>
+  <div class="raggio" id="raggio" role="group" aria-label="Distanza massima">
+    <span>Entro</span>
+    <button type="button" data-km="25">25 km</button>
+    <button type="button" data-km="50" aria-pressed="true">50 km</button>
+    <button type="button" data-km="100">100 km</button>
+    <button type="button" data-km="0">qualsiasi distanza</button>
+    <span class="posizione" id="posizione"></span>
   </div>
   <div class="stili" id="stili" role="group" aria-label="Filtra per stile"></div>
   <main id="lista"></main>
@@ -119,6 +158,7 @@
 <script>
 (function () {
   var dati = null, attivo = 0, scelti = {};
+  var pos = null, raggioKm = 50;   // "Vicino a me": posizione dell'utente (solo in memoria) e distanza massima
   var $ = function (id) { return document.getElementById(id); };
   var GIORNI = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
   var MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
@@ -156,6 +196,14 @@
     return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null;
   }
   function giorni(a, b) { return Math.round((b - a) / 86400000); }
+  // distanza in km tra due punti (formula dell'emisenoverso)
+  function distanza(lat1, lng1, lat2, lng2) {
+    var r = Math.PI / 180, dLat = (lat2 - lat1) * r, dLng = (lng2 - lng1) * r;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 12742 * Math.asin(Math.sqrt(a));
+  }
+  function km(d) { return d < 1 ? "meno di 1 km" : d < 10 ? d.toFixed(1).replace(".", ",") + " km" : Math.round(d) + " km"; }
   function primoLink(s) {
     var m = /(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/i.exec(s || "");
     if (!m) return null;
@@ -217,13 +265,17 @@
       (ev._gratis ? '<span class="gratis">Gratis</span>' : "");
     var azioni = (ev._link ? '<a class="info" href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
       (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "");
-    return '<article class="ev"><div class="data">' + riquadro + '</div><div class="corpo">' +
+    var dataHtml = '<div class="data">' + riquadro + "</div>";
+    var dist = pos && ev._km != null ? ' · <span class="km">a ' + km(ev._km) + "</span>" : "";
+    // con l'immagine la data va sopra l'immagine; se l'immagine non si carica torna accanto al testo (vedi "error" più sotto)
+    var media = ev.img ? '<div class="media"><img src="' + esc(ev.img) + '" alt="" loading="lazy" decoding="async">' + dataHtml + "</div>" : "";
+    return '<article class="ev">' + media + '<div class="riga">' + (media ? "" : dataHtml) + '<div class="corpo">' +
       "<h3>" + esc(ev._nome) + "</h3>" +
-      (ev._dove ? '<div class="dove">' + esc(ev._dove) + "</div>" : "") +
+      (ev._dove || dist ? '<div class="dove">' + esc(ev._dove) + dist + "</div>" : "") +
       (ev._chi ? '<div class="chi">' + esc(ev._chi) + "</div>" : "") +
       (tag ? '<div class="tag">' + tag + "</div>" : "") +
       (azioni ? '<div class="azioni">' + azioni + "</div>" : "") +
-      "</div></article>";
+      "</div></div></article>";
   }
 
   function disegna() {
@@ -233,9 +285,17 @@
     var conteggio = {};
     foglio.eventi.forEach(function (ev) { ev._stili.forEach(function (s) { conteggio[s] = (conteggio[s] || 0) + 1; }); });
     var attivi = Object.keys(scelti).filter(function (s) { return conteggio[s]; });
+    foglio.eventi.forEach(function (ev) {
+      ev._km = pos && ev.lat != null ? distanza(pos.lat, pos.lng, ev.lat, ev.lng) : null;
+    });
     var eventi = foglio.eventi.filter(function (ev) {
       if (attivi.length && !ev._stili.some(function (s) { return scelti[s]; })) return false;
+      if (pos && raggioKm && (ev._km == null || ev._km > raggioKm)) return false;
       return !q || ev._testo.indexOf(q) >= 0;
+    });
+    // vicino a me: dentro ogni sezione prima i più vicini (l'ordine delle sezioni resta per data)
+    if (pos) eventi.sort(function (a, b) {
+      return (a._km == null) - (b._km == null) || (a._km || 0) - (b._km || 0);
     });
 
     var elenco = Object.keys(conteggio).sort(function (a, b) { return conteggio[b] - conteggio[a] || a.localeCompare(b); });
@@ -254,8 +314,10 @@
     });
     ordine.sort();
     // il titolo chiede "stasera": se stasera non c'è niente lo dico, prima delle prossime date
+    var filtri = q || attivi.length || (pos && raggioKm);
     var nienteStasera = foglio._serate && eventi.length && !gruppi["1"]
-      ? '<p class="stasera">Stasera nessuna serata' + (q || attivi.length ? " con questi filtri" : "") + ": ecco le prossime.</p>" : "";
+      ? '<p class="stasera">Stasera nessuna serata' + (pos && raggioKm ? " entro " + raggioKm + " km" : filtri ? " con questi filtri" : "") +
+        ": ecco le prossime.</p>" : "";
     $("lista").innerHTML = nienteStasera + ordine.map(function (k) {
       var g = gruppi[k];
       return '<section class="sezione' + (g.top ? " top" : "") + '"><h2>' + esc(g.t) +
@@ -286,6 +348,49 @@
     if (!s) scelti = {};
     else if (scelti[s]) delete scelti[s];
     else scelti[s] = true;
+    disegna();
+  });
+
+  // immagine che non si carica: tolgo la parte immagine e rimetto la data accanto al testo
+  document.addEventListener("error", function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== "IMG" || !img.closest(".media")) return;
+    var media = img.closest(".media"), riga = media.parentNode.querySelector(".riga");
+    var data = media.querySelector(".data");
+    if (riga && data) riga.insertBefore(data, riga.firstChild);
+    media.remove();
+  }, true);
+
+  function stato(t) { $("posizione").textContent = t || ""; }
+  $("vicino").addEventListener("click", function () {
+    if (pos) {   // secondo clic: spengo
+      pos = null;
+      this.setAttribute("aria-pressed", "false");
+      $("raggio").classList.remove("on");
+      stato(""); disegna();
+      return;
+    }
+    if (!navigator.geolocation) { alert("Il browser non permette di conoscere la posizione."); return; }
+    var b = this;
+    b.textContent = "📍 Cerco la posizione…";
+    navigator.geolocation.getCurrentPosition(function (p) {
+      pos = { lat: p.coords.latitude, lng: p.coords.longitude };
+      b.textContent = "📍 Vicino a me";
+      b.setAttribute("aria-pressed", "true");
+      $("raggio").classList.add("on");
+      stato(""); disegna();
+    }, function (err) {
+      b.textContent = "📍 Vicino a me";
+      alert(err.code === 1
+        ? "Per vedere gli eventi vicini consenti l'accesso alla posizione nelle impostazioni del browser."
+        : "Non riesco a trovare la posizione, riprova tra poco.");
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  });
+  $("raggio").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    raggioKm = +b.getAttribute("data-km");
+    [].forEach.call(this.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
     disegna();
   });
 
