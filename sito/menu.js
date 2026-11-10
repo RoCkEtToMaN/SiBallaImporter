@@ -19,6 +19,12 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.9) +
       '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + "</svg>";
   }
+  // per ora il menu si vede solo nelle versioni di prova (anteprima.siballa.pages.dev, file locali):
+  // sul sito pubblico resta nascosto. Per pubblicarlo basta mettere MENU_PUBBLICO = true.
+  var MENU_PUBBLICO = false;
+  var prova = /\.siballa\.pages\.dev$/.test(location.hostname) || location.protocol === "file:" ||
+    /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if (!MENU_PUBBLICO && !prova) return;
   var hero = document.querySelector(".hero");
   if (!hero) return;
   var qui = location.pathname.replace(/\/index(\.html)?$/, "/").replace(/\.html$/, "").replace(/(.)\/$/, "$1") || "/";
