@@ -32,6 +32,13 @@
   input[type=search] { flex: 1 1 220px; min-width: 0; font: inherit; color: var(--text);
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; }
   input[type=search]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .stili { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 16px; }
+  .stili button { font: inherit; font-size: 13px; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .stili button .n { color: var(--muted); margin-left: 4px; font-size: 12px; }
+  .stili button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .stili button[aria-pressed="true"] .n { color: rgba(255,255,255,.8); }
+  .stili .tutti { color: var(--muted); border-style: dashed; }
   a { color: var(--accent); }
   .empty { color: var(--muted); padding: 32px 0; text-align: center; }
 
@@ -71,6 +78,7 @@
     <div class="tabs" role="tablist" id="tabs"></div>
     <input type="search" id="q" placeholder="Cerca per nome, città, organizzatore…" aria-label="Cerca">
   </div>
+  <div class="stili" id="stili" role="group" aria-label="Filtra per stile"></div>
   <div class="table-box"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
   <div class="cards" id="cards"></div>
   <div class="empty" id="empty" hidden>Nessun evento trovato.</div>
@@ -79,7 +87,27 @@
 (function () {
   // indici delle colonne A..N con un ruolo speciale
   var COL = { inizio: 0, fine: 1, nome: 4, luogo: 5 };
-  var dati = null, attivo = 0;
+  var dati = null, attivo = 0, scelti = {};
+  // nomi degli stili come nello Sheet -> nome mostrato (stesse regole di ParseStili dell'importatore)
+  var SINONIMI = {
+    "lindy": "Lindy Hop", "lindy hop": "Lindy Hop", "lindyhop": "Lindy Hop",
+    "balboa": "Balboa", "bal": "Balboa",
+    "blues": "Blues", "blues dance": "Blues",
+    "solo jazz": "Solo Jazz", "solojazz": "Solo Jazz", "solo": "Solo Jazz", "jazz": "Solo Jazz",
+    "boogie": "Boogie Woogie", "boogie woogie": "Boogie Woogie", "boogiewoogie": "Boogie Woogie",
+    "shag": "Shag", "collegiate shag": "Shag",
+    "stlouisshag": "St. Louis Shag", "st. louis shag": "St. Louis Shag", "st louis shag": "St. Louis Shag",
+    "slowbal": "Slow Balboa", "slow bal": "Slow Balboa", "slow balboa": "Slow Balboa",
+    "charleston": "Charleston", "aerials": "Aerials", "afrodance": "Afrodance"
+  };
+  function stiliDi(testo) {
+    var out = {};
+    String(testo || "").split(/[,;\/|]/).forEach(function (s) {
+      s = s.trim();
+      if (s) out[SINONIMI[s.toLowerCase()] || s] = true;
+    });
+    return Object.keys(out);
+  }
   var $ = function (id) { return document.getElementById(id); };
 
   function esc(s) {
@@ -113,9 +141,20 @@
     var foglio = dati.fogli[attivo];
     if (!foglio) return;
     var q = $("q").value.trim().toLowerCase();
+    // stili selezionati presenti in questo foglio: l'evento passa se ne ha almeno uno
+    var conteggio = {};
+    foglio.eventi.forEach(function (ev) { ev._stili.forEach(function (s) { conteggio[s] = (conteggio[s] || 0) + 1; }); });
+    var attivi = Object.keys(scelti).filter(function (s) { return conteggio[s]; });
     var eventi = foglio.eventi.filter(function (ev) {
+      if (attivi.length && !ev._stili.some(function (s) { return scelti[s]; })) return false;
       return !q || ev.celle.join(" ").toLowerCase().indexOf(q) >= 0;
     });
+
+    var elenco = Object.keys(conteggio).sort(function (a, b) { return conteggio[b] - conteggio[a] || a.localeCompare(b); });
+    $("stili").innerHTML = elenco.map(function (s) {
+      return '<button type="button" data-stile="' + esc(s) + '" aria-pressed="' + !!scelti[s] + '">' +
+        esc(s) + '<span class="n">' + conteggio[s] + "</span></button>";
+    }).join("") + (attivi.length ? '<button type="button" class="tutti" data-stile="">Tutti gli stili</button>' : "");
     // colonne completamente vuote nel foglio: nascoste
     var usate = foglio.colonne.map(function (_, i) {
       return foglio.eventi.some(function (ev) { return ev.celle[i]; });
@@ -159,11 +198,24 @@
     tabs(); disegna();
   });
   $("q").addEventListener("input", disegna);
+  $("stili").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var s = b.getAttribute("data-stile");
+    if (!s) scelti = {};
+    else if (scelti[s]) delete scelti[s];
+    else scelti[s] = true;
+    disegna();
+  });
 
   fetch("eventi.json", { cache: "no-cache" })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
       dati = d;
+      d.fogli.forEach(function (f) {
+        var i = f.colonne.map(function (c) { return c.trim().toLowerCase(); }).indexOf("stile");
+        f.eventi.forEach(function (ev) { ev._stili = i >= 0 ? stiliDi(ev.celle[i]) : []; });
+      });
       var t = new Date(d.aggiornato);
       $("agg").textContent = "Aggiornato il " + t.toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" });
       tabs(); disegna();
