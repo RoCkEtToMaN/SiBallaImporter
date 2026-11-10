@@ -40,8 +40,8 @@ on:
       enable_importing_on_db:
         description: Carica gli eventi dello Sheet su Appwrite
         type: choice
-        options: ["false", "true"]
-        default: "false"
+        options: ["true", "false"]
+        default: "true"
       update_sheet_coordinates:
         description: Riscrive sullo Sheet le coordinate trovate
         type: choice
@@ -156,9 +156,10 @@ jobs:
           Import__EnableSending: ${{ inputs.enable_sending || vars.ENABLE_SENDING || 'true' }}
           # giro quotidiano: email solo se ci sono eventi che l'ultima email non aveva
           Import__EmailSoloSeCambia: "true"
-          # di notte gli eventi nuovi vanno sempre nello Sheet (li controlli lì); il DB dell'app si aggiorna a mano
+          # di notte gli eventi nuovi vanno nello Sheet e lo Sheet va sul DB dell'app (le righe "da verificare" restano fuori);
+          # dopo una correzione a mano nello Sheet basta un lancio manuale per riallineare il DB
           Import__EnableImportingOnExcel: ${{ inputs.enable_importing_on_excel || vars.ENABLE_IMPORTING_ON_EXCEL || 'true' }}
-          Import__EnableImportingOnDB: ${{ inputs.enable_importing_on_db || vars.ENABLE_IMPORTING_ON_DB || 'false' }}
+          Import__EnableImportingOnDB: ${{ inputs.enable_importing_on_db || vars.ENABLE_IMPORTING_ON_DB || 'true' }}
           Import__UpdateSheetCoordinates: ${{ inputs.update_sheet_coordinates || vars.UPDATE_SHEET_COORDINATES || 'false' }}
           Import__Giorni: ${{ inputs.giorni || vars.GIORNI || '7' }}
           # righe future con "Immagine" vuota: immagine di anteprima (og:image) del sito in "Riferimento" su Storage (max 100 per giro)
