@@ -1,4 +1,4 @@
-"""Esporta le colonne A-N dello Google Sheet degli eventi in un JSON per il sito pubblico.
+"""Esporta le colonne scelte dello Google Sheet degli eventi in un JSON per il sito pubblico.
 
 Uso: python sito/esporta_sheet.py <file di uscita>
 Credenziali: variabile d'ambiente GOOGLE_SERVICE_ACCOUNT_JSON (contenuto del JSON del service account,
@@ -8,7 +8,8 @@ Per ogni foglio dello Sheet:
 - riga 2 = intestazioni, dati dalla riga 3 (come legge l'importatore);
 - solo eventi futuri o in corso (data fine, o data inizio se manca, >= oggi in Italia);
 - esclude le righe "da verificare" nella colonna "Luogo verificato" (come per il DB);
-- pubblica solo le colonne A-N: le colonne dopo la N servono solo per il filtro e non finiscono nel JSON.
+- pubblica solo le colonne scelte (COLONNE_PER_FOGLIO / COLONNE_DEFAULT, meno COLONNE_ESCLUSE): le altre
+  servono al massimo per il filtro e non finiscono nel JSON.
 """
 
 import html
@@ -25,9 +26,12 @@ from google.oauth2 import service_account
 
 SPREADSHEET_ID = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo"
 API = f"https://sheets.googleapis.com/v4/spreadsheets/{SPREADSHEET_ID}"
-NUM_COLONNE = 14  # A..N
+# colonne pubblicate: per foglio (nome in minuscolo), altrimenti COLONNE_DEFAULT.
+# Devono comprendere A-F: il sito trova inizio, fine, nome e luogo in A, B, E, F.
+COLONNE_DEFAULT = "A-N"
+COLONNE_PER_FOGLIO = {"workshop": "A-H,R"}
 COL_LUOGO = 5  # F: "Paese, Città, Indirizzo(lat;lng)"
-# colonne di A-N da non pubblicare (per nome dell'intestazione, minuscolo)
+# colonne da non pubblicare anche se comprese sopra (per nome dell'intestazione, minuscolo)
 COLONNE_ESCLUSE = {"lindy", "blues", "boogie", "balboa"}
 VERIFIED_HEADER = "luogo verificato"
 VERIFIED_PENDING = "da verificare"
@@ -37,6 +41,15 @@ EPOCA_SHEETS = date(1899, 12, 30)
 
 def lettera(i: int) -> str:
     return chr(ord("A") + i)
+
+
+def indici(spec: str) -> list[int]:
+    """"A-H,R" -> [0..7, 17] (solo colonne A-Z)."""
+    out = []
+    for parte in spec.replace(" ", "").upper().split(","):
+        da, _, a = parte.partition("-")
+        out.extend(range(ord(da) - ord("A"), ord(a or da) - ord("A") + 1))
+    return out
 
 
 def range_foglio(nome: str) -> str:
@@ -99,7 +112,9 @@ def main() -> None:
             continue
 
         intestazione = righe_f[1]
-        colonne = [cella(intestazione, i) or lettera(i) for i in range(NUM_COLONNE)]
+        scelte = indici(COLONNE_PER_FOGLIO.get(nome.strip().lower(), COLONNE_DEFAULT))
+        num_colonne = max(scelte) + 1
+        colonne = [cella(intestazione, i) or lettera(i) for i in range(num_colonne)]
         col_verificato = next(
             (i for i, h in enumerate(intestazione) if str(h).strip().lower() == VERIFIED_HEADER), None
         )
@@ -109,7 +124,7 @@ def main() -> None:
         for n in range(2, len(righe_f)):
             rf = righe_f[n]
             rg = righe_g[n] if n < len(righe_g) else []
-            if not any(cella(rf, i) for i in range(NUM_COLONNE)):
+            if not any(cella(rf, i) for i in scelte):
                 continue
             inizio = come_data(rg[0] if len(rg) > 0 else None)
             fine = come_data(rg[1] if len(rg) > 1 else None) or inizio
@@ -121,7 +136,7 @@ def main() -> None:
                 continue
 
             # html.unescape: alcuni nomi arrivano dai siti con entità tipo "&#8217;"
-            celle = [html.unescape(cella(rf, i)) for i in range(NUM_COLONNE)]
+            celle = [html.unescape(cella(rf, i)) for i in range(num_colonne)]
             # date tutte nello stesso formato (nello Sheet ci sono sia 11/11/2026 sia 2026-11-11)
             if inizio:
                 celle[0] = inizio.strftime("%d/%m/%Y")
@@ -141,9 +156,9 @@ def main() -> None:
                 evento["mappa"] = "https://www.google.com/maps/search/?api=1&query=" + quote(luogo)
             eventi.append(evento)
 
-        # tolgo le colonne escluse (dopo l'uso degli indici fissi qui sopra; restano prima della F, quindi il
-        # sito trova sempre inizio/fine/nome/luogo agli stessi indici)
-        tenute = [i for i, c in enumerate(colonne) if c.strip().lower() not in COLONNE_ESCLUSE]
+        # tengo solo le colonne scelte e non escluse (dopo l'uso degli indici fissi qui sopra; A-F restano
+        # sempre le prime, quindi il sito trova inizio/fine/nome/luogo agli stessi indici)
+        tenute = [i for i in scelte if colonne[i].strip().lower() not in COLONNE_ESCLUSE]
         colonne = [colonne[i] for i in tenute]
         for e in eventi:
             e["celle"] = [e["celle"][i] for i in tenute]
