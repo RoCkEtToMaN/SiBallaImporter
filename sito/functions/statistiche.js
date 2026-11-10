@@ -47,32 +47,54 @@ export async function onRequestGet({ request, env }) {
     await preparaTabella(env.VISITE);
     const dal = giorni ? giornoRoma(new Date(Date.now() - (giorni - 1) * 86400000)) : "0000-00-00";
     const q = (sql) => env.VISITE.prepare(sql).bind(dal).all().then((r) => r.results);
-    const [totale, perGiorno, regioni, citta, paesi, primo] = await Promise.all([
+    const s = (tipo, limite) => q(`SELECT chiave, SUM(n) AS n FROM statistiche WHERE giorno >= ?1 AND tipo = '${tipo}'
+      GROUP BY chiave ORDER BY n DESC LIMIT ${limite}`);
+    const [totale, perGiorno, regioni, citta, paesi, primo, visitatori, pagine, fonti, disp, click, mesi, primoStat] = await Promise.all([
       q(`SELECT COALESCE(SUM(n),0) AS n FROM visite WHERE giorno >= ?1`),
-      q(`SELECT giorno, SUM(n) AS n FROM visite WHERE giorno >= ?1 GROUP BY giorno ORDER BY giorno DESC LIMIT 60`),
+      q(`SELECT v.giorno, SUM(v.n) AS n, (SELECT n FROM statistiche s WHERE s.giorno = v.giorno AND tipo = 'visitatori' AND chiave = 'giorno') AS u
+         FROM visite v WHERE v.giorno >= ?1 GROUP BY v.giorno ORDER BY v.giorno DESC LIMIT 60`),
       q(`SELECT paese, regione, SUM(n) AS n FROM visite WHERE giorno >= ?1 GROUP BY paese, regione ORDER BY n DESC LIMIT 40`),
       q(`SELECT paese, regione, citta, SUM(n) AS n FROM visite WHERE giorno >= ?1 GROUP BY paese, regione, citta ORDER BY n DESC LIMIT 40`),
       q(`SELECT paese, SUM(n) AS n FROM visite WHERE giorno >= ?1 GROUP BY paese ORDER BY n DESC LIMIT 30`),
       env.VISITE.prepare(`SELECT MIN(giorno) AS g FROM visite`).all().then((r) => r.results),
+      s("visitatori", 5), s("pagina", 20), s("fonte", 20), s("disp", 5), s("click", 40),
+      q(`SELECT substr(giorno,1,7) AS mese, SUM(CASE WHEN tipo='pagina' THEN n ELSE 0 END) AS viste,
+           SUM(CASE WHEN tipo='visitatori' AND chiave='mese' THEN n ELSE 0 END) AS u
+         FROM statistiche WHERE giorno >= ?1 GROUP BY mese ORDER BY mese DESC LIMIT 24`),
+      env.VISITE.prepare(`SELECT MIN(giorno) AS g FROM statistiche`).all().then((r) => r.results),
     ]);
     const tot = totale[0]?.n || 0;
+    const vis = Object.fromEntries(visitatori.map((r) => [r.chiave, r.n]));
+    // media sui giorni del periodo da quando esistono questi dati (oggi compreso)
+    const inizio = primoStat[0]?.g && primoStat[0].g > dal ? primoStat[0].g : dal;
+    const nGiorni = primoStat[0]?.g ? Math.max(1, Math.round((Date.parse(giornoRoma()) - Date.parse(inizio)) / 86400000) + 1) : 1;
+    const mediaGiorno = Math.round(((vis.giorno || 0) / nGiorni) * 10) / 10;
+    const NOMI_MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+    const nomeMese = (m) => NOMI_MESI[Number(m.slice(5, 7)) - 1] + " " + m.slice(0, 4);
     const estero = (p) => (p && p !== "IT" && p !== "?" ? ` <span class="paese">(${esc(nomePaese(p))})</span>` : "");
     const regione = (r) => (r.regione === "?" ? "sconosciuta" : esc(REGIONI[r.regione] || r.regione)) + estero(r.paese);
-    const tabella = (titolo, righe, etichetta) => {
+    const tabella = (titolo, righe, etichetta, campo = "n") => {
       if (!righe.length) return "";
-      const max = Math.max(...righe.map((r) => r.n));
+      const max = Math.max(...righe.map((r) => r[campo]));
       return `<section><h2>${titolo}</h2><table>${righe.map((r) =>
-        `<tr><td>${etichetta(r)}</td><td class="num">${r.n}</td><td class="barra"><span style="width:${Math.max(2, (r.n / max) * 100)}%"></span></td></tr>`
+        `<tr><td>${etichetta(r)}</td><td class="num">${r[campo]}</td><td class="barra"><span style="width:${Math.max(2, (r[campo] / max) * 100)}%"></span></td></tr>`
       ).join("")}</table></section>`;
     };
     const dataIt = (g) => g.split("-").reverse().join("/");
     corpo = `
       <p class="totale"><b>${tot}</b> visite ${giorni ? `negli ultimi ${giorni} giorni` : "in totale"}${primo[0]?.g ? ` · conteggio attivo dal ${dataIt(primo[0].g)}` : ""}</p>
+      ${primoStat[0]?.g ? `<p class="dettaglio"><b>${mediaGiorno}</b> visitatori unici al giorno in media · <b>${vis.nuovi || 0}</b> nuovi visitatori
+        <br><span class="paese">Visitatori, pagine, provenienza, dispositivi e click registrati dal ${dataIt(primoStat[0].g)}.</span></p>` : ""}
       ${tot ? "" : `<p class="vuoto">Nessuna visita registrata nel periodo.</p>`}
+      ${tabella("Mesi · visitatori unici", mesi.filter((r) => r.u), (r) => `${nomeMese(r.mese)} <span class="paese">· ${r.viste} pagine viste</span>`, "u")}
+      ${tabella("Pagine più viste", pagine, (r) => esc(r.chiave === "/" ? "/ (eventi)" : r.chiave))}
+      ${tabella("Da dove arrivano", fonti, (r) => esc(r.chiave))}
+      ${tabella("Dispositivi", disp, (r) => esc(r.chiave))}
+      ${tabella("Click su eventi e link esterni", click, (r) => esc(r.chiave))}
       ${tabella("Regioni", regioni, regione)}
       ${tabella("Città", citta, (r) => (r.citta === "?" ? "sconosciuta" : esc(CITTA[r.citta] || r.citta)) + ` <span class="paese">· ${regione(r)}</span>`)}
       ${tabella("Paesi", paesi, (r) => (r.paese === "?" ? "sconosciuto" : esc(nomePaese(r.paese))))}
-      ${tabella("Giorni", perGiorno, (r) => dataIt(r.giorno))}`;
+      ${tabella("Giorni · pagine viste", perGiorno, (r) => dataIt(r.giorno) + (r.u ? ` <span class="paese">· ${r.u} visitatori</span>` : ""))}`;
   }
 
   const link = (g, testo) =>
@@ -87,6 +109,9 @@ main{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{margin:0 0 4px;font
 .sub{color:var(--muted);margin:0 0 16px;font-size:13px}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}nav a{padding:6px 12px;border-radius:999px;background:var(--surface-2);color:var(--text);text-decoration:none;font-size:13px}
 nav a.attivo{background:var(--accent);color:var(--bg);font-weight:600}
+.disp{background:var(--surface);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--muted)}
+.disp button{margin-left:6px;padding:4px 10px;border:0;border-radius:999px;background:var(--surface-2);color:var(--text);font:inherit;cursor:pointer}
+.dettaglio{margin-top:-6px}.dettaglio b{color:var(--accent)}
 .totale{font-size:16px}.totale b{color:var(--accent);font-size:28px}.vuoto{color:var(--muted)}
 section{background:var(--surface);border-radius:14px;padding:12px 14px;margin:14px 0}h2{font-size:15px;margin:0 0 8px;color:var(--accent)}
 table{width:100%;border-collapse:collapse}td{padding:5px 4px;border-top:1px solid var(--surface-2);vertical-align:middle}tr:first-child td{border-top:0}
@@ -96,8 +121,29 @@ table{width:100%;border-collapse:collapse}td{padding:5px 4px;border-top:1px soli
 <h1>Statistiche <span>siBalla</span></h1>
 <p class="sub">Visite anonime per luogo (approssimativo, ricavato dall'IP: la città può essere imprecisa). Aggiornato al ${esc(new Date().toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}.</p>
 <nav>${link(7, "7 giorni")}${link(30, "30 giorni")}${link(365, "1 anno")}${link(0, "Sempre")}</nav>
+<p class="disp" id="disp"></p>
 ${corpo}
-</main></body></html>`;
+</main>
+<script>
+// aprire questa pagina esclude il browser dal conteggio (stessa chiave letta da conta.js); il pulsante lo riattiva
+(function () {
+  var el = document.getElementById("disp"), K = "siballa_noconta";
+  function stato() {
+    var escluso = false;
+    try { escluso = localStorage.getItem(K) === "1"; } catch (e) {}
+    el.innerHTML = escluso
+      ? "✓ Le tue visite da questo browser non vengono contate. <button id='tg'>Riattiva il conteggio</button>"
+      : "Le visite da questo browser vengono contate. <button id='tg'>Escludi questo browser</button>";
+    document.getElementById("tg").onclick = function () {
+      try { if (escluso) localStorage.removeItem(K); else localStorage.setItem(K, "1"); } catch (e) {}
+      stato();
+    };
+  }
+  try { if (!sessionStorage.getItem("siballa_stat_visto")) { localStorage.setItem(K, "1"); sessionStorage.setItem("siballa_stat_visto", "1"); } } catch (e) {}
+  stato();
+})();
+</script>
+</body></html>`;
   return new Response(html, {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" },
   });
