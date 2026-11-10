@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -43,4 +43,10 @@
     </None>
   </ItemGroup>
 
+  <!-- Inclusione esplicita dei file di orchestrazione anche per il progetto caricato nell'IDE. -->
+  <ItemGroup>
+    <Compile Remove="Application\ImportRunner.cs;Application\ImportCommands.cs" />
+    <Compile Include="Application\ImportRunner.cs" />
+    <Compile Include="Application\ImportCommands.cs" />
+  </ItemGroup>
 </Project>
