@@ -151,6 +151,7 @@ namespace SiBallaImportingData.Utils
                                     SheetVerifiedColumn = verifiedCol,
                                     SheetImageColumn = imageCol,
                                     SheetImageRaw = imageCol is int ir && row.Count > ir ? row[ir]?.ToString()?.Trim() : null,
+                                    SheetStiliRaw = row.Count > 7 ? row[7]?.ToString()?.Trim() : null,
                                     LuogoVerificato = verifiedCol is int vc && row.Count > vc ? row[vc]?.ToString()?.Trim().ToLowerInvariant() : null,
                                     DateStart = Convert.ToDateTime(row[0]),
                                     DateFinish = Convert.ToDateTime(row[1]),
@@ -415,10 +416,10 @@ namespace SiBallaImportingData.Utils
                 // 4. Esecuzione asincrona dell'inserimento
                 var response = appendRequest.Execute();
 
-                // 5. righe "da verificare": colore di sfondo e motivo di Gemini nella nota della cella "Luogo verificato"
-                if (verifiedCol is int colonnaVerifica)
-                    await EvidenziaDaVerificareAsync(service, spreadsheetId, spreadsheet, sheetName, response.Updates?.UpdatedRange,
-                        events, colonnaVerifica, newData.Max(r => r.Count));
+                // 5. righe "da verificare": colore di sfondo e motivo di Gemini nella nota della cella "Luogo verificato";
+                //    stili dedotti: cella H colorata con la nota da dove vengono
+                await EvidenziaDaVerificareAsync(service, spreadsheetId, spreadsheet, sheetName, response.Updates?.UpdatedRange,
+                    events, verifiedCol, newData.Max(r => r.Count));
 
 #if DEBUG
 
@@ -475,10 +476,13 @@ namespace SiBallaImportingData.Utils
             && Math.Abs((c.Green ?? 0) - ColoreDaVerificare.Green!.Value) < 0.01
             && Math.Abs((c.Blue ?? 0) - ColoreDaVerificare.Blue!.Value) < 0.01;
 
-        // colora le righe appena aggiunte che sono "da verificare" e mette il motivo nella nota (passandoci sopra col mouse)
+        // colora le righe appena aggiunte che sono "da verificare" e mette il motivo nella nota (passandoci sopra col mouse);
+        // poi colora la cella H degli stili dedotti (dopo, così resta lilla anche nelle righe "da verificare")
         private static async Task EvidenziaDaVerificareAsync(SheetsService service, string spreadsheetId, Spreadsheet spreadsheet,
-            string sheetName, string? updatedRange, List<Event> events, int verifiedCol, int colonne)
+            string sheetName, string? updatedRange, List<Event> events, int? verifiedCol, int colonne)
         {
+            if (verifiedCol is null && !events.Any(e => e.StileDedottoDa is not null)) return;
+
             // es. "Serate!A15:V20" o "'Serate'!A15:V20": la prima riga scritta è la 15
             var m = Regex.Match(updatedRange ?? "", @"![A-Z]+(\d+)");
             var sheetId = spreadsheet.Sheets.FirstOrDefault(s => s.Properties.Title == sheetName)?.Properties.SheetId;
@@ -493,7 +497,7 @@ namespace SiBallaImportingData.Utils
             for (int i = 0; i < events.Count; i++)
             {
                 var ev = events[i];
-                if ((ev.StatoNuovaRiga ?? VerifiedPending) != VerifiedPending) continue;
+                if (verifiedCol is null || (ev.StatoNuovaRiga ?? VerifiedPending) != VerifiedPending) continue;
 
                 requests.Add(new Request
                 {
@@ -515,10 +519,130 @@ namespace SiBallaImportingData.Utils
                         }
                     });
             }
+            int righeColorate = requests.Count(r => r.RepeatCell is not null);
+
+            int stiliDedotti = 0;
+            for (int i = 0; i < events.Count; i++)
+            {
+                if (events[i].StileDedottoDa is not string fonte) continue;
+                requests.Add(new Request
+                {
+                    UpdateCells = new UpdateCellsRequest
+                    {
+                        Start = new GridCoordinate { SheetId = sheetId, RowIndex = primaRiga + i, ColumnIndex = ColonnaStili },
+                        Rows = new List<RowData> { new() { Values = new List<CellData> { new()
+                        {
+                            UserEnteredFormat = new CellFormat { BackgroundColor = ColoreStileDedotto },
+                            Note = NotaStileDedotto(fonte, events[i].EventDetail?.StylesToString)
+                        } } } },
+                        Fields = "userEnteredFormat.backgroundColor,note"
+                    }
+                });
+                stiliDedotti++;
+            }
             if (requests.Count == 0) return;
 
             await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
-            Console.WriteLine($"[sheet] '{sheetName}': {requests.Count(r => r.RepeatCell is not null)} righe '{VerifiedPending}' colorate");
+            Console.WriteLine($"[sheet] '{sheetName}': {righeColorate} righe '{VerifiedPending}' colorate, {stiliDedotti} stili dedotti da confermare");
+        }
+
+        // ---------- Stili dedotti (colonna H) ----------
+
+        private const int ColonnaStili = 7;   // H
+        // lilla delle celle H con lo stile dedotto dal programma: è anche il segno che non l'hai ancora confermato
+        private static readonly Color ColoreStileDedotto = new() { Red = 217 / 255f, Green = 210 / 255f, Blue = 233 / 255f };
+        private static readonly Regex NotaStileRegex = new(@"^Stile dedotto \(([^)]*)\): (.*)$", RegexOptions.Multiline);
+
+        private static string NotaStileDedotto(string fonte, string? valore) =>
+            $"Stile dedotto ({fonte}): {valore}\n" +
+            "Se è giusto togli il colore della cella, se è sbagliato correggilo: " +
+            "il programma impara lo stile solo da celle non colorate o corrette.";
+
+        private static bool IsColore(Color? c, Color atteso) =>
+            c is not null
+            && Math.Abs((c.Red ?? 0) - atteso.Red!.Value) < 0.01
+            && Math.Abs((c.Green ?? 0) - atteso.Green!.Value) < 0.01
+            && Math.Abs((c.Blue ?? 0) - atteso.Blue!.Value) < 0.01;
+
+        /// <summary>
+        /// Legge la colonna H e segna StileDedotto sulle righe con lo stile dedotto ancora da confermare (cella lilla e valore
+        /// uguale a quello della nota). Le celle confermate (colore tolto o valore corretto) vengono ripulite da colore e nota.
+        /// Restituisce false se la lettura non riesce: in quel caso gli stili non vanno imparati in questo giro
+        /// </summary>
+        public static async Task<bool> LeggiStiliDedottiAsync(IEnumerable<Event> sheetEvents)
+        {
+            var righe = sheetEvents.Where(e => e.SheetName is not null && e.SheetRow is not null).ToList();
+            if (righe.Count == 0) return true;
+            try
+            {
+                var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+                using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                    ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+                var service = new SheetsService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                    ApplicationName = "Google Sheets API .NET"
+                });
+                const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+
+                var perFoglio = righe.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.ToDictionary(e => e.SheetRow!.Value));
+                var get = service.Spreadsheets.Get(spreadsheetId);
+                get.Ranges = perFoglio.Select(f => $"'{f.Key}'!H3:H{f.Value.Keys.Max()}").ToList();
+                get.IncludeGridData = true;
+                get.Fields = "sheets(properties(sheetId,title),data(startRow,rowData(values(formattedValue,note,userEnteredFormat(backgroundColor)))))";
+                var spreadsheet = await get.ExecuteAsync();
+
+                var pulizie = new List<Request>();
+                int daConfermare = 0;
+                foreach (var sheet in spreadsheet.Sheets)
+                {
+                    if (!perFoglio.TryGetValue(sheet.Properties.Title, out var eventi)) continue;
+                    foreach (var data in sheet.Data ?? new List<GridData>())
+                    {
+                        int start = data.StartRow ?? 0;
+                        for (int i = 0; i < (data.RowData?.Count ?? 0); i++)
+                        {
+                            int riga = start + i + 1;
+                            var cella = data.RowData![i].Values?.FirstOrDefault();
+                            if (cella is null || !eventi.TryGetValue(riga, out var ev)) continue;
+
+                            var colorata = IsColore(cella.UserEnteredFormat?.BackgroundColor, ColoreStileDedotto);
+                            var nota = cella.Note is null ? null : NotaStileRegex.Match(cella.Note);
+                            var mia = nota is { Success: true };
+                            if (!colorata && !mia) continue;
+
+                            // valore cambiato rispetto a quello dedotto = l'hai corretto tu
+                            var corretta = mia && !string.Equals(nota!.Groups[2].Value.Trim(), (cella.FormattedValue ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+                            if (colorata && !corretta)
+                            {
+                                ev.StileDedotto = true;
+                                daConfermare++;
+                                continue;
+                            }
+                            // confermata: via colore (se è ancora il mio) e nota
+                            pulizie.Add(new Request
+                            {
+                                UpdateCells = new UpdateCellsRequest
+                                {
+                                    Start = new GridCoordinate { SheetId = sheet.Properties.SheetId, RowIndex = riga - 1, ColumnIndex = ColonnaStili },
+                                    Rows = new List<RowData> { new() { Values = new List<CellData> { new() { UserEnteredFormat = new CellFormat() } } } },
+                                    Fields = mia && colorata ? "userEnteredFormat.backgroundColor,note" : mia ? "note" : "userEnteredFormat.backgroundColor"
+                                }
+                            });
+                        }
+                    }
+                }
+
+                if (pulizie.Count > 0)
+                    await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = pulizie }, spreadsheetId).ExecuteAsync();
+                Console.WriteLine($"[sheet] stili dedotti: {daConfermare} da confermare, {pulizie.Count} confermati e ripuliti");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[sheet] ⚠️ stili dedotti non letti ({ex.Message}): in questo giro il dizionario non impara gli stili");
+                return false;
+            }
         }
 
         /// <summary>
@@ -564,15 +688,20 @@ namespace SiBallaImportingData.Utils
                         var colore = data.RowData![i].Values?.FirstOrDefault()?.UserEnteredFormat?.BackgroundColor;
                         if (!righe.ContainsKey(riga) || !IsColoreDaVerificare(colore)) continue;
 
-                        requests.Add(new Request
-                        {
-                            RepeatCell = new RepeatCellRequest
+                        // la cella H con lo stile dedotto non ancora confermato resta lilla
+                        var tratti = righe[riga].StileDedotto
+                            ? new[] { (0, ColonnaStili), (ColonnaStili + 1, 26) }
+                            : new[] { (0, 26) };
+                        foreach (var (da, a) in tratti)
+                            requests.Add(new Request
                             {
-                                Range = new GridRange { SheetId = sheet.Properties.SheetId, StartRowIndex = riga - 1, EndRowIndex = riga, StartColumnIndex = 0, EndColumnIndex = 26 },
-                                Cell = new CellData { UserEnteredFormat = new CellFormat() },
-                                Fields = "userEnteredFormat.backgroundColor"
-                            }
-                        });
+                                RepeatCell = new RepeatCellRequest
+                                {
+                                    Range = new GridRange { SheetId = sheet.Properties.SheetId, StartRowIndex = riga - 1, EndRowIndex = riga, StartColumnIndex = da, EndColumnIndex = a },
+                                    Cell = new CellData { UserEnteredFormat = new CellFormat() },
+                                    Fields = "userEnteredFormat.backgroundColor"
+                                }
+                            });
                         requests.Add(new Request
                         {
                             UpdateCells = new UpdateCellsRequest

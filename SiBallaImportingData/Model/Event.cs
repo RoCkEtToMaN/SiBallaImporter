@@ -28,6 +28,12 @@ namespace SiBallaImportingData.Model
         // colonna "Immagine" dello sheet: "sì" = file su Storage, "no" = cercata sul sito senza trovarla, vuoto = da cercare
         [JsonIgnore] public string? SheetImageRaw { get; set; }
         [JsonIgnore] public int? SheetImageColumn { get; set; }
+        // colonna H (Stile) come scritta nello sheet: ParseStili tiene solo alcuni stili, il dizionario li impara tutti
+        [JsonIgnore] public string? SheetStiliRaw { get; set; }
+        // cella H colorata dal programma (stile dedotto, non ancora confermato da te): il dizionario non la impara
+        [JsonIgnore] public bool StileDedotto { get; set; }
+        // per gli eventi trovati online: da dove viene lo stile scritto in H se la fonte non lo indicava (null = dalla fonte)
+        [JsonIgnore] public string? StileDedottoDa { get; set; }
         public EventDetail EventDetail { get; set; } 
         public string? PartyName { get; set; }
         public string? WorkshopName { get; set; }

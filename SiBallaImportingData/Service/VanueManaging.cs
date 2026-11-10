@@ -25,6 +25,10 @@ public class VenueInfo
     // (scritto nel file solo se c'è, per non aggiungere una riga vuota a ogni voce)
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? GeminiNonTrovato { get; set; }
+    // stili di ballo imparati dalla colonna H dello sheet (solo celle non colorate come "dedotte"):
+    // nell'evento = quelli della data più recente, nel default = quelli presenti in almeno metà delle righe dell'organizzatore
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Stili { get; set; }
 }
 
 public class OrganizerVenues
@@ -151,6 +155,76 @@ public class KnownVenueStore
         }
         if (empty > 0) Console.WriteLine($"[store] eventi senza indirizzo aggiunti come voci vuote: {empty}");
         return n;
+    }
+
+    // il default dell'organizzatore prende uno stile solo se ha almeno queste righe con lo stile compilato
+    private const int MinRigheStiliOrganizzatore = 2;
+
+    /// <summary>
+    /// Impara gli stili dalla colonna H: per ogni evento (organizzatore + città + titolo) quelli della data più recente,
+    /// per l'organizzatore quelli presenti in almeno metà delle sue righe. Salta le righe "da verificare" e le celle
+    /// con lo stile dedotto dal programma e non ancora confermato. Le voci senza righe nello sheet restano come sono
+    /// </summary>
+    public int ImparaStili(IEnumerable<Event> sheetEvents)
+    {
+        var righe = sheetEvents
+            .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
+            .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && !e.StileDedotto)
+            .Select(e => (Evento: e, Stili: SiBallaImportingData.Utils.StiliEvento.Normalizza(e.SheetStiliRaw)))
+            .Where(x => x.Stili.Count > 0)
+            .ToList();
+
+        int cambiate = 0;
+        foreach (var org in righe.GroupBy(x => MakeKey(x.Evento.Organizer!, x.Evento.City!)))
+        {
+            var primo = org.First().Evento;
+            if (!_data.TryGetValue(org.Key, out var voce))
+                _data[org.Key] = voce = new OrganizerVenues { Default = new VenueInfo { Organizer = primo.Organizer, City = primo.City, Country = primo.Country } };
+
+            foreach (var ev in org.GroupBy(x => NormalizeTitle(x.Evento.PartyName)).Where(g => g.Key.Length > 0))
+            {
+                var stili = ev.OrderBy(x => x.Evento.DateStart).Last().Stili;
+                if (!voce.Events.TryGetValue(ev.Key, out var v))
+                    voce.Events[ev.Key] = v = new VenueInfo { City = primo.City, Country = primo.Country };
+                if (ImpostaStili(v, stili)) cambiate++;
+            }
+
+            var n = org.Count();
+            var comuni = n < MinRigheStiliOrganizzatore ? null : org
+                .SelectMany(x => x.Stili)
+                .GroupBy(s => s, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() * 2 >= n)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .ToList();
+            if (comuni is { Count: > 0 } && ImpostaStili(voce.Default, comuni)) cambiate++;
+        }
+        if (cambiate > 0) Console.WriteLine($"[store] stili imparati dallo sheet: {cambiate} voci aggiornate");
+        return cambiate;
+    }
+
+    private bool ImpostaStili(VenueInfo v, List<string> stili)
+    {
+        if (v.Stili is not null && v.Stili.SequenceEqual(stili, StringComparer.OrdinalIgnoreCase)) return false;
+        v.Stili = stili;
+        _dirty = true;
+        return true;
+    }
+
+    /// <summary>Stili dello stesso evento (organizzatore + città + titolo), null se non noti</summary>
+    public List<string>? StiliEvento(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return null;
+        if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) return null;
+        var t = NormalizeTitle(e.PartyName);
+        return t.Length > 0 && org.Events.TryGetValue(t, out var v) ? v.Stili : null;
+    }
+
+    /// <summary>Stili abituali dell'organizzatore (in quella città), null se non noti</summary>
+    public List<string>? StiliOrganizzatore(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return null;
+        return _data.TryGetValue(MakeKey(e.Organizer, e.City), out var org) ? org.Default.Stili : null;
     }
 
     public const string SourceInitial = "iniziale";   // coordinate della riga, il default aspetta il geocoding inverso

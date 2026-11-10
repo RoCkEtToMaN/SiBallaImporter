@@ -11,7 +11,7 @@ namespace SiBallaImportingData.Service
     {
         private const int DimensioneGruppo = 20;
 
-        private const string Istruzioni =
+        private static readonly string Istruzioni =
             "Sei un esperto di balli swing. Ti passo una lista di eventi trovati online. " +
             "Per ognuno decidi se è un evento di ballo swing o affine: Lindy Hop, Balboa, Boogie Woogie, Collegiate Shag, " +
             "St. Louis Shag, Charleston, Solo Jazz, Blues dance, Tap, serate o festival swing con musica dal vivo o DJ. " +
@@ -21,10 +21,18 @@ namespace SiBallaImportingData.Service
             "Lezioni, lezioni di prova, corsi, classi a livelli (es. 'Livello aperto', 'Principianti') e open class " +
             "NON sono eventi: considerali non swing anche se sono di Lindy Hop, Charleston o altri stili swing. " +
             "Sono eventi solo serate sociali, feste, festival, stage/workshop weekend e serate con musica dal vivo o DJ. " +
-            "Per ogni evento rispondi con id, isSwing e un motivo breve in italiano (max 15 parole).";
+            "Per ogni evento rispondi con id, isSwing e un motivo breve in italiano (max 15 parole). " +
+            "Indica anche gli stili di ballo dell'evento in 'stili', usando solo questi nomi: " + string.Join(", ", StiliEvento.Nomi) + ". " +
+            "Metti uno stile solo se è citato o evidente da titolo, organizzatore, stili o descrizione (rock'n'roll e jive -> Boogie Woogie); " +
+            "se non si capisce lascia la lista vuota, non indovinare.";
 
         // esiti di Gemini di questo giro, per evento: lo Sheet e l'email usano la stessa classificazione senza richiederla due volte
         private static readonly Dictionary<Event, (bool IsSwing, string Motivo)> _esiti = new(ReferenceEqualityComparer.Instance);
+        // stili indicati da Gemini nella stessa risposta (solo nomi di StiliEvento.Nomi), per gli eventi senza stile dalla fonte
+        private static readonly Dictionary<Event, List<string>> _stili = new(ReferenceEqualityComparer.Instance);
+
+        /// <summary>Stili dell'evento secondo Gemini (dopo SegnaPerSheetAsync o ClassifyAsync), null se non classificato</summary>
+        public static List<string>? StiliDaGemini(Event e) => _stili.TryGetValue(e, out var s) ? s : null;
 
         /// <summary>
         /// Per l'email: separa gli eventi swing dagli altri. Se Gemini non risponde l'evento resta tra gli swing (l'email parte comunque)
@@ -101,7 +109,10 @@ namespace SiBallaImportingData.Service
                 try
                 {
                     foreach (var (id, esito) in await ClassifyGroupAsync(daFare, inizio, quanti, apiKey, model))
-                        _esiti[daFare[id]] = esito;
+                    {
+                        _esiti[daFare[id]] = (esito.IsSwing, esito.Motivo);
+                        _stili[daFare[id]] = esito.Stili;
+                    }
                     Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi}: {quanti} eventi in {cronometro.Elapsed.TotalSeconds:F1} s");
                 }
                 catch (Exception ex)
@@ -112,7 +123,7 @@ namespace SiBallaImportingData.Service
         }
 
         // classifica gli eventi [inizio, inizio + quanti) e restituisce l'esito di quelli a cui il modello ha risposto (id = indice nella lista)
-        private static async Task<Dictionary<int, (bool IsSwing, string Motivo)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model)
+        private static async Task<Dictionary<int, (bool IsSwing, string Motivo, List<string> Stili)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model)
         {
             var elenco = new StringBuilder();
             for (int i = inizio; i < inizio + quanti; i++)
@@ -148,9 +159,10 @@ namespace SiBallaImportingData.Service
                             {
                                 id = new { type = "INTEGER" },
                                 isSwing = new { type = "BOOLEAN" },
-                                motivo = new { type = "STRING" }
+                                motivo = new { type = "STRING" },
+                                stili = new { type = "ARRAY", items = new { type = "STRING", format = "enum", @enum = StiliEvento.Nomi } }
                             },
-                            required = new[] { "id", "isSwing", "motivo" }
+                            required = new[] { "id", "isSwing", "motivo", "stili" }
                         }
                     }
                 }
@@ -165,13 +177,20 @@ namespace SiBallaImportingData.Service
                 .GetProperty("text").GetString();
 
             using var risultati = JsonDocument.Parse(text ?? "[]");
-            var esiti = new Dictionary<int, (bool, string)>();
+            var esiti = new Dictionary<int, (bool, string, List<string>)>();
             foreach (var r in risultati.RootElement.EnumerateArray())
             {
                 int id = r.GetProperty("id").GetInt32();
                 // ignora id fuori dal gruppo, se il modello ne inventa
                 if (id >= inizio && id < inizio + quanti)
-                    esiti[id] = (r.GetProperty("isSwing").GetBoolean(), r.GetProperty("motivo").GetString() ?? string.Empty);
+                {
+                    // solo i nomi ammessi, anche se lo schema lo impone già
+                    var stili = r.TryGetProperty("stili", out var st) && st.ValueKind == JsonValueKind.Array
+                        ? st.EnumerateArray().Select(x => x.GetString()).OfType<string>()
+                            .Where(x => StiliEvento.Nomi.Contains(x)).Distinct().ToList()
+                        : new List<string>();
+                    esiti[id] = (r.GetProperty("isSwing").GetBoolean(), r.GetProperty("motivo").GetString() ?? string.Empty, stili);
+                }
             }
 
             return esiti;

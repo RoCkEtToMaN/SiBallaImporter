@@ -58,6 +58,9 @@ internal static class ImportRunner
 
         // 1. righe con indirizzo -> luoghi verificati
         store.ImportFromSheet(sheetEvents);
+        //    colonna H -> stili di eventi e organizzatori (escluse le celle con lo stile dedotto non ancora confermato)
+        if (await ImportData.LeggiStiliDedottiAsync(sheetEvents))
+            store.ImparaStili(sheetEvents);
 
         // 2. righe future senza indirizzo e senza luogo noto -> voci da compilare
         var daCompilare = sheetEvents
@@ -118,6 +121,8 @@ internal static class ImportRunner
             // Gemini decide lo stato delle righe: swing -> "nuovo" (va sul DB), gli altri -> "da verificare" colorati.
             // La classificazione resta in memoria e l'email più sotto la riusa
             await SwingEventClassifier.SegnaPerSheetAsync(nuoviEventi, settings.Gemini);
+            // senza stile dalla fonte: dizionario, Gemini (stessa risposta di sopra) o parole chiave -> cella H lilla da confermare
+            StiliEvento.Completa(nuoviEventi, store);
             // immagine su Storage prima di scrivere la riga: il link online (es. Facebook) scade, la copia no
             await EventImages.UploadAsync(nuoviEventi, appWriteService);
             await ImportData.PrepareToAppendToGoogleSheet([.. nuoviEventi.OrderBy(x => x.DateStart)], eventiSheet);
