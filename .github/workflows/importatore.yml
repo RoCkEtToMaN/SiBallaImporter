@@ -50,6 +50,11 @@ on:
       giorni:
         description: Giorni coperti dall'email
         default: "7"
+      solo_immagini:
+        description: "Giro veloce: solo immagini (data/immagini, siti, loghi) e DB, senza ricerca online, email e Gemini"
+        type: choice
+        options: ["false", "true"]
+        default: "false"
 
 concurrency:
   group: importatore
@@ -94,9 +99,10 @@ jobs:
     if: needs.orario.outputs.esegui == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # per il commit del dizionario dei luoghi
+    # contents: commit del dizionario dei luoghi; actions: avvio del workflow del sito a fine giro
     permissions:
       contents: write
+      actions: write
     env:
       # il programma calcola il bollettino da DateTime.Today: il giorno deve essere quello italiano, non UTC
       TZ: Europe/Rome
@@ -155,8 +161,9 @@ jobs:
           Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
           Appwrite__ApiKey: ${{ secrets.APPWRITE_API_KEY }}
           # impostazioni (sovrascrivono appsettings.json)
-          Import__EnableSearching: "true"
-          Import__EnableSending: ${{ inputs.enable_sending || vars.ENABLE_SENDING || 'true' }}
+          # solo_immagini (menu SiBalla dello Sheet): niente ricerca online, email e indirizzi con Gemini
+          Import__EnableSearching: ${{ inputs.solo_immagini == 'true' && 'false' || 'true' }}
+          Import__EnableSending: ${{ inputs.solo_immagini == 'true' && 'false' || (inputs.enable_sending || vars.ENABLE_SENDING || 'true') }}
           # giro quotidiano: email solo se ci sono eventi che l'ultima email non aveva
           Import__EmailSoloSeCambia: "true"
           # di notte gli eventi nuovi vanno nello Sheet e lo Sheet va sul DB dell'app (le righe "da verificare" restano fuori);
@@ -168,7 +175,7 @@ jobs:
           # righe future con "Immagine" vuota: immagine di anteprima (og:image) del sito in "Riferimento" su Storage (max 100 per giro)
           Import__CercaImmaginiSheet: ${{ vars.CERCA_IMMAGINI_SHEET || 'true' }}
           # righe future dello Sheet senza indirizzo: Gemini cerca il locale e lo scrive come "gemini" (max 20 per giro)
-          Import__CercaIndirizzi: ${{ vars.CERCA_INDIRIZZI || 'true' }}
+          Import__CercaIndirizzi: ${{ inputs.solo_immagini == 'true' && 'false' || (vars.CERCA_INDIRIZZI || 'true') }}
           Import__CercaIndirizziMax: ${{ vars.CERCA_INDIRIZZI_MAX || '20' }}
           Import__ResetDb: "false"
           Import__ResetExcel: "false"
@@ -183,10 +190,13 @@ jobs:
         run: dotnet SiBallaImportingData.dll 2>&1 | tee importatore.log
 
       # i tentativi successivi di oggi trovano la chiave e non ripartono (i run sono in fila per la concurrency)
+      # il giro veloce "solo immagini" non conta: quello completo della notte deve partire comunque
       - name: Segna giorno fatto
+        if: inputs.solo_immagini != 'true'
         run: mkdir -p fatto && echo "run ${{ github.run_number }}" > fatto/giorno
 
       - name: Salva giorno fatto
+        if: inputs.solo_immagini != 'true'
         uses: actions/cache/save@v4
         with:
           path: fatto
@@ -215,6 +225,14 @@ jobs:
           git pull --rebase
           git push
 
+      # lo Sheet è cambiato (righe nuove, "sì" nella colonna Immagine): il sito pubblico si aggiorna subito
+      # invece di aspettare il giro orario. Le modifiche via API non fanno partire lo script dello Sheet
+      - name: Aggiorna sito pubblico
+        if: always() && steps.importatore.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run sito.yml --repo "${{ github.repository }}" --ref master || echo "::warning::Sito non avviato"
+
       - name: Allega file prodotti
         if: always()
         uses: actions/upload-artifact@v4
@@ -231,8 +249,9 @@ jobs:
 
       # log del giro per email (stessi destinatari dell'email degli eventi) con un riepilogo in cima;
       # parte anche se il programma è andato in errore e non fa mai fallire il run
+      # nel giro veloce "solo immagini" solo se va in errore
       - name: Email con il log
-        if: always() && steps.importatore.outcome != 'skipped'
+        if: always() && steps.importatore.outcome != 'skipped' && (inputs.solo_immagini != 'true' || steps.importatore.outcome == 'failure')
         env:
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}

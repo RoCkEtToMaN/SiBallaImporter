@@ -5,6 +5,9 @@
  * - Automatico: a ogni modifica aspetta ATTESA_MINUTI senza altre modifiche, poi avvia il workflow
  *   "Sito pubblico" su GitHub (così una sessione di modifiche fa un solo aggiornamento).
  * - Manuale: menu SiBalla > Aggiorna sito ora.
+ * - Menu SiBalla > Carica immagini e aggiorna sito: giro veloce dell'importatore ("solo immagini": carica
+ *   su Storage le immagini di data/immagini, dei siti e i loghi, scrive "sì" nella colonna Immagine e
+ *   aggiorna il DB dell'app), poi aggiorna il sito. Ci mette 5-10 minuti.
  *
  * Configurazione (una volta sola):
  * 1. Impostazioni progetto (rotella) > Proprietà script > aggiungi GITHUB_TOKEN = token GitHub con permesso
@@ -16,6 +19,7 @@
 
 const REPO = 'RoCkEtToMaN/SiBallaImporter';
 const WORKFLOW = 'sito.yml';
+const WORKFLOW_IMPORTATORE = 'importatore.yml';
 const BRANCH = 'master';
 const ATTESA_MINUTI = 3;
 
@@ -24,7 +28,18 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('SiBalla')
     .addItem('Aggiorna sito ora', 'aggiornaSitoOra')
+    .addItem('Carica immagini e aggiorna sito', 'caricaImmagini')
     .addToUi();
+}
+
+/** Voce di menu: giro veloce dell'importatore (solo immagini e DB); a fine giro parte anche il sito. */
+function caricaImmagini() {
+  const esito = avviaWorkflow_(WORKFLOW_IMPORTATORE, { solo_immagini: 'true' });
+  SpreadsheetApp.getActive().toast(
+    esito.ok
+      ? 'Caricamento avviato: tra 5-10 minuti la colonna Immagine e il sito saranno aggiornati.'
+      : 'Errore: ' + esito.messaggio,
+    'SiBalla', 10);
 }
 
 /** Voce di menu: avvia subito l'aggiornamento. */
@@ -88,12 +103,13 @@ function programmaControllo_(ms) {
   ScriptApp.newTrigger('pubblicaSeFermo').timeBased().after(Math.max(ms, 60000)).create();
 }
 
-/** Chiede a GitHub di avviare il workflow del sito. */
-function avviaWorkflow_() {
+/** Chiede a GitHub di avviare un workflow (di default quello del sito), con gli input indicati. */
+function avviaWorkflow_(workflow, inputs) {
+  workflow = workflow || WORKFLOW;
   const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!token) return { ok: false, messaggio: 'manca la proprietà script GITHUB_TOKEN' };
   const risposta = UrlFetchApp.fetch(
-    'https://api.github.com/repos/' + REPO + '/actions/workflows/' + WORKFLOW + '/dispatches', {
+    'https://api.github.com/repos/' + REPO + '/actions/workflows/' + workflow + '/dispatches', {
       method: 'post',
       contentType: 'application/json',
       headers: {
@@ -101,7 +117,7 @@ function avviaWorkflow_() {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
       },
-      payload: JSON.stringify({ ref: BRANCH }),
+      payload: JSON.stringify(inputs ? { ref: BRANCH, inputs: inputs } : { ref: BRANCH }),
       muteHttpExceptions: true,
     });
   const codice = risposta.getResponseCode();
