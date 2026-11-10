@@ -1,0 +1,33 @@
+NICE TO HAVE - sito "Dove siBalla stasera?" (https://siballa.pages.dev)
+=====================================================================
+
+GIA' FATTI
+----------
+[x] Immagini degli eventi nelle schede
+[x] "Vicino a me" (ordina per distanza e mostra "a X km")
+[x] Anteprima quando si condivide il link (og.png)
+[x] Statistiche visite per regione/citta' (pagina nascosta /statistiche?chiave=...)
+
+DA FARE
+-------
+[ ] Pulsanti sulla scheda: "Aggiungi al calendario" (file .ics) e "Condividi"
+    (sul telefono apre WhatsApp e le altre app).
+[ ] Pulizia dei nomi "sporchi" nell'esportazione del sito: caratteri in grassetto
+    Unicode, barre "┃", "-Italy" in fondo al nome.
+[ ] Filtro per citta' o regione, oppure vista mappa con i segnaposto
+    (le coordinate degli eventi ci sono gia').
+[ ] Link all'app SiBalla in fondo alla pagina (se e' sugli store): il sito fa da vetrina.
+[ ] Dominio vostro, es. eventi.siballa.it al posto di siballa.pages.dev
+    (serve il dominio; il collegamento su Cloudflare e' gratis:
+    Workers & Pages -> siballa -> Custom domains).
+
+PICCOLE COSE IN SOSPESO
+-----------------------
+[ ] Attribuzione dell'icona dell'app, se viene da Flaticon (va citato l'autore).
+[ ] Cancellare il vecchio salvataggio automatico di git: git stash drop stash@{0}
+
+ORDINE CONSIGLIATO
+------------------
+1. Pulsanti calendario/condividi + pulizia dei nomi (poco lavoro, si vede subito)
+2. Vista mappa / filtro per citta' o regione
+3. Il resto quando serve
