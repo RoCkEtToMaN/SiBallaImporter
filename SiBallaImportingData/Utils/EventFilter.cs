@@ -248,6 +248,8 @@ namespace SiBallaImportingData.Utils
         /// </summary>
         private static bool IsInsideCircle(double? lat, double? lng, string? city, string? country, float raggio_km)
         {
+            // Import:Radius = 0 (o negativo): nessun limite di distanza per la ricerca (l'email ha il suo RadiusEmail)
+            if (raggio_km <= 0) return true;
             if (!HasCoords(lat, lng))
             {
                 if (!HasCity(city)) return true;
