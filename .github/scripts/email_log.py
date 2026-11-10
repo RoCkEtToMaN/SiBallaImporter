@@ -54,7 +54,9 @@ def main() -> None:
 
     esito = os.environ.get("ESITO", "")
     ok = esito == "success"
-    errori = [r for r in righe if "❌" in r or re.search(r"\b(Unhandled exception|Exception:)", r)]
+    # "❌ https://…" = sito senza immagine di anteprima (ricerca immagini): normale, non è un errore
+    errori = [r for r in righe if ("❌" in r and not re.match(r"\s*❌ https?://", r))
+              or re.search(r"\b(Unhandled exception|Exception:)", r)]
     avvisi = [r for r in righe if "⚠️" in r]
 
     voci = []
