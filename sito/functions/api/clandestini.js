@@ -157,7 +157,7 @@ async function avvisa(env, origine, c) {
   try {
     const r = await fetch("https://api.mailjet.com/v3.1/send", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${env.MAILJET_API_KEY}:${env.MAILJET_API_SECRET}`) },
+      headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${env.MAILJET_API_KEY.trim()}:${env.MAILJET_API_SECRET.trim()}`) },
       body: JSON.stringify({ Messages: [messaggio] }),
     });
     const risposta = await r.text();
