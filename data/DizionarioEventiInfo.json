@@ -149,7 +149,10 @@
       "verified": false,
       "source": "sheet+photon",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "defrag swing party opening night": {
@@ -194,6 +197,24 @@
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "jam night special con helena kanini kiiru": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
         "verifiedOn": null,
         "notes": null,
         "stili": [
@@ -1365,6 +1386,25 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "swing aperidance senigallia an college": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-11",
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -2287,6 +2327,22 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "let s swingout": {
+        "organizer": null,
+        "city": "Napoli",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-11"
       }
     }
   },
@@ -8433,6 +8489,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa",
           "Blues",
@@ -8929,7 +8986,13 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa",
+        "Shag",
+        "SoloJazz"
+      ]
     },
     "events": {
       "pumpyourswing festival milano ita": {
@@ -8952,6 +9015,24 @@
           "Lindy",
           "Shag",
           "SoloJazz"
+        ]
+      },
+      "carro in swing pumpyourswing festival live music shag together": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
         ]
       }
     }
@@ -13022,6 +13103,24 @@
           "Lindy",
           "Balboa",
           "SoloJazz"
+        ]
+      },
+      "tutti ballano swing al teatro del sale cena swing show e social dance": {
+        "organizer": null,
+        "city": "Firenze",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
         ]
       }
     }
@@ -17997,6 +18096,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -18422,6 +18522,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -18514,6 +18615,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy",
           "Shag"
@@ -20615,6 +20717,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa",
           "SlowBal"
@@ -20728,6 +20831,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa"
         ]
@@ -20765,6 +20869,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa"
         ]
@@ -20802,6 +20907,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -20918,6 +21024,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Blues"
         ]
@@ -21049,6 +21156,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy",
           "SoloJazz"
@@ -21423,6 +21531,375 @@
         "organizer": null,
         "city": "Fairfax County",
         "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-11"
+      }
+    }
+  },
+  "il nazionale sala da ballo|torino": {
+    "default": {
+      "organizer": "Il Nazionale Sala da Ballo",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing time al nazionale dal waiting for christmas": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swingin folks|varese": {
+    "default": {
+      "organizer": "Swingin'Folks",
+      "city": "Varese",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "che note quella notte": {
+        "organizer": null,
+        "city": "Varese",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "the swing home e daste bergamo|bergamo": {
+    "default": {
+      "organizer": "The Swing Home e Daste Bergamo",
+      "city": "Bergamo",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing home night daste": {
+        "organizer": null,
+        "city": "Bergamo",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing dream factory vincenzo fesi e mariangela vanadia|roma": {
+    "default": {
+      "organizer": "Swing Dream Factory, Vincenzo Fesi e Mariangela Vanadia",
+      "city": "Roma",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing dream factory 10th anniversary": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing on sudtirol|trentino alto adige": {
+    "default": {
+      "organizer": "Swing On Südtirol",
+      "city": "Trentino Alto Adige",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "christmas event by swing on": {
+        "organizer": null,
+        "city": "Trentino Alto Adige",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "gheswingers|treviso": {
+    "default": {
+      "organizer": "GheswingerS",
+      "city": "Treviso",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "capodanno boogie express": {
+        "organizer": null,
+        "city": "Treviso",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "west in val|metropolitan france": {
+    "default": {
+      "organizer": "West in Val'",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "west in val": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "shag n bal college|gdansk": {
+    "default": {
+      "organizer": "Shag'n'Bal College",
+      "city": "Gdańsk",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "zjazd ii shag n bal college": {
+        "organizer": null,
+        "city": "Gdańsk",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-11",
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "torino r b club raffaello allemanini e altri 2|torino": {
+    "default": {
+      "organizer": "Torino R&B Club, Raffaello Allemanini e altri 2",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rock this house sab novembre boogie jive special night": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-11"
+      }
+    }
+  },
+  "svenska rytmsektionen|vastra gotaland county": {
+    "default": {
+      "organizer": "Svenska Rytmsektionen",
+      "city": "Västra Götaland County",
+      "country": "Sweden",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "ll hings azz": {
+        "organizer": null,
+        "city": "Västra Götaland County",
+        "country": "Sweden",
         "eventCount": null,
         "venueName": null,
         "address": null,
