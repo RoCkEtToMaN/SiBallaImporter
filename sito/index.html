@@ -124,6 +124,41 @@
   .raggio button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
   .posizione { font-size: 13px; color: var(--muted); }
   .vuoto { color: var(--muted); padding: 40px 0; text-align: center; }
+
+  /* clandestini: invito a proporre un evento + modulo */
+  .proponi { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    margin: 16px 0 0; padding: 14px 16px; border-radius: 16px; border: 1px dashed rgba(255,212,0,.45); background: var(--accent-soft); }
+  .proponi p { margin: 0; flex: 1 1 260px; }
+  .proponi p small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 10px; padding: 9px 16px; cursor: pointer;
+    background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+  .btn.sec { background: var(--surface-2); color: var(--text); font-weight: 600; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  dialog.modulo { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 18px; }
+  dialog.modulo::backdrop { background: rgba(0,0,0,.65); }
+  .modulo form { padding: 20px; }
+  .modulo h2 { margin: 0 0 4px; font-size: 20px; }
+  .modulo .nota { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+  .modulo label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+  .modulo label small { font-weight: 400; color: var(--muted); }
+  .modulo input:not([type=checkbox]), .modulo textarea { width: 100%; font: inherit; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; color-scheme: dark; }
+  .modulo textarea { resize: vertical; min-height: 64px; }
+  .modulo input:focus, .modulo textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .modulo .due { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .modulo .scelte { display: flex; flex-wrap: wrap; gap: 6px; }
+  .modulo .scelte label { margin: 0; font-weight: 400; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+  .modulo .scelte label:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+  .modulo .scelte input { accent-color: var(--accent); margin: 0; }
+  .modulo .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .modulo .fondo { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+  .modulo .esito { margin: 12px 0 0; font-size: 14px; }
+  .modulo .esito.err { color: #FF6B6B; }
+  .modulo .grazie { text-align: center; padding: 12px 0 4px; }
+  .modulo .grazie b { display: block; font-size: 40px; }
+  @media (max-width: 520px) { .modulo .due { grid-template-columns: minmax(0, 1fr); } }
 </style>
 <link rel="stylesheet" href="menu.css">
 </head>
@@ -153,9 +188,44 @@
     <span class="posizione" id="posizione"></span>
   </div>
   <div class="stili" id="stili" role="group" aria-label="Filtra per stile"></div>
+  <div class="proponi" id="proponi" hidden>
+    <p><b>Conosci un clandestino?</b> <small>Una serata improvvisata in piazza, al parco, sul lungomare… Segnalala: dopo un controllo compare qui.</small></p>
+    <button type="button" class="btn" id="apriModulo">+ Aggiungi clandestino</button>
+  </div>
   <main id="lista"></main>
   <div class="vuoto" id="vuoto" hidden>Nessun evento trovato.</div>
 </div>
+<dialog class="modulo" id="modulo" aria-labelledby="titoloModulo">
+  <form id="formClandestino" novalidate>
+    <h2 id="titoloModulo">Aggiungi un clandestino</h2>
+    <p class="nota">Lo controlliamo prima di pubblicarlo, di solito in poche ore.</p>
+    <label for="cNome">Nome dell'evento</label>
+    <input id="cNome" name="nome" required maxlength="100" placeholder="Es. Lindy al Porto Antico">
+    <div class="due">
+      <div><label for="cGiorno">Data</label><input id="cGiorno" name="giorno" type="date" required></div>
+      <div><label for="cOra">Ora <small>(facoltativa)</small></label><input id="cOra" name="ora" type="time"></div>
+    </div>
+    <div class="due">
+      <div><label for="cCitta">Città</label><input id="cCitta" name="citta" required maxlength="60" placeholder="Es. Genova"></div>
+      <div><label for="cLuogo">Luogo</label><input id="cLuogo" name="luogo" required maxlength="120" placeholder="Piazza, via o parco"></div>
+    </div>
+    <label>Stili <small>(facoltativi)</small></label>
+    <div class="scelte" id="cStili"></div>
+    <label for="cDettagli">Dettagli <small>(facoltativi)</small></label>
+    <textarea id="cDettagli" name="dettagli" maxlength="300" placeholder="DJ o musica live, pavimento, chi lo organizza…"></textarea>
+    <label for="cLink">Link <small>(post Instagram, evento Facebook, gruppo… facoltativo)</small></label>
+    <input id="cLink" name="link" type="url" maxlength="300" placeholder="https://">
+    <label for="cContatto">Il tuo contatto <small>(facoltativo, non viene pubblicato: serve solo se dobbiamo chiederti qualcosa)</small></label>
+    <input id="cContatto" name="contatto" maxlength="120" placeholder="Email o telefono">
+    <div class="scelte" style="margin-top:12px"><label><input type="checkbox" id="cGratis" checked> Ingresso gratuito</label></div>
+    <div class="trappola" aria-hidden="true"><label for="cSito">Sito web</label><input id="cSito" name="sito_web" tabindex="-1" autocomplete="off"></div>
+    <p class="esito" id="esito" role="status"></p>
+    <div class="fondo">
+      <button type="button" class="btn sec" id="annulla">Annulla</button>
+      <button type="submit" class="btn" id="invia">Invia</button>
+    </div>
+  </form>
+</dialog>
 <script>
 (function () {
   var dati = null, attivo = 0, scelti = {};
@@ -216,7 +286,9 @@
   function prepara(f) {
     var col = {};
     f.colonne.forEach(function (c, i) { col[c.trim().toLowerCase()] = i; });
-    var serate = /serat/i.test(f.nome);
+    var clandestini = /clandestin/i.test(f.nome);
+    // i clandestini sono serate di una sera: stesse regole (spariscono il giorno dopo)
+    var serate = clandestini || /serat/i.test(f.nome);
     f.eventi.forEach(function (ev) {
       var c = ev.celle;
       ev._inizio = data(c[0]);
@@ -232,9 +304,11 @@
       ev._stili = "stile" in col ? stiliDi(c[col["stile"]]) : [];
       ev._gratis = "gratis" in col && /^(x|s[iì]|yes|1|true)$/i.test((c[col["gratis"]] || "").trim());
       ev._link = "riferimento" in col ? primoLink(c[col["riferimento"]]) : null;
+      ev._ora = "ora" in col && /^\d{1,2}:\d{2}$/.test(c[col["ora"]] || "") ? c[col["ora"]] : "";
       ev._testo = c.join(" ").toLowerCase();
     });
     f._serate = serate;
+    f._clandestini = clandestini;
   }
 
   // sezione di un evento rispetto a oggi
@@ -272,7 +346,7 @@
     var media = ev.img ? '<div class="media"><img src="' + esc(ev.img) + '" alt="" loading="lazy" decoding="async">' + dataHtml + "</div>" : "";
     return '<article class="ev">' + media + '<div class="riga">' + (media ? "" : dataHtml) + '<div class="corpo">' +
       "<h3>" + esc(ev._nome) + "</h3>" +
-      (ev._dove || dist ? '<div class="dove">' + esc(ev._dove) + dist + "</div>" : "") +
+      (ev._dove || dist || ev._ora ? '<div class="dove">' + esc(ev._dove) + (ev._ora ? (ev._dove ? " · " : "") + "ore " + esc(ev._ora) : "") + dist + "</div>" : "") +
       (ev._chi ? '<div class="chi">' + esc(ev._chi) + "</div>" : "") +
       (tag ? '<div class="tag">' + tag + "</div>" : "") +
       (azioni ? '<div class="azioni">' + azioni + "</div>" : "") +
@@ -317,7 +391,7 @@
     // il titolo chiede "stasera": se stasera non c'è niente lo dico, prima delle prossime date
     var filtri = q || attivi.length || (pos && raggioKm);
     var nienteStasera = foglio._serate && eventi.length && !gruppi["1"]
-      ? '<p class="stasera">Stasera nessuna serata' + (pos && raggioKm ? " entro " + raggioKm + " km" : filtri ? " con questi filtri" : "") +
+      ? '<p class="stasera">Stasera ' + (foglio._clandestini ? "nessun clandestino" : "nessuna serata") + (pos && raggioKm ? " entro " + raggioKm + " km" : filtri ? " con questi filtri" : "") +
         ": ecco le prossime.</p>" : "";
     $("lista").innerHTML = nienteStasera + ordine.map(function (k) {
       var g = gruppi[k];
@@ -325,6 +399,9 @@
         ' <span class="c">' + g.ev.length + "</span></h2>" +
         '<div class="griglia">' + g.ev.map(scheda).join("") + "</div></section>";
     }).join("");
+    $("proponi").hidden = !foglio._clandestini;
+    $("vuoto").textContent = foglio._clandestini && !foglio.eventi.length
+      ? "Nessun clandestino in vista. Se ne conosci uno, aggiungilo!" : "Nessun evento trovato.";
     $("vuoto").hidden = eventi.length > 0;
   }
 
@@ -395,8 +472,73 @@
     disegna();
   });
 
+  // --- clandestini: eventi proposti dagli utenti, letti in tempo reale da /api/clandestini (dopo l'approvazione) ---
+  // per ora la scheda si vede solo nelle versioni di prova (anteprima.siballa.pages.dev, file locali):
+  // per pubblicarla basta mettere CLANDESTINI_PUBBLICI = true.
+  var CLANDESTINI_PUBBLICI = false;
+  var clandestiniAttivi = CLANDESTINI_PUBBLICI || /\.siballa\.pages\.dev$/.test(location.hostname) ||
+    location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var vuotoClandestini = { nome: "Clandestini", colonne: [], eventi: [] };
+  var clandestini = !clandestiniAttivi ? Promise.resolve(null)
+    : location.protocol === "file:" ? Promise.resolve(vuotoClandestini)
+    : fetch("/api/clandestini", { cache: "no-cache" })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .catch(function () { return vuotoClandestini; });
+
+  var STILI_MODULO = ["Lindy Hop", "Balboa", "Blues", "Solo Jazz", "Boogie Woogie", "Charleston", "Shag"];
+  $("cStili").innerHTML = STILI_MODULO.map(function (s) {
+    return '<label><input type="checkbox" value="' + esc(s) + '"> ' + esc(s) + "</label>";
+  }).join("");
+  function giornoISO(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function esito(t, errore) { $("esito").textContent = t || ""; $("esito").className = "esito" + (errore ? " err" : ""); }
+  var formIniziale = $("formClandestino").innerHTML;
+  $("apriModulo").addEventListener("click", function () {
+    var oggi = new Date();
+    $("cGiorno").min = giornoISO(oggi);
+    $("cGiorno").max = giornoISO(new Date(oggi.getTime() + 89 * 86400000));
+    if (!$("cGiorno").value) $("cGiorno").value = giornoISO(oggi);
+    esito("");
+    $("modulo").showModal();
+    $("cNome").focus();
+  });
+  $("modulo").addEventListener("click", function (e) {
+    if (e.target === this || e.target.id === "annulla" || e.target.id === "chiudiGrazie") this.close();
+  });
+  // dopo un invio riuscito il modulo torna vuoto alla prossima apertura
+  $("modulo").addEventListener("close", function () {
+    if (!$("formClandestino").querySelector("#invia")) $("formClandestino").innerHTML = formIniziale;
+  });
+  $("formClandestino").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var f = this, mancanti = ["cNome", "cGiorno", "cCitta", "cLuogo"].filter(function (id) { return !$(id).value.trim(); });
+    if (mancanti.length) { esito("Compila nome, data, città e luogo.", true); $(mancanti[0]).focus(); return; }
+    var d = {
+      nome: $("cNome").value, giorno: $("cGiorno").value, ora: $("cOra").value, citta: $("cCitta").value,
+      luogo: $("cLuogo").value, dettagli: $("cDettagli").value, link: $("cLink").value, contatto: $("cContatto").value,
+      gratis: $("cGratis").checked, sito_web: $("cSito").value,
+      stili: [].map.call(f.querySelectorAll("#cStili input:checked"), function (x) { return x.value; })
+    };
+    $("invia").disabled = true;
+    esito("Invio…");
+    fetch("/api/clandestini", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok || !x.j.ok) throw new Error(x.j.errore || "Invio non riuscito, riprova più tardi.");
+        f.innerHTML = '<div class="grazie"><b>🎷</b><h2>Grazie!</h2><p class="nota">Abbiamo ricevuto il clandestino: ' +
+          "dopo un controllo compare nella scheda Clandestini.</p>" +
+          '<div class="fondo" style="justify-content:center"><button type="button" class="btn" id="chiudiGrazie">Chiudi</button></div></div>';
+      })
+      .catch(function (err) {
+        esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
+        $("invia").disabled = false;
+      });
+  });
+
   fetch("eventi.json", { cache: "no-cache" })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) { return clandestini.then(function (c) { if (c) d.fogli.push(c); return d; }); })
     .then(function (d) {
       dati = d;
       d.fogli.forEach(prepara);
