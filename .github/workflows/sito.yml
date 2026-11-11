@@ -19,7 +19,8 @@ on:
   workflow_dispatch:
   push:
     # master -> sito pubblico; anteprima -> versione di prova su anteprima.<progetto>.pages.dev
-    branches: [master, anteprima]
+    # clandestini: prova della scheda Clandestini su clandestini.<progetto>.pages.dev (togliere prima del merge in master)
+    branches: [master, anteprima, clandestini]
     paths:
       - "sito/**"
       - ".github/workflows/sito.yml"
