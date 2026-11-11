@@ -1,5 +1,5 @@
 import { giornoRoma } from "../../lib/visite.js";
-import { preparaClandestini, pulisci, dataSheet, leggiFoto } from "../../lib/clandestini.js";
+import { preparaClandestini, pulisci, dataSheet, leggiFoto, esc } from "../../lib/clandestini.js";
 
 // GET  /api/clandestini : i clandestini approvati da oggi in poi, nello stesso formato di un foglio di eventi.json
 // POST /api/clandestini : nuova proposta dal modulo del sito (JSON); finisce "in attesa" finché non la approvi.
@@ -63,7 +63,7 @@ async function turnstileOk(env, token, ip) {
   } catch { return false; }
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const db = env.VISITE;
   if (!db) return json({ errore: "Le proposte non sono ancora attive, riprova più tardi." }, 503);
   let d;
@@ -100,9 +100,62 @@ export async function onRequestPost({ request, env }) {
         link, dettagli, contatto).run();
     if (foto) await db.prepare(`INSERT OR REPLACE INTO clandestini_foto (id, tipo, dati) VALUES (?1, ?2, ?3)`)
       .bind(r.meta.last_row_id, foto.tipo, foto.dati).run();
+    // email di avviso: parte dopo la risposta, così chi propone non aspetta Mailjet
+    waitUntil(avvisa(env, new URL(request.url).origin, {
+      nome, giorno, ora, citta, luogo, stili, link, dettagli, contatto, foto, coordinate: lat != null,
+    }));
   } catch (e) {
     console.log("clandestino non salvato: " + e);
     return json({ errore: "Non sono riuscito a salvare la proposta, riprova più tardi." }, 500);
   }
   return json({ ok: true });
+}
+
+// --- email di avviso con Mailjet (stesso mittente e destinatario dell'importatore) ---
+// Secrets nel progetto Pages: MAILJET_API_KEY, MAILJET_API_SECRET; variabile facoltativa EMAIL_DESTINATARI
+// (più indirizzi separati da ";"). Senza le chiavi l'email semplicemente non parte.
+const MITTENTE = { Email: "siballanewsletter@gmail.com", Name: "siBalla" };
+const DESTINATARI = "Giacomo.lo87@gmail.com";   // come Email:Recipients di appsettings.json
+
+async function avvisa(env, origine, c) {
+  if (!env.MAILJET_API_KEY || !env.MAILJET_API_SECRET) return;
+  const a = (env.EMAIL_DESTINATARI || DESTINATARI).split(";").map((s) => s.trim()).filter(Boolean);
+  const pagina = `${origine}/clandestini-admin` + (env.STATS_KEY ? `?chiave=${encodeURIComponent(env.STATS_KEY)}` : "");
+  const quando = new Date(c.giorno + "T12:00:00Z").toLocaleDateString("it-IT",
+    { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }) + (c.ora ? ` alle ${c.ora}` : "");
+  const riga = (k, v) => v ? `<tr><td style="color:#666;padding:3px 12px 3px 0;vertical-align:top">${k}</td><td style="padding:3px 0">${esc(v)}</td></tr>` : "";
+  const html = `<div style="font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:15px;color:#111">
+    <h2 style="margin:0 0 4px">🎷 Nuovo clandestino da approvare</h2>
+    <p style="margin:0 0 14px;color:#666">Proposto dal sito, non è ancora visibile.</p>
+    ${c.foto ? `<img src="cid:foto" alt="" style="max-width:100%;width:480px;border-radius:10px;margin-bottom:12px">` : ""}
+    <table style="border-collapse:collapse">
+      ${riga("Nome", c.nome)}${riga("Quando", quando)}${riga("Dove", `${c.citta} · ${c.luogo}`)}
+      ${riga("Coordinate", c.coordinate ? "trovate" : "non trovate (non comparirà in \"Vicino a me\")")}
+      ${riga("Stili", c.stili)}${riga("Dettagli", c.dettagli)}${riga("Link", c.link)}${riga("Contatto", c.contatto)}
+    </table>
+    <p style="margin:20px 0"><a href="${esc(pagina)}" style="background:#FFD400;color:#0E0E12;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:10px;display:inline-block">Apri la pagina di approvazione</a></p>
+  </div>`;
+  const testo = `Nuovo clandestino da approvare\n\n${c.nome}\n${quando}\n${c.citta} · ${c.luogo}\n` +
+    (c.dettagli ? c.dettagli + "\n" : "") + (c.link ? c.link + "\n" : "") + (c.contatto ? "Contatto: " + c.contatto + "\n" : "") +
+    `\nApprova o rifiuta: ${pagina}\n`;
+  const messaggio = {
+    From: MITTENTE, To: a.map((Email) => ({ Email })),
+    Subject: `🎷 Clandestino da approvare: ${c.nome} (${c.citta}, ${dataSheet(c.giorno).slice(0, 5)})`,
+    TextPart: testo, HTMLPart: html,
+  };
+  if (c.foto) {
+    let bin = "";
+    for (let i = 0; i < c.foto.dati.length; i += 0x8000) bin += String.fromCharCode.apply(null, c.foto.dati.subarray(i, i + 0x8000));
+    messaggio.InlinedAttachments = [{ ContentType: c.foto.tipo, Filename: "foto", ContentID: "foto", Base64Content: btoa(bin) }];
+  }
+  try {
+    const r = await fetch("https://api.mailjet.com/v3.1/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${env.MAILJET_API_KEY}:${env.MAILJET_API_SECRET}`) },
+      body: JSON.stringify({ Messages: [messaggio] }),
+    });
+    if (!r.ok) console.log(`email clandestino non inviata: HTTP ${r.status} ${await r.text()}`);
+  } catch (e) {
+    console.log("email clandestino non inviata: " + e);
+  }
 }

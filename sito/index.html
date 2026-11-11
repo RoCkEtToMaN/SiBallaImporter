@@ -431,24 +431,17 @@
     $("vuoto").hidden = eventi.length > 0;
   }
 
-  // clandestini già visti da questo browser (id in localStorage): la scheda lampeggia solo per quelli nuovi
-  var VISTI = "siballa_clandestini_visti";
-  function visti() { try { return JSON.parse(localStorage.getItem(VISTI) || "[]"); } catch (e) { return []; } }
-  function nuoviClandestini(f) {
-    var v = visti(), oggi = new Date(); oggi.setHours(0, 0, 0, 0);
-    return f.eventi.filter(function (ev) { return ev._inizio && ev._inizio >= oggi && v.indexOf(ev.id) < 0; }).length;
-  }
-  function segnaVisti(f) {
-    try { localStorage.setItem(VISTI, JSON.stringify(f.eventi.map(function (ev) { return ev.id; }).slice(-200))); } catch (e) {}
+  // la scheda Clandestini lampeggia finché c'è almeno un clandestino in programma (da oggi in poi)
+  function clandestiniInVista(f) {
+    var oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    return f.eventi.filter(function (ev) { return ev._inizio && ev._inizio >= oggi; }).length;
   }
 
   function tabs() {
-    var f = dati.fogli[attivo];
-    if (f && f._clandestini) segnaVisti(f);
     $("tabs").innerHTML = dati.fogli.map(function (f, i) {
-      var nuovi = f._clandestini && i !== attivo ? nuoviClandestini(f) : 0;
+      var n = f._clandestini && i !== attivo ? clandestiniInVista(f) : 0;
       return '<button role="tab" data-i="' + i + '" aria-selected="' + (i === attivo) + '"' +
-        (nuovi ? ' class="lampeggia" title="' + (nuovi === 1 ? "Un clandestino nuovo" : nuovi + " clandestini nuovi") + '"' : "") + ">" +
+        (n ? ' class="lampeggia" title="' + (n === 1 ? "C'è un clandestino in vista!" : "Ci sono " + n + " clandestini in vista!") + '"' : "") + ">" +
         esc(f.nome) + '<span class="n">' + f.eventi.length + "</span></button>";
     }).join("");
   }
