@@ -1,10 +1,14 @@
-# Tiene attivo il progetto Appwrite Cloud: sul piano gratuito i progetti
-# inattivi vengono messi in pausa e l'app smette di ricevere gli eventi.
-# Fa una vera lettura dal database (non /health) così conta come attività.
+# Tiene attivo il progetto Appwrite Cloud: sul piano Free i progetti senza "attività di sviluppo"
+# per 7 giorni vengono messi in pausa (e cancellati dopo 90 giorni di pausa) e l'app smette di ricevere gli eventi.
+# Letture e scritture di documenti NON bastano: l'importatore riscrive serate e workshop ogni notte
+# e a novembre 2026 il progetto è stato messo in pausa lo stesso. Per questo, oltre alla lettura
+# (che fa da allarme: se il progetto è in pausa il run fallisce e arriva la mail di GitHub),
+# crea e cancella una collezione temporanea, cioè una modifica allo schema come dalla console.
+# Se il progetto finisce di nuovo in pausa, neanche questo basta: l'unica cosa sicura è il piano Pro.
 #
 # Sta in questo repo (e non in SiBallaApp) perché GitHub disattiva i workflow pianificati
 # dopo 60 giorni senza commit: qui se succede si ferma anche l'email del lunedì e ce ne si accorge.
-# Nessun secret richiesto: le collezioni sono leggibili senza chiave, come dall'app.
+# Secret: APPWRITE_API_KEY (lo stesso dell'importatore), con gli scope collections.read e collections.write.
 name: Appwrite keep-alive
 
 on:
@@ -38,3 +42,29 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Crea e cancella una collezione temporanea
+        env:
+          APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+        run: |
+          [ -n "$APPWRITE_API_KEY" ] || { echo "::error::Secret APPWRITE_API_KEY mancante"; exit 1; }
+          auth=(-H "X-Appwrite-Project: $APPWRITE_PROJECT" -H "X-Appwrite-Key: $APPWRITE_API_KEY" -H "Content-Type: application/json")
+          id="keepalive$(date +%s)"
+          url="$APPWRITE_ENDPOINT/databases/$APPWRITE_DATABASE/collections"
+
+          status=$(curl -s -o response.json -w "%{http_code}" -X POST "$url" "${auth[@]}" \
+            -d "{\"collectionId\":\"$id\",\"name\":\"keep-alive (si cancella da sola)\"}")
+          echo "crea $id -> HTTP $status"
+          if [ "$status" != "201" ]; then
+            # 401 = alla chiave manca lo scope collections.write (Appwrite console > Overview > API Keys)
+            cat response.json
+            exit 1
+          fi
+
+          status=$(curl -s -o response.json -w "%{http_code}" -X DELETE "$url/$id" "${auth[@]}")
+          echo "cancella $id -> HTTP $status"
+          if [ "$status" != "204" ]; then
+            echo "::error::Collezione $id non cancellata: toglila a mano dalla console"
+            cat response.json
+            exit 1
+          fi
