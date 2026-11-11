@@ -120,7 +120,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
 const MITTENTE = { Email: "siballanewsletter@gmail.com", Name: "siBalla" };
 const DESTINATARI = "Giacomo.lo87@gmail.com";   // come Email:Recipients di appsettings.json
 
-async function avvisa(env, origine, c) {
+export async function avvisa(env, origine, c) {
   const mancano = ["MAILJET_API_KEY", "MAILJET_API_SECRET"].filter((k) => !env[k]);
   if (mancano.length) return `non inviata: manca ${mancano.join(" e ")} nelle impostazioni Cloudflare di questo ambiente`;
   const a = (env.EMAIL_DESTINATARI || DESTINATARI).split(";").map((s) => s.trim()).filter(Boolean);

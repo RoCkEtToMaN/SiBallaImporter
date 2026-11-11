@@ -1,5 +1,6 @@
 import { giornoRoma } from "../lib/visite.js";
 import { preparaClandestini, esc, uguali } from "../lib/clandestini.js";
+import { avvisa } from "./api/clandestini.js";
 
 // GET  /clandestini-admin?chiave=... : pagina nascosta con i clandestini proposti dagli utenti, da approvare o rifiutare.
 // POST /clandestini-admin            : pulsanti Approva / Rifiuta / Togli (modulo con chiave, id e azione).
@@ -13,9 +14,19 @@ export async function onRequestPost({ request, env }) {
   const chiave = String(f.get("chiave") || "");
   if (!env.STATS_KEY || !uguali(chiave, env.STATS_KEY) || !env.VISITE) return nonTrovata();
   const stato = AZIONI[f.get("azione")], id = Number(f.get("id"));
+  await preparaClandestini(env.VISITE);
   if (stato && id) {
-    await preparaClandestini(env.VISITE);
     await env.VISITE.prepare(`UPDATE clandestini SET stato = ?1 WHERE id = ?2`).bind(stato, id).run();
+  } else if (f.get("azione") === "email" && id) {
+    // rimanda l'email di avviso (utile dopo aver sistemato le chiavi Mailjet) e salva il nuovo esito
+    const c = await env.VISITE.prepare(`SELECT * FROM clandestini WHERE id = ?1`).bind(id).first();
+    if (c) {
+      const foto = await env.VISITE.prepare(`SELECT tipo, dati FROM clandestini_foto WHERE id = ?1`).bind(id).first();
+      const esito = await avvisa(env, new URL(request.url).origin, {
+        ...c, coordinate: c.lat != null, foto: foto ? { tipo: foto.tipo, dati: new Uint8Array(foto.dati) } : null,
+      });
+      await env.VISITE.prepare(`UPDATE clandestini SET email = ?1 WHERE id = ?2`).bind(esito.slice(0, 500), id).run();
+    }
   }
   // dopo il clic torna alla pagina (POST -> GET, così il "ricarica" non ripete l'azione)
   return Response.redirect(new URL("/clandestini-admin?chiave=" + encodeURIComponent(chiave), request.url).href, 303);
@@ -54,7 +65,8 @@ export async function onRequestGet({ request, env }) {
           : /^inviata/.test(r.email) ? "✉️ email " + esc(r.email)
           : `<span class="avviso">✉️ email ${esc(r.email)}</span>`}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
-        : r.stato === "ok" ? pulsante(r, "togli", "Togli dal sito") : pulsante(r, "riapri", "Rimetti in attesa")}</div>
+        : r.stato === "ok" ? pulsante(r, "togli", "Togli dal sito") : pulsante(r, "riapri", "Rimetti in attesa")}
+        ${/^inviata/.test(r.email || "") ? "" : pulsante(r, "email", "✉️ Rimanda email")}</div>
     </article>`;
     const gruppo = (titolo, righe, vuoto) =>
       `<section><h2>${titolo} <span class="n">${righe.length}</span></h2>${righe.length ? righe.map(scheda).join("") : `<p class="vuoto">${vuoto}</p>`}</section>`;
