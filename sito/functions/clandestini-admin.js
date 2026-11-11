@@ -66,7 +66,7 @@ export async function onRequestGet({ request, env }) {
           : `<span class="avviso">✉️ email ${esc(r.email)}</span>`}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
         : r.stato === "ok" ? pulsante(r, "togli", "Togli dal sito") : pulsante(r, "riapri", "Rimetti in attesa")}
-        ${/^inviata/.test(r.email || "") ? "" : pulsante(r, "email", "✉️ Rimanda email")}</div>
+        ${pulsante(r, "email", "✉️ Rimanda email")}</div>
     </article>`;
     const gruppo = (titolo, righe, vuoto) =>
       `<section><h2>${titolo} <span class="n">${righe.length}</span></h2>${righe.length ? righe.map(scheda).join("") : `<p class="vuoto">${vuoto}</p>`}</section>`;
