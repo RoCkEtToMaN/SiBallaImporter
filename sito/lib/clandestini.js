@@ -3,6 +3,8 @@
 // Si approvano dalla pagina nascosta /clandestini-admin?chiave=... (stessa chiave STATS_KEY delle statistiche).
 // Impostazioni Cloudflare, in Production e in Preview: binding D1 VISITE (in Preview: siballa-visite-test),
 // secrets STATS_KEY, MAILJET_API_KEY e MAILJET_API_SECRET (email di avviso a ogni proposta).
+// Le due chiavi Mailjet devono essere della STESSA riga di API Key Management (API Key + la sua Secret Key):
+// il sito usa una chiave sub-account dedicata, così la primaria dell'importatore non si tocca.
 
 let tabellaPronta = false;
 
