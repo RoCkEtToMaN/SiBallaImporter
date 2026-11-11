@@ -12,6 +12,8 @@
 # Clandestini (proposte degli utenti, approvazione su /clandestini-admin?chiave=STATS_KEY), stesso database VISITE;
 #   secrets MAILJET_API_KEY e MAILJET_API_SECRET per l'email a ogni proposta (facoltativa EMAIL_DESTINATARI),
 #   in Production e Preview. Le variabili nuove valgono dal deploy successivo.
+#   Le anteprime (anteprima., clandestini. ...) usano l'ambiente Preview: binding VISITE e STATS_KEY vanno messi
+#   anche lì (la STATS_KEY di Preview può essere diversa da quella di Production).
 
 name: Sito pubblico
 
