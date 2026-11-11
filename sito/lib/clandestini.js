@@ -30,6 +30,8 @@ export async function preparaClandestini(db) {
        tipo TEXT NOT NULL,
        dati BLOB NOT NULL
      )`).run();
+  // colonna aggiunta dopo: esito dell'email di avviso (vedi /clandestini-admin)
+  try { await db.prepare(`ALTER TABLE clandestini ADD COLUMN email TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
   tabellaPronta = true;
 }
 

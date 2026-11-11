@@ -101,9 +101,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (foto) await db.prepare(`INSERT OR REPLACE INTO clandestini_foto (id, tipo, dati) VALUES (?1, ?2, ?3)`)
       .bind(r.meta.last_row_id, foto.tipo, foto.dati).run();
     // email di avviso: parte dopo la risposta, così chi propone non aspetta Mailjet
+    // l'esito ("inviata" o il motivo dell'errore) si vede nella pagina di approvazione
+    const id = r.meta.last_row_id;
     waitUntil(avvisa(env, new URL(request.url).origin, {
       nome, giorno, ora, citta, luogo, stili, link, dettagli, contatto, foto, coordinate: lat != null,
-    }));
+    }).then((esito) => db.prepare(`UPDATE clandestini SET email = ?1 WHERE id = ?2`).bind(esito.slice(0, 500), id).run())
+      .catch((e) => console.log("esito email non salvato: " + e)));
   } catch (e) {
     console.log("clandestino non salvato: " + e);
     return json({ errore: "Non sono riuscito a salvare la proposta, riprova più tardi." }, 500);
@@ -118,7 +121,8 @@ const MITTENTE = { Email: "siballanewsletter@gmail.com", Name: "siBalla" };
 const DESTINATARI = "Giacomo.lo87@gmail.com";   // come Email:Recipients di appsettings.json
 
 async function avvisa(env, origine, c) {
-  if (!env.MAILJET_API_KEY || !env.MAILJET_API_SECRET) return;
+  const mancano = ["MAILJET_API_KEY", "MAILJET_API_SECRET"].filter((k) => !env[k]);
+  if (mancano.length) return `non inviata: manca ${mancano.join(" e ")} nelle impostazioni Cloudflare di questo ambiente`;
   const a = (env.EMAIL_DESTINATARI || DESTINATARI).split(";").map((s) => s.trim()).filter(Boolean);
   const pagina = `${origine}/clandestini-admin` + (env.STATS_KEY ? `?chiave=${encodeURIComponent(env.STATS_KEY)}` : "");
   const quando = new Date(c.giorno + "T12:00:00Z").toLocaleDateString("it-IT",
@@ -156,8 +160,16 @@ async function avvisa(env, origine, c) {
       headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${env.MAILJET_API_KEY}:${env.MAILJET_API_SECRET}`) },
       body: JSON.stringify({ Messages: [messaggio] }),
     });
-    if (!r.ok) console.log(`email clandestino non inviata: HTTP ${r.status} ${await r.text()}`);
+    const risposta = await r.text();
+    // Mailjet risponde 200 anche quando rifiuta il singolo messaggio: conta Messages[0].Status
+    let j = {}, m = null;
+    try { j = JSON.parse(risposta); m = j.Messages?.[0]; } catch { /* risposta non JSON */ }
+    if (r.ok && m?.Status === "success") return `inviata a ${a.join(", ")}`;
+    const motivo = m?.Errors?.map((x) => x.ErrorMessage).join("; ") || j.ErrorMessage || risposta.slice(0, 300);
+    console.log(`email clandestino non inviata: HTTP ${r.status} ${motivo}`);
+    return `non inviata (Mailjet HTTP ${r.status}): ${motivo}`;
   } catch (e) {
     console.log("email clandestino non inviata: " + e);
+    return "non inviata: " + e;
   }
 }

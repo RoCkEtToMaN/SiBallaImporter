@@ -49,7 +49,10 @@ export async function onRequestGet({ request, env }) {
       ${r.dettagli ? `<div class="m">Dettagli: ${esc(r.dettagli)}</div>` : ""}
       ${r.link ? `<div class="m">Link: <a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">${esc(r.link)}</a></div>` : ""}
       ${r.contatto ? `<div class="m">Contatto (privato): ${esc(r.contatto)}</div>` : ""}
-      <div class="m piccolo">Proposto il ${esc(new Date(r.creato).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}</div>
+      <div class="m piccolo">Proposto il ${esc(new Date(r.creato).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}
+        · ${!r.email ? "✉️ email: esito non registrato"
+          : /^inviata/.test(r.email) ? "✉️ email " + esc(r.email)
+          : `<span class="avviso">✉️ email ${esc(r.email)}</span>`}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
         : r.stato === "ok" ? pulsante(r, "togli", "Togli dal sito") : pulsante(r, "riapri", "Rimetti in attesa")}</div>
     </article>`;
