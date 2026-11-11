@@ -140,7 +140,9 @@ async function avvisa(env, origine, c) {
     `\nApprova o rifiuta: ${pagina}\n`;
   const messaggio = {
     From: MITTENTE, To: a.map((Email) => ({ Email })),
-    Subject: `🎷 Clandestino da approvare: ${c.nome} (${c.citta}, ${dataSheet(c.giorno).slice(0, 5)})`,
+    // dalle anteprime (<ramo>.siballa.pages.dev) o in locale: "[PROVA]" nell'oggetto, per distinguerle da quelle vere
+    Subject: (/^[^.]+\.[^.]+\.pages\.dev$|^(localhost|127\.0\.0\.1)$/.test(new URL(origine).hostname) ? "[PROVA] " : "") +
+      `🎷 Clandestino da approvare: ${c.nome} (${c.citta}, ${dataSheet(c.giorno).slice(0, 5)})`,
     TextPart: testo, HTMLPart: html,
   };
   if (c.foto) {
