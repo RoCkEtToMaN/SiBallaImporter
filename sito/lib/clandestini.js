@@ -1,6 +1,8 @@
 // Clandestini: eventi proposti dagli utenti dal sito, salvati nello stesso database D1 delle visite (binding "VISITE").
 // stato: "attesa" (appena proposto, non visibile) -> "ok" (approvato, visibile subito sul sito) oppure "no" (rifiutato).
 // Si approvano dalla pagina nascosta /clandestini-admin?chiave=... (stessa chiave STATS_KEY delle statistiche).
+// Impostazioni Cloudflare, in Production e in Preview: binding D1 VISITE (in Preview: siballa-visite-test),
+// secrets STATS_KEY, MAILJET_API_KEY e MAILJET_API_SECRET (email di avviso a ogni proposta).
 
 let tabellaPronta = false;
 
