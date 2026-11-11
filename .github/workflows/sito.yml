@@ -9,6 +9,9 @@
 #                                   se il progetto non esiste viene creato al primo giro
 # Contatore visite + pagina nascosta /statistiche?chiave=... (sito/functions), da configurare su Cloudflare:
 #   binding D1 "VISITE" (database siballa-visite) e secret "STATS_KEY" nel progetto Pages: vedi il documento.
+# Clandestini (proposte degli utenti, approvazione su /clandestini-admin?chiave=STATS_KEY), stesso database VISITE;
+#   secrets MAILJET_API_KEY e MAILJET_API_SECRET per l'email a ogni proposta (facoltativa EMAIL_DESTINATARI),
+#   in Production e Preview. Le variabili nuove valgono dal deploy successivo.
 
 name: Sito pubblico
 
