@@ -32,12 +32,14 @@ export async function onRequestGet({ request, env }) {
     await preparaClandestini(env.VISITE);
     const oggi = giornoRoma();
     const { results } = await env.VISITE.prepare(
-      `SELECT * FROM clandestini WHERE giorno >= ?1 ORDER BY giorno, ora LIMIT 300`).bind(oggi).all();
+      `SELECT c.*, f.id IS NOT NULL AS foto FROM clandestini c LEFT JOIN clandestini_foto f ON f.id = c.id
+       WHERE c.giorno >= ?1 ORDER BY c.giorno, c.ora LIMIT 300`).bind(oggi).all();
     const dataIt = (g) => new Date(g + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" });
     const pulsante = (r, azione, testo, cls = "") =>
       `<form method="post"><input type="hidden" name="chiave" value="${esc(chiave)}"><input type="hidden" name="id" value="${r.id}">` +
       `<button name="azione" value="${azione}" class="${cls}">${testo}</button></form>`;
     const scheda = (r) => `<article>
+      ${r.foto ? `<a href="/api/clandestini-foto/${r.id}?chiave=${encodeURIComponent(chiave)}" target="_blank"><img class="foto" src="/api/clandestini-foto/${r.id}?chiave=${encodeURIComponent(chiave)}" alt="Foto proposta" loading="lazy"></a>` : ""}
       <div class="quando">${esc(dataIt(r.giorno))}${r.ora ? " · ore " + esc(r.ora) : ""}</div>
       <h3>${esc(r.nome)}</h3>
       <div>${esc(r.citta)} · ${esc(r.luogo)} ${r.lat != null
@@ -69,6 +71,7 @@ main{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{margin:0 0 4px;font
 section{margin:20px 0}h2{font-size:15px;margin:0 0 8px;color:var(--accent)}h2 .n{color:var(--muted);font-weight:400}
 article{background:var(--surface);border-radius:14px;padding:12px 14px;margin:10px 0}h3{margin:2px 0 4px;font-size:16px}
 .quando{color:var(--accent);font-weight:600;font-size:13px;text-transform:capitalize}.m{color:var(--muted);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
+.foto{display:block;width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-bottom:8px;background:var(--surface-2)}
 .piccolo{font-size:12px}.avviso{color:#FF9F43;font-size:13px}.vuoto{color:var(--muted)}
 .azioni{display:flex;gap:8px;margin-top:10px}form{margin:0}
 button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:var(--surface-2);color:var(--text);cursor:pointer}

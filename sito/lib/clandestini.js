@@ -23,7 +23,29 @@ export async function preparaClandestini(db) {
        dettagli TEXT NOT NULL DEFAULT '',
        contatto TEXT NOT NULL DEFAULT ''   -- solo per chi approva, mai mostrato sul sito
      )`).run();
+  // foto facoltativa, già rimpicciolita dal browser (circa 1280 px, JPEG): una per clandestino, stesso id
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS clandestini_foto (
+       id INTEGER PRIMARY KEY,
+       tipo TEXT NOT NULL,
+       dati BLOB NOT NULL
+     )`).run();
   tabellaPronta = true;
+}
+
+export const FOTO_MAX_BYTE = 700 * 1024;
+
+// "data:image/jpeg;base64,..." -> { tipo, dati } controllando che sia davvero un'immagine JPEG/PNG/WebP
+export function leggiFoto(dataUrl) {
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl || ""));
+  if (!m || m[2].length > FOTO_MAX_BYTE * 1.37) return null;
+  let dati;
+  try { dati = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0)); } catch { return null; }
+  const jpeg = dati[0] === 0xff && dati[1] === 0xd8;
+  const png = dati[0] === 0x89 && dati[1] === 0x50 && dati[2] === 0x4e && dati[3] === 0x47;
+  const webp = dati[8] === 0x57 && dati[9] === 0x45 && dati[10] === 0x42 && dati[11] === 0x50;
+  if (!(jpeg || png || webp) || dati.length > FOTO_MAX_BYTE) return null;
+  return { tipo: jpeg ? "image/jpeg" : png ? "image/png" : "image/webp", dati };
 }
 
 export function pulisci(s, max) {

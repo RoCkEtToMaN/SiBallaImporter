@@ -159,6 +159,25 @@
   .modulo .grazie { text-align: center; padding: 12px 0 4px; }
   .modulo .grazie b { display: block; font-size: 40px; }
   @media (max-width: 520px) { .modulo .due { grid-template-columns: minmax(0, 1fr); } }
+  .modulo .foto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .modulo .foto input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .modulo .foto .scegli { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; cursor: pointer;
+    border: 1px dashed var(--border); border-radius: 10px; padding: 8px 14px; }
+  .modulo .foto .scegli:hover, .modulo .foto input:focus-visible + .scegli { border-color: var(--accent); color: var(--accent); }
+  .modulo .foto img { width: 112px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 8px; background: var(--surface-2); }
+  .modulo .foto .togli { font: inherit; font-size: 13px; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; }
+
+  /* scheda Clandestini: lampeggia quando c'è un clandestino approvato che l'utente non ha ancora visto */
+  .tabs button.lampeggia { color: var(--accent); animation: lampeggia 1.3s ease-in-out infinite; }
+  .tabs button.lampeggia::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px;
+    border-radius: 50%; background: var(--accent); vertical-align: 2px; box-shadow: 0 0 8px var(--accent); }
+  @keyframes lampeggia {
+    0%, 100% { background: transparent; box-shadow: none; }
+    50% { background: var(--accent-soft); box-shadow: 0 0 0 1px rgba(255,212,0,.6), 0 0 18px rgba(255,212,0,.35); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tabs button.lampeggia { animation: none; background: var(--accent-soft); box-shadow: 0 0 0 1px rgba(255,212,0,.6); }
+  }
 </style>
 <link rel="stylesheet" href="menu.css">
 </head>
@@ -213,6 +232,13 @@
     <div class="scelte" id="cStili"></div>
     <label for="cDettagli">Dettagli <small>(facoltativi)</small></label>
     <textarea id="cDettagli" name="dettagli" maxlength="300" placeholder="DJ o musica live, pavimento, chi lo organizza…"></textarea>
+    <label>Foto o locandina <small>(facoltativa)</small></label>
+    <div class="foto">
+      <input id="cFoto" type="file" accept="image/*">
+      <label for="cFoto" class="scegli">📷 Scegli una foto</label>
+      <img id="cAnteprima" alt="Anteprima della foto" hidden>
+      <button type="button" class="togli" id="cTogliFoto" hidden>Togli</button>
+    </div>
     <label for="cLink">Link <small>(post Instagram, evento Facebook, gruppo… facoltativo)</small></label>
     <input id="cLink" name="link" type="url" maxlength="300" placeholder="https://">
     <label for="cContatto">Il tuo contatto <small>(facoltativo, non viene pubblicato: serve solo se dobbiamo chiederti qualcosa)</small></label>
@@ -405,9 +431,24 @@
     $("vuoto").hidden = eventi.length > 0;
   }
 
+  // clandestini già visti da questo browser (id in localStorage): la scheda lampeggia solo per quelli nuovi
+  var VISTI = "siballa_clandestini_visti";
+  function visti() { try { return JSON.parse(localStorage.getItem(VISTI) || "[]"); } catch (e) { return []; } }
+  function nuoviClandestini(f) {
+    var v = visti(), oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    return f.eventi.filter(function (ev) { return ev._inizio && ev._inizio >= oggi && v.indexOf(ev.id) < 0; }).length;
+  }
+  function segnaVisti(f) {
+    try { localStorage.setItem(VISTI, JSON.stringify(f.eventi.map(function (ev) { return ev.id; }).slice(-200))); } catch (e) {}
+  }
+
   function tabs() {
+    var f = dati.fogli[attivo];
+    if (f && f._clandestini) segnaVisti(f);
     $("tabs").innerHTML = dati.fogli.map(function (f, i) {
-      return '<button role="tab" data-i="' + i + '" aria-selected="' + (i === attivo) + '">' +
+      var nuovi = f._clandestini && i !== attivo ? nuoviClandestini(f) : 0;
+      return '<button role="tab" data-i="' + i + '" aria-selected="' + (i === attivo) + '"' +
+        (nuovi ? ' class="lampeggia" title="' + (nuovi === 1 ? "Un clandestino nuovo" : nuovi + " clandestini nuovi") + '"' : "") + ">" +
         esc(f.nome) + '<span class="n">' + f.eventi.length + "</span></button>";
     }).join("");
   }
@@ -508,7 +549,46 @@
   });
   // dopo un invio riuscito il modulo torna vuoto alla prossima apertura
   $("modulo").addEventListener("close", function () {
-    if (!$("formClandestino").querySelector("#invia")) $("formClandestino").innerHTML = formIniziale;
+    if (!$("formClandestino").querySelector("#invia")) { $("formClandestino").innerHTML = formIniziale; foto = null; }
+  });
+
+  // foto: rimpicciolita nel browser (lato lungo 1280 px, JPEG) così l'invio è leggero anche dal telefono
+  var foto = null;
+  function rimpicciolisci(file) {
+    return new Promise(function (ok, ko) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var s = Math.min(1, 1280 / Math.max(img.naturalWidth, img.naturalHeight));
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+        var g = c.getContext("2d");
+        g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);   // PNG trasparenti: sfondo bianco
+        g.drawImage(img, 0, 0, c.width, c.height);
+        var q = 0.82, d = c.toDataURL("image/jpeg", q);
+        while (d.length > 900000 && q > 0.4) { q -= 0.12; d = c.toDataURL("image/jpeg", q); }
+        ok(d);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); ko(); };
+      img.src = url;
+    });
+  }
+  function mostraFoto(d) {
+    foto = d;
+    $("cAnteprima").hidden = $("cTogliFoto").hidden = !d;
+    if (d) $("cAnteprima").src = d; else $("cAnteprima").removeAttribute("src");
+    $("formClandestino").querySelector(".scegli").textContent = d ? "📷 Cambia foto" : "📷 Scegli una foto";
+  }
+  $("formClandestino").addEventListener("change", function (e) {
+    if (e.target.id !== "cFoto" || !e.target.files[0]) return;
+    esito("Preparo la foto…");
+    rimpicciolisci(e.target.files[0])
+      .then(function (d) { mostraFoto(d); esito(""); })
+      .catch(function () { mostraFoto(null); esito("Non riesco a leggere questa foto, prova con un'altra (JPEG o PNG).", true); });
+    e.target.value = "";
+  });
+  $("formClandestino").addEventListener("click", function (e) {
+    if (e.target.id === "cTogliFoto") mostraFoto(null);
   });
   $("formClandestino").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -517,7 +597,7 @@
     var d = {
       nome: $("cNome").value, giorno: $("cGiorno").value, ora: $("cOra").value, citta: $("cCitta").value,
       luogo: $("cLuogo").value, dettagli: $("cDettagli").value, link: $("cLink").value, contatto: $("cContatto").value,
-      gratis: $("cGratis").checked, sito_web: $("cSito").value,
+      gratis: $("cGratis").checked, sito_web: $("cSito").value, foto: foto || undefined,
       stili: [].map.call(f.querySelectorAll("#cStili input:checked"), function (x) { return x.value; })
     };
     $("invia").disabled = true;
