@@ -81,7 +81,8 @@ button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1p
 button.si{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 </style></head><body><main>
 <h1>Clandestini <span>siBalla</span></h1>
-<p class="sub">Eventi proposti dagli utenti dal sito, da oggi in poi. Quelli approvati compaiono subito nella scheda "Clandestini" (entro un minuto).</p>
+<p class="sub">Eventi proposti dagli utenti dal sito, da oggi in poi. Quelli approvati compaiono subito nella scheda "Clandestini" (entro un minuto).
+· <a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche delle visite</a></p>
 ${corpo}
 </main></body></html>`;
   return new Response(html, {
