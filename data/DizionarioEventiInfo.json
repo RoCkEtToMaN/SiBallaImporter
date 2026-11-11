@@ -17635,6 +17635,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa",
           "Lindy",
@@ -17751,6 +17752,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa"
         ]
@@ -18032,6 +18034,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -18907,6 +18910,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -19891,6 +19895,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -19928,6 +19933,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa",
           "Shag"
@@ -20003,6 +20009,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa"
         ]
@@ -20077,6 +20084,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa",
           "Lindy",
@@ -20193,6 +20201,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Charleston",
           "Lindy",
@@ -20232,6 +20241,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -20269,6 +20279,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy"
         ]
@@ -20306,6 +20317,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Blues"
         ]
@@ -20343,6 +20355,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Balboa"
         ]
@@ -20380,6 +20393,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Blues"
         ]
@@ -20492,6 +20506,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-11",
         "stili": [
           "Lindy",
           "SoloJazz"
@@ -21384,6 +21399,41 @@
         "stili": [
           "Blues"
         ]
+      }
+    }
+  },
+  "dance jam productions kay newhouse e altri 3|fairfax county": {
+    "default": {
+      "organizer": "Dance Jam Productions, Kay Newhouse e altri 3",
+      "city": "Fairfax County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "dcsx": {
+        "organizer": null,
+        "city": "Fairfax County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-11"
       }
     }
   }
