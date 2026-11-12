@@ -10,6 +10,8 @@
       ico: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>' },
     { url: "/scuole", t: "Scuole", d: "Dove imparare, per regione", pronta: true,
       ico: '<path d="M3 9l9-5 9 5-9 5zM7 11v5c3 2 7 2 10 0v-5"/>' },
+    { url: "/musica", t: "Musica", d: "Trova il ritmo per ballare", pronta: true,
+      ico: '<circle cx="6" cy="18" r="3"/><path d="M9 18V5l12-2v13"/><circle cx="18" cy="16" r="3"/><path d="M9 9l12-2"/>' },
     { url: "/artisti", t: "Artisti", d: "Insegnanti, band e DJ", pronta: true,
       ico: '<circle cx="9" cy="18" r="2.5"/><circle cx="18" cy="16" r="2.5"/><path d="M11.5 18V5l9-2v13"/>' },
     { url: "/community", t: "Community WhatsApp", d: "I gruppi della tua città", pronta: true,
