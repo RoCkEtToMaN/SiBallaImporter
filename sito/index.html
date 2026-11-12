@@ -151,7 +151,8 @@
   .pop-q { color: var(--accent); font-weight: 600; font-size: 13px; }
   .pop-chi { color: var(--muted); font-size: 12.5px; }
   .pop-az { display: flex; gap: 10px; margin-top: 8px; }
-  .pop-az a { color: var(--accent); font-weight: 600; }
+  .mappa .pop-az a { color: var(--accent); font-weight: 600; }
+  .pop-img { display: block; width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; background: var(--surface-2); }
   .mappa .marker-cluster-small, .mappa .marker-cluster-medium, .mappa .marker-cluster-large { background: rgba(255,212,0,.35); }
   .mappa .marker-cluster-small div, .mappa .marker-cluster-medium div, .mappa .marker-cluster-large div { background: #FFD400; color: #0E0E12; font-weight: 700; }
   .raggio { display: none; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
@@ -558,7 +559,9 @@
     return leaflet;
   }
   function popup(ev) {
-    return '<div class="pop"><b>' + esc(ev._nome) + "</b>" +
+    // foto dell'evento in cima (se non si carica, sparisce: vedi onerror)
+    return '<div class="pop">' + (ev.img ? '<img class="pop-img" src="' + esc(ev.img) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
+      "<b>" + esc(ev._nome) + "</b>" +
       (quando(ev) ? '<div class="pop-q">' + esc(quando(ev)) + "</div>" : "") +
       (ev._dove ? "<div>" + esc(ev._dove) + "</div>" : "") +
       (ev._chi ? '<div class="pop-chi">' + esc(ev._chi) + "</div>" : "") +
@@ -573,7 +576,7 @@
     eventi.forEach(function (ev) {
       if (ev.lat == null || ev.lng == null) return;
       var m = L.circleMarker([ev.lat, ev.lng], { radius: 8, color: "#0E0E12", weight: 2, fillColor: "#FFD400", fillOpacity: 1 });
-      m.bindPopup(popup(ev), { maxWidth: 260 });
+      m.bindPopup(popup(ev), { maxWidth: 280, minWidth: ev.img ? 240 : 0 });
       gruppo.addLayer(m);
       punti.push([ev.lat, ev.lng]);
     });
