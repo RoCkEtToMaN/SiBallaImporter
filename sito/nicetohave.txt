@@ -31,11 +31,14 @@ DA FARE
     ricordato dal browser, si aggiorna ogni 12 s; "Segnala" (2 persone -> nascosto + email),
     "Cancella" per i propri; limiti 5/minuto e 60/giorno; in /bacheca-admin elenco dei
     messaggi con Cancella / Nascondi / Rendi visibile. Sparisce con l'annuncio.
+    Etichetta "autore dell'annuncio" sui messaggi di chi l'ha scritto (stesso browser).
+    Modulo: contatto facoltativo (senza -> "scrivimi nella discussione"), Cerco/Offro da
+    scegliere (non preselezionato), errori che indicano il campo preciso.
     Da valutare: email privata facoltativa per avvisare chi ha scritto l'annuncio.
     COSA SERVIREBBE:
     - provarla sulla versione di prova (annuncio -> email -> approvazione -> pagina)
-    - contatto non pubblico: pulsante "Rispondi" che manda un'email a chi ha scritto
-    - sulla scheda di un festival: "3 cercano un passaggio, 2 cercano partner"
+    - [fatto] contatto non pubblico: ora facoltativo, ci si accorda nella discussione
+    - [fatto] sulla scheda di un evento: "2 cercano un passaggio · 1 cerca partner"
     - chi scrive puo' cancellare il proprio annuncio (link segreto nell'email)
     - altre categorie se queste funzionano: alloggio, mercatino, DJ/band/sale
     - Turnstile (captcha Cloudflare) se arriva spam
