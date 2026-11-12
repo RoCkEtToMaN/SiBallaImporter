@@ -181,7 +181,7 @@
   .modulo .nota { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
   .modulo label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
   .modulo label small { font-weight: 400; color: var(--muted); }
-  .modulo input:not([type=checkbox]), .modulo textarea { width: 100%; font: inherit; color: var(--text); background: var(--bg);
+  .modulo input:not([type=checkbox]):not([type=radio]), .modulo textarea { width: 100%; font: inherit; color: var(--text); background: var(--bg);
     border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; color-scheme: dark; }
   .modulo textarea { resize: vertical; min-height: 64px; }
   .modulo input:focus, .modulo textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
@@ -197,6 +197,12 @@
   .modulo .esito.err { color: #FF6B6B; }
   .modulo .grazie { text-align: center; padding: 12px 0 4px; }
   .modulo .grazie b { display: block; font-size: 40px; }
+  .azioni button.segnala { color: var(--muted); font-weight: 500; }
+  .modulo .motivi { display: grid; gap: 6px; }
+  .modulo .motivi label { margin: 0; font-weight: 400; font-size: 14px; display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+  .modulo .motivi label:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+  .modulo .motivi input { accent-color: var(--accent); margin: 0; }
   @media (max-width: 520px) { .modulo .due { grid-template-columns: minmax(0, 1fr); } }
   .modulo .foto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .modulo .foto input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; }
@@ -298,6 +304,25 @@
     </div>
   </form>
 </dialog>
+<dialog class="modulo" id="moduloTogli" aria-labelledby="titoloTogli">
+  <form id="formTogli" novalidate>
+    <h2 id="titoloTogli">Chiedi di toglierlo</h2>
+    <p class="nota" id="togliNome"></p>
+    <label>Perché?</label>
+    <div class="motivi" id="tMotivi"></div>
+    <label for="tDettagli">Dettagli <small>(facoltativi, obbligatori con "Altro")</small></label>
+    <textarea id="tDettagli" maxlength="300" placeholder="Es. è stato spostato a sabato"></textarea>
+    <label for="tContatto">Il tuo contatto <small>(facoltativo, non viene pubblicato)</small></label>
+    <input id="tContatto" maxlength="120" placeholder="Email o telefono">
+    <div class="trappola" aria-hidden="true"><label for="tSito">Sito web</label><input id="tSito" tabindex="-1" autocomplete="off"></div>
+    <div class="antibot" id="tAntibot"></div>
+    <p class="esito" id="tEsito" role="status"></p>
+    <div class="fondo">
+      <button type="button" class="btn sec" id="tAnnulla">Annulla</button>
+      <button type="submit" class="btn" id="tInvia">Invia richiesta</button>
+    </div>
+  </form>
+</dialog>
 <script>
 (function () {
   var dati = null, attivo = 0, scelti = {};
@@ -360,6 +385,7 @@
     var col = {};
     f.colonne.forEach(function (c, i) { col[c.trim().toLowerCase()] = i; });
     var clandestini = /clandestin/i.test(f.nome);
+    f.eventi.forEach(function (ev) { ev._clandestino = clandestini && ev.id ? ev.id : 0; });
     // i clandestini sono serate di una sera: stesse regole (spariscono il giorno dopo)
     var serate = clandestini || /serat/i.test(f.nome);
     f.eventi.forEach(function (ev) {
@@ -415,7 +441,8 @@
     var azioni = (ev._link ? '<a class="info" href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
       (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "") +
       (ev._inizio ? '<button type="button" class="calendario" data-ev="' + ev._id + '" title="Aggiungi al tuo calendario">📅 Calendario</button>' : "") +
-      '<button type="button" class="condividi" data-ev="' + ev._id + '" title="Condividi questo evento">↗ Condividi</button>';
+      '<button type="button" class="condividi" data-ev="' + ev._id + '" title="Condividi questo evento">↗ Condividi</button>' +
+      (ev._clandestino ? '<button type="button" class="segnala" data-ev="' + ev._id + '" title="Annullato o sbagliato? Chiedi di toglierlo">⚑ Chiedi di toglierlo</button>' : "");
     var dataHtml = '<div class="data">' + riquadro + "</div>";
     var dist = pos && ev._km != null ? ' · <span class="km">a ' + km(ev._km) + "</span>" : "";
     // con l'immagine la data va sopra l'immagine; se l'immagine non si carica torna accanto al testo (vedi "error" più sotto)
@@ -733,11 +760,12 @@
     });
   }
   $("lista").addEventListener("click", function (e) {
-    var b = e.target.closest("button.calendario, button.condividi");
+    var b = e.target.closest("button.calendario, button.condividi, button.segnala");
     if (!b) return;
     var ev = EVENTI_PER_ID[+b.getAttribute("data-ev")];
     if (!ev) return;
-    if (b.classList.contains("calendario")) sceltaCalendario(ev, b); else condividi(ev, b);
+    if (b.classList.contains("segnala")) apriTogli(ev);
+    else if (b.classList.contains("calendario")) sceltaCalendario(ev, b); else condividi(ev, b);
   });
 
   // immagine che non si carica: tolgo la parte immagine e rimetto la data accanto al testo
@@ -888,6 +916,54 @@
         esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
         $("invia").disabled = false;
         if (abClandestino) abClandestino.reset();   // la verifica vale per un solo invio
+      });
+  });
+
+  // --- "Chiedi di toglierlo" sotto un clandestino: la richiesta arriva per email a chi amministra, che decide ---
+  var MOTIVI_TOGLI = ["È stato annullato", "Data, ora o luogo sbagliati", "Sono l'organizzatore e non voglio che sia pubblicato", "Altro"];
+  var formTogliIniziale = null, abTogli = null, togliId = 0;
+  function tEsito(t, errore) { $("tEsito").textContent = t || ""; $("tEsito").className = "esito" + (errore ? " err" : ""); }
+  function apriTogli(ev) {
+    if (formTogliIniziale === null) {
+      $("tMotivi").innerHTML = MOTIVI_TOGLI.map(function (m) {
+        return '<label><input type="radio" name="motivo" value="' + esc(m) + '"> ' + esc(m) + "</label>";
+      }).join("");
+      formTogliIniziale = $("formTogli").innerHTML;
+    }
+    togliId = ev._clandestino;
+    $("togliNome").textContent = ev._nome + (ev._dove ? " · " + ev._dove : "") + ". Lo controlliamo noi prima di toglierlo.";
+    tEsito("");
+    $("moduloTogli").showModal();
+    if (window.siBallaAntibot && $("tAntibot") && !$("tAntibot").hasChildNodes()) abTogli = siBallaAntibot.monta($("tAntibot"));
+  }
+  $("moduloTogli").addEventListener("click", function (e) {
+    if (e.target === this || e.target.id === "tAnnulla" || e.target.id === "tChiudi") this.close();
+  });
+  $("moduloTogli").addEventListener("close", function () {
+    if (!$("formTogli").querySelector("#tInvia")) { $("formTogli").innerHTML = formTogliIniziale; abTogli = null; }
+  });
+  $("formTogli").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var f = this, scelto = f.querySelector('input[name="motivo"]:checked');
+    if (!scelto) { tEsito("Scegli il motivo.", true); return; }
+    if (scelto.value === "Altro" && !$("tDettagli").value.trim()) { tEsito("Scrivi in breve il motivo.", true); $("tDettagli").focus(); return; }
+    if (abTogli && abTogli.inAttesa()) { tEsito("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia.", true); return; }
+    var d = { azione: "rimozione", id: togliId, motivo: scelto.value, dettagli: $("tDettagli").value, contatto: $("tContatto").value,
+      sito_web: $("tSito").value, turnstile: abTogli ? abTogli.token() : "" };
+    $("tInvia").disabled = true;
+    tEsito("Invio…");
+    fetch("/api/clandestini", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok || !x.j.ok) throw new Error(x.j.errore || "Invio non riuscito, riprova più tardi.");
+        f.innerHTML = '<div class="grazie"><b>🙏</b><h2>Grazie!</h2><p class="nota">Abbiamo ricevuto la richiesta: ' +
+          "la controlliamo e, se serve, togliamo il clandestino.</p>" +
+          '<div class="fondo" style="justify-content:center"><button type="button" class="btn" id="tChiudi">Chiudi</button></div></div>';
+      })
+      .catch(function (err) {
+        tEsito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
+        $("tInvia").disabled = false;
+        if (abTogli) abTogli.reset();
       });
   });
 

@@ -1,8 +1,12 @@
 import { giornoRoma } from "../../lib/visite.js";
 import { preparaClandestini, pulisci, dataSheet, leggiFoto, esc } from "../../lib/clandestini.js";
+import { inviaEmail, prefissoProva } from "../../lib/bacheca.js";
 
 // GET  /api/clandestini : i clandestini approvati da oggi in poi, nello stesso formato di un foglio di eventi.json
 // POST /api/clandestini : nuova proposta dal modulo del sito (JSON); finisce "in attesa" finché non la approvi.
+//                         { azione: "rimozione", id, motivo, dettagli, contatto }: un visitatore chiede di togliere
+//                         un clandestino pubblicato; arriva un'email e decidi tu da /clandestini-admin.
+const MOTIVI_RIMOZIONE = ["È stato annullato", "Data, ora o luogo sbagliati", "Sono l'organizzatore e non voglio che sia pubblicato", "Altro"];
 
 const STILI = ["Lindy Hop", "Balboa", "Blues", "Solo Jazz", "Boogie Woogie", "Charleston", "Shag"];
 const MAX_IN_ATTESA = 40;   // freno allo spam: oltre questo numero di proposte da approvare non ne accetta altre
@@ -72,6 +76,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (d.sito_web) return json({ ok: true });
   if (!(await turnstileOk(env, d.turnstile, request.headers.get("cf-connecting-ip"))))
     return json({ errore: "Verifica anti-spam non riuscita, ricarica la pagina e riprova." }, 400);
+  if (d.azione === "rimozione") return richiestaRimozione(request, env, waitUntil, d);
 
   const nome = pulisci(d.nome, 100), citta = pulisci(d.citta, 60), luogo = pulisci(d.luogo, 120);
   const giorno = /^\d{4}-\d{2}-\d{2}$/.test(d.giorno || "") ? d.giorno : "";
@@ -110,6 +115,49 @@ export async function onRequestPost({ request, env, waitUntil }) {
   } catch (e) {
     console.log("clandestino non salvato: " + e);
     return json({ errore: "Non sono riuscito a salvare la proposta, riprova più tardi." }, 500);
+  }
+  return json({ ok: true });
+}
+
+// --- richiesta di eliminazione da un visitatore: salvata sul clandestino + email a chi amministra ---
+async function richiestaRimozione(request, env, waitUntil, d) {
+  const db = env.VISITE, id = Number(d.id);
+  const motivo = MOTIVI_RIMOZIONE.includes(d.motivo) ? d.motivo : "";
+  const dettagli = pulisci(d.dettagli, 300), contatto = pulisci(d.contatto, 120);
+  if (!id || !motivo) return json({ errore: "Scegli il motivo." }, 400);
+  if (motivo === "Altro" && !dettagli) return json({ errore: "Scrivi in breve il motivo." }, 400);
+  try {
+    await preparaClandestini(db);
+    const c = await db.prepare(`SELECT * FROM clandestini WHERE id = ?1 AND stato = 'ok'`).bind(id).first();
+    if (!c) return json({ ok: true });   // già tolto o mai esistito: niente da fare
+    const adesso = new Date().toISOString();
+    const richiesta = [motivo, dettagli, contatto ? "Contatto: " + contatto : ""].filter(Boolean).join(" · ");
+    await db.prepare(`UPDATE clandestini SET rimozione = ?1, rimozioni = rimozioni + 1, rimozione_quando = ?2 WHERE id = ?3`)
+      .bind(richiesta.slice(0, 500), adesso, id).run();
+    // freno allo spam: per lo stesso clandestino al massimo un'email ogni 6 ore
+    const recente = c.rimozione_quando && Date.now() - Date.parse(c.rimozione_quando) < 6 * 3600000;
+    if (!recente) {
+      const origine = new URL(request.url).origin;
+      const pagina = `${origine}/clandestini-admin` + (env.STATS_KEY ? `?chiave=${encodeURIComponent(env.STATS_KEY)}` : "");
+      const riga = (k, v) => v ? `<tr><td style="color:#666;padding:3px 12px 3px 0;vertical-align:top">${k}</td><td style="padding:3px 0">${esc(v)}</td></tr>` : "";
+      const quando = dataSheet(c.giorno) + (c.ora ? " alle " + c.ora : "");
+      const html = `<div style="font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:15px;color:#111">
+    <h2 style="margin:0 0 4px">🗑 Richiesta di eliminazione</h2>
+    <p style="margin:0 0 14px;color:#666">Un visitatore chiede di togliere questo clandestino. Resta sul sito finché non decidi tu.</p>
+    <table style="border-collapse:collapse">
+      ${riga("Clandestino", c.nome)}${riga("Quando", quando)}${riga("Dove", `${c.citta} · ${c.luogo}`)}
+      ${riga("Motivo", motivo)}${riga("Dettagli", dettagli)}${riga("Contatto", contatto)}
+    </table>
+    <p style="margin:20px 0"><a href="${esc(pagina)}" style="background:#FFD400;color:#0E0E12;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:10px;display:inline-block">Apri la pagina di approvazione</a></p>
+  </div>`;
+      const testo = `Richiesta di eliminazione\n\n${c.nome}\n${quando}\n${c.citta} · ${c.luogo}\n\nMotivo: ${motivo}\n` +
+        (dettagli ? dettagli + "\n" : "") + (contatto ? "Contatto: " + contatto + "\n" : "") + `\nDecidi qui: ${pagina}\n`;
+      const oggetto = prefissoProva(origine) + `🗑 Richiesta di eliminazione: ${c.nome} (${c.citta}, ${dataSheet(c.giorno).slice(0, 5)})`;
+      waitUntil(inviaEmail(env, oggetto, html, testo).then((esito) => console.log("email richiesta di eliminazione: " + esito)));
+    }
+  } catch (e) {
+    console.log("richiesta di eliminazione non salvata: " + e);
+    return json({ errore: "Non sono riuscito a inviare la richiesta, riprova più tardi." }, 500);
   }
   return json({ ok: true });
 }

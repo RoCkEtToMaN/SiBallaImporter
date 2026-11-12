@@ -17,6 +17,8 @@ export async function onRequestPost({ request, env }) {
   await preparaClandestini(env.VISITE);
   if (stato && id) {
     await env.VISITE.prepare(`UPDATE clandestini SET stato = ?1 WHERE id = ?2`).bind(stato, id).run();
+  } else if (f.get("azione") === "ignora_rimozione" && id) {
+    await env.VISITE.prepare(`UPDATE clandestini SET rimozione = '', rimozioni = 0, rimozione_quando = '' WHERE id = ?1`).bind(id).run();
   } else if (f.get("azione") === "elimina" && id) {
     // cancellazione definitiva: proposta, foto e contatto spariscono dal database
     await env.VISITE.batch([
@@ -70,14 +72,18 @@ export async function onRequestGet({ request, env }) {
         · ${!r.email ? "✉️ email: esito non registrato"
           : /^inviata/.test(r.email) ? "✉️ email " + esc(r.email)
           : `<span class="avviso">✉️ email ${esc(r.email)}</span>`}</div>
+      ${r.rimozioni ? `<div class="richiesta">🗑 <b>Richiesta di eliminazione</b>${r.rimozioni > 1 ? ` (${r.rimozioni} richieste)` : ""}:
+        ${esc(r.rimozione)}<div class="piccolo">ultima il ${esc(new Date(r.rimozione_quando).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}</div></div>` : ""}
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
         : r.stato === "ok" ? pulsante(r, "togli", "Togli dal sito") : pulsante(r, "riapri", "Rimetti in attesa")}
-        ${pulsante(r, "email", "✉️ Rimanda email")}${pulsante(r, "elimina", "🗑 Elimina", "no")}</div>
+        ${r.rimozioni ? pulsante(r, "ignora_rimozione", "Ignora richiesta") : ""}${pulsante(r, "email", "✉️ Rimanda email")}${pulsante(r, "elimina", "🗑 Elimina", "no")}</div>
     </article>`;
     const gruppo = (titolo, righe, vuoto) =>
       `<section><h2>${titolo} <span class="n">${righe.length}</span></h2>${righe.length ? righe.map(scheda).join("") : `<p class="vuoto">${vuoto}</p>`}</section>`;
-    corpo = gruppo("Da approvare", results.filter((r) => r.stato === "attesa"), "Nessuna proposta in attesa.") +
-      gruppo("Sul sito", results.filter((r) => r.stato === "ok"), "Nessun clandestino in programma.") +
+    const richieste = results.filter((r) => r.stato === "ok" && r.rimozioni);
+    corpo = (richieste.length ? gruppo("Richieste di eliminazione", richieste, "") : "") +
+      gruppo("Da approvare", results.filter((r) => r.stato === "attesa"), "Nessuna proposta in attesa.") +
+      gruppo("Sul sito", results.filter((r) => r.stato === "ok" && !r.rimozioni), "Nessun altro clandestino in programma.") +
       gruppo("Rifiutati", results.filter((r) => r.stato === "no"), "Nessuno.");
   }
 
@@ -97,7 +103,8 @@ article{background:var(--surface);border-radius:14px;padding:12px 14px;margin:10
 .azioni{display:flex;gap:8px;margin-top:10px}form{margin:0}
 button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:var(--surface-2);color:var(--text);cursor:pointer}
 button.si{background:var(--accent);border-color:var(--accent);color:var(--bg)}
-button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}.azioni{flex-wrap:wrap}
+button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}
+.richiesta{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.35);font-size:14px;overflow-wrap:anywhere}.azioni{flex-wrap:wrap}
 </style></head><body><main>
 <h1>Clandestini <span>siBalla</span></h1>
 <p class="sub">Eventi proposti dagli utenti dal sito, da oggi in poi. Quelli approvati compaiono subito nella scheda "Clandestini" (entro un minuto).

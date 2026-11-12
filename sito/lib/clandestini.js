@@ -36,6 +36,10 @@ export async function preparaClandestini(db) {
      )`).run();
   // colonna aggiunta dopo: esito dell'email di avviso (vedi /clandestini-admin)
   try { await db.prepare(`ALTER TABLE clandestini ADD COLUMN email TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
+  // richieste di eliminazione dai visitatori ("Chiedi di toglierlo" sotto la scheda): ultimo motivo, quante, quando l'ultima
+  for (const col of [`rimozione TEXT NOT NULL DEFAULT ''`, `rimozioni INTEGER NOT NULL DEFAULT 0`, `rimozione_quando TEXT NOT NULL DEFAULT ''`]) {
+    try { await db.prepare(`ALTER TABLE clandestini ADD COLUMN ${col}`).run(); } catch { /* c'è già */ }
+  }
   tabellaPronta = true;
 }
 
