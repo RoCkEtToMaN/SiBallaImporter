@@ -26,6 +26,23 @@ function fonte(f) {
   return f.replace(/^www\./, "");
 }
 
+// reti di data center / hosting: da lì arrivano scanner di link nelle email, strumenti SEO, browser automatici.
+// NON ci sono Cloudflare, Akamai e Fastly: li usano iCloud Private Relay (Safari su iPhone) e WARP, cioè persone vere.
+const DATACENTER = new RegExp([
+  "amazon", "aws", "google", "microsoft", "azure", "digitalocean", "ovh", "hetzner", "linode", "akamai connected cloud",
+  "vultr", "choopa", "oracle", "alibaba", "tencent", "huawei cloud", "leaseweb", "contabo", "scaleway", "online s\\.a\\.s",
+  "m247", "datacamp", "cdn77", "ionos", "hostinger", "g-core", "gcore", "zscaler", "psychz", "colocrossing",
+  "quadranet", "servers\\.com", "hostroyale", "ipxo", "packethub", "tzulo", "censys", "shadowserver", "facebook",
+  "meta platforms", "yandex", "baidu", "bytedance", "hosting", "server", "data ?cent", "cloud",
+].join("|"), "i");
+// ...ma alcune reti con "cloud" nel nome sono di persone vere
+const NON_DATACENTER = /cloudflare|icloud|private relay/i;
+
+function daDatacenter(cf) {
+  const org = String(cf.asOrganization || "");
+  return !!org && DATACENTER.test(org) && !NON_DATACENTER.test(org);
+}
+
 function dispositivo(ua) {
   if (/ipad|tablet|android(?!.*mobile)/i.test(ua)) return "Tablet";
   if (/mobi|iphone|ipod|android/i.test(ua)) return "Telefono";
@@ -46,11 +63,20 @@ export async function onRequestPost({ request, env }) {
       `INSERT INTO statistiche (giorno, tipo, chiave, n) VALUES (?1, ?2, ?3, 1)
        ON CONFLICT (giorno, tipo, chiave) DO UPDATE SET n = n + 1`).bind(giorno, tipo, chiave);
     const op = [];
+    const cf = request.cf || {};
+    if (daDatacenter(cf)) {
+      // probabile bot: non entra nei conteggi, si conta solo la rete (tabella "Probabili bot esclusi")
+      if (d.t !== "click") {
+        const rete = pulisci(cf.asOrganization, 60) + (cf.country ? ` (${pulisci(cf.country, 3)})` : "");
+        await db.batch([stat("bot", rete)]);
+      }
+      return new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });
+    }
     if (d.t === "click") {
       const cosa = pulisci(d.cosa, 90), tipo = pulisci(d.tipo, 30);
       if (cosa) op.push(stat("click", tipo ? `${cosa} · ${tipo}` : cosa));
     } else {
-      const cf = request.cf || {};
+      op.push(stat("rete", pulisci(cf.asOrganization, 60) || "?"));
       op.push(db.prepare(
         `INSERT INTO visite (giorno, paese, regione, citta, n) VALUES (?1, ?2, ?3, ?4, 1)
          ON CONFLICT (giorno, paese, regione, citta) DO UPDATE SET n = n + 1`

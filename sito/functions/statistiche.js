@@ -49,7 +49,7 @@ export async function onRequestGet({ request, env }) {
     const q = (sql) => env.VISITE.prepare(sql).bind(dal).all().then((r) => r.results);
     const s = (tipo, limite) => q(`SELECT chiave, SUM(n) AS n FROM statistiche WHERE giorno >= ?1 AND tipo = '${tipo}'
       GROUP BY chiave ORDER BY n DESC LIMIT ${limite}`);
-    const [totale, perGiorno, regioni, citta, paesi, primo, visitatori, pagine, fonti, disp, click, mesi, primoStat] = await Promise.all([
+    const [totale, perGiorno, regioni, citta, paesi, primo, visitatori, pagine, fonti, disp, click, reti, bot, mesi, primoStat] = await Promise.all([
       q(`SELECT COALESCE(SUM(n),0) AS n FROM visite WHERE giorno >= ?1`),
       q(`SELECT v.giorno, SUM(v.n) AS n, (SELECT n FROM statistiche s WHERE s.giorno = v.giorno AND tipo = 'visitatori' AND chiave = 'giorno') AS u
          FROM visite v WHERE v.giorno >= ?1 GROUP BY v.giorno ORDER BY v.giorno DESC LIMIT 60`),
@@ -57,7 +57,7 @@ export async function onRequestGet({ request, env }) {
       q(`SELECT paese, regione, citta, SUM(n) AS n FROM visite WHERE giorno >= ?1 GROUP BY paese, regione, citta ORDER BY n DESC LIMIT 40`),
       q(`SELECT paese, SUM(n) AS n FROM visite WHERE giorno >= ?1 GROUP BY paese ORDER BY n DESC LIMIT 30`),
       env.VISITE.prepare(`SELECT MIN(giorno) AS g FROM visite`).all().then((r) => r.results),
-      s("visitatori", 5), s("pagina", 20), s("fonte", 20), s("disp", 5), s("click", 40),
+      s("visitatori", 5), s("pagina", 20), s("fonte", 20), s("disp", 5), s("click", 40), s("rete", 15), s("bot", 20),
       q(`SELECT substr(giorno,1,7) AS mese, SUM(CASE WHEN tipo='pagina' THEN n ELSE 0 END) AS viste,
            SUM(CASE WHEN tipo='visitatori' AND chiave='mese' THEN n ELSE 0 END) AS u
          FROM statistiche WHERE giorno >= ?1 GROUP BY mese ORDER BY mese DESC LIMIT 24`),
@@ -94,6 +94,8 @@ export async function onRequestGet({ request, env }) {
       ${tabella("Regioni", regioni, regione)}
       ${tabella("Città", citta, (r) => (r.citta === "?" ? "sconosciuta" : esc(CITTA[r.citta] || r.citta)) + ` <span class="paese">· ${regione(r)}</span>`)}
       ${tabella("Paesi", paesi, (r) => (r.paese === "?" ? "sconosciuto" : esc(nomePaese(r.paese))))}
+      ${tabella("Reti dei visitatori (operatore internet)", reti, (r) => esc(r.chiave))}
+      ${tabella(`Probabili bot esclusi · ${bot.reduce((t, r) => t + r.n, 0)} visite non contate (reti di data center)`, bot, (r) => esc(r.chiave))}
       ${tabella("Giorni · pagine viste", perGiorno, (r) => dataIt(r.giorno) + (r.u ? ` <span class="paese">· ${r.u} visitatori</span>` : ""))}`;
   }
 
