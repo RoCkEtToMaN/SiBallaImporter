@@ -1,6 +1,6 @@
 import { giornoRoma } from "../../lib/visite.js";
 import { pulisci, esc } from "../../lib/clandestini.js";
-import { preparaBacheca, impronta, inviaEmail, SOGLIA_SEGNALAZIONI } from "../../lib/bacheca.js";
+import { preparaBacheca, impronta, inviaEmail, avvisaAutore, SOGLIA_SEGNALAZIONI } from "../../lib/bacheca.js";
 
 // Discussione sotto gli annunci della bacheca. I messaggi NON passano dall'approvazione: compaiono subito.
 // GET  /api/messaggi?annuncio=ID   : messaggi visibili di un annuncio approvato e non scaduto
@@ -15,7 +15,7 @@ const json = (o, status = 200) => new Response(JSON.stringify(o), {
 });
 
 async function annuncioAperto(db, id) {
-  return db.prepare(`SELECT id, citta, arrivo, evento FROM annunci WHERE id = ?1 AND stato = 'ok' AND scade >= ?2`)
+  return db.prepare(`SELECT id, categoria, tipo, citta, arrivo, evento, autore, avvisi, avvisato FROM annunci WHERE id = ?1 AND stato = 'ok' AND scade >= ?2`)
     .bind(id, giornoRoma()).first();
 }
 
@@ -75,7 +75,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const nick = pulisci(d.nick, 30), testo = pulisci(String(d.testo || "").replace(/\r/g, ""), 500);
   if (nick.length < 2) return json({ errore: "Scegli un nickname di almeno 2 lettere." }, 400);
   if (!testo) return json({ errore: "Scrivi un messaggio." }, 400);
-  if (!(await annuncioAperto(db, id))) return json({ errore: "Questo annuncio non è più in bacheca." }, 404);
+  const an = await annuncioAperto(db, id);
+  if (!an) return json({ errore: "Questo annuncio non è più in bacheca." }, 404);
 
   const rete = await impronta("rete|" + giornoRoma() + "|" + (request.headers.get("cf-connecting-ip") || ""));
   const unMinutoFa = new Date(Date.now() - 60000).toISOString(), oggi = giornoRoma() + "T00:00";
@@ -89,8 +90,19 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   await db.prepare(`INSERT INTO messaggi (annuncio, creato, nick, testo, autore, rete) VALUES (?1, ?2, ?3, ?4, ?5, ?6)`)
     .bind(id, new Date().toISOString(), nick, testo, autore, rete).run();
-  // pulizia: discussioni di annunci scaduti da più di 7 giorni
+  // avviso a chi ha scritto l'annuncio (se ha lasciato l'email privata e il messaggio non è suo):
+  // al massimo uno ogni 30 minuti, così una conversazione vivace non riempie la casella
+  const trentaMinutiFa = new Date(Date.now() - 30 * 60000).toISOString();
+  if (an.avvisi && an.autore !== autore && (!an.avvisato || an.avvisato < trentaMinutiFa)) {
+    await db.prepare(`UPDATE annunci SET avvisato = ?1 WHERE id = ?2`).bind(new Date().toISOString(), id).run();
+    waitUntil(avvisaAutore(env, new URL(request.url).origin, an, "💬 Nuovo messaggio sul tuo annuncio",
+      [`${nick} ha scritto: «${testo.length > 200 ? testo.slice(0, 200) + "…" : testo}»`,
+        "Rispondi nella discussione sotto l'annuncio. Ti avvisiamo al massimo una volta ogni 30 minuti."])
+      .catch((e) => console.log("avviso messaggio non inviato: " + e)));
+  }
+  // pulizia: discussioni di annunci scaduti da più di 7 giorni; email private degli annunci scaduti
   waitUntil(db.prepare(`DELETE FROM messaggi WHERE annuncio IN (SELECT id FROM annunci WHERE scade < ?1)`)
     .bind(giornoRoma(new Date(Date.now() - 7 * 86400000))).run().catch(() => {}));
+  waitUntil(db.prepare(`UPDATE annunci SET avvisi = '' WHERE avvisi <> '' AND scade < ?1`).bind(giornoRoma()).run().catch(() => {}));
   return json({ ok: true });
 }

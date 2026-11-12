@@ -103,7 +103,9 @@
     "passaggio|offro": ["🚗", "offre un passaggio", "offrono un passaggio"],
     "passaggio|cerco": ["🚗", "cerca un passaggio", "cercano un passaggio"],
     "partner|cerco": ["💃", "cerca partner", "cercano partner"],
-    "partner|offro": ["💃", "si propone come partner", "si propongono come partner"]
+    "partner|offro": ["💃", "si propone come partner", "si propongono come partner"],
+    "alloggio|cerco": ["🛏️", "cerca alloggio", "cercano alloggio"],
+    "alloggio|offro": ["🛏️", "offre alloggio", "offrono alloggio"]
   };
   function segnaEventi(annunci) {
     var conEvento = annunci.filter(function (a) { return norm(a.evento).length >= 5; });

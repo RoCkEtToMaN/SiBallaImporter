@@ -1,9 +1,10 @@
 import { giornoRoma } from "../../lib/visite.js";
 import { pulisci, esc, dataSheet } from "../../lib/clandestini.js";
-import { preparaBacheca, CATEGORIE, RUOLI, GIORNI_SCADENZA, impronta } from "../../lib/bacheca.js";
+import { preparaBacheca, CATEGORIE, RUOLI, GIORNI_SCADENZA, impronta, EMAIL_VALIDA } from "../../lib/bacheca.js";
 
 // GET  /api/bacheca : annunci approvati e non scaduti
 // POST /api/bacheca : nuovo annuncio dal modulo della pagina /bacheca; resta "in attesa" finché non lo approvi.
+//                     { azione: "togli", id, token }: chi l'ha scritto (stesso browser) lo toglie dalla bacheca.
 
 const STILI = ["Lindy Hop", "Balboa", "Blues", "Solo Jazz", "Boogie Woogie", "Charleston", "Shag"];
 const MAX_IN_ATTESA = 40;   // freno allo spam
@@ -18,6 +19,7 @@ export async function onRequestGet({ env }) {
       await preparaBacheca(env.VISITE);
       const { results } = await env.VISITE.prepare(
         `SELECT id, creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto,
+           substr(autore, 1, 16) AS a,   -- per riconoscere i propri annunci nel browser (pulsante "Togli")
            (SELECT COUNT(*) FROM messaggi m WHERE m.annuncio = annunci.id AND m.nascosto = 0) AS messaggi
          FROM annunci WHERE stato = 'ok' AND scade >= ?1 ORDER BY CASE WHEN giorno = '' THEN scade ELSE giorno END, id LIMIT 300`)
         .bind(giornoRoma()).all();
@@ -47,6 +49,17 @@ export async function onRequestPost({ request, env, waitUntil }) {
   let d;
   try { d = await request.json(); } catch { return json({ errore: "Richiesta non valida." }, 400); }
   if (d.sito_web) return json({ ok: true });   // campo trappola per i bot
+
+  // chi ha scritto l'annuncio lo toglie: vale solo dallo stesso browser (stessa impronta del codice segreto)
+  if (d.azione === "togli") {
+    const t = String(d.token || "");
+    if (!/^[A-Za-z0-9-]{20,100}$/.test(t)) return json({ errore: "Ricarica la pagina e riprova." }, 400);
+    await preparaBacheca(db);
+    const r = await db.prepare(`UPDATE annunci SET stato = 'no', avvisi = '' WHERE id = ?1 AND autore = ?2 AND autore <> ''`)
+      .bind(Number(d.id), await impronta("autore|" + t)).run();
+    return r.meta?.changes === 0 ? json({ errore: "Puoi togliere solo i tuoi annunci, dallo stesso browser con cui li hai scritti." }, 403) : json({ ok: true });
+  }
+
   if (!(await turnstileOk(env, d.turnstile, request.headers.get("cf-connecting-ip"))))
     return json({ errore: "Verifica anti-spam non riuscita, ricarica la pagina e riprova." }, 400);
 
@@ -56,6 +69,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const citta = pulisci(d.citta, 60), arrivo = categoria === "passaggio" ? pulisci(d.arrivo, 80) : "";
   const evento = pulisci(d.evento, 120), testo = pulisci(d.testo, 400);
   const nome = pulisci(d.nome, 40), contatto = pulisci(d.contatto, 120);
+  // email PRIVATA facoltativa per gli avvisi (pubblicazione e nuovi messaggi): mai mostrata
+  const avvisi = pulisci(d.avvisi, 120);
+  if (avvisi && !EMAIL_VALIDA.test(avvisi)) return json({ errore: "L'email per gli avvisi non sembra valida." }, 400);
   const ruolo = categoria === "partner" && RUOLI.includes(d.ruolo) ? d.ruolo : "";
   const stile = STILI.includes(d.stile) ? d.stile : "";
   const giorno = /^\d{4}-\d{2}-\d{2}$/.test(d.giorno || "") ? d.giorno : "";
@@ -79,11 +95,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const token = String(d.token || "");
     const autore = /^[A-Za-z0-9-]{20,100}$/.test(token) ? await impronta("autore|" + token) : "";
     const r = await db.prepare(
-      `INSERT INTO annunci (creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto, autore)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`)
-      .bind(new Date().toISOString(), categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto, autore).run();
+      `INSERT INTO annunci (creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto, autore, avvisi)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)`)
+      .bind(new Date().toISOString(), categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto, autore, avvisi).run();
     const id = r.meta.last_row_id;
-    waitUntil(avvisa(env, new URL(request.url).origin, { categoria, tipo, evento, giorno, citta, arrivo, ruolo, stile, testo, nome, contatto })
+    waitUntil(avvisa(env, new URL(request.url).origin, { categoria, tipo, evento, giorno, citta, arrivo, ruolo, stile, testo, nome, contatto, avvisi })
       .then((esito) => db.prepare(`UPDATE annunci SET email = ?1 WHERE id = ?2`).bind(esito.slice(0, 500), id).run())
       .catch((e) => console.log("esito email non salvato: " + e)));
   } catch (e) {
@@ -111,7 +127,7 @@ export async function avvisa(env, origine, a) {
       ${riga("Evento", a.evento)}${riga("Data", a.giorno ? dataSheet(a.giorno) : "")}
       ${riga(a.categoria === "passaggio" ? "Da" : "Città", a.citta)}${riga("A", a.arrivo)}
       ${riga("Ruolo", a.ruolo)}${riga("Stile", a.stile)}${riga("Testo", a.testo)}
-      ${riga("Firma", a.nome)}${riga("Contatto (pubblico)", a.contatto)}
+      ${riga("Firma", a.nome)}${riga("Contatto (pubblico)", a.contatto)}${riga("Email per gli avvisi (privata)", a.avvisi)}
     </table>
     <p style="margin:20px 0"><a href="${esc(pagina)}" style="background:#FFD400;color:#0E0E12;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:10px;display:inline-block">Apri la pagina di approvazione</a></p>
   </div>`;

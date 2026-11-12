@@ -1,6 +1,6 @@
 import { giornoRoma } from "../lib/visite.js";
 import { esc, uguali, dataSheet } from "../lib/clandestini.js";
-import { preparaBacheca, CATEGORIE, SOGLIA_SEGNALAZIONI } from "../lib/bacheca.js";
+import { preparaBacheca, CATEGORIE, SOGLIA_SEGNALAZIONI, avvisaAutore } from "../lib/bacheca.js";
 
 // GET  /bacheca-admin?chiave=... : pagina nascosta con gli annunci della bacheca, da approvare o rifiutare.
 // POST /bacheca-admin            : pulsanti Approva / Rifiuta / Togli / Rimetti in attesa.
@@ -15,7 +15,20 @@ export async function onRequestPost({ request, env }) {
   if (!env.STATS_KEY || !uguali(chiave, env.STATS_KEY) || !env.VISITE) return nonTrovata();
   const stato = AZIONI[f.get("azione")], id = Number(f.get("id"));
   await preparaBacheca(env.VISITE);
-  if (stato && id) await env.VISITE.prepare(`UPDATE annunci SET stato = ?1 WHERE id = ?2`).bind(stato, id).run();
+  if (stato && id) {
+    const prima = await env.VISITE.prepare(`SELECT * FROM annunci WHERE id = ?1`).bind(id).first();
+    // tolto o rifiutato: l'email privata non serve più
+    await env.VISITE.prepare(`UPDATE annunci SET stato = ?1, avvisi = CASE WHEN ?2 = 1 THEN '' ELSE avvisi END WHERE id = ?3`)
+      .bind(stato, stato === "no" ? 1 : 0, id).run();
+    // appena approvato: avviso a chi l'ha scritto, se ha lasciato l'email privata
+    if (prima && prima.stato === "attesa" && stato === "ok") {
+      try {
+        await avvisaAutore(env, new URL(request.url).origin, prima, "📌 Il tuo annuncio è in bacheca",
+          ["Il tuo annuncio è stato approvato ed è visibile su siBalla.",
+            "Ti scriveremo quando qualcuno ti risponde nella discussione sotto l'annuncio."]);
+      } catch (e) { console.log("avviso all'autore non inviato: " + e); }
+    }
+  }
   // messaggi delle discussioni
   else if (f.get("azione") === "cancella_msg" && id) {
     await env.VISITE.prepare(`DELETE FROM messaggi WHERE id = ?1`).bind(id).run();
@@ -48,7 +61,8 @@ export async function onRequestGet({ request, env }) {
       <h3>${esc(r.citta)}${r.arrivo ? " → " + esc(r.arrivo) : ""}${r.evento ? " · " + esc(r.evento) : ""}</h3>
       ${r.ruolo || r.stile ? `<div class="m">${esc([r.ruolo, r.stile].filter(Boolean).join(" · "))}</div>` : ""}
       ${r.testo ? `<div class="m">${esc(r.testo)}</div>` : ""}
-      <div class="m">Firma: ${esc(r.nome)} · ${r.contatto ? "contatto pubblico: " + esc(r.contatto) : "nessun contatto (solo discussione)"}</div>
+      <div class="m">Firma: ${esc(r.nome)} · ${r.contatto ? "contatto pubblico: " + esc(r.contatto) : "nessun contatto (solo discussione)"}
+        ${r.avvisi ? " · ✉️ avvisi a " + esc(r.avvisi) + " (privata)" : ""}</div>
       <div class="m piccolo">Inviato il ${esc(new Date(r.creato).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}
         · scade il ${esc(dataSheet(r.scade))} · ✉️ ${r.email ? esc(r.email) : "esito non registrato"}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")

@@ -23,6 +23,12 @@
   .annuncio .firma b { color: var(--text); }
   .annuncio .firma a { color: var(--accent); }
   .data-ann { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .annuncio .tuo { margin-left: 8px; font-size: 10.5px; letter-spacing: .03em; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 999px; padding: 1px 7px; vertical-align: 1px; }
+  .annuncio.evidenziato { border-color: var(--accent); }
+  .togli-ann { margin-top: 10px; text-align: right; }
+  .togli { font: inherit; font-size: 12.5px; color: var(--muted); background: none; border: 0; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
+  .togli:hover { color: #FF6B6B; }
 
   dialog.modulo { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--border); border-radius: 18px;
     background: var(--surface); color: var(--text); padding: 0; }
@@ -100,7 +106,7 @@
   </header>
   <main>
     <h2 class="titolo-sez">Bacheca</h2>
-    <p class="intro">Passaggi per serate e festival, partner per corsi e competizioni. Ogni annuncio viene controllato prima di comparire e sparisce da solo dopo la data indicata.</p>
+    <p class="intro">Passaggi per serate e festival, partner per corsi e competizioni, alloggio per i festival e mercatino (scarpe, abiti vintage, biglietti). Ogni annuncio viene controllato prima di comparire e sparisce da solo dopo la data indicata.</p>
     <div class="testa-bacheca">
       <div class="chips" id="categorie" role="group" aria-label="Tipo di annuncio" style="margin:0"></div>
       <button type="button" class="btn" id="apri">+ Scrivi un annuncio</button>
@@ -119,6 +125,8 @@
     <div class="scelta" id="sCategoria" role="group" aria-label="Categoria">
       <button type="button" data-v="passaggio" aria-pressed="true">Passaggio</button>
       <button type="button" data-v="partner" aria-pressed="false">Partner di ballo</button>
+      <button type="button" data-v="alloggio" aria-pressed="false">Alloggio</button>
+      <button type="button" data-v="mercatino" aria-pressed="false">Mercatino</button>
     </div>
     <div class="scelta" id="sTipo" role="group" aria-label="Cerco o offro">
       <!-- nessuna scelta preselezionata: chi scrive deve dire se cerca o offre -->
@@ -149,6 +157,9 @@
       <div><label for="fContatto">Come contattarti <small>(facoltativo)</small></label><input id="fContatto" maxlength="120" placeholder="@instagram o email"></div>
     </div>
     <p class="avviso-contatto">Puoi lasciarlo vuoto: chi è interessato ti scrive nella discussione sotto l'annuncio. Se lo metti, è visibile a tutti: meglio Instagram del telefono.</p>
+    <label for="fAvvisi">La tua email per gli avvisi <small>(privata, facoltativa)</small></label>
+    <input id="fAvvisi" type="email" maxlength="120" placeholder="nome@esempio.it" autocomplete="email">
+    <p class="avviso-contatto">Non la vede nessuno: ti scriviamo quando l'annuncio è pubblicato e quando qualcuno ti risponde nella discussione. Viene cancellata quando l'annuncio scade o lo togli.</p>
     <div class="trappola" aria-hidden="true"><label for="fSito">Sito web</label><input id="fSito" tabindex="-1" autocomplete="off"></div>
 
     <p class="esito" id="esito" role="status"></p>
@@ -166,7 +177,9 @@
   var $ = function (id) { return document.getElementById(id); };
   var CAT = {
     passaggio: { nome: "Passaggi", cerco: "Cerco un passaggio", offro: "Offro un passaggio" },
-    partner: { nome: "Cerco partner", cerco: "Cerco partner", offro: "Mi propongo come partner" }
+    partner: { nome: "Cerco partner", cerco: "Cerco partner", offro: "Mi propongo come partner" },
+    alloggio: { nome: "Alloggio", cerco: "Cerco alloggio", offro: "Offro alloggio" },
+    mercatino: { nome: "Mercatino", cerco: "Cerco", offro: "Vendo o regalo" }
   };
   var annunci = [], categoria = "tutti";
 
@@ -190,9 +203,9 @@
   }
 
   function disegna() {
-    var conta = { tutti: annunci.length, passaggio: 0, partner: 0 };
+    var conta = { tutti: annunci.length, passaggio: 0, partner: 0, alloggio: 0, mercatino: 0 };
     annunci.forEach(function (a) { conta[a.categoria] = (conta[a.categoria] || 0) + 1; });
-    $("categorie").innerHTML = [["tutti", "Tutti"], ["passaggio", "Passaggi"], ["partner", "Cerco partner"]].map(function (c) {
+    $("categorie").innerHTML = [["tutti", "Tutti"], ["passaggio", "Passaggi"], ["partner", "Cerco partner"], ["alloggio", "Alloggio"], ["mercatino", "Mercatino"]].map(function (c) {
       return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (c[0] === categoria) + '">' + c[1] + '<span class="n">' + conta[c[0]] + "</span></button>";
     }).join("");
     var q = norm($("filtro").value.trim());
@@ -208,13 +221,17 @@
       var c = CAT[a.categoria] || CAT.passaggio;
       var dove = a.categoria === "passaggio" ? esc(a.citta) + (a.arrivo ? " → " + esc(a.arrivo) : "") : esc(a.citta);
       var extra = [a.ruolo && a.ruolo.charAt(0).toUpperCase() + a.ruolo.slice(1), a.stile].filter(Boolean).join(" · ");
-      return '<article class="card annuncio"><div class="cosa ' + (a.tipo === "offro" ? "offro" : "") + '">' + esc(c[a.tipo] || c.cerco) + "</div>" +
+      var mioAnn = mio && a.a === mio;
+      return '<article class="card annuncio' + (mioAnn ? " mio-ann" : "") + '" id="annuncio-' + a.id + '"><div class="cosa ' + (a.tipo === "offro" ? "offro" : "") + '">' +
+        esc(c[a.tipo] || c.cerco) + (mioAnn ? '<span class="tuo">il tuo annuncio</span>' : "") + "</div>" +
         "<h3>" + dove + (a.evento ? " · " + esc(a.evento) : "") + "</h3>" +
         (a.giorno ? '<div class="data-ann">' + esc(data(a.giorno)) + "</div>" : "") +
         (extra ? '<div class="tag"><span>' + esc(extra) + "</span></div>" : "") +
         (a.testo ? '<div class="testo">' + esc(a.testo) + "</div>" : "") +
         '<div class="firma"><b>' + esc(a.nome) + "</b>" + (a.contatto ? " · " + contatto(a.contatto) : ' <span class="meta2">· scrivimi nella discussione</span>') + "</div>" +
-        '<div class="disc" data-id="' + a.id + '">' + discussione(a) + "</div></article>";
+        '<div class="disc" data-id="' + a.id + '">' + discussione(a) + "</div>" +
+        (mioAnn ? '<div class="togli-ann"><button type="button" class="togli" data-id="' + a.id + '">Togli il mio annuncio</button></div>' : "") +
+        "</article>";
     }).join("") + "</div>" : '<p class="vuoto">Nessun annuncio trovato.</p>';
     Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
   }
@@ -233,7 +250,7 @@
   // impronta del token come la calcola il server (primi 16 caratteri): serve a riconoscere i propri messaggi
   if (crypto.subtle) crypto.subtle.digest("SHA-256", new TextEncoder().encode("autore|" + token)).then(function (h) {
     mio = Array.from(new Uint8Array(h), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("").slice(0, 16);
-    Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
+    if (annunci.length) disegna(); else Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
   });
 
   function discussione(a) {
@@ -338,6 +355,26 @@
         .catch(function () { b.disabled = false; });
     }
   });
+  // "Togli il mio annuncio" (solo dallo stesso browser che l'ha scritto), con conferma
+  $("lista").addEventListener("click", function (e) {
+    var b = e.target.closest("button.togli");
+    if (!b) return;
+    if (b.getAttribute("data-conferma") !== "1") {
+      b.setAttribute("data-conferma", "1");
+      b.textContent = "Sicuro? Toglilo dalla bacheca";
+      return;
+    }
+    var id = +b.getAttribute("data-id");
+    b.disabled = true;
+    fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ azione: "togli", id: id, token: token }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); }); })
+      .then(function () {
+        annunci = annunci.filter(function (x) { return x.id !== id; });
+        delete aperti[id];
+        disegna();
+      })
+      .catch(function (err) { b.disabled = false; b.textContent = err.message || "Non riuscito, riprova"; });
+  });
   $("lista").addEventListener("input", function (e) {
     if (!e.target.classList.contains("disc-testo")) return;
     bozze[+e.target.closest(".disc").getAttribute("data-id")] = e.target.value;
@@ -385,8 +422,19 @@
   function carica() {
     return fetch("/api/bacheca", { cache: "no-cache" })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (d) { annunci = d.annunci || []; disegna(); })
+      .then(function (d) { annunci = d.annunci || []; disegna(); apriDaLink(); })
       .catch(function () { $("lista").innerHTML = '<p class="vuoto">Impossibile caricare la bacheca, riprova più tardi.</p>'; });
+  }
+  // /bacheca?annuncio=ID (link delle email): apre la discussione di quell'annuncio e ci porta lì
+  function apriDaLink() {
+    var id = 0;
+    try { id = +new URLSearchParams(location.search).get("annuncio") || 0; } catch (e) {}
+    if (!id || !annuncio(id)) return;
+    aperti[id] = true;
+    ridisegnaDisc(id);
+    caricaMessaggi(id);
+    var el = $("annuncio-" + id);
+    if (el) { el.classList.add("evidenziato"); el.scrollIntoView({ block: "start" }); }
   }
   carica();
 
@@ -448,15 +496,26 @@
   // ---- modulo ----
   var formIniziale = $("form").innerHTML;
   function scelto(id) { var b = $(id).querySelector('[aria-pressed="true"]'); return b ? b.getAttribute("data-v") : ""; }
+  // campi ed etichette che cambiano con la categoria
+  var MODULO = {
+    passaggio: { citta: "Parto da", cerco: "Cerco un passaggio", offro: "Offro un passaggio (ho l'auto)",
+      testo: "Posti in auto, orari, dove ci si trova…" },
+    partner: { citta: "Città", cerco: "Cerco partner", offro: "Mi propongo come partner",
+      testo: "Livello, corso o festival, cosa cerchi…" },
+    alloggio: { citta: "Città (dove dormire)", cerco: "Cerco alloggio", offro: "Offro alloggio (posto letto, divano…)",
+      testo: "Quante notti, quanti posti, zona, prezzo o gratis…" },
+    mercatino: { citta: "Città", cerco: "Cerco", offro: "Vendo o regalo",
+      testo: "Cosa (scarpe, abiti, biglietto…), taglia o numero, prezzo, condizioni…" }
+  };
   function aggiornaCampi() {
-    var p = scelto("sCategoria") === "passaggio";
-    $("lCitta").textContent = p ? "Parto da" : "Città";
-    $("bArrivo").hidden = !p;
-    $("bRuolo").hidden = p;
-    // frasi intere al posto di "Cerco" / "Offro", così è chiaro chi ha l'auto
-    var c = CAT[p ? "passaggio" : "partner"];
-    $("sTipo").querySelector('[data-v="cerco"]').textContent = c.cerco;
-    $("sTipo").querySelector('[data-v="offro"]').textContent = p ? "Offro un passaggio (ho l'auto)" : c.offro;
+    var cat = scelto("sCategoria") || "passaggio", m = MODULO[cat];
+    $("lCitta").textContent = m.citta;
+    $("bArrivo").hidden = cat !== "passaggio";
+    $("bRuolo").hidden = cat !== "partner";
+    // frasi intere al posto di "Cerco" / "Offro", così è chiaro chi cerca e chi offre
+    $("sTipo").querySelector('[data-v="cerco"]').textContent = m.cerco;
+    $("sTipo").querySelector('[data-v="offro"]').textContent = m.offro;
+    $("fTesto").placeholder = m.testo;
     suggerimenti();
   }
   function esito(t, errore) { $("esito").textContent = t; $("esito").className = "esito" + (errore ? " errore" : ""); }
@@ -480,7 +539,8 @@
       categoria: scelto("sCategoria"), tipo: scelto("sTipo"), evento: $("fEvento").value, citta: $("fCitta").value,
       arrivo: $("fArrivo").value, ruolo: $("fRuolo").value, giorno: $("fGiorno").value, stile: $("fStile").value,
       testo: $("fTesto").value, nome: $("fNome").value, contatto: $("fContatto").value, sito_web: $("fSito").value,
-      token: token   // così i tuoi messaggi nella discussione avranno l'etichetta "autore dell'annuncio"
+      token: token,  // così i tuoi messaggi nella discussione avranno l'etichetta "autore dell'annuncio"
+      avvisi: $("fAvvisi").value
     };
     // errore sul campo preciso: messaggio che lo nomina, bordo rosso e cursore lì
     [].forEach.call($("form").querySelectorAll(".manca"), function (x) { x.classList.remove("manca"); });
@@ -491,7 +551,7 @@
     }
     var passaggio = d.categoria === "passaggio";
     if (!d.tipo) {
-      esito(passaggio ? "Scegli se cerchi o offri un passaggio." : "Scegli se cerchi un partner o ti proponi.", true);
+      esito("Scegli tra “" + MODULO[d.categoria].cerco + "” e “" + MODULO[d.categoria].offro + "”.", true);
       $("sTipo").classList.add("manca");
       $("sTipo").querySelector("button").focus();
       return;
@@ -499,6 +559,7 @@
     if (!d.citta.trim()) { manca("fCitta", passaggio ? "Scrivi da dove parti." : "Scrivi la tua città."); return; }
     if (passaggio && !d.arrivo.trim() && !d.evento.trim()) { manca("fArrivo", "Scrivi dove vai: destinazione o evento."); return; }
     if (!d.nome.trim()) { manca("fNome", "Scrivi il tuo nome o un soprannome."); return; }
+    if (d.avvisi.trim() && !/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(d.avvisi.trim())) { manca("fAvvisi", "L'email per gli avvisi non sembra valida."); return; }
     $("invia").disabled = true;
     esito("Invio in corso…");
     fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })

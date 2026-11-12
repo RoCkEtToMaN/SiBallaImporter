@@ -8,7 +8,10 @@ let tabellaPronta = false;
 export const CATEGORIE = {
   passaggio: { nome: "Passaggi", cerco: "Cerco un passaggio", offro: "Offro un passaggio" },
   partner: { nome: "Cerco partner", cerco: "Cerco partner", offro: "Mi propongo come partner" },
+  alloggio: { nome: "Alloggio", cerco: "Cerco alloggio", offro: "Offro alloggio" },
+  mercatino: { nome: "Mercatino", cerco: "Cerco", offro: "Vendo o regalo" },
 };
+export const EMAIL_VALIDA = /^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i;
 export const RUOLI = ["leader", "follower", "entrambi"];
 export const GIORNI_SCADENZA = 30;
 
@@ -49,6 +52,10 @@ export async function preparaBacheca(db) {
   // colonna aggiunta dopo: impronta del browser di chi ha scritto l'annuncio, per l'etichetta
   // "autore dell'annuncio" sui suoi messaggi nella discussione (vuota per gli annunci più vecchi)
   try { await db.prepare(`ALTER TABLE annunci ADD COLUMN autore TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
+  // email PRIVATA facoltativa di chi scrive l'annuncio (mai mostrata): avviso di pubblicazione e dei nuovi messaggi.
+  // Si svuota quando l'annuncio scade o viene tolto. "avvisato" = ultimo avviso di messaggi (max 1 ogni 30 minuti).
+  try { await db.prepare(`ALTER TABLE annunci ADD COLUMN avvisi TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
+  try { await db.prepare(`ALTER TABLE annunci ADD COLUMN avvisato TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
   // una segnalazione per persona per messaggio
   await db.prepare(
     `CREATE TABLE IF NOT EXISTS segnalazioni (
@@ -65,11 +72,12 @@ export async function impronta(testo) {
   return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// invio email con Mailjet (stesse chiavi dei clandestini); risponde con l'esito in parole
-export async function inviaEmail(env, oggetto, html, testo) {
+// invio email con Mailjet (stesse chiavi dei clandestini); risponde con l'esito in parole.
+// Senza "a" va a chi amministra (EMAIL_DESTINATARI); con "a" all'indirizzo indicato (es. chi ha scritto l'annuncio).
+export async function inviaEmail(env, oggetto, html, testo, a) {
   const mancano = ["MAILJET_API_KEY", "MAILJET_API_SECRET"].filter((k) => !env[k]);
   if (mancano.length) return `non inviata: manca ${mancano.join(" e ")}`;
-  const dest = (env.EMAIL_DESTINATARI || "Giacomo.lo87@gmail.com").split(";").map((s) => s.trim()).filter(Boolean);
+  const dest = (a || env.EMAIL_DESTINATARI || "Giacomo.lo87@gmail.com").split(";").map((s) => s.trim()).filter(Boolean);
   try {
     const r = await fetch("https://api.mailjet.com/v3.1/send", {
       method: "POST",
@@ -84,4 +92,29 @@ export async function inviaEmail(env, oggetto, html, testo) {
   } catch (e) {
     return "non inviata: " + e;
   }
+}
+
+// "[PROVA] " nell'oggetto delle email partite dalle versioni di prova (<ramo>.siballa.pages.dev) o in locale
+export function prefissoProva(url) {
+  return /^[^.]+\.[^.]+\.pages\.dev$|^(localhost|127\.0\.0\.1)$/.test(new URL(url).hostname) ? "[PROVA] " : "";
+}
+
+// email a chi ha scritto l'annuncio (solo se ha lasciato l'indirizzo privato)
+export async function avvisaAutore(env, origine, annuncio, oggetto, righe) {
+  if (!annuncio.avvisi || !EMAIL_VALIDA.test(annuncio.avvisi)) return "";
+  const link = `${origine}/bacheca?annuncio=${annuncio.id}`;
+  const titolo = (CATEGORIE[annuncio.categoria]?.[annuncio.tipo] || "Annuncio") +
+    ` · ${annuncio.citta}${annuncio.arrivo ? " → " + annuncio.arrivo : ""}${annuncio.evento ? " · " + annuncio.evento : ""}`;
+  const e = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const html = `<div style="font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:15px;color:#111">
+    <h2 style="margin:0 0 6px">${e(oggetto)}</h2>
+    <p style="margin:0 0 12px;color:#666">${e(titolo)}</p>
+    ${righe.map((r) => `<p style="margin:0 0 8px">${e(r)}</p>`).join("")}
+    <p style="margin:18px 0"><a href="${e(link)}" style="background:#FFD400;color:#0E0E12;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:10px;display:inline-block">Apri l'annuncio</a></p>
+    <p style="margin:0;color:#888;font-size:12px">Ricevi questa email perché hai lasciato il tuo indirizzo nell'annuncio su siBalla.
+    Non è visibile a nessuno e viene cancellato quando l'annuncio scade o lo togli dalla bacheca.</p>
+  </div>`;
+  const testo = `${oggetto}\n${titolo}\n\n${righe.join("\n")}\n\nApri l'annuncio: ${link}\n\n` +
+    "Ricevi questa email perché hai lasciato il tuo indirizzo nell'annuncio su siBalla. Viene cancellato quando l'annuncio scade o lo togli.";
+  return inviaEmail(env, prefissoProva(origine) + oggetto, html, testo, annuncio.avvisi);
 }
