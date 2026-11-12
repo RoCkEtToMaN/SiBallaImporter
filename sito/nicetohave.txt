@@ -91,7 +91,11 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
 [ ] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
     pagina da condividere con numero di eventi, citta' piu' attiva, mese piu'
     ballato, stili piu' presenti.
-[ ] Playlist per BPM: playlist Spotify divise per velocita' (lente per principianti,
+[~] Playlist per BPM: FATTA in prova la pagina /musica (scheda Musica dello Sheet: selezioni con
+    BPM, lettore YouTube continuo, Ascolta tutto in ordine casuale, Proponi un brano, pulsante
+    Ascolta su Spotify con le playlist del proprio account). Resta: riempire le selezioni,
+    playlist Spotify pubbliche, poi Radio siBalla con licenze.
+    Idea iniziale: playlist Spotify divise per velocita' (lente per principianti,
     medie per social dance, veloci per Balboa/jam). Utili per allenarsi e ai DJ.
     PIU' AVANTI (deciso il 12/11/2026), in 3 passi:
     1) pagina "Musica" con 4-5 playlist incorporate: Lente 110-140 BPM (principianti,
