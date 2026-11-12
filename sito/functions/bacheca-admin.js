@@ -1,6 +1,6 @@
 import { giornoRoma } from "../lib/visite.js";
 import { esc, uguali, dataSheet } from "../lib/clandestini.js";
-import { preparaBacheca, CATEGORIE } from "../lib/bacheca.js";
+import { preparaBacheca, CATEGORIE, SOGLIA_SEGNALAZIONI } from "../lib/bacheca.js";
 
 // GET  /bacheca-admin?chiave=... : pagina nascosta con gli annunci della bacheca, da approvare o rifiutare.
 // POST /bacheca-admin            : pulsanti Approva / Rifiuta / Togli / Rimetti in attesa.
@@ -16,6 +16,16 @@ export async function onRequestPost({ request, env }) {
   const stato = AZIONI[f.get("azione")], id = Number(f.get("id"));
   await preparaBacheca(env.VISITE);
   if (stato && id) await env.VISITE.prepare(`UPDATE annunci SET stato = ?1 WHERE id = ?2`).bind(stato, id).run();
+  // messaggi delle discussioni
+  else if (f.get("azione") === "cancella_msg" && id) {
+    await env.VISITE.prepare(`DELETE FROM messaggi WHERE id = ?1`).bind(id).run();
+    await env.VISITE.prepare(`DELETE FROM segnalazioni WHERE messaggio = ?1`).bind(id).run();
+  } else if (f.get("azione") === "mostra_msg" && id) {
+    await env.VISITE.prepare(`UPDATE messaggi SET nascosto = 0 WHERE id = ?1`).bind(id).run();
+    await env.VISITE.prepare(`DELETE FROM segnalazioni WHERE messaggio = ?1`).bind(id).run();
+  } else if (f.get("azione") === "nascondi_msg" && id) {
+    await env.VISITE.prepare(`UPDATE messaggi SET nascosto = 1 WHERE id = ?1`).bind(id).run();
+  }
   return Response.redirect(new URL("/bacheca-admin?chiave=" + encodeURIComponent(chiave), request.url).href, 303);
 }
 
@@ -46,8 +56,24 @@ export async function onRequestGet({ request, env }) {
     </article>`;
     const gruppo = (titolo, righe, vuoto) =>
       `<section><h2>${titolo} <span class="n">${righe.length}</span></h2>${righe.length ? righe.map(scheda).join("") : `<p class="vuoto">${vuoto}</p>`}</section>`;
+    // ultimi messaggi delle discussioni (compaiono senza approvazione): prima quelli nascosti o segnalati
+    const msg = (await env.VISITE.prepare(
+      `SELECT m.*, a.citta, a.arrivo, a.evento, (SELECT COUNT(*) FROM segnalazioni s WHERE s.messaggio = m.id) AS segn
+       FROM messaggi m JOIN annunci a ON a.id = m.annuncio WHERE a.scade >= ?1
+       ORDER BY m.nascosto DESC, segn DESC, m.id DESC LIMIT 150`).bind(giornoRoma()).all()).results;
+    const schedaMsg = (m) => `<article class="msg${m.nascosto ? " nascosto" : ""}">
+      <div class="quando">${esc(m.citta)}${m.arrivo ? " → " + esc(m.arrivo) : ""}${m.evento ? " · " + esc(m.evento) : ""}</div>
+      <div><b>${esc(m.nick)}</b>: ${esc(m.testo)}</div>
+      <div class="m piccolo">${esc(new Date(m.creato).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}
+        ${m.segn ? ` · <span class="avviso">⚑ ${m.segn} segnalazion${m.segn === 1 ? "e" : "i"}</span>` : ""}${m.nascosto ? ` · <span class="avviso">nascosto</span>` : ""}</div>
+      <div class="azioni">${pulsante(m, "cancella_msg", "Cancella")}${m.nascosto ? pulsante(m, "mostra_msg", "Rendi visibile", "si") : pulsante(m, "nascondi_msg", "Nascondi")}</div>
+    </article>`;
+    const sezioneMsg = `<section><h2>Messaggi delle discussioni <span class="n">${msg.length}</span></h2>` +
+      `<p class="m">Compaiono subito, senza approvazione. Con ${SOGLIA_SEGNALAZIONI} segnalazioni si nascondono da soli e arriva un'email.</p>` +
+      (msg.length ? msg.map(schedaMsg).join("") : `<p class="vuoto">Nessun messaggio.</p>`) + `</section>`;
     corpo = gruppo("Da approvare", results.filter((r) => r.stato === "attesa"), "Nessun annuncio in attesa.") +
       gruppo("In bacheca", results.filter((r) => r.stato === "ok"), "Nessun annuncio pubblicato.") +
+      sezioneMsg +
       gruppo("Rifiutati o tolti", results.filter((r) => r.stato === "no"), "Nessuno.");
   }
 
@@ -62,7 +88,8 @@ main{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{margin:0 0 4px;font
 section{margin:20px 0}h2{font-size:15px;margin:0 0 8px;color:var(--accent)}h2 .n{color:var(--muted);font-weight:400}
 article{background:var(--surface);border-radius:14px;padding:12px 14px;margin:10px 0}h3{margin:2px 0 4px;font-size:16px;overflow-wrap:anywhere}
 .quando{color:var(--accent);font-weight:600;font-size:13px}.m{color:var(--muted);font-size:13px;margin-top:3px;overflow-wrap:anywhere}
-.piccolo{font-size:12px}.vuoto{color:var(--muted)}.azioni{display:flex;gap:8px;margin-top:10px}form{margin:0}
+.piccolo{font-size:12px}.vuoto{color:var(--muted)}.avviso{color:#FF9F43}
+article.msg{padding:10px 14px}article.msg.nascosto{opacity:.75;border:1px dashed #FF9F43}.azioni{display:flex;gap:8px;margin-top:10px}form{margin:0}
 button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:var(--surface-2);color:var(--text);cursor:pointer}
 button.si{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 </style></head><body><main>

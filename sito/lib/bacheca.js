@@ -33,5 +33,52 @@ export async function preparaBacheca(db) {
        contatto TEXT NOT NULL,            -- PUBBLICO: Instagram, email o telefono, scelto da chi scrive
        email TEXT NOT NULL DEFAULT ''     -- esito dell'email di avviso
      )`).run();
+  // discussione sotto ogni annuncio: messaggi pubblici SENZA approvazione (si nascondono con le segnalazioni)
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS messaggi (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       annuncio INTEGER NOT NULL,
+       creato TEXT NOT NULL,                  -- ISO, ora UTC
+       nick TEXT NOT NULL,
+       testo TEXT NOT NULL,
+       autore TEXT NOT NULL,                  -- impronta (SHA-256) del codice segreto del browser di chi scrive
+       rete TEXT NOT NULL DEFAULT '',         -- impronta dell'IP con la data: solo per i limiti anti-spam, cambia ogni giorno
+       nascosto INTEGER NOT NULL DEFAULT 0    -- 1 = nascosto dalle segnalazioni o da chi amministra
+     )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS messaggi_annuncio ON messaggi (annuncio, id)`).run();
+  // una segnalazione per persona per messaggio
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS segnalazioni (
+       messaggio INTEGER NOT NULL, chi TEXT NOT NULL, creato TEXT NOT NULL,
+       PRIMARY KEY (messaggio, chi)
+     )`).run();
   tabellaPronta = true;
+}
+
+export const SOGLIA_SEGNALAZIONI = 2;   // con 2 segnalazioni di persone diverse il messaggio si nasconde
+
+export async function impronta(testo) {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(testo)));
+  return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// invio email con Mailjet (stesse chiavi dei clandestini); risponde con l'esito in parole
+export async function inviaEmail(env, oggetto, html, testo) {
+  const mancano = ["MAILJET_API_KEY", "MAILJET_API_SECRET"].filter((k) => !env[k]);
+  if (mancano.length) return `non inviata: manca ${mancano.join(" e ")}`;
+  const dest = (env.EMAIL_DESTINATARI || "Giacomo.lo87@gmail.com").split(";").map((s) => s.trim()).filter(Boolean);
+  try {
+    const r = await fetch("https://api.mailjet.com/v3.1/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${env.MAILJET_API_KEY.trim()}:${env.MAILJET_API_SECRET.trim()}`) },
+      body: JSON.stringify({ Messages: [{
+        From: { Email: "siballanewsletter@gmail.com", Name: "siBalla" }, To: dest.map((Email) => ({ Email })),
+        Subject: oggetto, TextPart: testo, HTMLPart: html,
+      }] }),
+    });
+    const j = await r.json().catch(() => ({}));
+    return r.ok && j.Messages?.[0]?.Status === "success" ? `inviata a ${dest.join(", ")}` : `non inviata (Mailjet HTTP ${r.status})`;
+  } catch (e) {
+    return "non inviata: " + e;
+  }
 }

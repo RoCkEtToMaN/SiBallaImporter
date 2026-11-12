@@ -25,6 +25,13 @@ DA FARE
     ricerca, modulo, approvazione in /bacheca-admin?chiave=..., email di avviso,
     scadenza automatica (data indicata o 30 giorni), voce "Bacheca" nel menu.
     Stesso database D1 e stesse chiavi dei clandestini: niente da configurare.
+    Avvisi: pallino sul menu, invito in home, riga sulle schede evento (gialli fino al clic);
+    nel modulo data e destinazione dall'evento, suggerimenti filtrati per citta'.
+    DISCUSSIONE sotto ogni annuncio (in prova): messaggi SENZA approvazione, nickname
+    ricordato dal browser, si aggiorna ogni 12 s; "Segnala" (2 persone -> nascosto + email),
+    "Cancella" per i propri; limiti 5/minuto e 60/giorno; in /bacheca-admin elenco dei
+    messaggi con Cancella / Nascondi / Rendi visibile. Sparisce con l'annuncio.
+    Da valutare: email privata facoltativa per avvisare chi ha scritto l'annuncio.
     COSA SERVIREBBE:
     - provarla sulla versione di prova (annuncio -> email -> approvazione -> pagina)
     - contatto non pubblico: pulsante "Rispondi" che manda un'email a chi ha scritto

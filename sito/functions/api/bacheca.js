@@ -17,7 +17,8 @@ export async function onRequestGet({ env }) {
     try {
       await preparaBacheca(env.VISITE);
       const { results } = await env.VISITE.prepare(
-        `SELECT id, creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto
+        `SELECT id, creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto,
+           (SELECT COUNT(*) FROM messaggi m WHERE m.annuncio = annunci.id AND m.nascosto = 0) AS messaggi
          FROM annunci WHERE stato = 'ok' AND scade >= ?1 ORDER BY CASE WHEN giorno = '' THEN scade ELSE giorno END, id LIMIT 300`)
         .bind(giornoRoma()).all();
       annunci = results;

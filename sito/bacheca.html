@@ -50,6 +50,36 @@
   .grazie { text-align: center; padding: 10px 0; }
   .grazie b { font-size: 34px; }
   [hidden] { display: none !important; }
+
+  /* discussione sotto l'annuncio */
+  .disc { margin-top: 12px; }
+  .disc-apri { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 6px 12px; cursor: pointer; }
+  .disc-apri:hover { border-color: rgba(255,212,0,.5); }
+  .disc-testa { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; font-size: 14px; }
+  .disc-chiudi, .disc-cambia, .msg-az { font: inherit; font-size: 12px; color: var(--muted); background: none; border: 0; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
+  .disc-chiudi:hover, .disc-cambia:hover, .msg-az:hover { color: var(--text); }
+  .msgs { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 8px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 12px; }
+  .msg { background: var(--surface-2); border-radius: 10px; padding: 6px 10px; max-width: 92%; align-self: flex-start; min-width: 0; }
+  .msg.mio { align-self: flex-end; background: var(--accent-soft); }
+  .msg-testa { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+  .msg-testa b { color: var(--accent); }
+  .msg.mio .msg-testa b { color: var(--text); }
+  .msg-ora { color: var(--muted); font-size: 11.5px; }
+  .msg-az { margin-left: auto; font-size: 11.5px; padding: 0 2px; }
+  .msg-t { font-size: 14px; white-space: pre-line; overflow-wrap: anywhere; margin-top: 1px; }
+  .disc-vuota { margin: 6px 2px; color: var(--muted); font-size: 13px; }
+  .disc-form { display: grid; gap: 6px; margin-top: 8px; }
+  .disc-form input, .disc-form textarea { width: 100%; font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; resize: vertical; }
+  .disc-form input:focus, .disc-form textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .disc-come { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .disc-fondo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .disc-nota { font-size: 11.5px; color: var(--muted); }
+  .disc-invia { padding: 7px 14px; font-size: 14px; flex: none; }
+  .disc-esito { margin: 0; min-height: 0; font-size: 13px; }
+  .disc-form .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; }
 </style>
 </head>
 <body>
@@ -177,9 +207,89 @@
         (a.giorno ? '<div class="data-ann">' + esc(data(a.giorno)) + "</div>" : "") +
         (extra ? '<div class="tag"><span>' + esc(extra) + "</span></div>" : "") +
         (a.testo ? '<div class="testo">' + esc(a.testo) + "</div>" : "") +
-        '<div class="firma"><b>' + esc(a.nome) + "</b> · " + contatto(a.contatto) + "</div></article>";
+        '<div class="firma"><b>' + esc(a.nome) + "</b> · " + contatto(a.contatto) + "</div>" +
+        '<div class="disc" data-id="' + a.id + '">' + discussione(a) + "</div></article>";
     }).join("") + "</div>" : '<p class="vuoto">Nessun annuncio trovato.</p>';
+    Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
   }
+
+  // ---- discussione sotto l'annuncio: messaggi pubblici, senza approvazione ----
+  // Il browser ricorda nickname e un codice segreto (token) con cui si riconoscono e cancellano i propri messaggi.
+  var aperti = {}, messaggi = {}, bozze = {}, mio = "";
+  function leggiLS(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function scriviLS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  var token = leggiLS("siballa-token");
+  if (!/^[A-Za-z0-9-]{20,100}$/.test(token)) {
+    token = (crypto.randomUUID ? crypto.randomUUID() + "-" + crypto.randomUUID()
+      : Array.from(crypto.getRandomValues(new Uint8Array(24)), function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""));
+    scriviLS("siballa-token", token);
+  }
+  // impronta del token come la calcola il server (primi 16 caratteri): serve a riconoscere i propri messaggi
+  if (crypto.subtle) crypto.subtle.digest("SHA-256", new TextEncoder().encode("autore|" + token)).then(function (h) {
+    mio = Array.from(new Uint8Array(h), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("").slice(0, 16);
+    Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
+  });
+
+  function discussione(a) {
+    var n = messaggi[a.id] ? messaggi[a.id].length : (a.messaggi || 0);
+    if (!aperti[a.id]) {
+      return '<button type="button" class="disc-apri">💬 ' + (n ? "Discussione (" + n + ")" : "Scrivi un messaggio") + "</button>";
+    }
+    var nick = leggiLS("siballa-nick");
+    return '<div class="disc-testa"><b>💬 Discussione</b><button type="button" class="disc-chiudi">Chiudi</button></div>' +
+      '<div class="msgs" id="msgs-' + a.id + '"><p class="disc-vuota">Caricamento…</p></div>' +
+      '<form class="disc-form" novalidate>' +
+      (nick ? '<p class="disc-come">Scrivi come <b>' + esc(nick) + '</b> · <button type="button" class="disc-cambia">cambia</button></p>'
+        : '<input class="disc-nick" maxlength="30" placeholder="Il tuo nickname" aria-label="Nickname" autocomplete="nickname">') +
+      '<textarea class="disc-testo" maxlength="500" rows="2" placeholder="Scrivi un messaggio…" aria-label="Messaggio">' + esc(bozze[a.id] || "") + "</textarea>" +
+      '<input class="trappola" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+      '<div class="disc-fondo"><span class="disc-nota">Messaggi pubblici: non scrivere numeri di telefono o indirizzi.</span>' +
+      '<button type="submit" class="btn disc-invia">Invia</button></div><p class="esito disc-esito" role="status"></p></form>';
+  }
+
+  function ora(iso) {
+    var d = new Date(iso), oggi = new Date();
+    var stessoGiorno = d.toDateString() === oggi.toDateString();
+    return (stessoGiorno ? "" : d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) + " ") +
+      d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  }
+  function mostraMessaggi(id) {
+    var box = $("msgs-" + id);
+    if (!box || !messaggi[id]) return;
+    var giu = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    box.innerHTML = messaggi[id].length ? messaggi[id].map(function (m) {
+      var suo = mio && m.a === mio;
+      return '<div class="msg' + (suo ? " mio" : "") + '"><div class="msg-testa"><b>' + esc(m.nick) + '</b><span class="msg-ora">' + esc(ora(m.creato)) +
+        '</span><button type="button" class="msg-az" data-az="' + (suo ? "cancella" : "segnala") + '" data-m="' + m.id + '" title="' +
+        (suo ? "Cancella il tuo messaggio" : "Segnala un messaggio offensivo o spam") + '">' + (suo ? "Cancella" : "Segnala") + "</button></div>" +
+        '<div class="msg-t">' + esc(m.testo) + "</div></div>";
+    }).join("") : '<p class="disc-vuota">Ancora nessun messaggio: scrivi tu il primo.</p>';
+    if (giu) box.scrollTop = box.scrollHeight;
+    // aggiorno il numero sull'annuncio
+    var a = annunci.filter(function (x) { return x.id === id; })[0];
+    if (a) a.messaggi = messaggi[id].length;
+  }
+  function caricaMessaggi(id) {
+    return fetch("/api/messaggi?annuncio=" + id, { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { messaggi[id] = d.messaggi || []; mostraMessaggi(id); })
+      .catch(function () {});
+  }
+  function annuncio(id) { return annunci.filter(function (x) { return x.id === id; })[0]; }
+  function ridisegnaDisc(id) {
+    var el = document.querySelector('.disc[data-id="' + id + '"]'), a = annuncio(id);
+    if (el && a) { el.innerHTML = discussione(a); mostraMessaggi(id); }
+  }
+  function posta(dati) {
+    dati.token = token;
+    return fetch("/api/messaggi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dati) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); return j; }); });
+  }
+  // aggiornamento automatico delle discussioni aperte, solo con la pagina in primo piano
+  setInterval(function () {
+    if (document.visibilityState !== "visible") return;
+    Object.keys(aperti).forEach(function (id) { caricaMessaggi(+id); });
+  }, 12000);
 
   $("categorie").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-c]");
@@ -188,6 +298,79 @@
     disegna();
   });
   $("filtro").addEventListener("input", disegna);
+
+  // clic nella discussione: apri, chiudi, cambia nickname, cancella / segnala un messaggio
+  $("lista").addEventListener("click", function (e) {
+    var disc = e.target.closest(".disc");
+    if (!disc) return;
+    var id = +disc.getAttribute("data-id");
+    if (e.target.closest(".disc-apri")) {
+      aperti[id] = true;
+      ridisegnaDisc(id);
+      caricaMessaggi(id).then(function () { var t = disc.querySelector(".disc-nick") || disc.querySelector(".disc-testo"); if (t) t.focus(); });
+    } else if (e.target.closest(".disc-chiudi")) {
+      delete aperti[id];
+      ridisegnaDisc(id);
+    } else if (e.target.closest(".disc-cambia")) {
+      scriviLS("siballa-nick", "");
+      ridisegnaDisc(id);
+    } else if (e.target.closest(".msg-az")) {
+      var b = e.target.closest(".msg-az"), az = b.getAttribute("data-az");
+      if (az === "cancella" && b.getAttribute("data-conferma") !== "1") {
+        b.setAttribute("data-conferma", "1");
+        b.textContent = "Sicuro? Cancella";
+        return;
+      }
+      b.disabled = true;
+      posta({ azione: az, id: +b.getAttribute("data-m") })
+        .then(function () {
+          if (az === "segnala") { b.textContent = "Segnalato"; }
+          return caricaMessaggi(id);
+        })
+        .catch(function () { b.disabled = false; });
+    }
+  });
+  $("lista").addEventListener("input", function (e) {
+    if (!e.target.classList.contains("disc-testo")) return;
+    bozze[+e.target.closest(".disc").getAttribute("data-id")] = e.target.value;
+  });
+  // Invio = invia, Maiusc+Invio = a capo
+  $("lista").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey && e.target.classList.contains("disc-testo")) {
+      e.preventDefault();
+      e.target.form.requestSubmit ? e.target.form.requestSubmit() : e.target.form.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+  });
+  $("lista").addEventListener("submit", function (e) {
+    var form = e.target.closest(".disc-form");
+    if (!form) return;
+    e.preventDefault();
+    var id = +form.closest(".disc").getAttribute("data-id");
+    var campoNick = form.querySelector(".disc-nick"), testo = form.querySelector(".disc-testo");
+    var esitoEl = form.querySelector(".disc-esito"), invia = form.querySelector(".disc-invia");
+    var nick = campoNick ? campoNick.value.trim() : leggiLS("siballa-nick");
+    function errore(t) { esitoEl.textContent = t; esitoEl.className = "esito disc-esito errore"; }
+    if (nick.length < 2) { errore("Scegli un nickname di almeno 2 lettere."); if (campoNick) campoNick.focus(); return; }
+    if (!testo.value.trim()) { testo.focus(); return; }
+    invia.disabled = true;
+    posta({ azione: "scrivi", annuncio: id, nick: nick, testo: testo.value, sito_web: form.querySelector(".trappola").value })
+      .then(function () {
+        scriviLS("siballa-nick", nick);
+        bozze[id] = "";
+        ridisegnaDisc(id);
+        return caricaMessaggi(id);
+      })
+      .then(function () {
+        var box = $("msgs-" + id), t = document.querySelector('.disc[data-id="' + id + '"] .disc-testo');
+        if (box) box.scrollTop = box.scrollHeight;
+        if (t) t.focus();
+      })
+      .catch(function (err) {
+        errore(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, riprova.");
+        invia.disabled = false;
+      });
+  });
+
   // /bacheca?q=nome evento: arriva dalla scheda di un evento nella home
   try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("filtro").value = q0; } catch (e) {}
 
@@ -262,6 +445,10 @@
     $("lCitta").textContent = p ? "Parto da" : "Città";
     $("bArrivo").hidden = !p;
     $("bRuolo").hidden = p;
+    // frasi intere al posto di "Cerco" / "Offro", così è chiaro chi ha l'auto
+    var c = CAT[p ? "passaggio" : "partner"];
+    $("sTipo").querySelector('[data-v="cerco"]').textContent = c.cerco;
+    $("sTipo").querySelector('[data-v="offro"]').textContent = p ? "Offro un passaggio (ho l'auto)" : c.offro;
     suggerimenti();
   }
   function esito(t, errore) { $("esito").textContent = t; $("esito").className = "esito" + (errore ? " errore" : ""); }
