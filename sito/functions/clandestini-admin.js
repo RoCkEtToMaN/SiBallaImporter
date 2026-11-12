@@ -3,7 +3,7 @@ import { preparaClandestini, esc, uguali } from "../lib/clandestini.js";
 import { avvisa } from "./api/clandestini.js";
 
 // GET  /clandestini-admin?chiave=... : pagina nascosta con i clandestini proposti dagli utenti, da approvare o rifiutare.
-// POST /clandestini-admin            : pulsanti Approva / Rifiuta / Togli (modulo con chiave, id e azione).
+// POST /clandestini-admin            : pulsanti Approva / Rifiuta / Togli / Elimina (modulo con chiave, id e azione).
 // Stessa chiave delle statistiche (secret STATS_KEY); senza la chiave giusta risponde 404.
 
 const nonTrovata = () => new Response("Not found", { status: 404 });
@@ -17,6 +17,12 @@ export async function onRequestPost({ request, env }) {
   await preparaClandestini(env.VISITE);
   if (stato && id) {
     await env.VISITE.prepare(`UPDATE clandestini SET stato = ?1 WHERE id = ?2`).bind(stato, id).run();
+  } else if (f.get("azione") === "elimina" && id) {
+    // cancellazione definitiva: proposta, foto e contatto spariscono dal database
+    await env.VISITE.batch([
+      env.VISITE.prepare(`DELETE FROM clandestini_foto WHERE id = ?1`).bind(id),
+      env.VISITE.prepare(`DELETE FROM clandestini WHERE id = ?1`).bind(id),
+    ]);
   } else if (f.get("azione") === "email" && id) {
     // rimanda l'email di avviso (utile dopo aver sistemato le chiavi Mailjet) e salva il nuovo esito
     const c = await env.VISITE.prepare(`SELECT * FROM clandestini WHERE id = ?1`).bind(id).first();
@@ -47,7 +53,7 @@ export async function onRequestGet({ request, env }) {
        WHERE c.giorno >= ?1 ORDER BY c.giorno, c.ora LIMIT 300`).bind(oggi).all();
     const dataIt = (g) => new Date(g + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" });
     const pulsante = (r, azione, testo, cls = "") =>
-      `<form method="post"><input type="hidden" name="chiave" value="${esc(chiave)}"><input type="hidden" name="id" value="${r.id}">` +
+      `<form method="post"${azione === "elimina" ? ` onsubmit="return confirm('Eliminare per sempre questo clandestino? Non si può annullare.')"` : ""}><input type="hidden" name="chiave" value="${esc(chiave)}"><input type="hidden" name="id" value="${r.id}">` +
       `<button name="azione" value="${azione}" class="${cls}">${testo}</button></form>`;
     const scheda = (r) => `<article>
       ${r.foto ? `<a href="/api/clandestini-foto/${r.id}?chiave=${encodeURIComponent(chiave)}" target="_blank"><img class="foto" src="/api/clandestini-foto/${r.id}?chiave=${encodeURIComponent(chiave)}" alt="Foto proposta" loading="lazy"></a>` : ""}
@@ -66,7 +72,7 @@ export async function onRequestGet({ request, env }) {
           : `<span class="avviso">✉️ email ${esc(r.email)}</span>`}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
         : r.stato === "ok" ? pulsante(r, "togli", "Togli dal sito") : pulsante(r, "riapri", "Rimetti in attesa")}
-        ${pulsante(r, "email", "✉️ Rimanda email")}</div>
+        ${pulsante(r, "email", "✉️ Rimanda email")}${pulsante(r, "elimina", "🗑 Elimina", "no")}</div>
     </article>`;
     const gruppo = (titolo, righe, vuoto) =>
       `<section><h2>${titolo} <span class="n">${righe.length}</span></h2>${righe.length ? righe.map(scheda).join("") : `<p class="vuoto">${vuoto}</p>`}</section>`;
@@ -91,6 +97,7 @@ article{background:var(--surface);border-radius:14px;padding:12px 14px;margin:10
 .azioni{display:flex;gap:8px;margin-top:10px}form{margin:0}
 button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:var(--surface-2);color:var(--text);cursor:pointer}
 button.si{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}.azioni{flex-wrap:wrap}
 </style></head><body><main>
 <h1>Clandestini <span>siBalla</span></h1>
 <p class="sub">Eventi proposti dagli utenti dal sito, da oggi in poi. Quelli approvati compaiono subito nella scheda "Clandestini" (entro un minuto).
