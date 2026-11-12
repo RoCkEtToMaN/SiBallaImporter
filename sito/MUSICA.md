@@ -18,6 +18,7 @@ La pagina `/musica` della versione di prova usa la scheda **Musica** dello stess
 | H | Link YouTube | Lascia vuoto | Link HTTPS del video o della playlist YouTube |
 | I | Ordine | Posizione del riquadro | Posizione del brano nel suo riquadro |
 | J | Attivo | `si` per mostrare; `no` o vuoto per nascondere tutta la selezione | `si` per mostrare; `no` o vuoto per nascondere il brano |
+| K | BPM | Facoltativa: velocità mostrata sulla copertina del riquadro, es. `110–140` o `200+`; vuota = si vede il Sottotitolo | Lascia vuoto |
 
 ## Esempio minimo
 
@@ -43,3 +44,7 @@ Le intestazioni devono rimanere alla riga 2; non rinominare la scheda Musica. Le
 `elenchi/musica.csv` contiene il template e la selezione iniziale. Il CSV inizia dalle intestazioni: per copiarlo in un nuovo foglio, incollalo a partire da **A2**. Viene usato come bozza soltanto se la scheda Musica non esiste; se la scheda esiste ma è vuota o tutta disattivata, il sito resta senza selezioni e non ripristina la bozza.
 
 L'esportatore genera `musica.json` insieme a `eventi.json` nel workflow esistente. Musica è una scheda editoriale, esclusa dagli eventi e dal sito pubblico finché le novità pubbliche sono disattivate.
+
+## Aspetto della pagina
+
+Ogni selezione è un riquadro con la copertina colorata (nell'ordine: azzurro, verde, arancio, viola, giallo) e i BPM della colonna **BPM**. In alto c'è la guida alle fasce di velocità (Lente 110–140, Medie 140–180, Veloci oltre 200). Sotto le selezioni: **Ascolta tutto in ordine casuale** (tutti i brani mescolati), **Proponi un brano** (arriva un'email e la proposta resta nella tabella `brani_proposti` del database; i brani buoni si aggiungono a mano qui) e il riquadro **Radio siBalla, più avanti**.

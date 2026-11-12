@@ -12,7 +12,8 @@
   var coda = [];
   var posizione = 0;
   var inTransizione = false;
-  var tinte = ['#6FCF97', '#FFD400', '#F2994A', '#9B8CFF'];
+  var tinte = ['#56CCF2', '#6FCF97', '#F2994A', '#C9A0FF', '#FFD400'];   // lento, medio, veloce, live, altro
+  var tutte = [];   // tutti i brani riproducibili, per "Ascolta tutto in ordine casuale"
   function nodo(tag, classe, testo) {
     var n = document.createElement(tag);
     if (classe) n.className = classe;
@@ -27,6 +28,7 @@
     video.replaceChildren();
     lettore.hidden = true;
     elenco.querySelectorAll('[aria-pressed]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+    elenco.querySelectorAll('.pl.suona').forEach(function (c) { c.classList.remove('suona'); });
   }
   function destinazione(valore) {
     try {
@@ -68,9 +70,14 @@
     document.getElementById('titolo-brano').textContent = titolo;
     document.getElementById('apri-youtube').href = voce.link.url;
     elenco.querySelectorAll('[aria-pressed]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === voce.pulsante)); });
+    // onde in movimento sul riquadro del brano che suona
+    var card = voce.pulsante.closest('.pl');
+    elenco.querySelectorAll('.pl.suona').forEach(function (c) { if (c !== card) c.classList.remove('suona'); });
+    if (card) card.classList.add('suona');
     var frame = video.querySelector('iframe');
     if (frame) frame.title = titolo;
-    statoRiproduzione.textContent = 'Ascolto ' + (posizione + 1) + ' di ' + coda.length + '. I brani proseguono in ordine fino alla fine della selezione.';
+    statoRiproduzione.textContent = 'Ascolto ' + (posizione + 1) + ' di ' + coda.length + (coda.casuale
+      ? '. Tutti i brani in ordine casuale, uno dopo l\'altro.' : '. I brani proseguono in ordine fino alla fine della selezione.');
   }
   function successivo() {
     if (posizione + 1 >= coda.length) {
@@ -159,14 +166,24 @@
     filtro('Tutta la musica', null);
     selezioni.forEach(function (s, i) {
       filtro(s.titolo_selezione, s.selezione);
-      var card = nodo('article', 'card selezione');
+      // riquadro: copertina colorata con i BPM (colonna "BPM" dello Sheet; senza, il sottotitolo), poi titolo e brani
+      var card = nodo('article', 'pl');
       card.dataset.categoria = s.selezione;
       card.style.setProperty('--tinta', tinte[i % tinte.length]);
-      var disco = nodo('div', 'disco'); disco.setAttribute('aria-hidden', 'true');
-      card.appendChild(disco);
-      card.appendChild(nodo('div', 'occasione', s.sottotitolo));
-      card.appendChild(nodo('h3', '', s.titolo_selezione));
-      card.appendChild(nodo('p', 'descrizione', s.descrizione));
+      var copertina = nodo('div', 'copertina');
+      var bpm = (s.bpm || '').trim();
+      var numerico = !!bpm && /\d/.test(bpm);
+      var etichetta = nodo('div', 'bpm' + (numerico ? '' : ' testo'), bpm || s.sottotitolo || '');
+      if (numerico && !/bpm/i.test(bpm)) etichetta.appendChild(nodo('small', '', 'BPM'));
+      copertina.appendChild(etichetta);
+      var onde = nodo('div', 'onde'); onde.setAttribute('aria-hidden', 'true');
+      [40, 80, 55, 100].forEach(function (h) { var o = nodo('i'); o.style.height = h + '%'; onde.appendChild(o); });
+      copertina.appendChild(onde);
+      card.appendChild(copertina);
+      var corpo = nodo('div', 'corpo');
+      if (bpm && s.sottotitolo) corpo.appendChild(nodo('div', 'occasione', s.sottotitolo));
+      corpo.appendChild(nodo('h3', '', s.titolo_selezione));
+      if (s.descrizione) corpo.appendChild(nodo('p', 'descrizione', s.descrizione));
       var lista = nodo('ul', 'brani');
       var sequenza = [];
       righe.filter(function (r) { return r.tipo === 'brano' && r.selezione === s.selezione && r.titolo_brano; }).sort(ordine).forEach(function (brano) {
@@ -178,32 +195,81 @@
           b.type = 'button'; b.setAttribute('aria-pressed', 'false');
           var indice = sequenza.length;
           sequenza.push({ brano: brano, link: link, pulsante: b });
+          tutte.push({ brano: brano, link: link, pulsante: b });
           b.addEventListener('click', function () { ascolta(sequenza, indice); });
         } else { b.href = link.url; b.target = '_blank'; b.rel = 'noopener noreferrer'; }
         var icona = nodo('span', 'play', link.embed ? '▶' : '↗'); icona.setAttribute('aria-hidden', 'true');
         b.appendChild(icona);
         var testo = nodo('span');
         testo.appendChild(nodo('strong', '', brano.titolo_brano));
-        testo.appendChild(nodo('small', '', brano.artista));
+        if (brano.artista) testo.appendChild(nodo('small', '', brano.artista));
         b.appendChild(testo);
-        b.appendChild(nodo('span', 'invito', link.embed ? 'Ascolta' : 'Apri YouTube'));
+        b.appendChild(nodo('span', 'invito', link.embed ? (link.lista ? 'Playlist' : '') : 'YouTube ↗'));
         riga.appendChild(b); lista.appendChild(riga);
       });
-      card.appendChild(lista);
-      if (!lista.children.length) card.appendChild(nodo('p', 'nota', 'Nuovi brani in arrivo.'));
+      var n = lista.children.length;
+      corpo.appendChild(nodo('div', 'meta', n ? n + (n === 1 ? ' voce' : ' voci') + ' · YouTube' : 'Nuovi brani in arrivo'));
+      if (sequenza.length) {
+        // pulsante grande: ascolta la selezione dall'inizio
+        var tutta = nodo('button', 'ascolta-tutta');
+        tutta.type = 'button';
+        var tondo = nodo('span', 'tondo', '▶'); tondo.setAttribute('aria-hidden', 'true');
+        tutta.appendChild(tondo);
+        tutta.appendChild(nodo('b', '', 'Ascolta la selezione'));
+        tutta.addEventListener('click', function () { ascolta(sequenza, 0); });
+        corpo.appendChild(tutta);
+      }
+      if (n) corpo.appendChild(lista);
       if (s.selezione === 'italia') {
         var azioni = nodo('div', 'azioni');
         var artisti = nodo('a', '', 'Scopri band e DJ →'); artisti.href = '/artisti';
-        azioni.appendChild(artisti); card.appendChild(azioni);
+        azioni.appendChild(artisti); corpo.appendChild(azioni);
       }
+      card.appendChild(corpo);
       elenco.appendChild(card);
     });
     stato.hidden = true;
+    // "Ascolta tutto in ordine casuale": tutti i brani delle selezioni, mescolati
+    var casuale = document.getElementById('tutto-casuale');
+    if (casuale && tutte.length > 1) {
+      casuale.hidden = false;
+      casuale.addEventListener('click', function () {
+        var mix = tutte.slice();
+        for (var k = mix.length - 1; k > 0; k--) { var x = Math.floor(Math.random() * (k + 1)); var t = mix[k]; mix[k] = mix[x]; mix[x] = t; }
+        mix.casuale = true;
+        ascolta(mix, 0);
+      });
+    }
   }
   lettore.querySelector('button').addEventListener('click', function () {
     ferma();
     if (ultimoBrano) ultimoBrano.focus();
   });
+  // "Proponi un brano": salvato e segnalato via email a chi gestisce il sito (functions/api/brani.js)
+  var modulo = document.getElementById('proponi');
+  if (modulo) {
+    var antibot = window.siBallaAntibot ? window.siBallaAntibot.monta(document.getElementById('pAntibot')) : null;
+    var esitoP = document.getElementById('pEsito');
+    var esitoMsg = function (t, ok) { esitoP.textContent = t; esitoP.className = 'esito-proposta ' + (ok ? 'ok' : 'err'); };
+    modulo.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var titolo = document.getElementById('pTitolo');
+      if (!titolo.value.trim()) { esitoMsg('Scrivi almeno il titolo del brano.', false); titolo.focus(); return; }
+      if (antibot && antibot.inAttesa()) { esitoMsg('Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia.', false); return; }
+      var invia = document.getElementById('pInvia');
+      invia.disabled = true;
+      fetch('/api/brani', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        titolo: titolo.value, artista: document.getElementById('pArtista').value, link: document.getElementById('pLink').value,
+        velocita: document.getElementById('pVelocita').value, sito_web: document.getElementById('pSito').value,
+        turnstile: antibot ? antibot.token() : ''
+      }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.errore || 'Invio non riuscito'); }); })
+        .then(function () { esitoMsg('Grazie! Il brano è arrivato: lo ascoltiamo presto.', true); modulo.reset(); })
+        .catch(function (err) { esitoMsg(err.message || 'Invio non riuscito, riprova.', false); })
+        .then(function () { invia.disabled = false; if (antibot) antibot.reset(); });
+    });
+  }
+
   fetch('musica.json', { cache: 'no-cache' })
     .then(function (r) { if (!r.ok) throw new Error('Musica non disponibile'); return r.json(); })
     .then(function (d) { if (!d || !Array.isArray(d.righe)) throw new Error('Dati non validi'); disegna(d.righe); })

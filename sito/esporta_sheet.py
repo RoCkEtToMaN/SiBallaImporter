@@ -233,7 +233,7 @@ def riga_musica(d: dict) -> dict | None:
     if tipo == "brano" and (not d.get("titolo_brano") or not link_musica(d.get("link_youtube", ""))):
         print("- musica: brano senza titolo o con link YouTube non valido, saltato")
         return None
-    campi = ("titolo_selezione", "sottotitolo", "descrizione") if tipo == "selezione" else ("titolo_brano", "artista", "link_youtube")
+    campi = ("titolo_selezione", "sottotitolo", "descrizione", "bpm") if tipo == "selezione" else ("titolo_brano", "artista", "link_youtube")
     voce = {k: d[k] for k in campi if d.get(k)}
     voce.update(tipo=tipo, selezione=selezione)
     try:

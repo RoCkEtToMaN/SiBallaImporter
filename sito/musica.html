@@ -4,65 +4,169 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Musica · siBalla</title>
-<meta name="description" content="Trova il ritmo per ballare: selezioni swing per allenarti, entrare in pista e scoprire le band italiane.">
+<meta name="description" content="Musica swing per ballare, allenarsi e scoprire le band: selezioni divise per velocità, con il lettore YouTube.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0E0E12">
 <link rel="icon" href="logo-app.svg" type="image/svg+xml">
 <link rel="stylesheet" href="pagina.css">
 <link rel="stylesheet" href="menu.css">
 <style>
-.musica-intro { max-width:760px; }
-.selezioni { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
-.selezione { padding:24px; position:relative; overflow:hidden; }
-.selezione[hidden] { display:none; }
-.disco { width:64px; height:64px; border-radius:50%; background:repeating-radial-gradient(circle,#25252d 0 3px,#15151b 4px 6px); border:1px solid var(--border); display:grid; place-items:center; margin-bottom:20px; }
-.disco::after { content:'♪'; display:grid; place-items:center; width:28px; height:28px; border-radius:50%; color:var(--on-accent); background:var(--tinta,var(--accent)); font-size:20px; }
-.selezione h3 { font-size:26px; letter-spacing:-.025em; margin:6px 0 10px; }
-.occasione { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--tinta,var(--accent)); font-weight:700; }
-.descrizione { color:var(--muted); margin:0 0 20px; }
-.brani { list-style:none; padding:0; margin:0; }
-.brani li { border-top:1px solid var(--border); }
-.brano { width:100%; display:flex; gap:12px; align-items:center; text-align:left; padding:14px 0; color:var(--text); background:none; border:0; cursor:pointer; font:inherit; }
-.brano:hover strong,.brano[aria-pressed="true"] strong { color:var(--accent); }
-.brano small { display:block; color:var(--muted); margin-top:3px; }
-.play { color:var(--accent); font-size:18px; }
-.brano .invito { margin-left:auto; font-size:12px; color:var(--muted); }
-button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
-.lettore { margin:20px 0 26px; padding:22px; border:1px solid var(--accent); border-radius:16px; background:var(--surface); scroll-margin-top:16px; }
-.lettore h3 { margin:0 0 6px; }
-.lettore p { color:var(--muted); }
-.lettore iframe { display:block; width:100%; aspect-ratio:16/9; max-height:420px; border:0; border-radius:12px; margin-top:16px; }
+/* colori delle fasce di velocità (e dei riquadri, nello stesso ordine) */
+:root { --lento:#56CCF2; --medio:#6FCF97; --veloce:#F2994A; --live:#C9A0FF; --linea:rgba(255,255,255,.14); }
+button, input, select { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.eti { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.musica h2 { margin:34px 0 6px; font-size:clamp(22px,4vw,30px); letter-spacing:-.02em; text-wrap:balance; }
+
+/* barra dei tempi: 110 -> 270 BPM */
+.tempi { background:var(--surface); border-radius:16px; padding:16px; margin-top:8px; }
+.scala { height:40px; border-radius:10px; overflow:hidden; display:flex; margin-top:10px; }
+.scala span { display:grid; place-items:center; font-size:12.5px; font-weight:700; color:var(--on-accent); min-width:0; white-space:nowrap; overflow:hidden; }
+.tacche { display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+.tempi p { margin:10px 0 0; font-size:13px; color:var(--muted); }
+
+#filtri-musica { margin:18px 0 10px; }
+.selezioni { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+.pl { background:var(--surface); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; min-width:0; }
+.pl[hidden] { display:none; }
+.copertina { height:110px; position:relative; display:flex; align-items:flex-end; padding:12px 14px; background:var(--tinta,var(--accent)); }
+.copertina .bpm { font-size:28px; font-weight:800; letter-spacing:-.02em; color:var(--on-accent); line-height:1.05; font-variant-numeric:tabular-nums; max-width:78%; overflow-wrap:anywhere; }
+.copertina .bpm.testo { font-size:17px; }
+.copertina .bpm small { font-size:12px; font-weight:700; margin-left:4px; }
+.onde { position:absolute; right:12px; top:12px; display:flex; gap:3px; align-items:flex-end; height:34px; }
+.onde i { width:4px; background:rgba(14,14,18,.55); border-radius:2px; transform-origin:bottom; }
+.pl.suona .onde i { animation:onda .9s ease-in-out infinite alternate; }
+.pl.suona .onde i:nth-child(2) { animation-delay:.15s } .pl.suona .onde i:nth-child(3) { animation-delay:.3s } .pl.suona .onde i:nth-child(4) { animation-delay:.45s }
+@keyframes onda { from { transform:scaleY(.35) } to { transform:scaleY(1) } }
+@media (prefers-reduced-motion: reduce) { .pl.suona .onde i { animation:none; } }
+.pl .corpo { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.pl h3 { margin:0; font-size:18px; }
+.pl .occasione { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--tinta,var(--accent)); }
+.pl .descrizione { font-size:13.5px; color:rgba(255,255,255,.85); margin:0; }
+.pl .meta { font-size:12.5px; color:var(--muted); }
+.ascolta-tutta { display:flex; align-items:center; gap:10px; margin-top:4px; background:none; border:0; color:var(--text); cursor:pointer; padding:0; text-align:left; }
+.ascolta-tutta .tondo { width:40px; height:40px; flex:none; border-radius:50%; background:var(--accent); color:var(--on-accent); display:grid; place-items:center; font-size:16px; font-weight:800; }
+.pl.suona .ascolta-tutta .tondo { background:var(--tinta,var(--accent)); }
+.ascolta-tutta b { font-size:14px; }
+.brani { list-style:none; padding:0; margin:6px 0 0; }
+.brani li { border-top:1px solid var(--linea); }
+.brano { width:100%; display:flex; gap:10px; align-items:center; text-align:left; padding:9px 0; color:var(--text); background:none; border:0; cursor:pointer; text-decoration:none; }
+.brano .play { color:var(--tinta,var(--accent)); font-size:14px; width:16px; flex:none; text-align:center; }
+.brano strong { font-size:14px; font-weight:600; }
+.brano small { display:block; color:var(--muted); font-size:12.5px; margin-top:1px; }
+.brano:hover strong, .brano[aria-pressed="true"] strong { color:var(--accent); }
+.brano .invito { margin-left:auto; font-size:12px; color:var(--muted); flex:none; }
+.pl .nota-vuota { color:var(--muted); font-size:13px; margin:6px 0 0; }
+.pl .azioni { margin-top:6px; }
+
+.casuale { margin-top:14px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.btn { border:0; border-radius:12px; padding:10px 16px; font-weight:700; cursor:pointer; background:var(--accent); color:var(--on-accent); }
+.casuale span { color:var(--muted); font-size:13px; }
+
+.lettore { margin:18px 0 8px; padding:18px; border:1px solid var(--accent); border-radius:16px; background:var(--surface); scroll-margin-top:16px; }
+.lettore h3 { margin:2px 0 6px; }
+.lettore p { color:var(--muted); margin:0; }
+.lettore .occasione { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin:0; }
+.lettore iframe { display:block; width:100%; aspect-ratio:16/9; max-height:420px; border:0; border-radius:12px; margin-top:14px; }
 .lettore-top { display:flex; justify-content:space-between; gap:14px; align-items:start; }
-.chiudi-lettore { background:var(--surface-2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 12px; cursor:pointer; font:inherit; }
-.nota { color:var(--muted); font-size:13px; margin:18px 0 26px; }
-@media(max-width:700px) { .selezioni { grid-template-columns:minmax(0,1fr); } .selezione { padding:20px; } .brano .invito { display:none; } }
+.chiudi-lettore { background:var(--surface-2); color:var(--text); border:1px solid var(--linea); border-radius:8px; padding:8px 12px; cursor:pointer; }
+#stato-riproduzione { font-size:13px; margin-top:8px; }
+
+.due-col { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+@media (max-width:760px) { .due-col { grid-template-columns:minmax(0,1fr); } }
+.riquadro { background:var(--surface); border-radius:16px; padding:16px; min-width:0; }
+.riquadro h3 { margin:0 0 4px; font-size:17px; }
+.riquadro > p { color:var(--muted); margin:0; font-size:14px; }
+#proponi { display:grid; gap:8px; margin-top:10px; }
+#proponi label { font-size:13px; font-weight:600; }
+#proponi input, #proponi select { width:100%; color:var(--text); background:var(--bg); border:1px solid var(--linea); border-radius:10px; padding:8px 10px; }
+#proponi .trappola { position:absolute; left:-9999px; width:1px; height:1px; }
+.esito-proposta { font-size:14px; min-height:1.2em; margin:0; }
+.esito-proposta.ok { color:#6FCF97; } .esito-proposta.err { color:#FF6B6B; }
+.pill { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); border-radius:999px; padding:2px 8px; vertical-align:2px; margin-left:6px; }
+.radio { border:1px dashed rgba(255,212,0,.45); border-radius:16px; padding:16px; display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px; align-items:start; }
+.radio .icona { width:50px; height:50px; border-radius:14px; background:var(--accent-soft); display:grid; place-items:center; font-size:24px; }
+.radio p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+.nota { color:var(--muted); font-size:13px; margin:16px 0 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="hero"><div class="hero-in">
 <a href="/" aria-label="Torna agli eventi"><img class="logo" src="logo-app.svg" alt="" width="84" height="84"></a>
-<div><h1>Dove <span class="brand">siBalla</span> stasera?</h1><p class="sub">La musica continua anche fuori dalla pista</p></div>
+<div><h1>Dove <span class="brand">siBalla</span> stasera?</h1><p class="sub">Musica swing per ballare, allenarsi e scoprire le band</p></div>
 </div></header>
-<main>
-<h2 class="titolo-sez">Trova il ritmo per ballare.</h2>
-<p class="intro musica-intro">Un po’ di spazio, il tuo brano preferito e si parte. Scegli l’atmosfera: per provare i primi passi, ritrovare la pista o alzare l’energia.</p>
+<main class="musica">
+<h2 class="titolo-sez" style="margin-top:0">Scegli la velocità</h2>
+<p class="intro">Le selezioni sono divise per <b>BPM</b>, i battiti al minuto: più è alto, più il brano è veloce. Chi inizia parte dalle lente; il Balboa vive sopra i 200. Sono indicazioni orientative: scegli il ritmo che ti fa stare bene.</p>
+<div class="tempi" aria-label="Fasce di velocità">
+  <span class="eti">Fasce di tempo</span>
+  <div class="scala" aria-hidden="true">
+    <span style="flex:30;background:var(--lento)">Lente</span>
+    <span style="flex:40;background:var(--medio)">Medie</span>
+    <span style="flex:20;background:var(--surface-2);color:var(--muted)">·</span>
+    <span style="flex:70;background:var(--veloce)">Veloci</span>
+  </div>
+  <div class="tacche" aria-hidden="true"><span>110</span><span>140</span><span>180</span><span>200</span><span>270 BPM</span></div>
+  <p>Lente 110–140 · Medie 140–180 · Veloci oltre 200. Le band dal vivo non hanno una fascia: suonano a ogni velocità.</p>
+</div>
+
 <div id="filtri-musica" class="chips" role="group" aria-label="Scegli la selezione musicale"></div>
-<p class="nota">Una prima selezione da esplorare. Le indicazioni di velocità sono orientative: scegli il ritmo che ti fa stare bene, qualunque ballo tu stia provando.</p>
 <section id="lettore" class="lettore" aria-label="Ascolto" hidden>
 <div class="lettore-top"><div><p class="occasione">In ascolto</p><h3 id="titolo-brano"></h3></div><button type="button" class="chiudi-lettore">Chiudi lettore</button></div>
 <p>Se il video non parte qui, <a id="apri-youtube" target="_blank" rel="noopener noreferrer">ascoltalo su YouTube ↗</a>.</p>
-<p id="stato-riproduzione" class="nota" role="status"></p>
+<p id="stato-riproduzione" role="status"></p>
 <div id="video"></div>
 </section>
-<p id="stato-musica" role="status">Caricamento della musica...</p>
+<p id="stato-musica" role="status">Caricamento della musica…</p>
 <div id="selezioni-musica" class="selezioni"></div>
-<p class="nota">Il lettore YouTube viene caricato solo quando scegli un brano. Disponibilità dei video e riproduzione dipendono da YouTube; puoi sempre aprire il collegamento esterno.</p>
+<div class="casuale">
+  <button type="button" class="btn" id="tutto-casuale" hidden>🔀 Ascolta tutto in ordine casuale</button>
+  <span>Tutti i brani mescolati, uno dopo l'altro: come una radio.</span>
+</div>
+<p class="nota">Il lettore YouTube si carica solo quando scegli un brano. Disponibilità dei video e riproduzione dipendono da YouTube; puoi sempre aprire il collegamento esterno.</p>
+
+<h2>Dalla scena</h2>
+<div class="due-col">
+  <div class="riquadro">
+    <h3>Proponi un brano</h3>
+    <p>Un brano che fa ballare tutti? Segnalalo: lo ascoltiamo e, se va, entra in una selezione.</p>
+    <form id="proponi" novalidate>
+      <div class="due-col" style="gap:8px">
+        <div><label for="pTitolo">Titolo</label><input id="pTitolo" maxlength="120" placeholder="Es. Jumpin' at the Woodside"></div>
+        <div><label for="pArtista">Artista</label><input id="pArtista" maxlength="120" placeholder="Es. Count Basie"></div>
+      </div>
+      <label for="pLink">Link <small style="font-weight:400;color:var(--muted)">(YouTube o Spotify, facoltativo)</small></label>
+      <input id="pLink" maxlength="300" placeholder="https://">
+      <label for="pVelocita">Velocità</label>
+      <select id="pVelocita"><option value="">Non so</option><option>Lenta</option><option>Media</option><option>Veloce</option><option>Band dal vivo</option></select>
+      <input class="trappola" id="pSito" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="antibot" id="pAntibot"></div>
+      <button type="submit" class="btn" id="pInvia" style="justify-self:start">Invia</button>
+      <p class="esito-proposta" id="pEsito" role="status"></p>
+    </form>
+  </div>
+  <div class="riquadro">
+    <h3>Le selezioni dei DJ</h3>
+    <p>Ogni tanto un DJ della scena italiana sceglie una selezione per siBalla: la trovi tra quelle qui sopra. Sei un DJ e vuoi proporne una? Scrivici dal modulo qui accanto, indicando il link della tua playlist.</p>
+    <p style="margin-top:10px"><a href="/artisti">Scopri band e DJ →</a></p>
+  </div>
+</div>
+
+<h2>Radio siBalla <span class="pill">più avanti</span></h2>
+<div class="radio">
+  <div class="icona" aria-hidden="true">📻</div>
+  <div>
+    <b>Una web radio swing sempre accesa, uguale per tutti.</b>
+    <p>È un'idea per il futuro: intanto "Ascolta tutto in ordine casuale" fa già da radio.</p>
+  </div>
+</div>
 <noscript><p class="box">Per scegliere i brani nel lettore attiva JavaScript, oppure <a href="https://www.youtube.com/results?search_query=swing+dance+music">cerca musica swing su YouTube</a>.</p></noscript>
-<a class="indietro" href="/">← Torna agli eventi</a>
+<p style="margin-top:24px"><a class="indietro" href="/">← Torna agli eventi</a></p>
 </main></div>
 <script src="musica.js"></script>
 <script src="menu.js"></script>
 <script src="piede.js"></script>
+<script src="antibot.js"></script>
 </body>
 </html>
