@@ -62,7 +62,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const oggi = giornoRoma();
   const limite = giornoRoma(new Date(Date.now() + 365 * 86400000));
   if (!categoria) return json({ errore: "Scegli il tipo di annuncio." }, 400);
-  if (!citta || !nome || !contatto) return json({ errore: "Compila città, nome e contatto." }, 400);
+  // il contatto è facoltativo: senza, ci si accorda nella discussione sotto l'annuncio
+  if (!citta) return json({ errore: categoria === "passaggio" ? "Scrivi da dove parti." : "Scrivi la tua città." }, 400);
+  if (!nome) return json({ errore: "Scrivi il tuo nome o un soprannome." }, 400);
   if (categoria === "passaggio" && !arrivo && !evento) return json({ errore: "Scrivi dove vai (destinazione o evento)." }, 400);
   if (giorno && (giorno < oggi || giorno > limite)) return json({ errore: "La data deve essere tra oggi e i prossimi 12 mesi." }, 400);
   const scade = giorno || giornoRoma(new Date(Date.now() + GIORNI_SCADENZA * 86400000));

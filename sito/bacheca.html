@@ -42,7 +42,8 @@
   .scelta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
   .scelta button { font: inherit; font-size: 14px; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
   .scelta button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
-  .avviso-contatto { font-size: 12.5px; color: #FF9F43; margin: 4px 0 0; }
+  .avviso-contatto { font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
+  dialog .manca { border-color: #FF6B6B; }
   .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .esito { min-height: 1.2em; margin: 10px 0 0; font-size: 14px; }
   .esito.errore { color: #FF6B6B; }
@@ -143,9 +144,9 @@
 
     <div class="due">
       <div><label for="fNome">Il tuo nome</label><input id="fNome" maxlength="40" required placeholder="Nome o soprannome"></div>
-      <div><label for="fContatto">Come contattarti</label><input id="fContatto" maxlength="120" required placeholder="@instagram, email o telefono"></div>
+      <div><label for="fContatto">Come contattarti <small>(facoltativo)</small></label><input id="fContatto" maxlength="120" placeholder="@instagram o email"></div>
     </div>
-    <p class="avviso-contatto">Il contatto sarà visibile a tutti: se preferisci, usa Instagram invece del telefono.</p>
+    <p class="avviso-contatto">Puoi lasciarlo vuoto: chi è interessato ti scrive nella discussione sotto l'annuncio. Se lo metti, è visibile a tutti: meglio Instagram del telefono.</p>
     <div class="trappola" aria-hidden="true"><label for="fSito">Sito web</label><input id="fSito" tabindex="-1" autocomplete="off"></div>
 
     <p class="esito" id="esito" role="status"></p>
@@ -210,7 +211,7 @@
         (a.giorno ? '<div class="data-ann">' + esc(data(a.giorno)) + "</div>" : "") +
         (extra ? '<div class="tag"><span>' + esc(extra) + "</span></div>" : "") +
         (a.testo ? '<div class="testo">' + esc(a.testo) + "</div>" : "") +
-        '<div class="firma"><b>' + esc(a.nome) + "</b> · " + contatto(a.contatto) + "</div>" +
+        '<div class="firma"><b>' + esc(a.nome) + "</b>" + (a.contatto ? " · " + contatto(a.contatto) : ' <span class="meta2">· scrivimi nella discussione</span>') + "</div>" +
         '<div class="disc" data-id="' + a.id + '">' + discussione(a) + "</div></article>";
     }).join("") + "</div>" : '<p class="vuoto">Nessun annuncio trovato.</p>';
     Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
@@ -478,8 +479,17 @@
       testo: $("fTesto").value, nome: $("fNome").value, contatto: $("fContatto").value, sito_web: $("fSito").value,
       token: token   // così i tuoi messaggi nella discussione avranno l'etichetta "autore dell'annuncio"
     };
-    if (!d.citta.trim() || !d.nome.trim() || !d.contatto.trim()) { esito("Compila città, nome e contatto.", true); return; }
-    if (d.categoria === "passaggio" && !d.arrivo.trim() && !d.evento.trim()) { esito("Scrivi dove vai: destinazione o evento.", true); return; }
+    // errore sul campo preciso: messaggio che lo nomina, bordo rosso e cursore lì
+    [].forEach.call($("form").querySelectorAll(".manca"), function (x) { x.classList.remove("manca"); });
+    function manca(campo, testo) {
+      esito(testo, true);
+      $(campo).classList.add("manca");
+      $(campo).focus();
+    }
+    var passaggio = d.categoria === "passaggio";
+    if (!d.citta.trim()) { manca("fCitta", passaggio ? "Scrivi da dove parti." : "Scrivi la tua città."); return; }
+    if (passaggio && !d.arrivo.trim() && !d.evento.trim()) { manca("fArrivo", "Scrivi dove vai: destinazione o evento."); return; }
+    if (!d.nome.trim()) { manca("fNome", "Scrivi il tuo nome o un soprannome."); return; }
     $("invia").disabled = true;
     esito("Invio in corso…");
     fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })

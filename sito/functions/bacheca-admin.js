@@ -48,7 +48,7 @@ export async function onRequestGet({ request, env }) {
       <h3>${esc(r.citta)}${r.arrivo ? " → " + esc(r.arrivo) : ""}${r.evento ? " · " + esc(r.evento) : ""}</h3>
       ${r.ruolo || r.stile ? `<div class="m">${esc([r.ruolo, r.stile].filter(Boolean).join(" · "))}</div>` : ""}
       ${r.testo ? `<div class="m">${esc(r.testo)}</div>` : ""}
-      <div class="m">Firma: ${esc(r.nome)} · contatto pubblico: ${esc(r.contatto)}</div>
+      <div class="m">Firma: ${esc(r.nome)} · ${r.contatto ? "contatto pubblico: " + esc(r.contatto) : "nessun contatto (solo discussione)"}</div>
       <div class="m piccolo">Inviato il ${esc(new Date(r.creato).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}
         · scade il ${esc(dataSheet(r.scade))} · ✉️ ${r.email ? esc(r.email) : "esito non registrato"}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
