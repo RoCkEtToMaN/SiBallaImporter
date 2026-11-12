@@ -2,7 +2,7 @@
 // Per aggiungere/togliere una sezione basta modificare VOCI (pronta: false mostra l'etichetta "presto").
 (function () {
   var VOCI = [
-    { url: "/", t: "Eventi", d: "Serate e workshop", pronta: true,
+    { url: "/", t: "Eventi", d: "Serate e workshop", pronta: true, pubblica: true,
       ico: '<path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>' },
     { url: "/storia", t: "Storia del ballo", d: "Dal Savoy a oggi", pronta: true,
       ico: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h6"/>' },
@@ -16,7 +16,7 @@
       ico: '<circle cx="9" cy="18" r="2.5"/><circle cx="18" cy="16" r="2.5"/><path d="M11.5 18V5l9-2v13"/>' },
     { url: "/community", t: "Community WhatsApp", d: "I gruppi della tua città", pronta: true,
       ico: '<path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/>' },
-    { url: "/bacheca", t: "Bacheca", d: "Passaggi e partner di ballo", pronta: true,
+    { url: "/bacheca", t: "Bacheca", d: "Passaggi e partner di ballo", pronta: true, pubblica: true,
       ico: '<path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/>' },
     { url: "/app", t: "App mobile", d: "siBalla sul telefono", pronta: true,
       ico: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>' }
@@ -25,12 +25,15 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.9) +
       '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + "</svg>";
   }
-  // per ora il menu si vede solo nelle versioni di prova (anteprima.siballa.pages.dev, file locali):
-  // sul sito pubblico resta nascosto. Per pubblicarlo basta mettere MENU_PUBBLICO = true.
-  var MENU_PUBBLICO = false;
+  // Sul sito pubblico il menu mostra solo le voci con "pubblica: true" (per ora Eventi e Bacheca);
+  // nelle versioni di prova (anteprima.siballa.pages.dev, file locali) si vedono tutte.
+  // Per pubblicare un'altra sezione basta aggiungere "pubblica: true" alla sua voce;
+  // con MENU_PUBBLICO = false il menu sparisce del tutto dal sito pubblico.
+  var MENU_PUBBLICO = true;
   var prova = /\.siballa\.pages\.dev$/.test(location.hostname) || location.protocol === "file:" ||
     /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   if (!MENU_PUBBLICO && !prova) return;
+  if (!prova) VOCI = VOCI.filter(function (v) { return v.pubblica; });
   var hero = document.querySelector(".hero");
   if (!hero) return;
   var qui = location.pathname.replace(/\/index(\.html)?$/, "/").replace(/\.html$/, "").replace(/(.)\/$/, "$1") || "/";
