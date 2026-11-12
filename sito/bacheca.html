@@ -92,7 +92,6 @@
 
     <label for="fEvento">Evento <small>(festival, workshop o serata, facoltativo)</small></label>
     <input id="fEvento" list="eventi" maxlength="120" placeholder="Es. Swing Craze Festival" autocomplete="off">
-    <datalist id="eventi"></datalist>
 
     <div class="due">
       <div><label for="fCitta" id="lCitta">Parto da</label><input id="fCitta" maxlength="60" required placeholder="Es. Genova"></div>
@@ -122,6 +121,8 @@
       <button type="submit" class="btn" id="invia">Invia</button>
     </div>
   </form>
+  <!-- fuori dal form: il form viene ricreato a ogni apertura, i suggerimenti restano -->
+  <datalist id="eventi"></datalist>
 </dialog>
 
 <script>
@@ -199,11 +200,44 @@
   carica();
 
   // eventi in programma per il suggerimento nel campo "Evento"
+  // per ogni nome: la prossima data (yyyy-mm-dd, non prima di oggi) e la città, per riempire il modulo da soli
+  var EVENTI = {};
+  function oggiIso() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
   fetch("eventi.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
-    var nomi = {};
-    d.fogli.forEach(function (f) { f.eventi.forEach(function (e) { var n = (e.celle[4] || "").trim(); if (n) nomi[n] = 1; }); });
-    $("eventi").innerHTML = Object.keys(nomi).sort().slice(0, 400).map(function (n) { return '<option value="' + esc(n) + '">'; }).join("");
+    var oggi = oggiIso();
+    d.fogli.forEach(function (f) {
+      f.eventi.forEach(function (e) {
+        var n = (e.celle[4] || "").trim();
+        if (!n) return;
+        var giorno = (e.inizio || "").slice(0, 10);
+        if (giorno && giorno < oggi) giorno = oggi;   // workshop già iniziato: da oggi
+        var citta = ((e.celle[5] || "").split(",")[1] || "").trim();
+        if (!EVENTI[n] || (giorno && giorno < EVENTI[n].giorno)) EVENTI[n] = { giorno: giorno, citta: citta };
+      });
+    });
+    $("eventi").innerHTML = Object.keys(EVENTI).sort().slice(0, 400).map(function (n) {
+      var ev = EVENTI[n];
+      var quando = ev.giorno ? new Date(ev.giorno + "T12:00:00Z").toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" }) : "";
+      return '<option value="' + esc(n) + '" label="' + esc([quando, ev.citta].filter(Boolean).join(" · ")) + '">';
+    }).join("");
   }).catch(function () {});
+
+  // scelto un evento dai suggerimenti: data e destinazione (o città, per i partner) si compilano da sole,
+  // ma solo se il campo è vuoto o era stato riempito da qui (quello scritto a mano non si tocca)
+  function riempi(campo, valore) {
+    var c = $(campo);
+    if (!c || !valore || (c.value && !c.dataset.auto)) return;
+    c.value = valore;
+    c.dataset.auto = "1";
+  }
+  $("form").addEventListener("input", function (e) {
+    if (e.target.dataset) delete e.target.dataset.auto;   // scritto a mano
+    if (e.target.id !== "fEvento") return;
+    var ev = EVENTI[e.target.value.trim()];
+    if (!ev) return;
+    riempi("fGiorno", ev.giorno);
+    riempi(scelto("sCategoria") === "passaggio" ? "fArrivo" : "fCitta", ev.citta);
+  });
 
   // ---- modulo ----
   var formIniziale = $("form").innerHTML;
