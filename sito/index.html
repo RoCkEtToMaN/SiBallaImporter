@@ -131,6 +131,8 @@
   .regione:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .mappa-box { margin: 4px 0 12px; }
   .mappa { height: min(460px, 62vh); border-radius: 16px; border: 1px solid var(--border); background: var(--surface); overflow: hidden; }
+  /* OpenStreetMap è chiara: la scurisco (inverto i colori e riporto le tinte, mare blu scuro, strade grigie) */
+  .mappa .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.5); }
   .mappa-nota { margin: 6px 2px 0; font-size: 12.5px; color: var(--muted); }
   .mappa .leaflet-popup-content-wrapper, .mappa .leaflet-popup-tip { background: var(--surface); color: var(--text); }
   .mappa .leaflet-popup-content { margin: 12px 14px; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
@@ -584,9 +586,10 @@
     preparaLeaflet().then(function () {
       if (!mappa) {
         mappa = L.map("mappa", { scrollWheelZoom: false, worldCopyJump: true });
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-          maxZoom: 18, subdomains: "abcd",
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+        // cartina OpenStreetMap: gratuita e senza chiave (scurita con un filtro CSS, vedi .mappa .leaflet-tile-pane)
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
         }).addTo(mappa);
         gruppo = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 45 });
         mappa.addLayer(gruppo);

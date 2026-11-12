@@ -65,7 +65,7 @@ DA FARE
 [~] Pulizia dei nomi "sporchi" (grassetto Unicode, barre ┃ ⎜, stelline ☆, "-Italy"):
     fatta in esporta_sheet.py (pulisci_nome), arriva col merge.
 [~] Filtro per regione (menu a tendina con il numero di eventi, "Estero" a parte) e
-    "🗺️ Mappa" con i segnaposti (Leaflet + cartina CARTO/OpenStreetMap, gratis):
+    "🗺️ Mappa" con i segnaposti (Leaflet + cartina OpenStreetMap scurita, gratis e senza chiave):
     fatti sulla versione di prova. La regione la calcola esporta_sheet.py dalla citta'
     (elenco ISTAT in sito/elenchi/comuni_regioni.json, anche sigla provincia).
 [ ] Link all'app SiBalla (se e' sugli store): voce "App mobile" nel menu, piu' magari
