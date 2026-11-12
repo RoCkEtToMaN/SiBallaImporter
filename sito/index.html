@@ -105,7 +105,15 @@
   .tag { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
   .tag span { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
   .tag span.gratis { background: rgba(37,211,102,.15); color: #25D366; }
-  .azioni { display: flex; gap: 8px; margin-top: 11px; }
+  .azioni { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+  .azioni button { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 9px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .azioni button:hover { border-color: var(--accent); }
+  .azioni button:focus-visible, .condividi-pannello a:focus-visible, .condividi-pannello button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .condividi-pannello { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .condividi-pannello a, .condividi-pannello button { font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; padding: 5px 12px;
+    border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
+  .condividi-pannello a.wa { background: #25D366; border-color: #25D366; color: #0b2814; }
   .azioni a { font-size: 13px; font-weight: 600; text-decoration: none; padding: 5px 12px; border-radius: 9px;
     border: 1px solid var(--border); color: var(--text); }
   .azioni a.info { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
@@ -310,6 +318,7 @@
   }
 
   // prepara ogni evento: date, luogo leggibile, stili, link
+  var EVENTI_PER_ID = [];   // per i pulsanti Calendario / Condividi delle schede
   function prepara(f) {
     var col = {};
     f.colonne.forEach(function (c, i) { col[c.trim().toLowerCase()] = i; });
@@ -331,6 +340,7 @@
       ev._stili = "stile" in col ? stiliDi(c[col["stile"]]) : [];
       ev._gratis = "gratis" in col && /^(x|s[iì]|yes|1|true)$/i.test((c[col["gratis"]] || "").trim());
       ev._link = "riferimento" in col ? primoLink(c[col["riferimento"]]) : null;
+      ev._id = EVENTI_PER_ID.push(ev) - 1;
       ev._ora = "ora" in col && /^\d{1,2}:\d{2}$/.test(c[col["ora"]] || "") ? c[col["ora"]] : "";
       ev._testo = c.join(" ").toLowerCase();
     });
@@ -366,7 +376,9 @@
     var tag = ev._stili.map(function (s) { return "<span>" + esc(s) + "</span>"; }).join("") +
       (ev._gratis ? '<span class="gratis">Gratis</span>' : "");
     var azioni = (ev._link ? '<a class="info" href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
-      (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "");
+      (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "") +
+      (ev._inizio ? '<button type="button" class="calendario" data-ev="' + ev._id + '" title="Aggiungi al calendario">📅 Calendario</button>' : "") +
+      '<button type="button" class="condividi" data-ev="' + ev._id + '" title="Condividi questo evento">↗ Condividi</button>';
     var dataHtml = '<div class="data">' + riquadro + "</div>";
     var dist = pos && ev._km != null ? ' · <span class="km">a ' + km(ev._km) + "</span>" : "";
     // con l'immagine la data va sopra l'immagine; se l'immagine non si carica torna accanto al testo (vedi "error" più sotto)
@@ -462,6 +474,74 @@
     else if (scelti[s]) delete scelti[s];
     else scelti[s] = true;
     disegna();
+  });
+
+  // ---- "📅 Calendario" e "↗ Condividi" sulle schede ----
+  function due(n) { return (n < 10 ? "0" : "") + n; }
+  function giornoIcs(d) { return d.getFullYear() + due(d.getMonth() + 1) + due(d.getDate()); }
+  // testo per il file .ics: \ , ; e a capo vanno "protetti"
+  function testoIcs(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\r?\n/g, "\\n"); }
+  function linkEvento(ev) { return location.origin + "/?q=" + encodeURIComponent(ev._nome); }
+  function quando(ev) {
+    var i = ev._inizio, f = ev._fine;
+    if (!i) return "";
+    return GIORNI[i.getDay()] + " " + i.getDate() + " " + MESI[i.getMonth()] +
+      (!ev._unGiorno && f ? " → " + f.getDate() + " " + MESI[f.getMonth()] : "") + (ev._ora ? ", ore " + ev._ora : "");
+  }
+  // file .ics: con l'ora l'evento dura 3 ore (ora locale), altrimenti tutto il giorno (o più giorni per i workshop)
+  function scaricaIcs(ev) {
+    var i = ev._inizio, inizio, fine;
+    if (ev._ora) {
+      var hm = ev._ora.split(":"), a = new Date(i.getFullYear(), i.getMonth(), i.getDate(), +hm[0], +hm[1]);
+      var b = new Date(a.getTime() + 3 * 3600000);
+      var t = function (d) { return giornoIcs(d) + "T" + due(d.getHours()) + due(d.getMinutes()) + "00"; };
+      inizio = "DTSTART:" + t(a); fine = "DTEND:" + t(b);
+    } else {
+      var ultimo = ev._unGiorno ? i : (ev._fine || i);
+      var dopo = new Date(ultimo.getFullYear(), ultimo.getMonth(), ultimo.getDate() + 1);
+      inizio = "DTSTART;VALUE=DATE:" + giornoIcs(i); fine = "DTEND;VALUE=DATE:" + giornoIcs(dopo);
+    }
+    var adesso = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//siBalla//Eventi swing//IT", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+      "UID:" + giornoIcs(i) + "-" + encodeURIComponent(ev._nome).slice(0, 60) + "@siballa", "DTSTAMP:" + adesso, inizio, fine,
+      "SUMMARY:" + testoIcs(ev._nome), ev._dove ? "LOCATION:" + testoIcs(ev._dove) : "",
+      "DESCRIPTION:" + testoIcs([ev._chi, ev._link, "Su siBalla: " + linkEvento(ev)].filter(Boolean).join("\n")),
+      ev._link ? "URL:" + ev._link : "", "END:VEVENT", "END:VCALENDAR"].filter(Boolean).join("\r\n");
+    var url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = (ev._nome.replace(/[^\wÀ-ſ -]+/g, "").trim().slice(0, 50) || "evento") + ".ics";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function () { URL.revokeObjectURL(url); link.remove(); }, 1000);
+  }
+  // sul telefono apre il menu di condivisione (WhatsApp, Telegram…); sul computer: WhatsApp o "Copia link"
+  function condividi(ev, bottone) {
+    var url = linkEvento(ev), testo = ev._nome + (quando(ev) ? " · " + quando(ev) : "") + (ev._dove ? " · " + ev._dove : "");
+    if (navigator.share) {
+      navigator.share({ title: ev._nome, text: testo, url: url }).catch(function () {});
+      return;
+    }
+    var azioni = bottone.closest(".azioni"), vecchio = azioni.parentNode.querySelector(".condividi-pannello");
+    if (vecchio) { vecchio.remove(); return; }
+    var p = document.createElement("div");
+    p.className = "condividi-pannello";
+    p.innerHTML = '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(testo + "\n" + url) + '">WhatsApp</a>' +
+      '<button type="button" class="copia">Copia link</button><span class="esito-copia" role="status"></span>';
+    azioni.parentNode.insertBefore(p, azioni.nextSibling);
+    p.querySelector(".copia").addEventListener("click", function () {
+      var esito = p.querySelector(".esito-copia");
+      var mostra = function () { esito.textContent = url; };   // se la copia non riesce, il link resta da selezionare
+      if (navigator.clipboard) navigator.clipboard.writeText(testo + "\n" + url).then(function () { esito.textContent = "Link copiato"; }, mostra);
+      else mostra();
+    });
+  }
+  $("lista").addEventListener("click", function (e) {
+    var b = e.target.closest("button.calendario, button.condividi");
+    if (!b) return;
+    var ev = EVENTI_PER_ID[+b.getAttribute("data-ev")];
+    if (!ev) return;
+    if (b.classList.contains("calendario")) scaricaIcs(ev); else condividi(ev, b);
   });
 
   // immagine che non si carica: tolgo la parte immagine e rimetto la data accanto al testo

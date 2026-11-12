@@ -72,6 +72,30 @@ def normalizza_titolo(titolo: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+# ---- pulizia dei nomi "sporchi" (solo quello che si vede sul sito: lo Sheet non cambia) ----
+# Lettere "in grassetto" Unicode (𝗩𝗲𝗻𝗲𝗿𝗱𝗶 -> Venerdi), barre strane (┃ ⎜) -> "|", stelline decorative (☆ ★ ✰ ✧ ✮) -> "·",
+# "-Italy" / ", Italy" in fondo, spazi multipli e a capo.
+BARRE = re.compile(r"\s*[─-╿⎜-⎟｜∣ǀ]\s*")
+STELLINE = re.compile(r"\s*[★☆✩-✰✴✶✷✸✹❂✪-✯✧✦⭐⯌]+\s*")
+# solo con trattino o virgola: "Savoy Swing Italy" resta com'è
+FINE_ITALY = re.compile(r"\s*[-–,]\s*Ital(?:y|ia)\s*$", re.I)
+
+
+def pulisci_nome(s: str) -> str:
+    if not s:
+        return s
+    t = unicodedata.normalize("NFKC", s)
+    t = re.sub(r"\s*[\r\n]+\s*", " · ", t)
+    t = BARRE.sub(" | ", t)
+    t = STELLINE.sub(" · ", t)
+    t = FINE_ITALY.sub("", t)
+    t = re.sub(r"[ \t ]{2,}", " ", t)
+    # separatori rimasti all'inizio o alla fine (es. "☆ Nome ☆" -> "Nome"), e doppi
+    t = re.sub(r"(\s*[·|]\s*){2,}", " · ", t)
+    t = re.sub(r"^[\s·|:–-]+|[\s·|:–-]+$", "", t)
+    return t or s.strip()
+
+
 def sha32(testo: str) -> str:
     return hashlib.sha256(testo.encode("utf-8")).hexdigest()[:32]
 
@@ -237,6 +261,10 @@ def main() -> None:
                 if col_immagine is not None else None
             # html.unescape: alcuni nomi arrivano dai siti con entità tipo "&#8217;"
             celle = [html.unescape(cella(rf, i)) for i in range(num_colonne)]
+            # nome dell'evento (E) e organizzatore (G) puliti per la pagina; l'immagine usa già il nome originale qui sopra
+            for k in (4, 6):
+                if k < len(celle):
+                    celle[k] = pulisci_nome(celle[k])
             # date tutte nello stesso formato (nello Sheet ci sono sia 11/11/2026 sia 2026-11-11)
             if inizio:
                 celle[0] = inizio.strftime("%d/%m/%Y")

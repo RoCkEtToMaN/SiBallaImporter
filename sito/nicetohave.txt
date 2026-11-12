@@ -34,13 +34,14 @@ DA FARE
     Etichetta "autore dell'annuncio" sui messaggi di chi l'ha scritto (stesso browser).
     Modulo: contatto facoltativo (senza -> "scrivimi nella discussione"), Cerco/Offro da
     scegliere (non preselezionato), errori che indicano il campo preciso.
-    Da valutare: email privata facoltativa per avvisare chi ha scritto l'annuncio.
+    Email privata facoltativa (avviso di pubblicazione e dei messaggi, max 1 ogni 30 min),
+    "Togli il mio annuncio" dallo stesso browser, categorie Alloggio e Mercatino.
     COSA SERVIREBBE:
     - provarla sulla versione di prova (annuncio -> email -> approvazione -> pagina)
     - [fatto] contatto non pubblico: ora facoltativo, ci si accorda nella discussione
     - [fatto] sulla scheda di un evento: "2 cercano un passaggio · 1 cerca partner"
-    - chi scrive puo' cancellare il proprio annuncio (link segreto nell'email)
-    - altre categorie se queste funzionano: alloggio, mercatino, DJ/band/sale
+    - [fatto] chi scrive puo' togliere il proprio annuncio (dallo stesso browser)
+    - [fatto] categorie Alloggio e Mercatino; da valutare DJ/band/sale
     - Turnstile (captcha Cloudflare) se arriva spam
     - pubblicazione: merge "anteprima" -> "master" e voce nel menu pubblico
     Dettagli nel documento Word, capitolo "Bacheca degli annunci".
@@ -58,11 +59,10 @@ DA FARE
     - App mobile: pulsanti degli store; sito installabile sul telefono (PWA)
     Quando una sezione e' pronta: pronta: true in sito/menu.js e togliere il "noindex".
 [ ] Mostrare il menu sul sito pubblico: MENU_PUBBLICO = true in sito/menu.js.
-[ ] Pulsanti sulla scheda: "Aggiungi al calendario" (file .ics) e "Condividi"
-    (sul telefono apre WhatsApp e le altre app). Piu' condivisioni = piu' visite
-    = numeri migliori da mostrare agli sponsor.
-[ ] Pulizia dei nomi "sporchi" nell'esportazione del sito: caratteri in grassetto
-    Unicode, barre "┃", "-Italy" in fondo al nome.
+[~] Pulsanti sulla scheda "📅 Calendario" (file .ics) e "↗ Condividi" (menu del telefono;
+    sul computer WhatsApp / Copia link): fatti sulla versione di prova, arrivano col merge.
+[~] Pulizia dei nomi "sporchi" (grassetto Unicode, barre ┃ ⎜, stelline ☆, "-Italy"):
+    fatta in esporta_sheet.py (pulisci_nome), arriva col merge.
 [ ] Filtro per citta' o regione, oppure vista mappa con i segnaposto
     (le coordinate degli eventi ci sono gia').
 [ ] Link all'app SiBalla (se e' sugli store): voce "App mobile" nel menu, piu' magari
