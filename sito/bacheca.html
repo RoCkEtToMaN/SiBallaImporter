@@ -215,12 +215,26 @@
         if (!EVENTI[n] || (giorno && giorno < EVENTI[n].giorno)) EVENTI[n] = { giorno: giorno, citta: citta };
       });
     });
-    $("eventi").innerHTML = Object.keys(EVENTI).sort().slice(0, 400).map(function (n) {
+    suggerimenti();
+  }).catch(function () {});
+
+  // suggerimenti del campo Evento: se è scritta la città di destinazione (o la città, per i partner)
+  // mostro solo gli eventi di quella città, in ordine di data; se non ce ne sono, tutti
+  function suggerimenti() {
+    var campo = $(scelto("sCategoria") === "passaggio" ? "fArrivo" : "fCitta");
+    var c = norm(campo ? campo.value.trim() : "");
+    var nomi = Object.keys(EVENTI);
+    if (c.length >= 2) {
+      var qui = nomi.filter(function (n) { return norm(EVENTI[n].citta).indexOf(c) === 0; });
+      if (qui.length) nomi = qui.sort(function (a, b) { return (EVENTI[a].giorno || "9").localeCompare(EVENTI[b].giorno || "9") || a.localeCompare(b); });
+      else nomi.sort();
+    } else nomi.sort();
+    $("eventi").innerHTML = nomi.slice(0, 400).map(function (n) {
       var ev = EVENTI[n];
       var quando = ev.giorno ? new Date(ev.giorno + "T12:00:00Z").toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" }) : "";
       return '<option value="' + esc(n) + '" label="' + esc([quando, ev.citta].filter(Boolean).join(" · ")) + '">';
     }).join("");
-  }).catch(function () {});
+  }
 
   // scelto un evento dai suggerimenti: data e destinazione (o città, per i partner) si compilano da sole,
   // ma solo se il campo è vuoto o era stato riempito da qui (quello scritto a mano non si tocca)
@@ -232,6 +246,7 @@
   }
   $("form").addEventListener("input", function (e) {
     if (e.target.dataset) delete e.target.dataset.auto;   // scritto a mano
+    if (e.target.id === "fArrivo" || e.target.id === "fCitta") { suggerimenti(); return; }
     if (e.target.id !== "fEvento") return;
     var ev = EVENTI[e.target.value.trim()];
     if (!ev) return;
@@ -247,6 +262,7 @@
     $("lCitta").textContent = p ? "Parto da" : "Città";
     $("bArrivo").hidden = !p;
     $("bRuolo").hidden = p;
+    suggerimenti();
   }
   function esito(t, errore) { $("esito").textContent = t; $("esito").className = "esito" + (errore ? " errore" : ""); }
 
