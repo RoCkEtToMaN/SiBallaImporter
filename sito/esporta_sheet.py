@@ -12,8 +12,13 @@ Per ogni foglio dello Sheet:
   servono al massimo per il filtro e non finiscono nel JSON;
 - aggiunge le coordinate (per "Vicino a me") e il link dell'immagine su Appwrite Storage se la colonna
   "Immagine" dice "sì" o "logo" (stesso id calcolato dall'importatore, vedi EventImages.cs).
+
+Le schede "Scuole", "Artisti" e "Community" non sono eventi: diventano scuole.json, artisti.json e
+community.json accanto al file di uscita (per le pagine /scuole, /artisti, /community). Finché la scheda
+non c'è si usa la bozza sito/elenchi/<nome>.csv. Gli artisti si pubblicano solo con Consenso = sì.
 """
 
+import csv
 import hashlib
 import html
 import json
@@ -119,6 +124,41 @@ def cella(riga: list, i: int) -> str:
     return str(riga[i]).strip() if i < len(riga) and riga[i] is not None else ""
 
 
+# ---- elenchi per le pagine Scuole, Artisti, Community ----
+# Schede dello Sheet con questi nomi non sono eventi: diventano <nome>.json accanto a eventi.json.
+# Se la scheda non c'è ancora si usa la bozza sito/elenchi/<nome>.csv del repository (se c'è).
+ELENCHI = ("scuole", "artisti", "community")
+CARTELLA_BOZZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "elenchi")
+CONSENSO_SI = {"sì", "si", "x", "yes", "true", "1", "ok"}
+
+
+def chiave_colonna(h: str) -> str:
+    """'Città' -> 'citta', 'Eventi nello Sheet' -> 'eventi_nello_sheet'."""
+    return norm(h).replace(" ", "_")
+
+
+def righe_elenco(nome: str, intestazione: list, righe: list) -> list[dict]:
+    chiavi = [chiave_colonna(str(h)) for h in intestazione]
+    out = []
+    for r in righe:
+        d = {k: html.unescape(cella(r, i)) for i, k in enumerate(chiavi) if k and cella(r, i)}
+        if not d.get("nome"):
+            continue
+        # artisti: si pubblicano solo con il consenso (colonna "Consenso" = sì); senza la colonna, nessuno
+        if nome == "artisti" and d.get("consenso", "").strip().lower() not in CONSENSO_SI:
+            continue
+        d.pop("consenso", None)
+        out.append(d)
+    return out
+
+
+def scrivi_elenco(cartella: str, nome: str, righe: list[dict], fonte: str) -> None:
+    with open(os.path.join(cartella, nome + ".json"), "w", encoding="utf-8") as f:
+        json.dump({"aggiornato": datetime.now(ZoneInfo("Europe/Rome")).isoformat(timespec="minutes"),
+                   "fonte": fonte, "righe": righe}, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"- elenco '{nome}': {len(righe)} righe (da {fonte})")
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         sys.exit("Uso: python esporta_sheet.py <file di uscita>")
@@ -148,9 +188,20 @@ def main() -> None:
     oggi = datetime.now(ZoneInfo("Europe/Rome")).date()
     uscita = {"aggiornato": datetime.now(ZoneInfo("Europe/Rome")).isoformat(timespec="minutes"), "fogli": []}
 
+    cartella = os.path.dirname(os.path.abspath(sys.argv[1]))
+    os.makedirs(cartella, exist_ok=True)
+    elenchi_fatti = set()
+
     for nome, vf, vg in zip(fogli, formattati, grezzi):
         righe_f = vf.get("values", [])
         righe_g = vg.get("values", [])
+        # Scuole / Artisti / Community: non sono eventi (riga 2 = intestazioni, dati dalla riga 3)
+        if nome.strip().lower() in ELENCHI:
+            elenco = nome.strip().lower()
+            if len(righe_f) >= 2:
+                scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1], righe_f[2:]), "sheet")
+                elenchi_fatti.add(elenco)
+            continue
         if len(righe_f) < 3:
             print(f"- '{nome}': vuoto, saltato")
             continue
@@ -219,7 +270,18 @@ def main() -> None:
         uscita["fogli"].append({"nome": nome, "colonne": colonne, "eventi": eventi})
         print(f"- '{nome}': {len(eventi)} eventi pubblicati, {scartate_passate} passati, {scartate_verifica} da verificare")
 
-    os.makedirs(os.path.dirname(os.path.abspath(sys.argv[1])), exist_ok=True)
+    # elenchi senza scheda nello Sheet: bozza CSV del repository, altrimenti vuoti
+    for elenco in ELENCHI:
+        if elenco in elenchi_fatti:
+            continue
+        bozza = os.path.join(CARTELLA_BOZZE, elenco + ".csv")
+        if os.path.exists(bozza):
+            with open(bozza, encoding="utf-8-sig", newline="") as f:
+                tutte = list(csv.reader(f))
+            scrivi_elenco(cartella, elenco, righe_elenco(elenco, tutte[0], tutte[1:]) if tutte else [], "bozza")
+        else:
+            scrivi_elenco(cartella, elenco, [], "nessuna")
+
     with open(sys.argv[1], "w", encoding="utf-8") as f:
         json.dump(uscita, f, ensure_ascii=False, separators=(",", ":"))
 

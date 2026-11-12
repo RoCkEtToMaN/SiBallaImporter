@@ -4,15 +4,15 @@
   var VOCI = [
     { url: "/", t: "Eventi", d: "Serate e workshop", pronta: true,
       ico: '<path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>' },
-    { url: "/storia", t: "Storia del ballo", d: "Dal Savoy a oggi",
+    { url: "/storia", t: "Storia del ballo", d: "Dal Savoy a oggi", pronta: true,
       ico: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h6"/>' },
-    { url: "/scuole", t: "Scuole", d: "Dove imparare, per regione",
+    { url: "/scuole", t: "Scuole", d: "Dove imparare, per regione", pronta: true,
       ico: '<path d="M3 9l9-5 9 5-9 5zM7 11v5c3 2 7 2 10 0v-5"/>' },
-    { url: "/artisti", t: "Artisti", d: "Insegnanti, band e DJ",
+    { url: "/artisti", t: "Artisti", d: "Insegnanti, band e DJ", pronta: true,
       ico: '<circle cx="9" cy="18" r="2.5"/><circle cx="18" cy="16" r="2.5"/><path d="M11.5 18V5l9-2v13"/>' },
-    { url: "/community", t: "Community WhatsApp", d: "I gruppi della tua città",
+    { url: "/community", t: "Community WhatsApp", d: "I gruppi della tua città", pronta: true,
       ico: '<path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/>' },
-    { url: "/app", t: "App mobile", d: "siBalla sul telefono",
+    { url: "/app", t: "App mobile", d: "siBalla sul telefono", pronta: true,
       ico: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>' }
   ];
   function svg(p, w) {

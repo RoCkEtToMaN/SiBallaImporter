@@ -618,6 +618,8 @@
       d.fogli.forEach(prepara);
       var t = new Date(d.aggiornato);
       $("agg").textContent = "Aggiornato il " + t.toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" });
+      // /?q=testo: ricerca già compilata (link "prossimi eventi" dalle pagine Scuole e Artisti)
+      try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("q").value = q0; } catch (e) {}
       tabs(); disegna();
     })
     .catch(function () { $("agg").textContent = "Impossibile caricare gli eventi, riprova più tardi."; });

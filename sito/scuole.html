@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scuole · siBalla</title>
+<meta name="description" content="Le scuole e associazioni di ballo swing in Italia, per regione.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="logo-app.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0E0E12">
 <link rel="stylesheet" href="pagina.css">
 <link rel="stylesheet" href="menu.css">
 </head>
-<body>
+<body data-elenco="scuole">
 <div class="wrap">
   <header class="hero">
     <div class="hero-in">
@@ -21,18 +22,13 @@
       </div>
     </div>
   </header>
-  <main class="pagina">
-    <h2>Scuole</h2>
-    <p>Le scuole e associazioni swing, da una scheda dello Google Sheet: si aggiornano come gli eventi.</p>
-    <p><span class="arrivo">In arrivo.</span> Cosa conterrà:</p>
-    <ul>
-      <li>Filtro per regione e città, oppure mappa</li>
-      <li>Logo, sito, Instagram e i prossimi eventi della scuola</li>
-    </ul>
-    <a class="indietro" href="/">← Torna agli eventi</a>
+  <main>
+    <h2 class="titolo-sez">Scuole</h2>
+    <p class="intro">Le scuole e associazioni dove imparare a ballare swing. Scegli la regione; da ogni scuola vedi i suoi prossimi eventi.</p>
+    <div id="contenuto"><p class="vuoto">Caricamento…</p></div>
   </main>
 </div>
+<script src="elenchi.js"></script>
 <script src="menu.js"></script>
-<script src="conta.js"></script>
 </body>
 </html>
