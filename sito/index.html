@@ -134,6 +134,7 @@
   /* OpenStreetMap è chiara: la scurisco (inverto i colori e riporto le tinte, mare blu scuro, strade grigie) */
   .mappa .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.5); }
   .mappa-nota { margin: 6px 2px 0; font-size: 12.5px; color: var(--muted); }
+  .mappa.rotellina { border-color: rgba(255,212,0,.5); }
   .mappa .leaflet-popup-content-wrapper, .mappa .leaflet-popup-tip { background: var(--surface); color: var(--text); }
   .mappa .leaflet-popup-content { margin: 12px 14px; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .mappa .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
@@ -569,7 +570,8 @@
     });
     var senza = eventi.length - punti.length;
     $("mappaNota").textContent = punti.length + (punti.length === 1 ? " evento sulla mappa" : " eventi sulla mappa") +
-      (senza ? " · " + senza + " senza posizione (solo nella lista)" : "");
+      (senza ? " · " + senza + " senza posizione (solo nella lista)" : "") +
+      (matchMedia("(hover: hover)").matches ? " · clicca sulla mappa per ingrandire con la rotellina" : "");
     // inquadratura: sui segnaposti quando cambia il filtro, poi resta dove la lascia chi guarda
     if (!mappaCentrata) {
       if (punti.length) mappa.fitBounds(punti, { padding: [30, 30], maxZoom: 12 });
@@ -593,6 +595,17 @@
         }).addTo(mappa);
         gruppo = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 45 });
         mappa.addLayer(gruppo);
+        // rotellina: si attiva con un clic sulla mappa (così scorrendo la pagina non si zooma per sbaglio)
+        // e si spegne quando il mouse esce dalla mappa
+        mappa.on("click focus", function () {
+          if (mappa.scrollWheelZoom.enabled()) return;
+          mappa.scrollWheelZoom.enable();
+          $("mappa").classList.add("rotellina");
+        });
+        mappa.on("mouseout blur", function () {
+          mappa.scrollWheelZoom.disable();
+          $("mappa").classList.remove("rotellina");
+        });
       }
       mappa.invalidateSize();
       mappaCentrata = false;
