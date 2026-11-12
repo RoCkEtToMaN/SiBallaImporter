@@ -187,6 +187,8 @@
     disegna();
   });
   $("filtro").addEventListener("input", disegna);
+  // /bacheca?q=nome evento: arriva dalla scheda di un evento nella home
+  try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("filtro").value = q0; } catch (e) {}
 
   function carica() {
     return fetch("/api/bacheca", { cache: "no-cache" })

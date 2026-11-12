@@ -82,6 +82,48 @@
   function leggi(k) { try { return +localStorage.getItem(k) || 0; } catch (e) { return 0; } }
   function scrivi(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
   function quanti(n, uno, tanti) { return n + " " + (n === 1 ? uno : tanti); }
+  function norm(s) { return String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+
+  // sulla scheda di ogni evento della home: "🚗 2 cercano un passaggio · 💃 1 cerca partner" (link alla bacheca filtrata).
+  // Un annuncio vale per l'evento se il nome scritto nel campo "Evento" coincide con il titolo o ne è una parte (min. 5 lettere).
+  var FRASI = {
+    "passaggio|offro": ["🚗", "offre un passaggio", "offrono un passaggio"],
+    "passaggio|cerco": ["🚗", "cerca un passaggio", "cercano un passaggio"],
+    "partner|cerco": ["💃", "cerca partner", "cercano partner"],
+    "partner|offro": ["💃", "si propone come partner", "si propongono come partner"]
+  };
+  function segnaEventi(annunci) {
+    var conEvento = annunci.filter(function (a) { return norm(a.evento).length >= 5; });
+    var lista = document.getElementById("lista");
+    if (!conEvento.length || !lista) return;
+    function segna() {
+      [].forEach.call(lista.querySelectorAll("article.ev"), function (art) {
+        if (art.querySelector(".bacheca-ev")) return;
+        var h = art.querySelector("h3"), corpo = art.querySelector(".corpo");
+        if (!h || !corpo) return;
+        var titolo = norm(h.textContent), conta = {}, nomeEvento = "";
+        conEvento.forEach(function (a) {
+          var e = norm(a.evento);
+          if (e === titolo || titolo.indexOf(e) >= 0 || (e.indexOf(titolo) >= 0 && titolo.length >= 5)) {
+            var k = a.categoria + "|" + a.tipo;
+            if (FRASI[k]) { conta[k] = (conta[k] || 0) + 1; nomeEvento = nomeEvento || a.evento; }
+          }
+        });
+        var parti = Object.keys(FRASI).filter(function (k) { return conta[k]; }).map(function (k) {
+          return FRASI[k][0] + " " + quanti(conta[k], FRASI[k][1], FRASI[k][2]);
+        });
+        if (!parti.length) return;
+        var link = document.createElement("a");
+        link.className = "bacheca-ev";
+        link.href = "/bacheca?q=" + encodeURIComponent(nomeEvento);
+        link.textContent = parti.join(" · ") + " →";
+        corpo.appendChild(link);
+      });
+    }
+    segna();
+    // la lista si ridisegna a ogni filtro o ricerca: rimetto le etichette
+    new MutationObserver(segna).observe(lista, { childList: true });
+  }
   if (location.protocol === "file:") return;
   fetch("/api/bacheca")
     .then(function (r) { return r.ok ? r.json() : null; })
@@ -91,12 +133,16 @@
       if (qui === "/bacheca") { scrivi(VISTO, ultimo); return; }
       var visto = leggi(VISTO);
       var nuovi = annunci.filter(function (a) { return (a.id || 0) > visto; }).length;
+      // accanto alla voce: "N nuovi" in giallo se ci sono annunci non visti, altrimenti il totale in grigio
+      var voce = pan.querySelector('a[href="/bacheca"]');
       if (nuovi) {
         btn.classList.add("novita");
         btn.setAttribute("aria-label", "Menu: " + quanti(nuovi, "annuncio nuovo", "annunci nuovi") + " in bacheca");
-        var voce = pan.querySelector('a[href="/bacheca"]');
         if (voce) voce.insertAdjacentHTML("beforeend", '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>");
+      } else if (voce && annunci.length) {
+        voce.insertAdjacentHTML("beforeend", '<span class="totale" title="Annunci in bacheca">' + annunci.length + "</span>");
       }
+      if (qui === "/") segnaEventi(annunci);
       // invito nella home, sotto la ricerca: si chiude con ✕ e torna solo quando arrivano annunci nuovi
       var bar = qui === "/" && document.querySelector(".bar");
       if (!bar || !annunci.length || leggi(INVITO_CHIUSO) >= ultimo) return;
