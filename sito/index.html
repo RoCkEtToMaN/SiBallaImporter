@@ -135,7 +135,9 @@
   .mappa .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.5); }
   .mappa-nota { margin: 6px 2px 0; font-size: 12.5px; color: var(--muted); }
   .mappa.rotellina { border-color: rgba(255,212,0,.5); }
-  .mappa { position: relative; }
+  /* isolation: i livelli interni di Leaflet (z-index fino a 1000) restano dentro la mappa,
+     così il menu ☰ e le finestre del sito ci passano sopra */
+  .mappa { position: relative; z-index: 0; isolation: isolate; }
   .mappa-avviso { position: absolute; inset: 0; z-index: 1000; display: grid; place-items: center; pointer-events: none;
     background: rgba(14,14,18,.55); opacity: 0; transition: opacity .2s; }
   .mappa-avviso.visibile { opacity: 1; }
