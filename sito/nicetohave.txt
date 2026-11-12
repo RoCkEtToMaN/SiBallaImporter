@@ -81,6 +81,20 @@ IDEE NUOVE (di nicchia ma "di moda")
     ballato, stili piu' presenti.
 [ ] Playlist per BPM: playlist Spotify divise per velocita' (lente per principianti,
     medie per social dance, veloci per Balboa/jam). Utili per allenarsi e ai DJ.
+    PIU' AVANTI (deciso il 12/11/2026), in 3 passi:
+    1) pagina "Musica" con 4-5 playlist incorporate: Lente 110-140 BPM (principianti,
+       Blues, Slow Balboa), Medie 140-180 (social), Veloci 200+ (Balboa, Shag, jam),
+       Live italiane (vetrina per le band). Spotify fa sentire i brani interi solo a chi
+       ha fatto l'accesso (altrimenti 30 s); YouTube li fa sentire interi a tutti, con
+       pubblicita'. Costo zero, diritti pagati da Spotify/YouTube. BPM a mano (Spotify
+       non li da' piu' alle app nuove). Serve solo il link delle playlist.
+    2) "Proponi un brano" (modulo come i clandestini) e playlist curate dai DJ della scena.
+    3) Radio vera ("Radio siBalla"), solo con pubblico stabile o uno sponsor: servono le
+       licenze (SIAE per gli autori + diritti delle registrazioni; esistono licenze per
+       web radio piccole, con costo annuale), un servizio di streaming (decine di euro al
+       mese) e chi la gestisce. Attenzione: i dischi swing anni '30-'40 possono essere
+       liberi come registrazioni, ma le canzoni restano protette fino a 70 anni dalla
+       morte dell'autore (Basie, Ellington...): le licenze servono comunque.
 [ ] "Cosa mi metto": guida allo stile vintage (moda anni '40, scarpe, acconciature).
     Si condivide molto su Instagram e si lega agli sponsor di abbigliamento/scarpe.
 [ ] Passaggi verso festival ed eventi: bacheca per dividere l'auto
