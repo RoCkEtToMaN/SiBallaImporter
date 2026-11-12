@@ -47,43 +47,15 @@ button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-
 <main>
 <h2 class="titolo-sez">Trova il ritmo per ballare.</h2>
 <p class="intro musica-intro">Un po’ di spazio, il tuo brano preferito e si parte. Scegli l’atmosfera: per provare i primi passi, ritrovare la pista o alzare l’energia.</p>
-<div class="chips" role="group" aria-label="Scegli la selezione musicale">
-<button type="button" data-filtro="tutte" aria-pressed="true">Tutta la musica</button>
-<button type="button" data-filtro="calma" aria-pressed="false">Con calma</button>
-<button type="button" data-filtro="pista" aria-pressed="false">In pista</button>
-<button type="button" data-filtro="energia" aria-pressed="false">A tutto swing</button>
-<button type="button" data-filtro="italia" aria-pressed="false">Scena italiana</button>
-</div>
+<div id="filtri-musica" class="chips" role="group" aria-label="Scegli la selezione musicale"></div>
 <p class="nota">Una prima selezione da esplorare. Le indicazioni di velocità sono orientative: scegli il ritmo che ti fa stare bene, qualunque ballo tu stia provando.</p>
 <section id="lettore" class="lettore" aria-label="Ascolto" hidden>
 <div class="lettore-top"><div><p class="occasione">In ascolto</p><h3 id="titolo-brano"></h3></div><button type="button" class="chiudi-lettore">Chiudi lettore</button></div>
 <p>Se il video non parte qui, <a id="apri-youtube" target="_blank" rel="noopener noreferrer">ascoltalo su YouTube ↗</a>.</p>
 <div id="video"></div>
 </section>
-<div class="selezioni">
-<article class="card selezione" data-categoria="calma" style="--tinta:#6FCF97">
-<div class="disco" aria-hidden="true"></div><div class="occasione">Respira · ascolta · prova</div>
-<h3>Con calma</h3><p class="descrizione">Parti morbido. Un invito ad ascoltare gli accenti, sciogliere i passi e lasciare spazio al movimento.</p>
-<ul class="brani"><li><button class="brano" type="button" data-video="lyRlLaQiguQ" data-titolo="Easy Does It · Count Basie" aria-pressed="false"><span class="play" aria-hidden="true">▶</span><span><strong>Easy Does It</strong><small>Count Basie</small></span><span class="invito">Ascolta</span></button></li></ul>
-</article>
-<article class="card selezione" data-categoria="pista" style="--tinta:#FFD400">
-<div class="disco" aria-hidden="true"></div><div class="occasione">Il piacere del social dance</div>
-<h3>In pista</h3><p class="descrizione">Il suono di una serata swing: una big band, un ritmo che cammina e la voglia di invitare qualcuno a ballare.</p>
-<ul class="brani"><li><button class="brano" type="button" data-video="YWqbQDjLK44" data-titolo="Shiny Stockings · Count Basie and His Orchestra" aria-pressed="false"><span class="play" aria-hidden="true">▶</span><span><strong>Shiny Stockings</strong><small>Count Basie and His Orchestra</small></span><span class="invito">Ascolta</span></button></li></ul>
-</article>
-<article class="card selezione" data-categoria="energia" style="--tinta:#F2994A">
-<div class="disco" aria-hidden="true"></div><div class="occasione">Alza l’energia</div>
-<h3>A tutto swing</h3><p class="descrizione">Fiati e batteria in primo piano. Per giocare con i ritmi veloci, il Balboa, lo Shag o semplicemente lasciarti trascinare.</p>
-<ul class="brani">
-<li><button class="brano" type="button" data-video="LyNWWQ_i1Go" data-titolo="Jumpin’ at the Woodside · Count Basie and His Orchestra" aria-pressed="false"><span class="play" aria-hidden="true">▶</span><span><strong>Jumpin’ at the Woodside</strong><small>Count Basie and His Orchestra</small></span><span class="invito">Ascolta</span></button></li>
-<li><button class="brano" type="button" data-video="1F-RQd5ZRAk" data-titolo="Sing, Sing, Sing · Benny Goodman and His Orchestra" aria-pressed="false"><span class="play" aria-hidden="true">▶</span><span><strong>Sing, Sing, Sing</strong><small>Benny Goodman and His Orchestra</small></span><span class="invito">Ascolta</span></button></li>
-</ul></article>
-<article class="card selezione" data-categoria="italia" style="--tinta:#9B8CFF">
-<div class="disco" aria-hidden="true"></div><div class="occasione">Dai palchi alle nostre piste</div>
-<h3>Swing italiano dal vivo</h3><p class="descrizione">La musica prende vita anche vicino a casa. Comincia dai Chicago Stompers e scopri il suono della scena italiana.</p>
-<div class="azioni"><a class="pri" href="https://www.youtube.com/results?search_query=Chicago+Stompers+live" target="_blank" rel="noopener noreferrer">Cerca le esibizioni su YouTube ↗</a><a href="/artisti">Scopri band e DJ →</a></div>
-</article>
-</div>
+<p id="stato-musica" role="status">Caricamento della musica...</p>
+<div id="selezioni-musica" class="selezioni"></div>
 <p class="nota">Il lettore YouTube viene caricato solo quando scegli un brano. Disponibilità dei video e riproduzione dipendono da YouTube; puoi sempre aprire il collegamento esterno.</p>
 <noscript><p class="box">Per scegliere i brani nel lettore attiva JavaScript, oppure <a href="https://www.youtube.com/results?search_query=swing+dance+music">cerca musica swing su YouTube</a>.</p></noscript>
 <a class="indietro" href="/">← Torna agli eventi</a>
