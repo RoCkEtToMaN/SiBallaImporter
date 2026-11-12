@@ -113,7 +113,8 @@
   var DISEGNA = { scuole: scuole, artisti: artisti, community: community };
 
   function disegna() {
-    var avviso = fonte === "bozza" && dati.length
+    // solo la bozza delle scuole viene dagli organizzatori degli eventi
+    var avviso = elenco === "scuole" && fonte === "bozza" && dati.length
       ? '<p class="avviso">Lista provvisoria, ricavata dagli organizzatori degli eventi: da controllare.</p>' : "";
     box.innerHTML = avviso + (dati.length ? DISEGNA[elenco]() : '<p class="box">' + VUOTO[elenco] + "</p>");
   }
