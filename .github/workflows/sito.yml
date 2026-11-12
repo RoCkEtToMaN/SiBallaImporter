@@ -62,6 +62,14 @@ jobs:
       - name: Prepara il sito
         run: cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og.png _sito/
 
+      # versione mostrata in fondo alle pagine (sito/piede.js): data e codice dell'ultimo commit, ramo, ora
+      - name: Versione
+        run: |
+          printf '{"versione":"%s","commit":"%s","ramo":"%s","pubblicata":"%s"}\n' \
+            "$(git log -1 --format=%cd --date=format:%Y.%m.%d)" "$(git rev-parse --short HEAD)" \
+            "$GITHUB_REF_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > _sito/versione.json
+          cat _sito/versione.json
+
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
