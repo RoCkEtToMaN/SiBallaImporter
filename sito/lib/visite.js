@@ -21,6 +21,12 @@ export async function preparaTabella(db) {
          giorno TEXT NOT NULL, tipo TEXT NOT NULL, chiave TEXT NOT NULL,
          n INTEGER NOT NULL DEFAULT 0,
          PRIMARY KEY (giorno, tipo, chiave))`),
+    // "cestino" delle visite tolte a mano dalla pagina /statistiche (bot, visite proprie): si possono ripristinare
+    db.prepare(
+      `CREATE TABLE IF NOT EXISTS visite_tolte (
+         giorno TEXT NOT NULL, paese TEXT NOT NULL, regione TEXT NOT NULL, citta TEXT NOT NULL,
+         n INTEGER NOT NULL DEFAULT 0, tolte_il TEXT NOT NULL,
+         PRIMARY KEY (giorno, paese, regione, citta))`),
   ]);
   tabellaPronta = true;
 }
