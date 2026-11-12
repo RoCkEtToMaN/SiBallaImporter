@@ -535,6 +535,7 @@
     if (!b) return;
     attivo = +b.dataset.i;
     tabs(); disegna();
+    if (dati.fogli[attivo]._clandestini) aggiornaClandestini();
   });
   $("q").addEventListener("input", disegna);
   $("stili").addEventListener("click", function (e) {
@@ -967,9 +968,35 @@
       });
   });
 
+  // --- clandestini sempre aggiornati: chi ha la pagina aperta vede subito quelli approvati o tolti, senza ricaricare.
+  // Si ricontrolla tornando sulla pagina, aprendo la scheda Clandestini e ogni minuto (solo con la pagina in primo piano);
+  // si ridisegna solo se qualcosa è cambiato e mai mentre è aperto un modulo.
+  var firmaClandestini = "", ultimoControllo = 0;
+  function aggiornaClandestini() {
+    if (!dati || !clandestiniAttivi || location.protocol === "file:" || document.visibilityState !== "visible") return;
+    if (Date.now() - ultimoControllo < 10000) return;
+    ultimoControllo = Date.now();
+    fetch("/api/clandestini", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (c) {
+        if (!c || !c.eventi || document.querySelector("dialog[open]")) return;
+        var firma = JSON.stringify(c.eventi), i = -1;
+        dati.fogli.forEach(function (f, k) { if (f._clandestini) i = k; });
+        if (i < 0 || firma === firmaClandestini) return;
+        firmaClandestini = firma;
+        prepara(c);
+        dati.fogli[i] = c;
+        tabs(); disegna();
+      })
+      .catch(function () {});
+  }
+  document.addEventListener("visibilitychange", aggiornaClandestini);
+  window.addEventListener("focus", aggiornaClandestini);
+  setInterval(aggiornaClandestini, 60000);
+
   fetch("eventi.json", { cache: "no-cache" })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (d) { return clandestini.then(function (c) { if (c) d.fogli.push(c); return d; }); })
+    .then(function (d) { return clandestini.then(function (c) { if (c) { firmaClandestini = JSON.stringify(c.eventi); d.fogli.push(c); } return d; }); })
     .then(function (d) {
       dati = d;
       d.fogli.forEach(prepara);
