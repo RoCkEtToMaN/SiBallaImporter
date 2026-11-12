@@ -18842,6 +18842,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Lindy"
         ]
@@ -19129,6 +19130,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Lindy",
           "SoloJazz"
@@ -19241,6 +19243,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa",
           "Shag"
@@ -19353,6 +19356,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa",
           "Blues",
@@ -19395,6 +19399,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa"
         ]
@@ -19432,6 +19437,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa",
           "Blues",
@@ -19509,6 +19515,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Lindy"
         ]
@@ -19546,6 +19553,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa",
           "SlowBal"
@@ -21237,6 +21245,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa",
           "Lindy",
@@ -21276,6 +21285,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Balboa",
           "Lindy",
@@ -21392,6 +21402,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Lindy",
           "SoloJazz"
@@ -21430,6 +21441,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "geminiNonTrovato": "2026-11-12",
         "stili": [
           "Lindy"
         ]
@@ -21911,6 +21923,41 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-11"
+      }
+    }
+  },
+  "boogie feet festival|oslo": {
+    "default": {
+      "organizer": "Boogie Feet Festival",
+      "city": "Oslo",
+      "country": "Norway",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "boogie invitational weekend": {
+        "organizer": null,
+        "city": "Oslo",
+        "country": "Norway",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-12"
       }
     }
   }
