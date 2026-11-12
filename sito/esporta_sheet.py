@@ -151,7 +151,9 @@ def cella(riga: list, i: int) -> str:
 # ---- elenchi per le pagine Scuole, Artisti, Community ----
 # Schede dello Sheet con questi nomi non sono eventi: diventano <nome>.json accanto a eventi.json.
 # Se la scheda non c'è ancora si usa la bozza sito/elenchi/<nome>.csv del repository (se c'è).
-ELENCHI = ("scuole", "artisti", "community")
+# "contenuti" = rubriche (mossa della settimana, giornate speciali, ...): colonne Data, Rubrica, Titolo, Testo,
+# Immagine, Video, Autore; una riga compare sul sito dal giorno in "Data" in poi (così si programmano in anticipo).
+ELENCHI = ("scuole", "artisti", "community", "contenuti")
 CARTELLA_BOZZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "elenchi")
 CONSENSO_SI = {"sì", "si", "x", "yes", "true", "1", "ok"}
 
@@ -191,8 +193,19 @@ def chiave_colonna(h: str) -> str:
 def righe_elenco(nome: str, intestazione: list, righe: list) -> list[dict]:
     chiavi = [chiave_colonna(str(h)) for h in intestazione]
     out = []
+    oggi = datetime.now(ZoneInfo("Europe/Rome")).date()
     for r in righe:
         d = {k: html.unescape(cella(r, i)) for i, k in enumerate(chiavi) if k and cella(r, i)}
+        if nome == "contenuti":
+            if not d.get("titolo"):
+                continue
+            giorno = come_data(d.get("data", ""))
+            if giorno and giorno > oggi:
+                continue   # programmato: compare dal suo giorno
+            d["data"] = giorno.isoformat() if giorno else ""
+            d["id"] = (d["data"] + "-" + norm(d["titolo"]).replace(" ", "-")).strip("-")[:80]
+            out.append(d)
+            continue
         if not d.get("nome"):
             continue
         # artisti: si pubblicano solo con il consenso (colonna "Consenso" = sì); senza la colonna, nessuno
@@ -200,6 +213,8 @@ def righe_elenco(nome: str, intestazione: list, righe: list) -> list[dict]:
             continue
         d.pop("consenso", None)
         out.append(d)
+    if nome == "contenuti":
+        out.sort(key=lambda c: c.get("data", ""), reverse=True)   # i più recenti prima
     return out
 
 
@@ -246,7 +261,7 @@ def main() -> None:
     for nome, vf, vg in zip(fogli, formattati, grezzi):
         righe_f = vf.get("values", [])
         righe_g = vg.get("values", [])
-        # Scuole / Artisti / Community: non sono eventi (riga 2 = intestazioni, dati dalla riga 3)
+        # Scuole / Artisti / Community / Contenuti: non sono eventi (riga 2 = intestazioni, dati dalla riga 3)
         if nome.strip().lower() in ELENCHI:
             elenco = nome.strip().lower()
             if len(righe_f) >= 2:

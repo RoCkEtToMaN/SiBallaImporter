@@ -76,6 +76,18 @@ DA FARE
 
 IDEE NUOVE (di nicchia ma "di moda")
 ------------------------------------
+PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scritte nello Sheet.
+[~] Base "Rubriche" (/rubriche, voce nel menu): fatta sulla versione di prova.
+    Scheda "Contenuti" nello Sheet (riga 2 intestazioni): Data, Rubrica, Titolo, Testo,
+    Immagine (link), Video (link YouTube -> video nella pagina; Instagram/altro -> pulsante),
+    Autore. Una riga compare dal giorno in "Data" in poi: si programmano in anticipo.
+    Finche' la scheda non c'e': bozza sito/elenchi/contenuti.csv (3 esempi). Ogni contenuto
+    ha "Condividi" e un link suo (/rubriche?id=...). Da fare: riga in home "La mossa della
+    settimana: ... ->", banner automatico nelle giornate speciali.
+    Ordine: 1) Wrapped 2026 (dicembre) 2) Quiz (gennaio) 3) Mossa della settimana con 3-4
+    insegnanti che fanno i video a turno 4) Giornate speciali entro il 26 maggio
+    5) "Cosa mi metto" quando c'e' uno sponsor. La parte difficile e' la costanza dei
+    contenuti: legarli a insegnanti e DJ della scena (Artisti), che ne hanno interesse.
 [ ] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
     pagina da condividere con numero di eventi, citta' piu' attiva, mese piu'
     ballato, stili piu' presenti.
