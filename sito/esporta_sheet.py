@@ -12,8 +12,13 @@ Per ogni foglio dello Sheet:
   servono al massimo per il filtro e non finiscono nel JSON;
 - aggiunge le coordinate (per "Vicino a me") e il link dell'immagine su Appwrite Storage se la colonna
   "Immagine" dice "sì" o "logo" (stesso id calcolato dall'importatore, vedi EventImages.cs).
+
+Le schede "Scuole", "Artisti" e "Community" non sono eventi: diventano scuole.json, artisti.json e
+community.json accanto al file di uscita (per le pagine /scuole, /artisti, /community). Finché la scheda
+non c'è si usa la bozza sito/elenchi/<nome>.csv. Gli artisti si pubblicano solo con Consenso = sì.
 """
 
+import csv
 import hashlib
 import html
 import json
@@ -65,6 +70,30 @@ def normalizza_titolo(titolo: str) -> str:
     t = re.sub(r"\b(edizione|edition|nd|rd|th)\b", " ", t)
     t = re.sub(r"\b\d+\b", " ", t)
     return re.sub(r"\s+", " ", t).strip()
+
+
+# ---- pulizia dei nomi "sporchi" (solo quello che si vede sul sito: lo Sheet non cambia) ----
+# Lettere "in grassetto" Unicode (𝗩𝗲𝗻𝗲𝗿𝗱𝗶 -> Venerdi), barre strane (┃ ⎜) -> "|", stelline decorative (☆ ★ ✰ ✧ ✮) -> "·",
+# "-Italy" / ", Italy" in fondo, spazi multipli e a capo.
+BARRE = re.compile(r"\s*[─-╿⎜-⎟｜∣ǀ]\s*")
+STELLINE = re.compile(r"\s*[★☆✩-✰✴✶✷✸✹❂✪-✯✧✦⭐⯌]+\s*")
+# solo con trattino o virgola: "Savoy Swing Italy" resta com'è
+FINE_ITALY = re.compile(r"\s*[-–,]\s*Ital(?:y|ia)\s*$", re.I)
+
+
+def pulisci_nome(s: str) -> str:
+    if not s:
+        return s
+    t = unicodedata.normalize("NFKC", s)
+    t = re.sub(r"\s*[\r\n]+\s*", " · ", t)
+    t = BARRE.sub(" | ", t)
+    t = STELLINE.sub(" · ", t)
+    t = FINE_ITALY.sub("", t)
+    t = re.sub(r"[ \t ]{2,}", " ", t)
+    # separatori rimasti all'inizio o alla fine (es. "☆ Nome ☆" -> "Nome"), e doppi
+    t = re.sub(r"(\s*[·|]\s*){2,}", " · ", t)
+    t = re.sub(r"^[\s·|:–-]+|[\s·|:–-]+$", "", t)
+    return t or s.strip()
 
 
 def sha32(testo: str) -> str:
@@ -119,6 +148,89 @@ def cella(riga: list, i: int) -> str:
     return str(riga[i]).strip() if i < len(riga) and riga[i] is not None else ""
 
 
+# ---- elenchi per le pagine Scuole, Artisti, Community ----
+# Schede dello Sheet con questi nomi non sono eventi: diventano <nome>.json accanto a eventi.json.
+# Se la scheda non c'è ancora si usa la bozza sito/elenchi/<nome>.csv del repository (se c'è).
+# "contenuti" = rubriche (mossa della settimana, giornate speciali, ...): colonne Data, Rubrica, Titolo, Testo,
+# Immagine, Video, Autore; una riga compare sul sito dal giorno in "Data" in poi (così si programmano in anticipo).
+ELENCHI = ("scuole", "artisti", "community", "contenuti")
+
+# Novità del sito (nomi degli eventi puliti, file di Scuole/Artisti/Community/Contenuti): accese sulle versioni
+# di prova (ramo diverso da master, o lanciato dal PC) e SPENTE sul sito pubblico finché non si mette True.
+# Sul sito pubblico, intanto, le schede Scuole/Artisti/Community/Contenuti vengono comunque saltate (non sono eventi).
+NOVITA_PUBBLICHE = False
+NOVITA_ATTIVE = NOVITA_PUBBLICHE or os.environ.get("GITHUB_REF_NAME", "") != "master"
+CARTELLA_BOZZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "elenchi")
+CONSENSO_SI = {"sì", "si", "x", "yes", "true", "1", "ok"}
+
+# regione di ogni evento (filtro "regione" e mappa della home): comune o provincia -> regione, dall'elenco ISTAT
+# (sito/elenchi/comuni_regioni.json, nomi normalizzati con norm()). Eventi fuori dall'Italia: "Estero".
+_REGIONI = None
+
+
+def regione_di(luogo: str) -> str:
+    global _REGIONI
+    if _REGIONI is None:
+        try:
+            with open(os.path.join(CARTELLA_BOZZE, "comuni_regioni.json"), encoding="utf-8") as f:
+                _REGIONI = json.load(f)
+        except OSError:
+            _REGIONI = {}
+    parti = [p.strip() for p in luogo.split(",") if p.strip()]
+    if not parti:
+        return ""
+    if not re.match(r"ital", parti[0], re.I):
+        return "Estero"
+    # prima la città (2° pezzo), poi gli altri pezzi dell'indirizzo (a volte la città è più avanti)
+    for pezzo in parti[1:2] + parti[2:]:
+        r = _REGIONI.get(norm(re.sub(r"\(.*?\)", "", pezzo)))
+        if r:
+            return r
+    # frazione o località non in elenco: sigla della provincia tra parentesi, es. "Silvi Marina (TE)"
+    m = re.search(r"\(([A-Za-z]{2})\)", luogo)
+    return _REGIONI.get("sigla " + m.group(1).lower(), "") if m else ""
+
+
+def chiave_colonna(h: str) -> str:
+    """'Città' -> 'citta', 'Eventi nello Sheet' -> 'eventi_nello_sheet'."""
+    return norm(h).replace(" ", "_")
+
+
+def righe_elenco(nome: str, intestazione: list, righe: list) -> list[dict]:
+    chiavi = [chiave_colonna(str(h)) for h in intestazione]
+    out = []
+    oggi = datetime.now(ZoneInfo("Europe/Rome")).date()
+    for r in righe:
+        d = {k: html.unescape(cella(r, i)) for i, k in enumerate(chiavi) if k and cella(r, i)}
+        if nome == "contenuti":
+            if not d.get("titolo"):
+                continue
+            giorno = come_data(d.get("data", ""))
+            if giorno and giorno > oggi:
+                continue   # programmato: compare dal suo giorno
+            d["data"] = giorno.isoformat() if giorno else ""
+            d["id"] = (d["data"] + "-" + norm(d["titolo"]).replace(" ", "-")).strip("-")[:80]
+            out.append(d)
+            continue
+        if not d.get("nome"):
+            continue
+        # artisti: si pubblicano solo con il consenso (colonna "Consenso" = sì); senza la colonna, nessuno
+        if nome == "artisti" and d.get("consenso", "").strip().lower() not in CONSENSO_SI:
+            continue
+        d.pop("consenso", None)
+        out.append(d)
+    if nome == "contenuti":
+        out.sort(key=lambda c: c.get("data", ""), reverse=True)   # i più recenti prima
+    return out
+
+
+def scrivi_elenco(cartella: str, nome: str, righe: list[dict], fonte: str) -> None:
+    with open(os.path.join(cartella, nome + ".json"), "w", encoding="utf-8") as f:
+        json.dump({"aggiornato": datetime.now(ZoneInfo("Europe/Rome")).isoformat(timespec="minutes"),
+                   "fonte": fonte, "righe": righe}, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"- elenco '{nome}': {len(righe)} righe (da {fonte})")
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         sys.exit("Uso: python esporta_sheet.py <file di uscita>")
@@ -148,9 +260,23 @@ def main() -> None:
     oggi = datetime.now(ZoneInfo("Europe/Rome")).date()
     uscita = {"aggiornato": datetime.now(ZoneInfo("Europe/Rome")).isoformat(timespec="minutes"), "fogli": []}
 
+    cartella = os.path.dirname(os.path.abspath(sys.argv[1]))
+    os.makedirs(cartella, exist_ok=True)
+    elenchi_fatti = set()
+
     for nome, vf, vg in zip(fogli, formattati, grezzi):
         righe_f = vf.get("values", [])
         righe_g = vg.get("values", [])
+        # Scuole / Artisti / Community / Contenuti: non sono eventi (riga 2 = intestazioni, dati dalla riga 3)
+        if nome.strip().lower() in ELENCHI:
+            elenco = nome.strip().lower()
+            if len(righe_f) >= 2:
+                if NOVITA_ATTIVE:
+                    scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1], righe_f[2:]), "sheet")
+                else:
+                    print(f"- scheda '{nome}': saltata (non è una scheda di eventi; pagine non ancora pubbliche)")
+                elenchi_fatti.add(elenco)
+            continue
         if len(righe_f) < 3:
             print(f"- '{nome}': vuoto, saltato")
             continue
@@ -186,6 +312,10 @@ def main() -> None:
                 if col_immagine is not None else None
             # html.unescape: alcuni nomi arrivano dai siti con entità tipo "&#8217;"
             celle = [html.unescape(cella(rf, i)) for i in range(num_colonne)]
+            # nome dell'evento (E) e organizzatore (G) puliti per la pagina; l'immagine usa già il nome originale qui sopra
+            for k in ((4, 6) if NOVITA_ATTIVE else ()):
+                if k < len(celle):
+                    celle[k] = pulisci_nome(celle[k])
             # date tutte nello stesso formato (nello Sheet ci sono sia 11/11/2026 sia 2026-11-11)
             if inizio:
                 celle[0] = inizio.strftime("%d/%m/%Y")
@@ -206,6 +336,9 @@ def main() -> None:
                     evento["lat"], evento["lng"] = round(lat, 5), round(lng, 5)
             elif luogo:
                 evento["mappa"] = "https://www.google.com/maps/search/?api=1&query=" + quote(luogo)
+            reg = regione_di(celle[COL_LUOGO])
+            if reg:
+                evento["regione"] = reg
             eventi.append(evento)
 
         # tengo solo le colonne scelte e non escluse (dopo l'uso degli indici fissi qui sopra; A-F restano
@@ -219,7 +352,18 @@ def main() -> None:
         uscita["fogli"].append({"nome": nome, "colonne": colonne, "eventi": eventi})
         print(f"- '{nome}': {len(eventi)} eventi pubblicati, {scartate_passate} passati, {scartate_verifica} da verificare")
 
-    os.makedirs(os.path.dirname(os.path.abspath(sys.argv[1])), exist_ok=True)
+    # elenchi senza scheda nello Sheet: bozza CSV del repository, altrimenti vuoti (solo con le novità accese)
+    for elenco in (ELENCHI if NOVITA_ATTIVE else ()):
+        if elenco in elenchi_fatti:
+            continue
+        bozza = os.path.join(CARTELLA_BOZZE, elenco + ".csv")
+        if os.path.exists(bozza):
+            with open(bozza, encoding="utf-8-sig", newline="") as f:
+                tutte = list(csv.reader(f))
+            scrivi_elenco(cartella, elenco, righe_elenco(elenco, tutte[0], tutte[1:]) if tutte else [], "bozza")
+        else:
+            scrivi_elenco(cartella, elenco, [], "nessuna")
+
     with open(sys.argv[1], "w", encoding="utf-8") as f:
         json.dump(uscita, f, ensure_ascii=False, separators=(",", ":"))
 
