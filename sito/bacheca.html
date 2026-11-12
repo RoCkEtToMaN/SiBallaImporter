@@ -44,6 +44,7 @@
   .scelta button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
   .avviso-contatto { font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
   dialog .manca { border-color: #FF6B6B; }
+  dialog .scelta.manca button { border-color: #FF6B6B; }
   .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .esito { min-height: 1.2em; margin: 10px 0 0; font-size: 14px; }
   .esito.errore { color: #FF6B6B; }
@@ -120,7 +121,8 @@
       <button type="button" data-v="partner" aria-pressed="false">Partner di ballo</button>
     </div>
     <div class="scelta" id="sTipo" role="group" aria-label="Cerco o offro">
-      <button type="button" data-v="cerco" aria-pressed="true">Cerco</button>
+      <!-- nessuna scelta preselezionata: chi scrive deve dire se cerca o offre -->
+      <button type="button" data-v="cerco" aria-pressed="false">Cerco</button>
       <button type="button" data-v="offro" aria-pressed="false">Offro</button>
     </div>
 
@@ -469,6 +471,7 @@
     var b = e.target.closest(".scelta button");
     if (!b) return;
     [].forEach.call(b.parentNode.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    b.parentNode.classList.remove("manca");
     aggiornaCampi();
   });
   $("form").addEventListener("submit", function (e) {
@@ -487,6 +490,12 @@
       $(campo).focus();
     }
     var passaggio = d.categoria === "passaggio";
+    if (!d.tipo) {
+      esito(passaggio ? "Scegli se cerchi o offri un passaggio." : "Scegli se cerchi un partner o ti proponi.", true);
+      $("sTipo").classList.add("manca");
+      $("sTipo").querySelector("button").focus();
+      return;
+    }
     if (!d.citta.trim()) { manca("fCitta", passaggio ? "Scrivi da dove parti." : "Scrivi la tua città."); return; }
     if (passaggio && !d.arrivo.trim() && !d.evento.trim()) { manca("fArrivo", "Scrivi dove vai: destinazione o evento."); return; }
     if (!d.nome.trim()) { manca("fNome", "Scrivi il tuo nome o un soprannome."); return; }

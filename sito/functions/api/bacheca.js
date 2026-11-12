@@ -51,7 +51,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     return json({ errore: "Verifica anti-spam non riuscita, ricarica la pagina e riprova." }, 400);
 
   const categoria = CATEGORIE[d.categoria] ? d.categoria : "";
-  const tipo = d.tipo === "offro" ? "offro" : "cerco";
+  const tipo = d.tipo === "offro" || d.tipo === "cerco" ? d.tipo : "";
+  if (!tipo) return json({ errore: "Scegli se cerchi o offri." }, 400);
   const citta = pulisci(d.citta, 60), arrivo = categoria === "passaggio" ? pulisci(d.arrivo, 80) : "";
   const evento = pulisci(d.evento, 120), testo = pulisci(d.testo, 400);
   const nome = pulisci(d.nome, 40), contatto = pulisci(d.contatto, 120);
