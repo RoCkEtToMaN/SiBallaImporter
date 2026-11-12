@@ -106,8 +106,7 @@ internal static class ImportRunner
 
         // senza città non vanno nello Sheet (la colonna F vuole "Paese, Città"): li vedi nell'email e li aggiungi tu
         foreach (var eventToCheck in eventiOnline.Where(x => !x.LuogoSconosciuto))
-            if (!eventiSheet[TipoEvento.Serate].Any(x => x.PartyName == eventToCheck.PartyName && x.DateStart.Date == eventToCheck.DateStart.Date)
-                && !eventiSheet[TipoEvento.Workshop].Any(x => x.PartyName == eventToCheck.PartyName && x.DateStart.Date == eventToCheck.DateStart.Date))
+            if (!NelloSheet(eventiSheet, eventToCheck))
                 nuoviEventi.Add(eventToCheck);
 
         // per il bot Telegram (AgenteRust, comando /importa): il calendario dello Sheet, nello stesso formato
@@ -127,11 +126,11 @@ internal static class ImportRunner
             await EventImages.UploadAsync(nuoviEventi, appWriteService);
             await ImportData.PrepareToAppendToGoogleSheet([.. nuoviEventi.OrderBy(x => x.DateStart)], eventiSheet);
 
-            // il DB è la copia dello Sheet letto all'inizio: rileggo, così le righe appena aggiunte arrivano sul DB
+            // DB ed email partono dallo Sheet letto all'inizio: rileggo, così le righe appena aggiunte arrivano
             // in questo giro e non in quello dopo. I luoghi del dizionario vanno riapplicati (in memoria, come al punto 4)
-            if (opzioni.EnableImportingOnDB)
+            if (opzioni.EnableImportingOnDB || opzioni.EnableSending)
             {
-                Console.WriteLine("[sheet] rileggo lo Sheet con le righe appena aggiunte, per il caricamento sul DB");
+                Console.WriteLine("[sheet] rileggo lo Sheet con le righe appena aggiunte, per DB ed email");
                 eventiSheet = ImportData.LoadFile();
                 sheetEvents = eventiSheet.Values.SelectMany(x => x).ToList();
                 store.ApplyToSheetEvents(sheetEvents);
@@ -139,7 +138,7 @@ internal static class ImportRunner
         }
 
         if (opzioni.EnableSending)
-            await InviaEmailAsync(settings, eventiOnline);
+            await InviaEmailAsync(settings, eventiSheet, sheetEvents, eventiOnline);
 
         if (opzioni.ResetDb)
             await appWriteService.ResetDbAsync();
@@ -148,15 +147,46 @@ internal static class ImportRunner
             await SincronizzaDatabaseAsync(eventiSheet, sheetEvents, appWriteService);
     }
 
-    private static async Task InviaEmailAsync(AppSettings settings, List<Event> eventiOnline)
+    // stesso confronto dell'import: nome della serata + giorno
+    private static bool NelloSheet(Dictionary<TipoEvento, List<Event>> eventiSheet, Event ev) =>
+        eventiSheet.Values.Any(lista => lista.Any(x => x.PartyName == ev.PartyName && x.DateStart.Date == ev.DateStart.Date));
+
+    /// <summary>
+    /// Il bollettino viene dallo Sheet (il calendario curato: indirizzi corretti, righe aggiunte a mano).
+    /// Dagli eventi online prendo solo quelli che nello Sheet non ci sono: senza città (non ci vanno mai)
+    /// o trovati con l'import sullo Sheet spento
+    /// </summary>
+    private static async Task InviaEmailAsync(AppSettings settings, Dictionary<TipoEvento, List<Event>> eventiSheet,
+        List<Event> sheetEvents, List<Event> eventiOnline)
     {
         var opzioni = settings.Import;
         var radiusEmail = opzioni.RadiusEmail ?? opzioni.Radius;
-        var eventiEmail = eventiOnline
-            .Where(x => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni))
+        bool NelPeriodo(Event x) => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni);
+
+        // Sheet: le righe "da verificare" (non ancora controllate da te) vanno nella sezione a parte, non nel bollettino
+        var righeSheet = sheetEvents
+            .Where(NelPeriodo)
             .Where(x => EventFilter.IsWithinEmailRadius(x, radiusEmail))
             .ToList();
-        Console.WriteLine($"[email] {eventiEmail.Count} eventi entro {radiusEmail} km da Genova nei prossimi {opzioni.Giorni} giorni");
+        var bollettino = righeSheet.Where(x => x.LuogoVerificato != ImportData.VerifiedPending).ToList();
+        var daVerificare = righeSheet
+            .Where(x => x.LuogoVerificato == ImportData.VerifiedPending)
+            .Select(x => (Evento: x, Motivo: x.MotivoVerifica ?? $"riga '{ImportData.VerifiedPending}' nello Sheet"))
+            .ToList();
+
+        // online e non nello Sheet
+        var fuoriSheet = eventiOnline.Where(NelPeriodo).Where(x => !NelloSheet(eventiSheet, x)).ToList();
+        // senza città non so se sono vicini: niente filtro sul raggio, sezione a parte invece del bollettino per città
+        var luogoSconosciuto = fuoriSheet.Where(x => x.LuogoSconosciuto).ToList();
+        var altriOnline = fuoriSheet
+            .Where(x => !x.LuogoSconosciuto)
+            .Where(x => EventFilter.IsWithinEmailRadius(x, radiusEmail))
+            .ToList();
+
+        var eventiEmail = bollettino.Concat(daVerificare.Select(x => x.Evento)).Concat(altriOnline).Concat(luogoSconosciuto).ToList();
+        Console.WriteLine($"[email] entro {radiusEmail} km da Genova nei prossimi {opzioni.Giorni} giorni: " +
+            $"{bollettino.Count} dallo Sheet, {daVerificare.Count} da verificare nello Sheet, " +
+            $"{altriOnline.Count} online non nello Sheet, {luogoSconosciuto.Count} con luogo sconosciuto");
 
         // giro quotidiano: niente email (e niente Gemini) se non c'è nessun evento nuovo dall'ultima
         var nuovi = UltimaEmail.Nuovi(eventiEmail);
@@ -167,12 +197,14 @@ internal static class ImportRunner
         else
         {
             Console.WriteLine($"📬 Eventi nuovi rispetto all'ultima email: {nuovi.Count} su {eventiEmail.Count}");
-            // controllo finale con l'AI: gli eventi non swing finiscono in una sezione separata dell'email
-            var (eventiSwing, daVerificare) = await SwingEventClassifier.ClassifyAsync(eventiEmail, settings.Gemini);
-            // senza città non so se sono vicini: sezione a parte invece del bollettino per città
-            var inviata = await EmailSender.SendWithMailjetAnonymous(
-                eventiSwing.Where(x => !x.LuogoSconosciuto).ToList(), settings, daVerificare,
-                eventiSwing.Where(x => x.LuogoSconosciuto).ToList());
+            // le righe dello Sheet le hai già curate tu; l'AI controlla solo gli eventi online rimasti fuori
+            if (altriOnline.Count > 0)
+            {
+                var (swingOnline, nonSwingOnline) = await SwingEventClassifier.ClassifyAsync(altriOnline, settings.Gemini);
+                bollettino.AddRange(swingOnline);
+                daVerificare.AddRange(nonSwingOnline);
+            }
+            var inviata = await EmailSender.SendWithMailjetAnonymous(bollettino, settings, daVerificare, luogoSconosciuto);
             // se non è partita gli eventi restano "nuovi" e il programma esce con errore:
             // su GitHub il run fallisce (arriva la mail) e il tentativo dell'ora dopo la rimanda
             if (inviata)
