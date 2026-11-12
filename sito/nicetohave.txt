@@ -20,6 +20,37 @@ GIA' FATTI
 
 DA FARE
 -------
+[~] Bacheca degli annunci (/bacheca): passaggi e cerco partner.
+    STATO: fatta solo sulla versione di prova (ramo "anteprima"): elenco con filtri e
+    ricerca, modulo, approvazione in /bacheca-admin?chiave=..., email di avviso,
+    scadenza automatica (data indicata o 30 giorni), voce "Bacheca" nel menu.
+    Stesso database D1 e stesse chiavi dei clandestini: niente da configurare.
+    Avvisi: pallino sul menu, invito in home, riga sulle schede evento (gialli fino al clic);
+    nel modulo data e destinazione dall'evento, suggerimenti filtrati per citta'.
+    DISCUSSIONE sotto ogni annuncio (in prova): messaggi SENZA approvazione, nickname
+    ricordato dal browser, si aggiorna ogni 12 s; "Segnala" (2 persone -> nascosto + email),
+    "Cancella" per i propri; limiti 5/minuto e 60/giorno; in /bacheca-admin elenco dei
+    messaggi con Cancella / Nascondi / Rendi visibile. Sparisce con l'annuncio.
+    Etichetta "autore dell'annuncio" sui messaggi di chi l'ha scritto (stesso browser).
+    Modulo: contatto facoltativo (senza -> "scrivimi nella discussione"), Cerco/Offro da
+    scegliere (non preselezionato), errori che indicano il campo preciso.
+    Email privata facoltativa (avviso di pubblicazione e dei messaggi, max 1 ogni 30 min),
+    "Togli il mio annuncio" dallo stesso browser, categorie Alloggio e Mercatino.
+    COSA SERVIREBBE:
+    - provarla sulla versione di prova (annuncio -> email -> approvazione -> pagina)
+    - [fatto] contatto non pubblico: ora facoltativo, ci si accorda nella discussione
+    - [fatto] sulla scheda di un evento: "2 cercano un passaggio · 1 cerca partner"
+    - [fatto] chi scrive puo' togliere il proprio annuncio (dallo stesso browser)
+    - [fatto] categorie Alloggio e Mercatino; da valutare DJ/band/sale
+    - [pronto] Turnstile (anti-bot Cloudflare) su clandestini, annunci e messaggi: si accende
+      da solo con TURNSTILE_SITEKEY (variabile) + TURNSTILE_SECRET (secret) nel progetto Pages
+    - pubblicazione: merge "anteprima" -> "master" e voce nel menu pubblico
+    Dettagli nel documento Word, capitolo "Bacheca degli annunci".
+[ ] Community WhatsApp aperta a tutti, da ogni parte del mondo (con calma, da decidere):
+    oggi c'e' solo la community siBalla (link chat.whatsapp.com, zona "Tutta Italia").
+    Da pensare: come farla trovare e usare anche a chi sta all'estero; zone/paesi oltre
+    alle regioni italiane; testi anche in inglese; come limitare lo spam con un link
+    pubblico (approvazione dei nuovi membri, oppure un Canale WhatsApp per gli annunci).
 [ ] Riempire le sezioni del menu (oggi "In arrivo"):
     - Storia del ballo: testo a capitoli con foto/video d'epoca, glossario degli stili
     - Scuole: nuova scheda nello Sheet -> esporta_sheet.py; filtro per regione, logo, link
@@ -29,13 +60,14 @@ DA FARE
     - App mobile: pulsanti degli store; sito installabile sul telefono (PWA)
     Quando una sezione e' pronta: pronta: true in sito/menu.js e togliere il "noindex".
 [ ] Mostrare il menu sul sito pubblico: MENU_PUBBLICO = true in sito/menu.js.
-[ ] Pulsanti sulla scheda: "Aggiungi al calendario" (file .ics) e "Condividi"
-    (sul telefono apre WhatsApp e le altre app). Piu' condivisioni = piu' visite
-    = numeri migliori da mostrare agli sponsor.
-[ ] Pulizia dei nomi "sporchi" nell'esportazione del sito: caratteri in grassetto
-    Unicode, barre "┃", "-Italy" in fondo al nome.
-[ ] Filtro per citta' o regione, oppure vista mappa con i segnaposto
-    (le coordinate degli eventi ci sono gia').
+[~] Pulsanti sulla scheda "📅 Calendario" (file .ics) e "↗ Condividi" (menu del telefono;
+    sul computer WhatsApp / Copia link): fatti sulla versione di prova, arrivano col merge.
+[~] Pulizia dei nomi "sporchi" (grassetto Unicode, barre ┃ ⎜, stelline ☆, "-Italy"):
+    fatta in esporta_sheet.py (pulisci_nome), arriva col merge.
+[~] Filtro per regione (menu a tendina con il numero di eventi, "Estero" a parte) e
+    "🗺️ Mappa" con i segnaposti (Leaflet + cartina OpenStreetMap scurita, gratis e senza chiave):
+    fatti sulla versione di prova. La regione la calcola esporta_sheet.py dalla citta'
+    (elenco ISTAT in sito/elenchi/comuni_regioni.json, anche sigla provincia).
 [ ] Link all'app SiBalla (se e' sugli store): voce "App mobile" nel menu, piu' magari
     un pulsante "Scarica l'app" sempre visibile.
 [ ] Dominio vostro, es. eventi.siballa.it al posto di siballa.pages.dev
@@ -44,11 +76,41 @@ DA FARE
 
 IDEE NUOVE (di nicchia ma "di moda")
 ------------------------------------
+PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scritte nello Sheet.
+[~] Base "Rubriche" (/rubriche, voce nel menu): fatta sulla versione di prova.
+    Scheda "Contenuti" nello Sheet (riga 2 intestazioni): Data, Rubrica, Titolo, Testo,
+    Immagine (link), Video (link YouTube -> video nella pagina; Instagram/altro -> pulsante),
+    Autore. Una riga compare dal giorno in "Data" in poi: si programmano in anticipo.
+    Finche' la scheda non c'e': bozza sito/elenchi/contenuti.csv (3 esempi). Ogni contenuto
+    ha "Condividi" e un link suo (/rubriche?id=...). Da fare: riga in home "La mossa della
+    settimana: ... ->", banner automatico nelle giornate speciali.
+    Ordine: 1) Wrapped 2026 (dicembre) 2) Quiz (gennaio) 3) Mossa della settimana con 3-4
+    insegnanti che fanno i video a turno 4) Giornate speciali entro il 26 maggio
+    5) "Cosa mi metto" quando c'e' uno sponsor. La parte difficile e' la costanza dei
+    contenuti: legarli a insegnanti e DJ della scena (Artisti), che ne hanno interesse.
 [ ] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
     pagina da condividere con numero di eventi, citta' piu' attiva, mese piu'
     ballato, stili piu' presenti.
-[ ] Playlist per BPM: playlist Spotify divise per velocita' (lente per principianti,
+[~] Playlist per BPM: FATTA in prova la pagina /musica (scheda Musica dello Sheet: selezioni con
+    BPM, lettore YouTube continuo, Ascolta tutto in ordine casuale, Proponi un brano, pulsante
+    Ascolta su Spotify con le playlist del proprio account). Resta: riempire le selezioni,
+    playlist Spotify pubbliche, poi Radio siBalla con licenze.
+    Idea iniziale: playlist Spotify divise per velocita' (lente per principianti,
     medie per social dance, veloci per Balboa/jam). Utili per allenarsi e ai DJ.
+    PIU' AVANTI (deciso il 12/11/2026), in 3 passi:
+    1) pagina "Musica" con 4-5 playlist incorporate: Lente 110-140 BPM (principianti,
+       Blues, Slow Balboa), Medie 140-180 (social), Veloci 200+ (Balboa, Shag, jam),
+       Live italiane (vetrina per le band). Spotify fa sentire i brani interi solo a chi
+       ha fatto l'accesso (altrimenti 30 s); YouTube li fa sentire interi a tutti, con
+       pubblicita'. Costo zero, diritti pagati da Spotify/YouTube. BPM a mano (Spotify
+       non li da' piu' alle app nuove). Serve solo il link delle playlist.
+    2) "Proponi un brano" (modulo come i clandestini) e playlist curate dai DJ della scena.
+    3) Radio vera ("Radio siBalla"), solo con pubblico stabile o uno sponsor: servono le
+       licenze (SIAE per gli autori + diritti delle registrazioni; esistono licenze per
+       web radio piccole, con costo annuale), un servizio di streaming (decine di euro al
+       mese) e chi la gestisce. Attenzione: i dischi swing anni '30-'40 possono essere
+       liberi come registrazioni, ma le canzoni restano protette fino a 70 anni dalla
+       morte dell'autore (Basie, Ellington...): le licenze servono comunque.
 [ ] "Cosa mi metto": guida allo stile vintage (moda anni '40, scarpe, acconciature).
     Si condivide molto su Instagram e si lega agli sponsor di abbigliamento/scarpe.
 [ ] Passaggi verso festival ed eventi: bacheca per dividere l'auto

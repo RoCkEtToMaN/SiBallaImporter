@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<script src="riservata.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubriche · siBalla</title>
+<meta name="description" content="La mossa della settimana, le giornate speciali e le altre rubriche della scena swing.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="logo-app.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E0E12">
+<link rel="stylesheet" href="pagina.css">
+<link rel="stylesheet" href="menu.css">
+<style>
+  .rubriche { display: grid; gap: 16px; max-width: 760px; }
+  .contenuto { scroll-margin-top: 16px; }
+  .contenuto.evidenziato { border-color: var(--accent); }
+  .contenuto .rubrica { font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .contenuto h3 { margin: 4px 0 2px; font-size: 21px; letter-spacing: -0.01em; }
+  .contenuto .quando { font-size: 13px; color: var(--muted); }
+  .contenuto .testo { margin-top: 10px; white-space: pre-line; color: rgba(255,255,255,.88); overflow-wrap: anywhere; }
+  .contenuto .foto-c { display: block; width: 100%; max-height: 380px; object-fit: cover; border-radius: 12px; margin-top: 12px; background: var(--surface-2); }
+  .video { position: relative; margin-top: 12px; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 12px; overflow: hidden; background: #000; }
+  .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .contenuto .autore { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .contenuto .azioni button { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 9px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .contenuto .azioni button:hover { border-color: var(--accent); }
+  .esito-cond { font-size: 13px; color: var(--muted); align-self: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-in">
+      <a href="/" aria-label="Torna agli eventi"><img class="logo" src="logo-app.svg" alt="" width="84" height="84"></a>
+      <div>
+        <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+        <p class="sub">Rubriche</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <h2 class="titolo-sez">Rubriche</h2>
+    <p class="intro">La mossa della settimana, le giornate speciali della scena swing e altre storie. I più recenti in alto.</p>
+    <div id="contenuto"><p class="vuoto">Caricamento…</p></div>
+  </main>
+</div>
+<script>
+// Contenuti da contenuti.json (scheda "Contenuti" dello Sheet, oppure la bozza sito/elenchi/contenuti.csv).
+// /rubriche?id=... porta a un contenuto preciso (è il link che si condivide).
+(function () {
+  var box = document.getElementById("contenuto");
+  var dati = [], fonte = "", scelta = "";
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function data(g) {
+    return g ? new Date(g + "T12:00:00Z").toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "";
+  }
+  // YouTube: video dentro la pagina (youtube-nocookie); altri link (Instagram, TikTok...): pulsante "Guarda il video"
+  function video(u) {
+    u = String(u || "").trim();
+    if (!/^https?:\/\//i.test(u)) return "";
+    var m = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/i.exec(u);
+    if (m) return '<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/' + m[1] + '" title="Video" loading="lazy" ' +
+      'allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>';
+    return '<div class="azioni"><a class="pri" href="' + esc(u) + '" target="_blank" rel="noopener">▶ Guarda il video</a></div>';
+  }
+  function link(c) { return location.origin + "/rubriche?id=" + encodeURIComponent(c.id); }
+
+  function disegna() {
+    var conta = {};
+    dati.forEach(function (c) { var r = c.rubrica || "Altro"; conta[r] = (conta[r] || 0) + 1; });
+    var nomi = Object.keys(conta).sort(function (a, b) { return a.localeCompare(b, "it"); });
+    var lista = dati.filter(function (c) { return !scelta || (c.rubrica || "Altro") === scelta; });
+    box.innerHTML = (fonte === "bozza" ? '<p class="avviso">Contenuti di esempio: quelli veri si scrivono nella scheda "Contenuti" dello Google Sheet.</p>' : "") +
+      (nomi.length > 1 ? '<div class="chips" role="group">' + [["", "Tutte", dati.length]].concat(nomi.map(function (n) { return [n, n, conta[n]]; })).map(function (c) {
+        return '<button type="button" data-r="' + esc(c[0]) + '" aria-pressed="' + (c[0] === scelta) + '">' + esc(c[1]) + '<span class="n">' + c[2] + "</span></button>";
+      }).join("") + "</div>" : "") +
+      '<div class="rubriche">' + lista.map(function (c) {
+        return '<article class="card contenuto" id="c-' + esc(c.id) + '">' +
+          '<div class="rubrica">' + esc(c.rubrica || "") + "</div><h3>" + esc(c.titolo) + "</h3>" +
+          (c.data ? '<div class="quando">' + esc(data(c.data)) + "</div>" : "") +
+          (c.immagine && /^https?:\/\//i.test(c.immagine) ? '<img class="foto-c" src="' + esc(c.immagine) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
+          video(c.video) +
+          (c.testo ? '<div class="testo">' + esc(c.testo) + "</div>" : "") +
+          (c.autore ? '<div class="autore">di ' + esc(c.autore) + "</div>" : "") +
+          '<div class="azioni"><button type="button" class="condividi" data-id="' + esc(c.id) + '">↗ Condividi</button><span class="esito-cond" role="status"></span></div>' +
+          "</article>";
+      }).join("") + "</div>";
+  }
+
+  box.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-r]");
+    if (b) { scelta = b.getAttribute("data-r"); disegna(); return; }
+    var c = e.target.closest("button.condividi");
+    if (!c) return;
+    var cont = dati.filter(function (x) { return x.id === c.getAttribute("data-id"); })[0];
+    if (!cont) return;
+    var url = link(cont), esitoEl = c.parentNode.querySelector(".esito-cond");
+    if (navigator.share) { navigator.share({ title: cont.titolo, text: (cont.rubrica ? cont.rubrica + ": " : "") + cont.titolo, url: url }).catch(function () {}); return; }
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { esitoEl.textContent = "Link copiato"; }, function () { esitoEl.textContent = url; });
+    else esitoEl.textContent = url;
+  });
+
+  fetch("contenuti.json", { cache: "no-cache" })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      dati = d.righe || [];
+      fonte = d.fonte || "";
+      if (!dati.length) { box.innerHTML = '<p class="box">Ancora nessun contenuto. Si scrivono nella scheda <b>Contenuti</b> dello Google Sheet.</p>'; return; }
+      disegna();
+      var id = "";
+      try { id = new URLSearchParams(location.search).get("id") || ""; } catch (e) {}
+      var el = id && document.getElementById("c-" + id);
+      if (el) { el.classList.add("evidenziato"); el.scrollIntoView({ block: "start" }); }
+    })
+    .catch(function () { box.innerHTML = '<p class="vuoto">Impossibile caricare le rubriche, riprova più tardi.</p>'; });
+})();
+</script>
+<script src="menu.js"></script>
+<script src="piede.js"></script>
+</body>
+</html>

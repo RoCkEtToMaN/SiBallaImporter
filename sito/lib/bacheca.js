@@ -1,0 +1,120 @@
+// Bacheca: annunci degli utenti (passaggi, cerco partner), nello stesso database D1 delle visite (binding "VISITE").
+// stato: "attesa" (appena inviato, non visibile) -> "ok" (approvato, visibile) oppure "no" (rifiutato o tolto).
+// Si approvano dalla pagina nascosta /bacheca-admin?chiave=... (stessa chiave STATS_KEY delle statistiche).
+// Ogni annuncio scade da solo: il giorno indicato (es. la data del festival) oppure 30 giorni dopo l'invio.
+
+let tabellaPronta = false;
+
+export const CATEGORIE = {
+  passaggio: { nome: "Passaggi", cerco: "Cerco un passaggio", offro: "Offro un passaggio" },
+  partner: { nome: "Cerco partner", cerco: "Cerco partner", offro: "Mi propongo come partner" },
+  alloggio: { nome: "Alloggio", cerco: "Cerco alloggio", offro: "Offro alloggio" },
+  mercatino: { nome: "Mercatino", cerco: "Cerco", offro: "Vendo o regalo" },
+};
+export const EMAIL_VALIDA = /^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i;
+export const RUOLI = ["leader", "follower", "entrambi"];
+export const GIORNI_SCADENZA = 30;
+
+export async function preparaBacheca(db) {
+  if (tabellaPronta) return;
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS annunci (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       creato TEXT NOT NULL,              -- ISO, ora UTC
+       stato TEXT NOT NULL DEFAULT 'attesa',
+       categoria TEXT NOT NULL,           -- passaggio | partner
+       tipo TEXT NOT NULL,                -- cerco | offro
+       evento TEXT NOT NULL DEFAULT '',   -- festival, workshop o serata a cui si riferisce
+       giorno TEXT NOT NULL DEFAULT '',   -- yyyy-mm-dd, facoltativo (data del viaggio o dell'evento)
+       scade TEXT NOT NULL,               -- yyyy-mm-dd: dopo questo giorno l'annuncio sparisce
+       citta TEXT NOT NULL,               -- partenza (passaggi) o città (partner)
+       arrivo TEXT NOT NULL DEFAULT '',   -- solo passaggi: destinazione
+       ruolo TEXT NOT NULL DEFAULT '',    -- solo partner: leader | follower | entrambi
+       stile TEXT NOT NULL DEFAULT '',
+       testo TEXT NOT NULL DEFAULT '',
+       nome TEXT NOT NULL,                -- come firmarsi (nome o soprannome)
+       contatto TEXT NOT NULL,            -- PUBBLICO: Instagram, email o telefono, scelto da chi scrive
+       email TEXT NOT NULL DEFAULT ''     -- esito dell'email di avviso
+     )`).run();
+  // discussione sotto ogni annuncio: messaggi pubblici SENZA approvazione (si nascondono con le segnalazioni)
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS messaggi (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       annuncio INTEGER NOT NULL,
+       creato TEXT NOT NULL,                  -- ISO, ora UTC
+       nick TEXT NOT NULL,
+       testo TEXT NOT NULL,
+       autore TEXT NOT NULL,                  -- impronta (SHA-256) del codice segreto del browser di chi scrive
+       rete TEXT NOT NULL DEFAULT '',         -- impronta dell'IP con la data: solo per i limiti anti-spam, cambia ogni giorno
+       nascosto INTEGER NOT NULL DEFAULT 0    -- 1 = nascosto dalle segnalazioni o da chi amministra
+     )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS messaggi_annuncio ON messaggi (annuncio, id)`).run();
+  // colonna aggiunta dopo: impronta del browser di chi ha scritto l'annuncio, per l'etichetta
+  // "autore dell'annuncio" sui suoi messaggi nella discussione (vuota per gli annunci più vecchi)
+  try { await db.prepare(`ALTER TABLE annunci ADD COLUMN autore TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
+  // email PRIVATA facoltativa di chi scrive l'annuncio (mai mostrata): avviso di pubblicazione e dei nuovi messaggi.
+  // Si svuota quando l'annuncio scade o viene tolto. "avvisato" = ultimo avviso di messaggi (max 1 ogni 30 minuti).
+  try { await db.prepare(`ALTER TABLE annunci ADD COLUMN avvisi TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
+  try { await db.prepare(`ALTER TABLE annunci ADD COLUMN avvisato TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
+  // una segnalazione per persona per messaggio
+  await db.prepare(
+    `CREATE TABLE IF NOT EXISTS segnalazioni (
+       messaggio INTEGER NOT NULL, chi TEXT NOT NULL, creato TEXT NOT NULL,
+       PRIMARY KEY (messaggio, chi)
+     )`).run();
+  tabellaPronta = true;
+}
+
+export const SOGLIA_SEGNALAZIONI = 2;   // con 2 segnalazioni di persone diverse il messaggio si nasconde
+
+export async function impronta(testo) {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(testo)));
+  return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// invio email con Mailjet (stesse chiavi dei clandestini); risponde con l'esito in parole.
+// Senza "a" va a chi amministra (EMAIL_DESTINATARI); con "a" all'indirizzo indicato (es. chi ha scritto l'annuncio).
+export async function inviaEmail(env, oggetto, html, testo, a) {
+  const mancano = ["MAILJET_API_KEY", "MAILJET_API_SECRET"].filter((k) => !env[k]);
+  if (mancano.length) return `non inviata: manca ${mancano.join(" e ")}`;
+  const dest = (a || env.EMAIL_DESTINATARI || "Giacomo.lo87@gmail.com").split(";").map((s) => s.trim()).filter(Boolean);
+  try {
+    const r = await fetch("https://api.mailjet.com/v3.1/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${env.MAILJET_API_KEY.trim()}:${env.MAILJET_API_SECRET.trim()}`) },
+      body: JSON.stringify({ Messages: [{
+        From: { Email: "siballanewsletter@gmail.com", Name: "siBalla" }, To: dest.map((Email) => ({ Email })),
+        Subject: oggetto, TextPart: testo, HTMLPart: html,
+      }] }),
+    });
+    const j = await r.json().catch(() => ({}));
+    return r.ok && j.Messages?.[0]?.Status === "success" ? `inviata a ${dest.join(", ")}` : `non inviata (Mailjet HTTP ${r.status})`;
+  } catch (e) {
+    return "non inviata: " + e;
+  }
+}
+
+// "[PROVA] " nell'oggetto delle email partite dalle versioni di prova (<ramo>.siballa.pages.dev) o in locale
+export function prefissoProva(url) {
+  return /^[^.]+\.[^.]+\.pages\.dev$|^(localhost|127\.0\.0\.1)$/.test(new URL(url).hostname) ? "[PROVA] " : "";
+}
+
+// email a chi ha scritto l'annuncio (solo se ha lasciato l'indirizzo privato)
+export async function avvisaAutore(env, origine, annuncio, oggetto, righe) {
+  if (!annuncio.avvisi || !EMAIL_VALIDA.test(annuncio.avvisi)) return "";
+  const link = `${origine}/bacheca?annuncio=${annuncio.id}`;
+  const titolo = (CATEGORIE[annuncio.categoria]?.[annuncio.tipo] || "Annuncio") +
+    ` · ${annuncio.citta}${annuncio.arrivo ? " → " + annuncio.arrivo : ""}${annuncio.evento ? " · " + annuncio.evento : ""}`;
+  const e = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const html = `<div style="font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:15px;color:#111">
+    <h2 style="margin:0 0 6px">${e(oggetto)}</h2>
+    <p style="margin:0 0 12px;color:#666">${e(titolo)}</p>
+    ${righe.map((r) => `<p style="margin:0 0 8px">${e(r)}</p>`).join("")}
+    <p style="margin:18px 0"><a href="${e(link)}" style="background:#FFD400;color:#0E0E12;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:10px;display:inline-block">Apri l'annuncio</a></p>
+    <p style="margin:0;color:#888;font-size:12px">Ricevi questa email perché hai lasciato il tuo indirizzo nell'annuncio su siBalla.
+    Non è visibile a nessuno e viene cancellato quando l'annuncio scade o lo togli dalla bacheca.</p>
+  </div>`;
+  const testo = `${oggetto}\n${titolo}\n\n${righe.join("\n")}\n\nApri l'annuncio: ${link}\n\n` +
+    "Ricevi questa email perché hai lasciato il tuo indirizzo nell'annuncio su siBalla. Viene cancellato quando l'annuncio scade o lo togli.";
+  return inviaEmail(env, prefissoProva(origine) + oggetto, html, testo, annuncio.avvisi);
+}

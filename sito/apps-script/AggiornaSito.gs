@@ -5,6 +5,9 @@
  * - Automatico: a ogni modifica aspetta ATTESA_MINUTI senza altre modifiche, poi avvia il workflow
  *   "Sito pubblico" su GitHub (così una sessione di modifiche fa un solo aggiornamento).
  * - Manuale: menu SiBalla > Aggiorna sito ora.
+ * - Menu SiBalla > Aggiorna versione di prova: pubblica il ramo "anteprima" (https://anteprima.siballa.pages.dev),
+ *   dove si vedono le novità non ancora pubbliche (es. le Rubriche della scheda "Contenuti").
+ *   Anche l'aggiornamento automatico, se RAMO_PROVA non è vuoto, aggiorna pure la versione di prova.
  * - Menu SiBalla > Carica immagini e aggiorna sito: giro veloce dell'importatore ("solo immagini": carica
  *   su Storage le immagini di data/immagini, dei siti e i loghi, scrive "sì" nella colonna Immagine e
  *   aggiorna il DB dell'app), poi aggiorna il sito. Ci mette 5-10 minuti.
@@ -21,6 +24,7 @@ const REPO = 'RoCkEtToMaN/SiBallaImporter';
 const WORKFLOW = 'sito.yml';
 const WORKFLOW_IMPORTATORE = 'importatore.yml';
 const BRANCH = 'master';
+const RAMO_PROVA = 'anteprima';   // versione di prova; '' per non aggiornarla mai dallo Sheet
 const ATTESA_MINUTI = 3;
 
 /** Menu nello Sheet (si crea a ogni apertura). */
@@ -29,6 +33,8 @@ function onOpen() {
     .createMenu('SiBalla')
     .addItem('Aggiorna sito ora', 'aggiornaSitoOra')
     .addItem('Carica immagini e aggiorna sito', 'caricaImmagini')
+    .addSeparator()
+    .addItem('Aggiorna versione di prova', 'aggiornaProva')
     .addToUi();
 }
 
@@ -47,6 +53,14 @@ function aggiornaSitoOra() {
   const esito = avviaWorkflow_();
   SpreadsheetApp.getActive().toast(
     esito.ok ? 'Aggiornamento avviato: il sito sarà aggiornato in 1-2 minuti.' : 'Errore: ' + esito.messaggio,
+    'SiBalla', 10);
+}
+
+/** Voce di menu: aggiorna la versione di prova (ramo RAMO_PROVA) con i dati attuali dello Sheet. */
+function aggiornaProva() {
+  const esito = avviaWorkflow_(WORKFLOW, null, RAMO_PROVA);
+  SpreadsheetApp.getActive().toast(
+    esito.ok ? 'Versione di prova in aggiornamento: pronta in 1-2 minuti su anteprima.siballa.pages.dev.' : 'Errore: ' + esito.messaggio,
     'SiBalla', 10);
 }
 
@@ -92,6 +106,8 @@ function pubblicaSeFermo() {
     lock.releaseLock();
   }
   const esito = avviaWorkflow_();
+  // anche la versione di prova, così le novità (es. Rubriche) seguono lo Sheet; un suo errore non blocca il sito pubblico
+  if (RAMO_PROVA) avviaWorkflow_(WORKFLOW, null, RAMO_PROVA);
   if (!esito.ok) throw new Error(esito.messaggio); // compare in Esecuzioni e Google manda un'email di errore
 }
 
@@ -103,9 +119,10 @@ function programmaControllo_(ms) {
   ScriptApp.newTrigger('pubblicaSeFermo').timeBased().after(Math.max(ms, 60000)).create();
 }
 
-/** Chiede a GitHub di avviare un workflow (di default quello del sito), con gli input indicati. */
-function avviaWorkflow_(workflow, inputs) {
+/** Chiede a GitHub di avviare un workflow (di default quello del sito, sul ramo BRANCH), con gli input indicati. */
+function avviaWorkflow_(workflow, inputs, ramo) {
   workflow = workflow || WORKFLOW;
+  ramo = ramo || BRANCH;
   const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   if (!token) return { ok: false, messaggio: 'manca la proprietà script GITHUB_TOKEN' };
   const risposta = UrlFetchApp.fetch(
@@ -117,7 +134,7 @@ function avviaWorkflow_(workflow, inputs) {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
       },
-      payload: JSON.stringify(inputs ? { ref: BRANCH, inputs: inputs } : { ref: BRANCH }),
+      payload: JSON.stringify(inputs ? { ref: ramo, inputs: inputs } : { ref: ramo }),
       muteHttpExceptions: true,
     });
   const codice = risposta.getResponseCode();

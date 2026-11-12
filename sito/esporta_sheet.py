@@ -27,7 +27,7 @@ import re
 import sys
 import unicodedata
 from datetime import date, datetime, timedelta
-from urllib.parse import quote
+from urllib.parse import quote, urlparse, parse_qs
 from zoneinfo import ZoneInfo
 
 from google.auth.transport.requests import AuthorizedSession
@@ -136,7 +136,7 @@ def come_data(valore) -> date | None:
     if isinstance(valore, (int, float)):
         return EPOCA_SHEETS + timedelta(days=int(valore))
     testo = str(valore).strip()
-    for formato in ("%Y-%m-%d", "%d/%m/%Y", "%d/%m/%y", "%d.%m.%Y", "%m/%d/%Y"):
+    for formato in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%y", "%d.%m.%Y", "%m/%d/%Y"):
         try:
             return datetime.strptime(testo[:10], formato).date()
         except ValueError:
@@ -153,7 +153,7 @@ def cella(riga: list, i: int) -> str:
 # Se la scheda non c'è ancora si usa la bozza sito/elenchi/<nome>.csv del repository (se c'è).
 # "contenuti" = rubriche (mossa della settimana, giornate speciali, ...): colonne Data, Rubrica, Titolo, Testo,
 # Immagine, Video, Autore; una riga compare sul sito dal giorno in "Data" in poi (così si programmano in anticipo).
-ELENCHI = ("scuole", "artisti", "community", "contenuti")
+ELENCHI = ("scuole", "artisti", "community", "contenuti", "musica")
 
 # Novità del sito (nomi degli eventi puliti, file di Scuole/Artisti/Community/Contenuti): accese sulle versioni
 # di prova (ramo diverso da master, o lanciato dal PC) e SPENTE sul sito pubblico finché non si mette True.
@@ -196,12 +196,82 @@ def chiave_colonna(h: str) -> str:
     return norm(h).replace(" ", "_")
 
 
+def link_musica(valore: str) -> bool:
+    """Accetta solo collegamenti HTTPS a YouTube, mai HTML o altri protocolli."""
+    try:
+        u = urlparse(valore)
+        host = (u.hostname or "").lower()
+        if u.scheme != "https" or u.username or u.password or u.port not in (None, 443):
+            return False
+        if host == "youtu.be":
+            return bool(re.fullmatch(r"/[A-Za-z0-9_-]{11}", u.path))
+        if host not in ("youtube.com", "www.youtube.com", "m.youtube.com", "www.youtube-nocookie.com"):
+            return False
+        q = parse_qs(u.query)
+        if u.path == "/results":
+            return bool(q.get("search_query", [""])[0].strip())
+        if re.fullmatch(r"/(?:embed|shorts)/[A-Za-z0-9_-]{11}", u.path):
+            return True
+        if u.path not in ("/watch", "/playlist", "/embed/videoseries"):
+            return False
+        return bool(re.fullmatch(r"[A-Za-z0-9_-]{11}", q.get("v", [""])[0]) or
+                    re.fullmatch(r"[A-Za-z0-9_-]{10,100}", q.get("list", [""])[0]))
+    except ValueError:
+        return False
+
+
+def link_spotify(valore: str) -> bool:
+    """Accetta solo link HTTPS di open.spotify.com a playlist, album, artista, brano, show o episodio."""
+    try:
+        u = urlparse(valore.strip())
+        return (u.scheme == "https" and (u.hostname or "").lower() == "open.spotify.com" and not u.username and not u.password
+                and u.port in (None, 443)
+                and bool(re.fullmatch(r"(?:/intl-[a-z]{2}(?:-[a-z]{2})?)?/(?:playlist|album|artist|track|show|episode)/[A-Za-z0-9]{10,40}/?", u.path)))
+    except ValueError:
+        return False
+
+
+def riga_musica(d: dict) -> dict | None:
+    # L'attivazione e' esplicita: righe vuote, nuove o disattivate non si pubblicano.
+    if norm(d.get("attivo", "")) not in CONSENSO_SI:
+        return None
+    tipo = norm(d.get("tipo", ""))
+    selezione = d.get("selezione", "").strip()
+    if tipo not in ("selezione", "brano") or not selezione:
+        return None
+    if tipo == "selezione" and not d.get("titolo_selezione"):
+        return None
+    if tipo == "brano" and (not d.get("titolo_brano") or not link_musica(d.get("link_youtube", ""))):
+        print("- musica: brano senza titolo o con link YouTube non valido, saltato")
+        return None
+    campi = ("titolo_selezione", "sottotitolo", "descrizione", "bpm") if tipo == "selezione" else ("titolo_brano", "artista", "link_youtube")
+    if tipo == "selezione" and d.get("link_spotify") and not link_spotify(d["link_spotify"]):
+        print("- musica: link Spotify non valido nella selezione '%s', ignorato" % selezione)
+        d = {k: v for k, v in d.items() if k != "link_spotify"}
+    if tipo == "selezione":
+        campi = campi + ("link_spotify",)
+    voce = {k: d[k] for k in campi if d.get(k)}
+    voce.update(tipo=tipo, selezione=selezione)
+    try:
+        voce["ordine"] = float(d.get("ordine", "").replace(",", "."))
+        if not (-1e9 < voce["ordine"] < 1e9):
+            voce["ordine"] = 999999
+    except ValueError:
+        voce["ordine"] = 999999
+    return voce
+
+
 def righe_elenco(nome: str, intestazione: list, righe: list) -> list[dict]:
     chiavi = [chiave_colonna(str(h)) for h in intestazione]
     out = []
     oggi = datetime.now(ZoneInfo("Europe/Rome")).date()
     for r in righe:
         d = {k: html.unescape(cella(r, i)) for i, k in enumerate(chiavi) if k and cella(r, i)}
+        if nome == "musica":
+            voce = riga_musica(d)
+            if voce:
+                out.append(voce)
+            continue
         if nome == "contenuti":
             if not d.get("titolo"):
                 continue
@@ -270,9 +340,9 @@ def main() -> None:
         # Scuole / Artisti / Community / Contenuti: non sono eventi (riga 2 = intestazioni, dati dalla riga 3)
         if nome.strip().lower() in ELENCHI:
             elenco = nome.strip().lower()
-            if len(righe_f) >= 2:
+            if len(righe_f) >= 2 or elenco == "musica":
                 if NOVITA_ATTIVE:
-                    scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1], righe_f[2:]), "sheet")
+                    scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1] if len(righe_f) >= 2 else [], righe_f[2:]), "sheet")
                 else:
                     print(f"- scheda '{nome}': saltata (non è una scheda di eventi; pagine non ancora pubbliche)")
                 elenchi_fatti.add(elenco)

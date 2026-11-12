@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bacheca · siBalla</title>
+<meta name="description" content="Passaggi per serate e festival e partner di ballo: gli annunci della scena swing.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="logo-app.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E0E12">
+<link rel="stylesheet" href="pagina.css">
+<link rel="stylesheet" href="menu.css">
+<style>
+  .testa-bacheca { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; background: var(--accent); color: var(--on-accent); }
+  .btn.sec { background: var(--surface-2); color: var(--text); }
+  .btn:focus-visible, .scelta button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .annuncio .cosa { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+  .annuncio .cosa.offro { color: #25D366; }
+  .annuncio h3 { margin-top: 3px; }
+  .annuncio .testo { margin-top: 8px; font-size: 14px; color: rgba(255,255,255,.85); overflow-wrap: anywhere; white-space: pre-line; }
+  .annuncio .firma { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 13.5px; overflow-wrap: anywhere; }
+  .annuncio .firma b { color: var(--text); }
+  .annuncio .firma a { color: var(--accent); }
+  .data-ann { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .annuncio .tuo { margin-left: 8px; font-size: 10.5px; letter-spacing: .03em; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 999px; padding: 1px 7px; vertical-align: 1px; }
+  .annuncio.evidenziato { border-color: var(--accent); }
+  .togli-ann { margin-top: 10px; text-align: right; }
+  .togli { font: inherit; font-size: 12.5px; color: var(--muted); background: none; border: 0; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
+  .togli:hover { color: #FF6B6B; }
+
+  dialog.modulo { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--border); border-radius: 18px;
+    background: var(--surface); color: var(--text); padding: 0; }
+  dialog.modulo::backdrop { background: rgba(5,5,8,.7); }
+  dialog.modulo form { padding: 20px; display: grid; gap: 4px; }
+  dialog.modulo h2 { margin: 0; font-size: 20px; }
+  dialog .nota { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+  dialog label { font-size: 13px; font-weight: 600; margin-top: 10px; }
+  dialog label small { font-weight: 400; color: var(--muted); }
+  dialog input, dialog select, dialog textarea { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 12px; }
+  dialog textarea { min-height: 80px; resize: vertical; }
+  dialog input:focus, dialog select:focus, dialog textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .due { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .due > div { min-width: 0; }
+  @media (max-width: 480px) { .due { grid-template-columns: minmax(0, 1fr); } }
+  .scelta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .scelta button { font: inherit; font-size: 14px; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .scelta button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .avviso-contatto { font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
+  dialog .manca { border-color: #FF6B6B; }
+  dialog .scelta.manca button { border-color: #FF6B6B; }
+  .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .esito { min-height: 1.2em; margin: 10px 0 0; font-size: 14px; }
+  .esito.errore { color: #FF6B6B; }
+  .fondo { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+  .grazie { text-align: center; padding: 10px 0; }
+  .grazie b { font-size: 34px; }
+  [hidden] { display: none !important; }
+
+  /* discussione sotto l'annuncio */
+  .disc { margin-top: 12px; }
+  .disc-apri { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 6px 12px; cursor: pointer; }
+  .disc-apri:hover { border-color: rgba(255,212,0,.5); }
+  .disc-testa { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; font-size: 14px; }
+  .disc-chiudi, .disc-cambia, .msg-az { font: inherit; font-size: 12px; color: var(--muted); background: none; border: 0; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
+  .disc-chiudi:hover, .disc-cambia:hover, .msg-az:hover { color: var(--text); }
+  .msgs { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 8px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 12px; }
+  .msg { background: var(--surface-2); border-radius: 10px; padding: 6px 10px; max-width: 92%; align-self: flex-start; min-width: 0; }
+  .msg.mio { align-self: flex-end; background: var(--accent-soft); }
+  .msg-testa { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+  .msg-testa b { color: var(--accent); }
+  .msg.mio .msg-testa b { color: var(--text); }
+  .msg-ora { color: var(--muted); font-size: 11.5px; }
+  .msg-testa { flex-wrap: wrap; }
+  .msg-autore { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap;
+    color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 1px 7px; }
+  .msg-az { margin-left: auto; font-size: 11.5px; padding: 0 2px; }
+  .msg-t { font-size: 14px; white-space: pre-line; overflow-wrap: anywhere; margin-top: 1px; }
+  .disc-vuota { margin: 6px 2px; color: var(--muted); font-size: 13px; }
+  .disc-form { display: grid; gap: 6px; margin-top: 8px; }
+  .disc-form input, .disc-form textarea { width: 100%; font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; resize: vertical; }
+  .disc-form input:focus, .disc-form textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .disc-come { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .disc-fondo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .disc-nota { font-size: 11.5px; color: var(--muted); }
+  .disc-invia { padding: 7px 14px; font-size: 14px; flex: none; }
+  .disc-esito { margin: 0; min-height: 0; font-size: 13px; }
+  .disc-form .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-in">
+      <a href="/" aria-label="Torna agli eventi"><img class="logo" src="logo-app.svg" alt="" width="84" height="84"></a>
+      <div>
+        <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+        <p class="sub">Bacheca degli annunci</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <h2 class="titolo-sez">Bacheca</h2>
+    <p class="intro">Passaggi per serate e festival, partner per corsi e competizioni, alloggio per i festival e mercatino (scarpe, abiti vintage, biglietti). Ogni annuncio viene controllato prima di comparire e sparisce da solo dopo la data indicata.</p>
+    <div class="testa-bacheca">
+      <div class="chips" id="categorie" role="group" aria-label="Tipo di annuncio" style="margin:0"></div>
+      <button type="button" class="btn" id="apri">+ Scrivi un annuncio</button>
+    </div>
+    <div class="cerca"><input type="search" id="filtro" placeholder="Cerca per città, evento, stile…" aria-label="Cerca"></div>
+    <div id="lista"><p class="vuoto">Caricamento…</p></div>
+  </main>
+</div>
+
+<dialog class="modulo" id="modulo" aria-labelledby="titoloModulo">
+  <form id="form" novalidate>
+    <h2 id="titoloModulo">Scrivi un annuncio</h2>
+    <p class="nota">Lo controlliamo prima di pubblicarlo, di solito in poche ore.</p>
+
+    <label>Cosa cerchi?</label>
+    <div class="scelta" id="sCategoria" role="group" aria-label="Categoria">
+      <button type="button" data-v="passaggio" aria-pressed="true">Passaggio</button>
+      <button type="button" data-v="partner" aria-pressed="false">Partner di ballo</button>
+      <button type="button" data-v="alloggio" aria-pressed="false">Alloggio</button>
+      <button type="button" data-v="mercatino" aria-pressed="false">Mercatino</button>
+    </div>
+    <div class="scelta" id="sTipo" role="group" aria-label="Cerco o offro">
+      <!-- nessuna scelta preselezionata: chi scrive deve dire se cerca o offre -->
+      <button type="button" data-v="cerco" aria-pressed="false">Cerco</button>
+      <button type="button" data-v="offro" aria-pressed="false">Offro</button>
+    </div>
+
+    <label for="fEvento">Evento <small>(festival, workshop o serata, facoltativo)</small></label>
+    <input id="fEvento" list="eventi" maxlength="120" placeholder="Es. Swing Craze Festival" autocomplete="off">
+
+    <div class="due">
+      <div><label for="fCitta" id="lCitta">Parto da</label><input id="fCitta" maxlength="60" required placeholder="Es. Genova"></div>
+      <div id="bArrivo"><label for="fArrivo">Vado a</label><input id="fArrivo" maxlength="80" placeholder="Es. Pescara"></div>
+      <div id="bRuolo" hidden><label for="fRuolo">Ruolo</label>
+        <select id="fRuolo"><option value="">—</option><option value="leader">Leader</option><option value="follower">Follower</option><option value="entrambi">Entrambi</option></select></div>
+    </div>
+    <div class="due">
+      <div><label for="fGiorno">Data <small>(facoltativa)</small></label><input id="fGiorno" type="date"></div>
+      <div><label for="fStile">Stile <small>(facoltativo)</small></label>
+        <select id="fStile"><option value="">—</option><option>Lindy Hop</option><option>Balboa</option><option>Blues</option><option>Solo Jazz</option><option>Boogie Woogie</option><option>Charleston</option><option>Shag</option></select></div>
+    </div>
+
+    <label for="fTesto">Dettagli <small>(facoltativi)</small></label>
+    <textarea id="fTesto" maxlength="400" placeholder="Posti in auto, orari, livello, cosa cerchi…"></textarea>
+
+    <div class="due">
+      <div><label for="fNome">Il tuo nome</label><input id="fNome" maxlength="40" required placeholder="Nome o soprannome"></div>
+      <div><label for="fContatto">Come contattarti <small>(facoltativo)</small></label><input id="fContatto" maxlength="120" placeholder="@instagram o email"></div>
+    </div>
+    <p class="avviso-contatto">Puoi lasciarlo vuoto: chi è interessato ti scrive nella discussione sotto l'annuncio. Se lo metti, è visibile a tutti: meglio Instagram del telefono.</p>
+    <label for="fAvvisi">La tua email per gli avvisi <small>(privata, facoltativa)</small></label>
+    <input id="fAvvisi" type="email" maxlength="120" placeholder="nome@esempio.it" autocomplete="email">
+    <p class="avviso-contatto">Non la vede nessuno: ti scriviamo quando l'annuncio è pubblicato e quando qualcuno ti risponde nella discussione. Viene cancellata quando l'annuncio scade o lo togli.</p>
+    <div class="trappola" aria-hidden="true"><label for="fSito">Sito web</label><input id="fSito" tabindex="-1" autocomplete="off"></div>
+
+    <div class="antibot" id="fAntibot"></div>
+    <p class="esito" id="esito" role="status"></p>
+    <div class="fondo">
+      <button type="button" class="btn sec" id="annulla">Annulla</button>
+      <button type="submit" class="btn" id="invia">Invia</button>
+    </div>
+  </form>
+  <!-- fuori dal form: il form viene ricreato a ogni apertura, i suggerimenti restano -->
+  <datalist id="eventi"></datalist>
+</dialog>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var CAT = {
+    passaggio: { nome: "Passaggi", cerco: "Cerco un passaggio", offro: "Offro un passaggio" },
+    partner: { nome: "Cerco partner", cerco: "Cerco partner", offro: "Mi propongo come partner" },
+    alloggio: { nome: "Alloggio", cerco: "Cerco alloggio", offro: "Offro alloggio" },
+    mercatino: { nome: "Mercatino", cerco: "Cerco", offro: "Vendo o regalo" }
+  };
+  var annunci = [], categoria = "tutti";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function norm(s) { return String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function data(g) {
+    if (!g) return "";
+    return new Date(g + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" });
+  }
+  // contatto: @utente -> Instagram, email -> mailto, link -> link, altrimenti testo
+  function contatto(c) {
+    c = String(c || "").trim();
+    if (/^@[\w.]{2,30}$/.test(c)) return '<a href="https://instagram.com/' + esc(c.slice(1)) + '" target="_blank" rel="noopener">' + esc(c) + "</a>";
+    if (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(c)) return '<a href="mailto:' + esc(c) + '">' + esc(c) + "</a>";
+    if (/^https?:\/\/\S+$/i.test(c)) return '<a href="' + esc(c) + '" target="_blank" rel="noopener nofollow">' + esc(c.replace(/^https?:\/\/(www\.)?/, "")) + "</a>";
+    return esc(c);
+  }
+
+  function disegna() {
+    var conta = { tutti: annunci.length, passaggio: 0, partner: 0, alloggio: 0, mercatino: 0 };
+    annunci.forEach(function (a) { conta[a.categoria] = (conta[a.categoria] || 0) + 1; });
+    $("categorie").innerHTML = [["tutti", "Tutti"], ["passaggio", "Passaggi"], ["partner", "Cerco partner"], ["alloggio", "Alloggio"], ["mercatino", "Mercatino"]].map(function (c) {
+      return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (c[0] === categoria) + '">' + c[1] + '<span class="n">' + conta[c[0]] + "</span></button>";
+    }).join("");
+    var q = norm($("filtro").value.trim());
+    var lista = annunci.filter(function (a) {
+      return (categoria === "tutti" || a.categoria === categoria) &&
+        (!q || norm([a.citta, a.arrivo, a.evento, a.stile, a.ruolo, a.testo, a.nome].join(" ")).indexOf(q) >= 0);
+    });
+    if (!annunci.length) {
+      $("lista").innerHTML = '<p class="box"><b>Ancora nessun annuncio.</b> Cerchi un passaggio per un festival o un partner per un corso? Scrivi il primo annuncio.</p>';
+      return;
+    }
+    $("lista").innerHTML = lista.length ? '<div class="griglia">' + lista.map(function (a) {
+      var c = CAT[a.categoria] || CAT.passaggio;
+      var dove = a.categoria === "passaggio" ? esc(a.citta) + (a.arrivo ? " → " + esc(a.arrivo) : "") : esc(a.citta);
+      var extra = [a.ruolo && a.ruolo.charAt(0).toUpperCase() + a.ruolo.slice(1), a.stile].filter(Boolean).join(" · ");
+      var mioAnn = mio && a.a === mio;
+      return '<article class="card annuncio' + (mioAnn ? " mio-ann" : "") + '" id="annuncio-' + a.id + '"><div class="cosa ' + (a.tipo === "offro" ? "offro" : "") + '">' +
+        esc(c[a.tipo] || c.cerco) + (mioAnn ? '<span class="tuo">il tuo annuncio</span>' : "") + "</div>" +
+        "<h3>" + dove + (a.evento ? " · " + esc(a.evento) : "") + "</h3>" +
+        (a.giorno ? '<div class="data-ann">' + esc(data(a.giorno)) + "</div>" : "") +
+        (extra ? '<div class="tag"><span>' + esc(extra) + "</span></div>" : "") +
+        (a.testo ? '<div class="testo">' + esc(a.testo) + "</div>" : "") +
+        '<div class="firma"><b>' + esc(a.nome) + "</b>" + (a.contatto ? " · " + contatto(a.contatto) : ' <span class="meta2">· scrivimi nella discussione</span>') + "</div>" +
+        '<div class="disc" data-id="' + a.id + '">' + discussione(a) + "</div>" +
+        (mioAnn ? '<div class="togli-ann"><button type="button" class="togli" data-id="' + a.id + '">Togli il mio annuncio</button></div>' : "") +
+        "</article>";
+    }).join("") + "</div>" : '<p class="vuoto">Nessun annuncio trovato.</p>';
+    Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
+    montaAntibotDisc();
+  }
+
+  // ---- discussione sotto l'annuncio: messaggi pubblici, senza approvazione ----
+  // Il browser ricorda nickname e un codice segreto (token) con cui si riconoscono e cancellano i propri messaggi.
+  var aperti = {}, messaggi = {}, bozze = {}, mio = "";
+  function leggiLS(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function scriviLS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  var token = leggiLS("siballa-token");
+  if (!/^[A-Za-z0-9-]{20,100}$/.test(token)) {
+    token = (crypto.randomUUID ? crypto.randomUUID() + "-" + crypto.randomUUID()
+      : Array.from(crypto.getRandomValues(new Uint8Array(24)), function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""));
+    scriviLS("siballa-token", token);
+  }
+  // impronta del token come la calcola il server (primi 16 caratteri): serve a riconoscere i propri messaggi
+  if (crypto.subtle) crypto.subtle.digest("SHA-256", new TextEncoder().encode("autore|" + token)).then(function (h) {
+    mio = Array.from(new Uint8Array(h), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("").slice(0, 16);
+    if (annunci.length) disegna(); else Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
+  });
+
+  function discussione(a) {
+    var n = messaggi[a.id] ? messaggi[a.id].length : (a.messaggi || 0);
+    if (!aperti[a.id]) {
+      return '<button type="button" class="disc-apri">💬 ' + (n ? "Discussione (" + n + ")" : "Scrivi un messaggio") + "</button>";
+    }
+    var nick = leggiLS("siballa-nick");
+    return '<div class="disc-testa"><b>💬 Discussione</b><button type="button" class="disc-chiudi">Chiudi</button></div>' +
+      '<div class="msgs" id="msgs-' + a.id + '"><p class="disc-vuota">Caricamento…</p></div>' +
+      '<form class="disc-form" novalidate>' +
+      (nick ? '<p class="disc-come">Scrivi come <b>' + esc(nick) + '</b> · <button type="button" class="disc-cambia">cambia</button></p>'
+        : '<input class="disc-nick" maxlength="30" placeholder="Il tuo nickname" aria-label="Nickname" autocomplete="nickname">') +
+      '<textarea class="disc-testo" maxlength="500" rows="2" placeholder="Scrivi un messaggio…" aria-label="Messaggio">' + esc(bozze[a.id] || "") + "</textarea>" +
+      '<input class="trappola" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="antibot"></div>' +
+      '<div class="disc-fondo"><span class="disc-nota">Messaggi pubblici: non scrivere numeri di telefono o indirizzi.</span>' +
+      '<button type="submit" class="btn disc-invia">Invia</button></div><p class="esito disc-esito" role="status"></p></form>';
+  }
+
+  function ora(iso) {
+    var d = new Date(iso), oggi = new Date();
+    var stessoGiorno = d.toDateString() === oggi.toDateString();
+    return (stessoGiorno ? "" : d.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) + " ") +
+      d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  }
+  function mostraMessaggi(id) {
+    var box = $("msgs-" + id);
+    if (!box || !messaggi[id]) return;
+    var giu = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    box.innerHTML = messaggi[id].length ? messaggi[id].map(function (m) {
+      var suo = mio && m.a === mio;
+      return '<div class="msg' + (suo ? " mio" : "") + '"><div class="msg-testa"><b>' + esc(m.nick) + "</b>" +
+        (m.aut ? '<span class="msg-autore" title="Ha scritto lui l\'annuncio">autore dell\'annuncio</span>' : "") +
+        '<span class="msg-ora">' + esc(ora(m.creato)) +
+        '</span><button type="button" class="msg-az" data-az="' + (suo ? "cancella" : "segnala") + '" data-m="' + m.id + '" title="' +
+        (suo ? "Cancella il tuo messaggio" : "Segnala un messaggio offensivo o spam") + '">' + (suo ? "Cancella" : "Segnala") + "</button></div>" +
+        '<div class="msg-t">' + esc(m.testo) + "</div></div>";
+    }).join("") : '<p class="disc-vuota">Ancora nessun messaggio: scrivi tu il primo.</p>';
+    if (giu) box.scrollTop = box.scrollHeight;
+    // aggiorno il numero sull'annuncio
+    var a = annunci.filter(function (x) { return x.id === id; })[0];
+    if (a) a.messaggi = messaggi[id].length;
+  }
+  function caricaMessaggi(id) {
+    return fetch("/api/messaggi?annuncio=" + id, { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { messaggi[id] = d.messaggi || []; mostraMessaggi(id); })
+      .catch(function () {});
+  }
+  function annuncio(id) { return annunci.filter(function (x) { return x.id === id; })[0]; }
+  function ridisegnaDisc(id) {
+    var el = document.querySelector('.disc[data-id="' + id + '"]'), a = annuncio(id);
+    if (el && a) { el.innerHTML = discussione(a); mostraMessaggi(id); montaAntibotDisc(); }
+  }
+  // anti-bot nei moduli delle discussioni aperte (uno per annuncio), se configurato su Cloudflare
+  var abDisc = {};
+  function montaAntibotDisc() {
+    if (!window.siBallaAntibot) return;
+    [].forEach.call(document.querySelectorAll(".disc-form .antibot"), function (el) {
+      if (el.hasChildNodes()) return;
+      abDisc[+el.closest(".disc").getAttribute("data-id")] = siBallaAntibot.monta(el);
+    });
+  }
+  function posta(dati) {
+    dati.token = token;
+    return fetch("/api/messaggi", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dati) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); return j; }); });
+  }
+  // aggiornamento automatico delle discussioni aperte, solo con la pagina in primo piano
+  setInterval(function () {
+    if (document.visibilityState !== "visible") return;
+    Object.keys(aperti).forEach(function (id) { caricaMessaggi(+id); });
+  }, 12000);
+
+  $("categorie").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-c]");
+    if (!b) return;
+    categoria = b.getAttribute("data-c");
+    disegna();
+  });
+  $("filtro").addEventListener("input", disegna);
+
+  // clic nella discussione: apri, chiudi, cambia nickname, cancella / segnala un messaggio
+  $("lista").addEventListener("click", function (e) {
+    var disc = e.target.closest(".disc");
+    if (!disc) return;
+    var id = +disc.getAttribute("data-id");
+    if (e.target.closest(".disc-apri")) {
+      aperti[id] = true;
+      ridisegnaDisc(id);
+      caricaMessaggi(id).then(function () { var t = disc.querySelector(".disc-nick") || disc.querySelector(".disc-testo"); if (t) t.focus(); });
+    } else if (e.target.closest(".disc-chiudi")) {
+      delete aperti[id];
+      ridisegnaDisc(id);
+    } else if (e.target.closest(".disc-cambia")) {
+      scriviLS("siballa-nick", "");
+      ridisegnaDisc(id);
+    } else if (e.target.closest(".msg-az")) {
+      var b = e.target.closest(".msg-az"), az = b.getAttribute("data-az");
+      if (az === "cancella" && b.getAttribute("data-conferma") !== "1") {
+        b.setAttribute("data-conferma", "1");
+        b.textContent = "Sicuro? Cancella";
+        return;
+      }
+      b.disabled = true;
+      posta({ azione: az, id: +b.getAttribute("data-m") })
+        .then(function () {
+          if (az === "segnala") { b.textContent = "Segnalato"; }
+          return caricaMessaggi(id);
+        })
+        .catch(function () { b.disabled = false; });
+    }
+  });
+  // "Togli il mio annuncio" (solo dallo stesso browser che l'ha scritto), con conferma
+  $("lista").addEventListener("click", function (e) {
+    var b = e.target.closest("button.togli");
+    if (!b) return;
+    if (b.getAttribute("data-conferma") !== "1") {
+      b.setAttribute("data-conferma", "1");
+      b.textContent = "Sicuro? Toglilo dalla bacheca";
+      return;
+    }
+    var id = +b.getAttribute("data-id");
+    b.disabled = true;
+    fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ azione: "togli", id: id, token: token }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); }); })
+      .then(function () {
+        annunci = annunci.filter(function (x) { return x.id !== id; });
+        delete aperti[id];
+        disegna();
+      })
+      .catch(function (err) { b.disabled = false; b.textContent = err.message || "Non riuscito, riprova"; });
+  });
+  $("lista").addEventListener("input", function (e) {
+    if (!e.target.classList.contains("disc-testo")) return;
+    bozze[+e.target.closest(".disc").getAttribute("data-id")] = e.target.value;
+  });
+  // Invio = invia, Maiusc+Invio = a capo
+  $("lista").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey && e.target.classList.contains("disc-testo")) {
+      e.preventDefault();
+      e.target.form.requestSubmit ? e.target.form.requestSubmit() : e.target.form.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+  });
+  $("lista").addEventListener("submit", function (e) {
+    var form = e.target.closest(".disc-form");
+    if (!form) return;
+    e.preventDefault();
+    var id = +form.closest(".disc").getAttribute("data-id");
+    var campoNick = form.querySelector(".disc-nick"), testo = form.querySelector(".disc-testo");
+    var esitoEl = form.querySelector(".disc-esito"), invia = form.querySelector(".disc-invia");
+    var nick = campoNick ? campoNick.value.trim() : leggiLS("siballa-nick");
+    function errore(t) { esitoEl.textContent = t; esitoEl.className = "esito disc-esito errore"; }
+    if (nick.length < 2) { errore("Scegli un nickname di almeno 2 lettere."); if (campoNick) campoNick.focus(); return; }
+    if (!testo.value.trim()) { testo.focus(); return; }
+    var ab = abDisc[id];
+    if (ab && ab.inAttesa()) { errore("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia."); return; }
+    invia.disabled = true;
+    posta({ azione: "scrivi", annuncio: id, nick: nick, testo: testo.value, sito_web: form.querySelector(".trappola").value,
+      turnstile: ab ? ab.token() : "" })
+      .then(function () {
+        scriviLS("siballa-nick", nick);
+        bozze[id] = "";
+        ridisegnaDisc(id);
+        return caricaMessaggi(id);
+      })
+      .then(function () {
+        var box = $("msgs-" + id), t = document.querySelector('.disc[data-id="' + id + '"] .disc-testo');
+        if (box) box.scrollTop = box.scrollHeight;
+        if (t) t.focus();
+      })
+      .catch(function (err) {
+        errore(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, riprova.");
+        invia.disabled = false;
+        if (ab) ab.reset();
+      });
+  });
+
+  // /bacheca?q=nome evento: arriva dalla scheda di un evento nella home
+  try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("filtro").value = q0; } catch (e) {}
+
+  function carica() {
+    return fetch("/api/bacheca", { cache: "no-cache" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { annunci = d.annunci || []; disegna(); apriDaLink(); })
+      .catch(function () { $("lista").innerHTML = '<p class="vuoto">Impossibile caricare la bacheca, riprova più tardi.</p>'; });
+  }
+  // /bacheca?annuncio=ID (link delle email): apre la discussione di quell'annuncio e ci porta lì
+  function apriDaLink() {
+    var id = 0;
+    try { id = +new URLSearchParams(location.search).get("annuncio") || 0; } catch (e) {}
+    if (!id || !annuncio(id)) return;
+    aperti[id] = true;
+    ridisegnaDisc(id);
+    caricaMessaggi(id);
+    var el = $("annuncio-" + id);
+    if (el) { el.classList.add("evidenziato"); el.scrollIntoView({ block: "start" }); }
+  }
+  carica();
+
+  // eventi in programma per il suggerimento nel campo "Evento"
+  // per ogni nome: la prossima data (yyyy-mm-dd, non prima di oggi) e la città, per riempire il modulo da soli
+  var EVENTI = {};
+  function oggiIso() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  fetch("eventi.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
+    var oggi = oggiIso();
+    d.fogli.forEach(function (f) {
+      f.eventi.forEach(function (e) {
+        var n = (e.celle[4] || "").trim();
+        if (!n) return;
+        var giorno = (e.inizio || "").slice(0, 10);
+        if (giorno && giorno < oggi) giorno = oggi;   // workshop già iniziato: da oggi
+        var citta = ((e.celle[5] || "").split(",")[1] || "").trim();
+        if (!EVENTI[n] || (giorno && giorno < EVENTI[n].giorno)) EVENTI[n] = { giorno: giorno, citta: citta };
+      });
+    });
+    suggerimenti();
+  }).catch(function () {});
+
+  // suggerimenti del campo Evento: se è scritta la città di destinazione (o la città, per i partner)
+  // mostro solo gli eventi di quella città, in ordine di data; se non ce ne sono, tutti
+  function suggerimenti() {
+    var campo = $(scelto("sCategoria") === "passaggio" ? "fArrivo" : "fCitta");
+    var c = norm(campo ? campo.value.trim() : "");
+    var nomi = Object.keys(EVENTI);
+    if (c.length >= 2) {
+      var qui = nomi.filter(function (n) { return norm(EVENTI[n].citta).indexOf(c) === 0; });
+      if (qui.length) nomi = qui.sort(function (a, b) { return (EVENTI[a].giorno || "9").localeCompare(EVENTI[b].giorno || "9") || a.localeCompare(b); });
+      else nomi.sort();
+    } else nomi.sort();
+    $("eventi").innerHTML = nomi.slice(0, 400).map(function (n) {
+      var ev = EVENTI[n];
+      var quando = ev.giorno ? new Date(ev.giorno + "T12:00:00Z").toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" }) : "";
+      return '<option value="' + esc(n) + '" label="' + esc([quando, ev.citta].filter(Boolean).join(" · ")) + '">';
+    }).join("");
+  }
+
+  // scelto un evento dai suggerimenti: data e destinazione (o città, per i partner) si compilano da sole,
+  // ma solo se il campo è vuoto o era stato riempito da qui (quello scritto a mano non si tocca)
+  function riempi(campo, valore) {
+    var c = $(campo);
+    if (!c || !valore || (c.value && !c.dataset.auto)) return;
+    c.value = valore;
+    c.dataset.auto = "1";
+  }
+  $("form").addEventListener("input", function (e) {
+    if (e.target.dataset) delete e.target.dataset.auto;   // scritto a mano
+    if (e.target.id === "fArrivo" || e.target.id === "fCitta") { suggerimenti(); return; }
+    if (e.target.id !== "fEvento") return;
+    var ev = EVENTI[e.target.value.trim()];
+    if (!ev) return;
+    riempi("fGiorno", ev.giorno);
+    riempi(scelto("sCategoria") === "passaggio" ? "fArrivo" : "fCitta", ev.citta);
+  });
+
+  // ---- modulo ----
+  var formIniziale = $("form").innerHTML;
+  var abAnnuncio = null;
+  function scelto(id) { var b = $(id).querySelector('[aria-pressed="true"]'); return b ? b.getAttribute("data-v") : ""; }
+  // campi ed etichette che cambiano con la categoria
+  var MODULO = {
+    passaggio: { citta: "Parto da", cerco: "Cerco un passaggio", offro: "Offro un passaggio (ho l'auto)",
+      testo: "Posti in auto, orari, dove ci si trova…" },
+    partner: { citta: "Città", cerco: "Cerco partner", offro: "Mi propongo come partner",
+      testo: "Livello, corso o festival, cosa cerchi…" },
+    alloggio: { citta: "Città (dove dormire)", cerco: "Cerco alloggio", offro: "Offro alloggio (posto letto, divano…)",
+      testo: "Quante notti, quanti posti, zona, prezzo o gratis…" },
+    mercatino: { citta: "Città", cerco: "Cerco", offro: "Vendo o regalo",
+      testo: "Cosa (scarpe, abiti, biglietto…), taglia o numero, prezzo, condizioni…" }
+  };
+  function aggiornaCampi() {
+    var cat = scelto("sCategoria") || "passaggio", m = MODULO[cat];
+    $("lCitta").textContent = m.citta;
+    $("bArrivo").hidden = cat !== "passaggio";
+    $("bRuolo").hidden = cat !== "partner";
+    // frasi intere al posto di "Cerco" / "Offro", così è chiaro chi cerca e chi offre
+    $("sTipo").querySelector('[data-v="cerco"]').textContent = m.cerco;
+    $("sTipo").querySelector('[data-v="offro"]').textContent = m.offro;
+    $("fTesto").placeholder = m.testo;
+    suggerimenti();
+  }
+  function esito(t, errore) { $("esito").textContent = t; $("esito").className = "esito" + (errore ? " errore" : ""); }
+
+  $("apri").addEventListener("click", function () {
+    if (!$("invia")) { $("form").innerHTML = formIniziale; }
+    aggiornaCampi();
+    $("modulo").showModal();
+    // anti-bot Turnstile (antibot.js): attivo solo se configurato su Cloudflare
+    if (window.siBallaAntibot && $("fAntibot") && !$("fAntibot").hasChildNodes()) abAnnuncio = siBallaAntibot.monta($("fAntibot"));
+  });
+  $("form").addEventListener("click", function (e) {
+    if (e.target.id === "annulla" || e.target.id === "chiudiGrazie") { $("modulo").close(); return; }
+    var b = e.target.closest(".scelta button");
+    if (!b) return;
+    [].forEach.call(b.parentNode.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    b.parentNode.classList.remove("manca");
+    aggiornaCampi();
+  });
+  $("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var d = {
+      categoria: scelto("sCategoria"), tipo: scelto("sTipo"), evento: $("fEvento").value, citta: $("fCitta").value,
+      arrivo: $("fArrivo").value, ruolo: $("fRuolo").value, giorno: $("fGiorno").value, stile: $("fStile").value,
+      testo: $("fTesto").value, nome: $("fNome").value, contatto: $("fContatto").value, sito_web: $("fSito").value,
+      token: token,  // così i tuoi messaggi nella discussione avranno l'etichetta "autore dell'annuncio"
+      avvisi: $("fAvvisi").value,
+      turnstile: abAnnuncio ? abAnnuncio.token() : ""
+    };
+    // errore sul campo preciso: messaggio che lo nomina, bordo rosso e cursore lì
+    [].forEach.call($("form").querySelectorAll(".manca"), function (x) { x.classList.remove("manca"); });
+    function manca(campo, testo) {
+      esito(testo, true);
+      $(campo).classList.add("manca");
+      $(campo).focus();
+    }
+    var passaggio = d.categoria === "passaggio";
+    if (!d.tipo) {
+      esito("Scegli tra “" + MODULO[d.categoria].cerco + "” e “" + MODULO[d.categoria].offro + "”.", true);
+      $("sTipo").classList.add("manca");
+      $("sTipo").querySelector("button").focus();
+      return;
+    }
+    if (!d.citta.trim()) { manca("fCitta", passaggio ? "Scrivi da dove parti." : "Scrivi la tua città."); return; }
+    if (passaggio && !d.arrivo.trim() && !d.evento.trim()) { manca("fArrivo", "Scrivi dove vai: destinazione o evento."); return; }
+    if (!d.nome.trim()) { manca("fNome", "Scrivi il tuo nome o un soprannome."); return; }
+    if (d.avvisi.trim() && !/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(d.avvisi.trim())) { manca("fAvvisi", "L'email per gli avvisi non sembra valida."); return; }
+    if (abAnnuncio && abAnnuncio.inAttesa()) { esito("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia.", true); return; }
+    $("invia").disabled = true;
+    esito("Invio in corso…");
+    fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); return j; }); })
+      .then(function () {
+        $("form").innerHTML = '<div class="grazie"><b>📌</b><h2>Grazie!</h2><p class="nota">Abbiamo ricevuto l\'annuncio: dopo un controllo compare in bacheca.</p>' +
+          '<div class="fondo" style="justify-content:center"><button type="button" class="btn" id="chiudiGrazie">Chiudi</button></div></div>';
+      })
+      .catch(function (err) {
+        esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
+        if (abAnnuncio) abAnnuncio.reset();   // la verifica vale per un solo invio
+        $("invia").disabled = false;
+      });
+  });
+})();
+</script>
+<script src="menu.js"></script>
+<script src="piede.js"></script>
+<script src="antibot.js"></script>
+</body>
+</html>

@@ -105,7 +105,15 @@
   .tag { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
   .tag span { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
   .tag span.gratis { background: rgba(37,211,102,.15); color: #25D366; }
-  .azioni { display: flex; gap: 8px; margin-top: 11px; }
+  .azioni { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+  .azioni button { font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 9px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .azioni button:hover { border-color: var(--accent); }
+  .azioni button:focus-visible, .condividi-pannello a:focus-visible, .condividi-pannello button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .condividi-pannello { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .condividi-pannello a, .condividi-pannello button { font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; padding: 5px 12px;
+    border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
+  .condividi-pannello a.wa { background: #25D366; border-color: #25D366; color: #0b2814; }
   .azioni a { font-size: 13px; font-weight: 600; text-decoration: none; padding: 5px 12px; border-radius: 9px;
     border: 1px solid var(--border); color: var(--text); }
   .azioni a.info { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
@@ -117,6 +125,36 @@
     border-radius: 12px; padding: 9px 14px; cursor: pointer; white-space: nowrap; }
   .vicino:hover { border-color: rgba(255,212,0,.5); }
   .vicino[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  /* filtro per regione e mappa */
+  .regione { font: inherit; font-weight: 600; color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 9px 12px; max-width: 100%; cursor: pointer; }
+  .regione:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .mappa-box { margin: 4px 0 12px; }
+  .mappa { height: min(460px, 62vh); border-radius: 16px; border: 1px solid var(--border); background: var(--surface); overflow: hidden; }
+  /* OpenStreetMap è chiara: la scurisco (inverto i colori e riporto le tinte, mare blu scuro, strade grigie) */
+  .mappa .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.5); }
+  .mappa-nota { margin: 6px 2px 0; font-size: 12.5px; color: var(--muted); }
+  .mappa.rotellina { border-color: rgba(255,212,0,.5); }
+  /* isolation: i livelli interni di Leaflet (z-index fino a 1000) restano dentro la mappa,
+     così il menu ☰ e le finestre del sito ci passano sopra */
+  .mappa { position: relative; z-index: 0; isolation: isolate; }
+  .mappa-avviso { position: absolute; inset: 0; z-index: 1000; display: grid; place-items: center; pointer-events: none;
+    background: rgba(14,14,18,.55); opacity: 0; transition: opacity .2s; }
+  .mappa-avviso.visibile { opacity: 1; }
+  .mappa-avviso span { background: var(--surface); color: var(--text); border: 1px solid rgba(255,212,0,.5); border-radius: 12px;
+    padding: 10px 16px; font-weight: 600; font-size: 15px; text-align: center; margin: 0 16px; }
+  @media (prefers-reduced-motion: reduce) { .mappa-avviso { transition: none; } }
+  .mappa .leaflet-popup-content-wrapper, .mappa .leaflet-popup-tip { background: var(--surface); color: var(--text); }
+  .mappa .leaflet-popup-content { margin: 12px 14px; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .mappa .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+  .pop b { display: block; font-size: 15px; margin-bottom: 3px; }
+  .pop-q { color: var(--accent); font-weight: 600; font-size: 13px; }
+  .pop-chi { color: var(--muted); font-size: 12.5px; }
+  .pop-az { display: flex; gap: 10px; margin-top: 8px; }
+  .mappa .pop-az a { color: var(--accent); font-weight: 600; }
+  .pop-img { display: block; width: 100%; max-height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; background: var(--surface-2); }
+  .mappa .marker-cluster-small, .mappa .marker-cluster-medium, .mappa .marker-cluster-large { background: rgba(255,212,0,.35); }
+  .mappa .marker-cluster-small div, .mappa .marker-cluster-medium div, .mappa .marker-cluster-large div { background: #FFD400; color: #0E0E12; font-weight: 700; }
   .raggio { display: none; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
   .raggio.on { display: flex; }
   .raggio button { font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--border);
@@ -198,6 +236,8 @@
     <div class="tabs" role="tablist" id="tabs"></div>
     <input type="search" id="q" placeholder="Cerca per nome, città, organizzatore…" aria-label="Cerca">
     <button type="button" class="vicino" id="vicino" aria-pressed="false">📍 Vicino a me</button>
+    <select id="regione" class="regione" aria-label="Filtra per regione" hidden></select>
+    <button type="button" class="vicino" id="btnMappa" aria-pressed="false">🗺️ Mappa</button>
   </div>
   <div class="raggio" id="raggio" role="group" aria-label="Distanza massima">
     <span>Entro</span>
@@ -211,6 +251,10 @@
   <div class="proponi" id="proponi" hidden>
     <p><b>Hai voglia di ballare e conosci qualcuno che vorrebbe farlo?</b> <small>Organizzate un clandestino in piazza, al parco, sul lungomare… Aggiungilo qui: dopo un controllo compare sul sito.</small></p>
     <button type="button" class="btn" id="apriModulo">+ Aggiungi clandestino</button>
+  </div>
+  <div class="mappa-box" id="mappaBox" hidden>
+    <div id="mappa" class="mappa" role="region" aria-label="Mappa degli eventi"></div>
+    <p class="mappa-nota" id="mappaNota" role="status"></p>
   </div>
   <main id="lista"></main>
   <div class="vuoto" id="vuoto" hidden>Nessun evento trovato.</div>
@@ -246,6 +290,7 @@
     <input id="cContatto" name="contatto" maxlength="120" placeholder="Email o telefono">
     <div class="scelte" style="margin-top:12px"><label><input type="checkbox" id="cGratis" checked> Ingresso gratuito</label></div>
     <div class="trappola" aria-hidden="true"><label for="cSito">Sito web</label><input id="cSito" name="sito_web" tabindex="-1" autocomplete="off"></div>
+    <div class="antibot" id="cAntibot"></div>
     <p class="esito" id="esito" role="status"></p>
     <div class="fondo">
       <button type="button" class="btn sec" id="annulla">Annulla</button>
@@ -310,6 +355,7 @@
   }
 
   // prepara ogni evento: date, luogo leggibile, stili, link
+  var EVENTI_PER_ID = [];   // per i pulsanti Calendario / Condividi delle schede
   function prepara(f) {
     var col = {};
     f.colonne.forEach(function (c, i) { col[c.trim().toLowerCase()] = i; });
@@ -331,6 +377,7 @@
       ev._stili = "stile" in col ? stiliDi(c[col["stile"]]) : [];
       ev._gratis = "gratis" in col && /^(x|s[iì]|yes|1|true)$/i.test((c[col["gratis"]] || "").trim());
       ev._link = "riferimento" in col ? primoLink(c[col["riferimento"]]) : null;
+      ev._id = EVENTI_PER_ID.push(ev) - 1;
       ev._ora = "ora" in col && /^\d{1,2}:\d{2}$/.test(c[col["ora"]] || "") ? c[col["ora"]] : "";
       ev._testo = c.join(" ").toLowerCase();
     });
@@ -366,7 +413,9 @@
     var tag = ev._stili.map(function (s) { return "<span>" + esc(s) + "</span>"; }).join("") +
       (ev._gratis ? '<span class="gratis">Gratis</span>' : "");
     var azioni = (ev._link ? '<a class="info" href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
-      (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "");
+      (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "") +
+      (ev._inizio ? '<button type="button" class="calendario" data-ev="' + ev._id + '" title="Aggiungi al tuo calendario">📅 Calendario</button>' : "") +
+      '<button type="button" class="condividi" data-ev="' + ev._id + '" title="Condividi questo evento">↗ Condividi</button>';
     var dataHtml = '<div class="data">' + riquadro + "</div>";
     var dist = pos && ev._km != null ? ' · <span class="km">a ' + km(ev._km) + "</span>" : "";
     // con l'immagine la data va sopra l'immagine; se l'immagine non si carica torna accanto al testo (vedi "error" più sotto)
@@ -383,6 +432,7 @@
   function disegna() {
     var foglio = dati.fogli[attivo];
     if (!foglio) return;
+    menuRegioni(foglio);
     var q = $("q").value.trim().toLowerCase();
     var conteggio = {};
     foglio.eventi.forEach(function (ev) { ev._stili.forEach(function (s) { conteggio[s] = (conteggio[s] || 0) + 1; }); });
@@ -393,6 +443,7 @@
     var eventi = foglio.eventi.filter(function (ev) {
       if (attivi.length && !ev._stili.some(function (s) { return scelti[s]; })) return false;
       if (pos && raggioKm && (ev._km == null || ev._km > raggioKm)) return false;
+      if (regioneScelta && ev.regione !== regioneScelta) return false;
       return !q || ev._testo.indexOf(q) >= 0;
     });
     // vicino a me: dentro ogni sezione prima i più vicini (l'ordine delle sezioni resta per data)
@@ -416,7 +467,7 @@
     });
     ordine.sort();
     // il titolo chiede "stasera": se stasera non c'è niente lo dico, prima delle prossime date
-    var filtri = q || attivi.length || (pos && raggioKm);
+    var filtri = q || attivi.length || (pos && raggioKm) || regioneScelta;
     var nienteStasera = foglio._serate && eventi.length && !gruppi["1"]
       ? '<p class="stasera">Stasera ' + (foglio._clandestini ? "nessun clandestino" : "nessuna serata") + (pos && raggioKm ? " entro " + raggioKm + " km" : filtri ? " con questi filtri" : "") +
         ": ecco le prossime.</p>" : "";
@@ -430,7 +481,12 @@
     $("vuoto").textContent = foglio._clandestini && !foglio.eventi.length
       ? "Nessun clandestino in vista. Se ne conosci uno, aggiungilo!" : "Nessun evento trovato.";
     $("vuoto").hidden = eventi.length > 0;
+    // mappa: se cambiano i filtri torna a inquadrare i segnaposti
+    var chiave = [attivo, regioneScelta, attivi.join(","), q, pos ? raggioKm : ""].join("|");
+    if (chiave !== chiaveMappa) { chiaveMappa = chiave; mappaCentrata = false; }
+    aggiornaMappa(eventi);
   }
+  var chiaveMappa = "";
 
   // la scheda Clandestini lampeggia finché c'è almeno un clandestino in programma (da oggi in poi)
   function clandestiniInVista(f) {
@@ -462,6 +518,226 @@
     else if (scelti[s]) delete scelti[s];
     else scelti[s] = true;
     disegna();
+  });
+
+  // ---- filtro per regione e mappa degli eventi ----
+  // La regione la calcola esporta_sheet.py (campo "regione": nome della regione, "Estero" o assente).
+  var regioneScelta = "";
+  function menuRegioni(foglio) {
+    var conta = {}, n = 0;
+    foglio.eventi.forEach(function (ev) { if (ev.regione) { conta[ev.regione] = (conta[ev.regione] || 0) + 1; n++; } });
+    var nomi = Object.keys(conta).sort(function (a, b) { return a === "Estero" ? 1 : b === "Estero" ? -1 : a.localeCompare(b, "it"); });
+    if (regioneScelta && !conta[regioneScelta]) regioneScelta = "";
+    $("regione").hidden = !nomi.length;
+    $("regione").innerHTML = '<option value="">Tutte le regioni</option>' + nomi.map(function (r) {
+      return '<option value="' + esc(r) + '"' + (r === regioneScelta ? " selected" : "") + ">" + esc(r === "Estero" ? "Estero (fuori Italia)" : r) +
+        " (" + conta[r] + ")</option>";
+    }).join("");
+  }
+  $("regione").addEventListener("change", function () { regioneScelta = this.value; mappaCentrata = false; disegna(); });
+
+  // mappa: Leaflet + raggruppamento dei segnaposti, caricati solo quando si apre la mappa
+  var mappa = null, gruppo = null, mappaCentrata = false, ultimiEventi = [];
+  function caricaFile(url, css) {
+    return new Promise(function (ok, ko) {
+      var el = document.createElement(css ? "link" : "script");
+      if (css) { el.rel = "stylesheet"; el.href = url; } else { el.src = url; }
+      el.onload = ok; el.onerror = ko;
+      document.head.appendChild(el);
+    });
+  }
+  var leaflet = null;
+  function preparaLeaflet() {
+    if (leaflet) return leaflet;
+    var base = "https://cdnjs.cloudflare.com/ajax/libs/";
+    leaflet = Promise.all([
+      caricaFile(base + "leaflet/1.9.4/leaflet.min.css", true),
+      caricaFile(base + "leaflet.markercluster/1.5.3/MarkerCluster.css", true),
+      caricaFile(base + "leaflet.markercluster/1.5.3/MarkerCluster.Default.css", true),
+      caricaFile(base + "leaflet/1.9.4/leaflet.min.js")
+    ]).then(function () { return caricaFile(base + "leaflet.markercluster/1.5.3/leaflet.markercluster.js"); });
+    return leaflet;
+  }
+  function popup(ev) {
+    // foto dell'evento in cima (se non si carica, sparisce: vedi onerror)
+    return '<div class="pop">' + (ev.img ? '<img class="pop-img" src="' + esc(ev.img) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
+      "<b>" + esc(ev._nome) + "</b>" +
+      (quando(ev) ? '<div class="pop-q">' + esc(quando(ev)) + "</div>" : "") +
+      (ev._dove ? "<div>" + esc(ev._dove) + "</div>" : "") +
+      (ev._chi ? '<div class="pop-chi">' + esc(ev._chi) + "</div>" : "") +
+      '<div class="pop-az">' + (ev._link ? '<a href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
+      (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Indicazioni</a>' : "") + "</div></div>";
+  }
+  function aggiornaMappa(eventi) {
+    ultimiEventi = eventi;
+    if (!mappa || !window.L) return;
+    gruppo.clearLayers();
+    var punti = [];
+    eventi.forEach(function (ev) {
+      if (ev.lat == null || ev.lng == null) return;
+      var m = L.circleMarker([ev.lat, ev.lng], { radius: 8, color: "#0E0E12", weight: 2, fillColor: "#FFD400", fillOpacity: 1 });
+      m.bindPopup(popup(ev), { maxWidth: 280, minWidth: ev.img ? 240 : 0 });
+      gruppo.addLayer(m);
+      punti.push([ev.lat, ev.lng]);
+    });
+    var senza = eventi.length - punti.length;
+    $("mappaNota").textContent = punti.length + (punti.length === 1 ? " evento sulla mappa" : " eventi sulla mappa") +
+      (senza ? " · " + senza + " senza posizione (solo nella lista)" : "") +
+      "";
+    // inquadratura: sui segnaposti quando cambia il filtro, poi resta dove la lascia chi guarda
+    if (!mappaCentrata) {
+      if (punti.length) mappa.fitBounds(punti, { padding: [30, 30], maxZoom: 12 });
+      else mappa.setView([42.5, 12.5], 5);
+      mappaCentrata = true;
+    }
+  }
+  $("btnMappa").addEventListener("click", function () {
+    var apri = $("mappaBox").hidden;
+    $("mappaBox").hidden = !apri;
+    this.setAttribute("aria-pressed", String(apri));
+    if (!apri) return;
+    $("mappaNota").textContent = "Carico la mappa…";
+    preparaLeaflet().then(function () {
+      if (!mappa) {
+        mappa = L.map("mappa", { scrollWheelZoom: false, worldCopyJump: true });
+        // cartina OpenStreetMap: gratuita e senza chiave (scurita con un filtro CSS, vedi .mappa .leaflet-tile-pane)
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+        }).addTo(mappa);
+        gruppo = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 45 });
+        mappa.addLayer(gruppo);
+        // rotellina: si attiva con un clic sulla mappa (così scorrendo la pagina non si zooma per sbaglio)
+        // e si spegne quando il mouse esce dalla mappa
+        mappa.on("click focus", function () {
+          if (mappa.scrollWheelZoom.enabled()) return;
+          mappa.scrollWheelZoom.enable();
+          $("mappa").classList.add("rotellina");
+        });
+        mappa.on("mouseout blur", function () {
+          mappa.scrollWheelZoom.disable();
+          $("mappa").classList.remove("rotellina");
+        });
+        // rotellina girata senza aver cliccato: avviso sopra la mappa per un attimo (la pagina intanto scorre normalmente)
+        var avviso = document.createElement("div"), timer = null;
+        avviso.className = "mappa-avviso";
+        avviso.setAttribute("aria-hidden", "true");
+        avviso.innerHTML = "<span>Clicca sulla mappa per ingrandire con la rotellina</span>";
+        $("mappa").appendChild(avviso);
+        $("mappa").addEventListener("wheel", function () {
+          if (mappa.scrollWheelZoom.enabled()) return;
+          avviso.classList.add("visibile");
+          clearTimeout(timer);
+          timer = setTimeout(function () { avviso.classList.remove("visibile"); }, 1400);
+        }, { passive: true });
+      }
+      mappa.invalidateSize();
+      mappaCentrata = false;
+      aggiornaMappa(ultimiEventi);
+    }).catch(function () { $("mappaNota").textContent = "Non riesco a caricare la mappa, riprova più tardi."; });
+  });
+
+  // ---- "📅 Calendario" e "↗ Condividi" sulle schede ----
+  function due(n) { return (n < 10 ? "0" : "") + n; }
+  function giornoIcs(d) { return d.getFullYear() + due(d.getMonth() + 1) + due(d.getDate()); }
+  // testo per il file .ics: \ , ; e a capo vanno "protetti"
+  function testoIcs(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\r?\n/g, "\\n"); }
+  function linkEvento(ev) { return location.origin + "/?q=" + encodeURIComponent(ev._nome); }
+  function quando(ev) {
+    var i = ev._inizio, f = ev._fine;
+    if (!i) return "";
+    return GIORNI[i.getDay()] + " " + i.getDate() + " " + MESI[i.getMonth()] +
+      (!ev._unGiorno && f ? " → " + f.getDate() + " " + MESI[f.getMonth()] : "") + (ev._ora ? ", ore " + ev._ora : "");
+  }
+  // orari dell'evento per il calendario: con l'ora dura 3 ore (ora locale), altrimenti giornata intera
+  // (o più giorni per i workshop; "b" è il giorno DOPO l'ultimo, come vogliono i calendari)
+  function orari(ev) {
+    var i = ev._inizio;
+    if (ev._ora) {
+      var hm = ev._ora.split(":"), a = new Date(i.getFullYear(), i.getMonth(), i.getDate(), +hm[0], +hm[1]);
+      return { tutto: false, a: a, b: new Date(a.getTime() + 3 * 3600000) };
+    }
+    var ultimo = ev._unGiorno ? i : (ev._fine || i);
+    return { tutto: true, a: i, b: new Date(ultimo.getFullYear(), ultimo.getMonth(), ultimo.getDate() + 1) };
+  }
+  function oraIcs(d) { return giornoIcs(d) + "T" + due(d.getHours()) + due(d.getMinutes()) + "00"; }
+  function noteCalendario(ev) { return [ev._chi, ev._link, "Su siBalla: " + linkEvento(ev)].filter(Boolean).join("\n"); }
+  // Google Calendar e Outlook: pagina già compilata, basta premere Salva (niente file da scaricare)
+  function linkGoogle(ev) {
+    var o = orari(ev), f = o.tutto ? giornoIcs : oraIcs;
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(ev._nome) +
+      "&dates=" + f(o.a) + "/" + f(o.b) + (o.tutto ? "" : "&ctz=Europe/Rome") +
+      "&details=" + encodeURIComponent(noteCalendario(ev)) + (ev._dove ? "&location=" + encodeURIComponent(ev._dove) : "");
+  }
+  function linkOutlook(ev) {
+    var o = orari(ev);
+    var iso = function (d) { return d.getFullYear() + "-" + due(d.getMonth() + 1) + "-" + due(d.getDate()) + (o.tutto ? "" : "T" + due(d.getHours()) + ":" + due(d.getMinutes()) + ":00"); };
+    return "https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent" +
+      "&subject=" + encodeURIComponent(ev._nome) + "&startdt=" + iso(o.a) + "&enddt=" + iso(o.b) + (o.tutto ? "&allday=true" : "") +
+      "&body=" + encodeURIComponent(noteCalendario(ev)) + (ev._dove ? "&location=" + encodeURIComponent(ev._dove) : "");
+  }
+  // scelta del calendario sotto la scheda: Google, Outlook, oppure il file .ics (iPhone, Mac e altri)
+  function sceltaCalendario(ev, bottone) {
+    var azioni = bottone.closest(".azioni"), corpo = azioni.parentNode;
+    var vecchio = corpo.querySelector(".pannello-cal");
+    [].forEach.call(corpo.querySelectorAll(".condividi-pannello"), function (x) { x.remove(); });
+    if (vecchio) return;
+    var p = document.createElement("div");
+    p.className = "condividi-pannello pannello-cal";
+    p.innerHTML = '<span>Aggiungi a:</span>' +
+      '<a target="_blank" rel="noopener" href="' + esc(linkGoogle(ev)) + '">Google Calendar</a>' +
+      '<a target="_blank" rel="noopener" href="' + esc(linkOutlook(ev)) + '">Outlook</a>' +
+      '<button type="button" class="ics">iPhone / altro</button>';
+    azioni.parentNode.insertBefore(p, azioni.nextSibling);
+    p.querySelector(".ics").addEventListener("click", function () { scaricaIcs(ev); });
+  }
+  // file .ics (calendario di iPhone e Mac, e qualsiasi altro calendario)
+  function scaricaIcs(ev) {
+    var i = ev._inizio, o = orari(ev), inizio, fine;
+    if (!o.tutto) { inizio = "DTSTART:" + oraIcs(o.a); fine = "DTEND:" + oraIcs(o.b); }
+    else { inizio = "DTSTART;VALUE=DATE:" + giornoIcs(o.a); fine = "DTEND;VALUE=DATE:" + giornoIcs(o.b); }
+    var adesso = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//siBalla//Eventi swing//IT", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+      "UID:" + giornoIcs(i) + "-" + encodeURIComponent(ev._nome).slice(0, 60) + "@siballa", "DTSTAMP:" + adesso, inizio, fine,
+      "SUMMARY:" + testoIcs(ev._nome), ev._dove ? "LOCATION:" + testoIcs(ev._dove) : "",
+      "DESCRIPTION:" + testoIcs(noteCalendario(ev)),
+      ev._link ? "URL:" + ev._link : "", "END:VEVENT", "END:VCALENDAR"].filter(Boolean).join("\r\n");
+    var url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = (ev._nome.replace(/[^\wÀ-ſ -]+/g, "").trim().slice(0, 50) || "evento") + ".ics";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function () { URL.revokeObjectURL(url); link.remove(); }, 1000);
+  }
+  // sul telefono apre il menu di condivisione (WhatsApp, Telegram…); sul computer: WhatsApp o "Copia link"
+  function condividi(ev, bottone) {
+    var url = linkEvento(ev), testo = ev._nome + (quando(ev) ? " · " + quando(ev) : "") + (ev._dove ? " · " + ev._dove : "");
+    if (navigator.share) {
+      navigator.share({ title: ev._nome, text: testo, url: url }).catch(function () {});
+      return;
+    }
+    var azioni = bottone.closest(".azioni"), vecchio = azioni.parentNode.querySelector(".condividi-pannello:not(.pannello-cal)");
+    [].forEach.call(azioni.parentNode.querySelectorAll(".pannello-cal"), function (x) { x.remove(); });
+    if (vecchio) { vecchio.remove(); return; }
+    var p = document.createElement("div");
+    p.className = "condividi-pannello";
+    p.innerHTML = '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(testo + "\n" + url) + '">WhatsApp</a>' +
+      '<button type="button" class="copia">Copia link</button><span class="esito-copia" role="status"></span>';
+    azioni.parentNode.insertBefore(p, azioni.nextSibling);
+    p.querySelector(".copia").addEventListener("click", function () {
+      var esito = p.querySelector(".esito-copia");
+      var mostra = function () { esito.textContent = url; };   // se la copia non riesce, il link resta da selezionare
+      if (navigator.clipboard) navigator.clipboard.writeText(testo + "\n" + url).then(function () { esito.textContent = "Link copiato"; }, mostra);
+      else mostra();
+    });
+  }
+  $("lista").addEventListener("click", function (e) {
+    var b = e.target.closest("button.calendario, button.condividi");
+    if (!b) return;
+    var ev = EVENTI_PER_ID[+b.getAttribute("data-ev")];
+    if (!ev) return;
+    if (b.classList.contains("calendario")) sceltaCalendario(ev, b); else condividi(ev, b);
   });
 
   // immagine che non si carica: tolgo la parte immagine e rimetto la data accanto al testo
@@ -529,6 +805,7 @@
   }
   function esito(t, errore) { $("esito").textContent = t || ""; $("esito").className = "esito" + (errore ? " err" : ""); }
   var formIniziale = $("formClandestino").innerHTML;
+  var abClandestino = null;   // anti-bot Turnstile (antibot.js): attivo solo se configurato su Cloudflare
   $("apriModulo").addEventListener("click", function () {
     var oggi = new Date();
     $("cGiorno").min = giornoISO(oggi);
@@ -536,6 +813,7 @@
     if (!$("cGiorno").value) $("cGiorno").value = giornoISO(oggi);
     esito("");
     $("modulo").showModal();
+    if (window.siBallaAntibot && $("cAntibot") && !$("cAntibot").hasChildNodes()) abClandestino = siBallaAntibot.monta($("cAntibot"));
     $("cNome").focus();
   });
   $("modulo").addEventListener("click", function (e) {
@@ -588,10 +866,12 @@
     e.preventDefault();
     var f = this, mancanti = ["cNome", "cGiorno", "cCitta", "cLuogo"].filter(function (id) { return !$(id).value.trim(); });
     if (mancanti.length) { esito("Compila nome, data, città e luogo.", true); $(mancanti[0]).focus(); return; }
+    if (abClandestino && abClandestino.inAttesa()) { esito("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia.", true); return; }
     var d = {
       nome: $("cNome").value, giorno: $("cGiorno").value, ora: $("cOra").value, citta: $("cCitta").value,
       luogo: $("cLuogo").value, dettagli: $("cDettagli").value, link: $("cLink").value, contatto: $("cContatto").value,
       gratis: $("cGratis").checked, sito_web: $("cSito").value, foto: foto || undefined,
+      turnstile: abClandestino ? abClandestino.token() : "",
       stili: [].map.call(f.querySelectorAll("#cStili input:checked"), function (x) { return x.value; })
     };
     $("invia").disabled = true;
@@ -607,6 +887,7 @@
       .catch(function (err) {
         esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
         $("invia").disabled = false;
+        if (abClandestino) abClandestino.reset();   // la verifica vale per un solo invio
       });
   });
 
@@ -618,6 +899,8 @@
       d.fogli.forEach(prepara);
       var t = new Date(d.aggiornato);
       $("agg").textContent = "Aggiornato il " + t.toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" });
+      // /?q=testo: ricerca già compilata (link "prossimi eventi" dalle pagine Scuole e Artisti)
+      try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("q").value = q0; } catch (e) {}
       tabs(); disegna();
     })
     .catch(function () { $("agg").textContent = "Impossibile caricare gli eventi, riprova più tardi."; });
@@ -626,6 +909,7 @@
 </script>
 <script src="menu.js"></script>
 <script src="piede.js"></script>
+<script src="antibot.js"></script>
 <script src="conta.js"></script>
 </body>
 </html>

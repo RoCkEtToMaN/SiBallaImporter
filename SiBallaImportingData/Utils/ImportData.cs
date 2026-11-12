@@ -53,10 +53,14 @@ namespace SiBallaImportingData.Utils
 
             var spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
             var spreadsheet = service.Spreadsheets.Get(spreadsheetId).Execute();
-            int eventType = 0;
 
             foreach (var sheet in spreadsheet.Sheets)
             {
+                // Le schede editoriali (Contenuti, Musica, ...) non sono eventi.
+                if (sheet.Properties.Title != TipoEvento.Serate.ToString() &&
+                    sheet.Properties.Title != TipoEvento.Workshop.ToString())
+                    continue;
+
                 Console.WriteLine($"- '{sheet.Properties.Title}'");
 
                 var eventList = new List<Event>();                
@@ -177,7 +181,7 @@ namespace SiBallaImportingData.Utils
                                     City = row[5].ToString().Split(",")[1].Split('(')[0].Trim(),
                                     Country = row[5].ToString().Split(',')[0].Trim(),
                                     Gratis = sheet.Properties.Title == TipoEvento.Serate.ToString() && row.Count >= 13 ? DetermineIfFree(sheet.Properties.Title, row) : false,
-                                    Type = eventType == 0 ? Model.Type.Event: Model.Type.Workshop
+                                    Type = sheet.Properties.Title == TipoEvento.Serate.ToString() ? Model.Type.Event : Model.Type.Workshop
                                 });
 
                                 eventList.LastOrDefault().MonthYear = eventList.LastOrDefault().Month + " " + eventList.LastOrDefault().DateStart.Year.ToString();
@@ -197,7 +201,6 @@ namespace SiBallaImportingData.Utils
                     Console.WriteLine("Successo!");
                 }
 
-                eventType++;
             }
             
             return eventiDic;           
