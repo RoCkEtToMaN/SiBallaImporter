@@ -21960,5 +21960,137 @@
         "geminiNonTrovato": "2026-11-12"
       }
     }
+  },
+  "bluesdancegenova|genova": {
+    "default": {
+      "organizer": "BluesDanceGenova",
+      "city": "Genova",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "blues dance al count basie a genova": {
+        "organizer": null,
+        "city": "Genova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "camp balboa dancemode in motion e altri 4|berlin": {
+    "default": {
+      "organizer": "Camp Balboa, DanceMode In Motion e altri 4",
+      "city": "Berlin",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa"
+      ]
+    },
+    "events": {
+      "camp balboa berlin winter retreat": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      },
+      "camp balboa berlin spring retreat": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "camp balboa dancemode in motion e altri 3|bernese mittelland administrative region": {
+    "default": {
+      "organizer": "Camp Balboa, DanceMode In Motion e altri 3",
+      "city": "Bernese Mittelland administrative region",
+      "country": "Switzerland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "camp balboa bern": {
+        "organizer": null,
+        "city": "Bernese Mittelland administrative region",
+        "country": "Switzerland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
   }
 }
