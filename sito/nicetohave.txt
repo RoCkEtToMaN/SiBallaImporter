@@ -20,6 +20,11 @@ GIA' FATTI
 
 DA FARE
 -------
+[ ] Community WhatsApp aperta a tutti, da ogni parte del mondo (con calma, da decidere):
+    oggi c'e' solo la community siBalla (link chat.whatsapp.com, zona "Tutta Italia").
+    Da pensare: come farla trovare e usare anche a chi sta all'estero; zone/paesi oltre
+    alle regioni italiane; testi anche in inglese; come limitare lo spam con un link
+    pubblico (approvazione dei nuovi membri, oppure un Canale WhatsApp per gli annunci).
 [ ] Riempire le sezioni del menu (oggi "In arrivo"):
     - Storia del ballo: testo a capitoli con foto/video d'epoca, glossario degli stili
     - Scuole: nuova scheda nello Sheet -> esporta_sheet.py; filtro per regione, logo, link
