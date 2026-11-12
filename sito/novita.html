@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novità · siBalla</title>
+<meta name="description" content="Cosa c'è di nuovo su siBalla: bacheca, clandestini, mappa degli eventi e altro.">
+<link rel="icon" href="logo-app.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E0E12">
+<link rel="stylesheet" href="pagina.css">
+<link rel="stylesheet" href="menu.css">
+<style>
+  .novita { max-width: 760px; }
+  .rilascio { padding-bottom: 12px; }
+  .rilascio + .rilascio { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border); }
+  .versione { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .versione b { color: var(--on-accent); background: var(--accent); padding: 3px 10px; border-radius: 999px; letter-spacing: .02em; }
+  .versione .ultima { color: var(--accent); border: 1px solid rgba(255,212,0,.5); border-radius: 999px; padding: 1px 8px; font-size: 11px; }
+  .rilascio h2 { margin: 12px 0 0; font-size: clamp(26px, 5vw, 38px); line-height: 1.1; letter-spacing: -.02em; text-wrap: balance; }
+  .rilascio .intro { margin: 10px 0 0; color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 62ch; }
+  .indice { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 4px; padding: 0 0 22px; list-style: none; border-bottom: 1px solid var(--border); }
+  .indice a { display: inline-block; font-size: 14px; font-weight: 600; color: var(--text); text-decoration: none;
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 13px; }
+  .indice a:hover { border-color: var(--accent); color: var(--accent); }
+  .voce { padding: 24px 0; border-bottom: 1px solid var(--border); scroll-margin-top: 16px; }
+  .voce:last-child { border-bottom: 0; }
+  .capo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .tipo { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 6px;
+    background: var(--surface-2); color: var(--accent); }
+  .voce h3 { margin: 0; font-size: 22px; line-height: 1.2; }
+  .voce h3 a { color: var(--text); text-decoration: none; }
+  .voce h3 a:hover { color: var(--accent); }
+  .sotto { margin: 8px 0 14px; color: var(--muted); font-size: 15.5px; max-width: 62ch; }
+  .schede { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 16px; }
+  .scheda { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+  .scheda strong { display: block; font-size: 15px; }
+  .scheda span { display: block; font-size: 13.5px; color: var(--muted); }
+  ul.punti { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  ul.punti li { position: relative; padding-left: 22px; max-width: 64ch; font-size: 15.5px; line-height: 1.55; }
+  ul.punti li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 7px; height: 7px; border-radius: 2px;
+    background: var(--accent); transform: rotate(45deg); }
+  .nota { margin: 14px 0 0; font-size: 14px; color: var(--muted); }
+  .torna { display: inline-block; margin-top: 28px; font-weight: 700; color: var(--on-accent); background: var(--accent);
+    text-decoration: none; padding: 10px 18px; border-radius: 12px; }
+  .indice a:focus-visible, .voce h3 a:focus-visible, .torna:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-in">
+      <a href="/" aria-label="Torna agli eventi"><img class="logo" src="logo-app.svg" alt="" width="84" height="84"></a>
+      <div>
+        <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+        <p class="sub">Le novità</p>
+      </div>
+    </div>
+  </header>
+  <main class="novita">
+    <div id="novita"></div>
+    <a class="torna" href="/">Vai agli eventi →</a>
+  </main>
+</div>
+<script src="menu.js"></script>
+<script src="novita.js"></script>
+<script src="piede.js"></script>
+</body>
+</html>
