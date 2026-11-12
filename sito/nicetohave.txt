@@ -20,6 +20,20 @@ GIA' FATTI
 
 DA FARE
 -------
+[~] Bacheca degli annunci (/bacheca): passaggi e cerco partner.
+    STATO: fatta solo sulla versione di prova (ramo "anteprima"): elenco con filtri e
+    ricerca, modulo, approvazione in /bacheca-admin?chiave=..., email di avviso,
+    scadenza automatica (data indicata o 30 giorni), voce "Bacheca" nel menu.
+    Stesso database D1 e stesse chiavi dei clandestini: niente da configurare.
+    COSA SERVIREBBE:
+    - provarla sulla versione di prova (annuncio -> email -> approvazione -> pagina)
+    - contatto non pubblico: pulsante "Rispondi" che manda un'email a chi ha scritto
+    - sulla scheda di un festival: "3 cercano un passaggio, 2 cercano partner"
+    - chi scrive puo' cancellare il proprio annuncio (link segreto nell'email)
+    - altre categorie se queste funzionano: alloggio, mercatino, DJ/band/sale
+    - Turnstile (captcha Cloudflare) se arriva spam
+    - pubblicazione: merge "anteprima" -> "master" e voce nel menu pubblico
+    Dettagli nel documento Word, capitolo "Bacheca degli annunci".
 [ ] Community WhatsApp aperta a tutti, da ogni parte del mondo (con calma, da decidere):
     oggi c'e' solo la community siBalla (link chat.whatsapp.com, zona "Tutta Italia").
     Da pensare: come farla trovare e usare anche a chi sta all'estero; zone/paesi oltre

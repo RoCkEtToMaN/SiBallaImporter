@@ -12,6 +12,8 @@
       ico: '<circle cx="9" cy="18" r="2.5"/><circle cx="18" cy="16" r="2.5"/><path d="M11.5 18V5l9-2v13"/>' },
     { url: "/community", t: "Community WhatsApp", d: "I gruppi della tua città", pronta: true,
       ico: '<path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/>' },
+    { url: "/bacheca", t: "Bacheca", d: "Passaggi e partner di ballo", pronta: true,
+      ico: '<path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/>' },
     { url: "/app", t: "App mobile", d: "siBalla sul telefono", pronta: true,
       ico: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>' }
   ];

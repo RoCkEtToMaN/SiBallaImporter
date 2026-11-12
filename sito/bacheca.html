@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bacheca · siBalla</title>
+<meta name="description" content="Passaggi per serate e festival e partner di ballo: gli annunci della scena swing.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="logo-app.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E0E12">
+<link rel="stylesheet" href="pagina.css">
+<link rel="stylesheet" href="menu.css">
+<style>
+  .testa-bacheca { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; background: var(--accent); color: var(--on-accent); }
+  .btn.sec { background: var(--surface-2); color: var(--text); }
+  .btn:focus-visible, .scelta button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .annuncio .cosa { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+  .annuncio .cosa.offro { color: #25D366; }
+  .annuncio h3 { margin-top: 3px; }
+  .annuncio .testo { margin-top: 8px; font-size: 14px; color: rgba(255,255,255,.85); overflow-wrap: anywhere; white-space: pre-line; }
+  .annuncio .firma { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 13.5px; overflow-wrap: anywhere; }
+  .annuncio .firma b { color: var(--text); }
+  .annuncio .firma a { color: var(--accent); }
+  .data-ann { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  dialog.modulo { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--border); border-radius: 18px;
+    background: var(--surface); color: var(--text); padding: 0; }
+  dialog.modulo::backdrop { background: rgba(5,5,8,.7); }
+  dialog.modulo form { padding: 20px; display: grid; gap: 4px; }
+  dialog.modulo h2 { margin: 0; font-size: 20px; }
+  dialog .nota { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+  dialog label { font-size: 13px; font-weight: 600; margin-top: 10px; }
+  dialog label small { font-weight: 400; color: var(--muted); }
+  dialog input, dialog select, dialog textarea { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 12px; }
+  dialog textarea { min-height: 80px; resize: vertical; }
+  dialog input:focus, dialog select:focus, dialog textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .due { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .due > div { min-width: 0; }
+  @media (max-width: 480px) { .due { grid-template-columns: minmax(0, 1fr); } }
+  .scelta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .scelta button { font: inherit; font-size: 14px; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .scelta button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .avviso-contatto { font-size: 12.5px; color: #FF9F43; margin: 4px 0 0; }
+  .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .esito { min-height: 1.2em; margin: 10px 0 0; font-size: 14px; }
+  .esito.errore { color: #FF6B6B; }
+  .fondo { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+  .grazie { text-align: center; padding: 10px 0; }
+  .grazie b { font-size: 34px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-in">
+      <a href="/" aria-label="Torna agli eventi"><img class="logo" src="logo-app.svg" alt="" width="84" height="84"></a>
+      <div>
+        <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+        <p class="sub">Bacheca degli annunci</p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <h2 class="titolo-sez">Bacheca</h2>
+    <p class="intro">Passaggi per serate e festival, partner per corsi e competizioni. Ogni annuncio viene controllato prima di comparire e sparisce da solo dopo la data indicata.</p>
+    <div class="testa-bacheca">
+      <div class="chips" id="categorie" role="group" aria-label="Tipo di annuncio" style="margin:0"></div>
+      <button type="button" class="btn" id="apri">+ Scrivi un annuncio</button>
+    </div>
+    <div class="cerca"><input type="search" id="filtro" placeholder="Cerca per città, evento, stile…" aria-label="Cerca"></div>
+    <div id="lista"><p class="vuoto">Caricamento…</p></div>
+  </main>
+</div>
+
+<dialog class="modulo" id="modulo" aria-labelledby="titoloModulo">
+  <form id="form" novalidate>
+    <h2 id="titoloModulo">Scrivi un annuncio</h2>
+    <p class="nota">Lo controlliamo prima di pubblicarlo, di solito in poche ore.</p>
+
+    <label>Cosa cerchi?</label>
+    <div class="scelta" id="sCategoria" role="group" aria-label="Categoria">
+      <button type="button" data-v="passaggio" aria-pressed="true">Passaggio</button>
+      <button type="button" data-v="partner" aria-pressed="false">Partner di ballo</button>
+    </div>
+    <div class="scelta" id="sTipo" role="group" aria-label="Cerco o offro">
+      <button type="button" data-v="cerco" aria-pressed="true">Cerco</button>
+      <button type="button" data-v="offro" aria-pressed="false">Offro</button>
+    </div>
+
+    <label for="fEvento">Evento <small>(festival, workshop o serata, facoltativo)</small></label>
+    <input id="fEvento" list="eventi" maxlength="120" placeholder="Es. Swing Craze Festival" autocomplete="off">
+    <datalist id="eventi"></datalist>
+
+    <div class="due">
+      <div><label for="fCitta" id="lCitta">Parto da</label><input id="fCitta" maxlength="60" required placeholder="Es. Genova"></div>
+      <div id="bArrivo"><label for="fArrivo">Vado a</label><input id="fArrivo" maxlength="80" placeholder="Es. Pescara"></div>
+      <div id="bRuolo" hidden><label for="fRuolo">Ruolo</label>
+        <select id="fRuolo"><option value="">—</option><option value="leader">Leader</option><option value="follower">Follower</option><option value="entrambi">Entrambi</option></select></div>
+    </div>
+    <div class="due">
+      <div><label for="fGiorno">Data <small>(facoltativa)</small></label><input id="fGiorno" type="date"></div>
+      <div><label for="fStile">Stile <small>(facoltativo)</small></label>
+        <select id="fStile"><option value="">—</option><option>Lindy Hop</option><option>Balboa</option><option>Blues</option><option>Solo Jazz</option><option>Boogie Woogie</option><option>Charleston</option><option>Shag</option></select></div>
+    </div>
+
+    <label for="fTesto">Dettagli <small>(facoltativi)</small></label>
+    <textarea id="fTesto" maxlength="400" placeholder="Posti in auto, orari, livello, cosa cerchi…"></textarea>
+
+    <div class="due">
+      <div><label for="fNome">Il tuo nome</label><input id="fNome" maxlength="40" required placeholder="Nome o soprannome"></div>
+      <div><label for="fContatto">Come contattarti</label><input id="fContatto" maxlength="120" required placeholder="@instagram, email o telefono"></div>
+    </div>
+    <p class="avviso-contatto">Il contatto sarà visibile a tutti: se preferisci, usa Instagram invece del telefono.</p>
+    <div class="trappola" aria-hidden="true"><label for="fSito">Sito web</label><input id="fSito" tabindex="-1" autocomplete="off"></div>
+
+    <p class="esito" id="esito" role="status"></p>
+    <div class="fondo">
+      <button type="button" class="btn sec" id="annulla">Annulla</button>
+      <button type="submit" class="btn" id="invia">Invia</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var CAT = {
+    passaggio: { nome: "Passaggi", cerco: "Cerco un passaggio", offro: "Offro un passaggio" },
+    partner: { nome: "Cerco partner", cerco: "Cerco partner", offro: "Mi propongo come partner" }
+  };
+  var annunci = [], categoria = "tutti";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function norm(s) { return String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  function data(g) {
+    if (!g) return "";
+    return new Date(g + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" });
+  }
+  // contatto: @utente -> Instagram, email -> mailto, link -> link, altrimenti testo
+  function contatto(c) {
+    c = String(c || "").trim();
+    if (/^@[\w.]{2,30}$/.test(c)) return '<a href="https://instagram.com/' + esc(c.slice(1)) + '" target="_blank" rel="noopener">' + esc(c) + "</a>";
+    if (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(c)) return '<a href="mailto:' + esc(c) + '">' + esc(c) + "</a>";
+    if (/^https?:\/\/\S+$/i.test(c)) return '<a href="' + esc(c) + '" target="_blank" rel="noopener nofollow">' + esc(c.replace(/^https?:\/\/(www\.)?/, "")) + "</a>";
+    return esc(c);
+  }
+
+  function disegna() {
+    var conta = { tutti: annunci.length, passaggio: 0, partner: 0 };
+    annunci.forEach(function (a) { conta[a.categoria] = (conta[a.categoria] || 0) + 1; });
+    $("categorie").innerHTML = [["tutti", "Tutti"], ["passaggio", "Passaggi"], ["partner", "Cerco partner"]].map(function (c) {
+      return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (c[0] === categoria) + '">' + c[1] + '<span class="n">' + conta[c[0]] + "</span></button>";
+    }).join("");
+    var q = norm($("filtro").value.trim());
+    var lista = annunci.filter(function (a) {
+      return (categoria === "tutti" || a.categoria === categoria) &&
+        (!q || norm([a.citta, a.arrivo, a.evento, a.stile, a.ruolo, a.testo, a.nome].join(" ")).indexOf(q) >= 0);
+    });
+    if (!annunci.length) {
+      $("lista").innerHTML = '<p class="box"><b>Ancora nessun annuncio.</b> Cerchi un passaggio per un festival o un partner per un corso? Scrivi il primo annuncio.</p>';
+      return;
+    }
+    $("lista").innerHTML = lista.length ? '<div class="griglia">' + lista.map(function (a) {
+      var c = CAT[a.categoria] || CAT.passaggio;
+      var dove = a.categoria === "passaggio" ? esc(a.citta) + (a.arrivo ? " → " + esc(a.arrivo) : "") : esc(a.citta);
+      var extra = [a.ruolo && a.ruolo.charAt(0).toUpperCase() + a.ruolo.slice(1), a.stile].filter(Boolean).join(" · ");
+      return '<article class="card annuncio"><div class="cosa ' + (a.tipo === "offro" ? "offro" : "") + '">' + esc(c[a.tipo] || c.cerco) + "</div>" +
+        "<h3>" + dove + (a.evento ? " · " + esc(a.evento) : "") + "</h3>" +
+        (a.giorno ? '<div class="data-ann">' + esc(data(a.giorno)) + "</div>" : "") +
+        (extra ? '<div class="tag"><span>' + esc(extra) + "</span></div>" : "") +
+        (a.testo ? '<div class="testo">' + esc(a.testo) + "</div>" : "") +
+        '<div class="firma"><b>' + esc(a.nome) + "</b> · " + contatto(a.contatto) + "</div></article>";
+    }).join("") + "</div>" : '<p class="vuoto">Nessun annuncio trovato.</p>';
+  }
+
+  $("categorie").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-c]");
+    if (!b) return;
+    categoria = b.getAttribute("data-c");
+    disegna();
+  });
+  $("filtro").addEventListener("input", disegna);
+
+  function carica() {
+    return fetch("/api/bacheca", { cache: "no-cache" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { annunci = d.annunci || []; disegna(); })
+      .catch(function () { $("lista").innerHTML = '<p class="vuoto">Impossibile caricare la bacheca, riprova più tardi.</p>'; });
+  }
+  carica();
+
+  // eventi in programma per il suggerimento nel campo "Evento"
+  fetch("eventi.json", { cache: "no-cache" }).then(function (r) { return r.json(); }).then(function (d) {
+    var nomi = {};
+    d.fogli.forEach(function (f) { f.eventi.forEach(function (e) { var n = (e.celle[4] || "").trim(); if (n) nomi[n] = 1; }); });
+    $("eventi").innerHTML = Object.keys(nomi).sort().slice(0, 400).map(function (n) { return '<option value="' + esc(n) + '">'; }).join("");
+  }).catch(function () {});
+
+  // ---- modulo ----
+  var formIniziale = $("form").innerHTML;
+  function scelto(id) { var b = $(id).querySelector('[aria-pressed="true"]'); return b ? b.getAttribute("data-v") : ""; }
+  function aggiornaCampi() {
+    var p = scelto("sCategoria") === "passaggio";
+    $("lCitta").textContent = p ? "Parto da" : "Città";
+    $("bArrivo").hidden = !p;
+    $("bRuolo").hidden = p;
+  }
+  function esito(t, errore) { $("esito").textContent = t; $("esito").className = "esito" + (errore ? " errore" : ""); }
+
+  $("apri").addEventListener("click", function () {
+    if (!$("invia")) { $("form").innerHTML = formIniziale; }
+    aggiornaCampi();
+    $("modulo").showModal();
+  });
+  $("form").addEventListener("click", function (e) {
+    if (e.target.id === "annulla" || e.target.id === "chiudiGrazie") { $("modulo").close(); return; }
+    var b = e.target.closest(".scelta button");
+    if (!b) return;
+    [].forEach.call(b.parentNode.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    aggiornaCampi();
+  });
+  $("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var d = {
+      categoria: scelto("sCategoria"), tipo: scelto("sTipo"), evento: $("fEvento").value, citta: $("fCitta").value,
+      arrivo: $("fArrivo").value, ruolo: $("fRuolo").value, giorno: $("fGiorno").value, stile: $("fStile").value,
+      testo: $("fTesto").value, nome: $("fNome").value, contatto: $("fContatto").value, sito_web: $("fSito").value
+    };
+    if (!d.citta.trim() || !d.nome.trim() || !d.contatto.trim()) { esito("Compila città, nome e contatto.", true); return; }
+    if (d.categoria === "passaggio" && !d.arrivo.trim() && !d.evento.trim()) { esito("Scrivi dove vai: destinazione o evento.", true); return; }
+    $("invia").disabled = true;
+    esito("Invio in corso…");
+    fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); return j; }); })
+      .then(function () {
+        $("form").innerHTML = '<div class="grazie"><b>📌</b><h2>Grazie!</h2><p class="nota">Abbiamo ricevuto l\'annuncio: dopo un controllo compare in bacheca.</p>' +
+          '<div class="fondo" style="justify-content:center"><button type="button" class="btn" id="chiudiGrazie">Chiudi</button></div></div>';
+      })
+      .catch(function (err) {
+        esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
+        $("invia").disabled = false;
+      });
+  });
+})();
+</script>
+<script src="menu.js"></script>
+</body>
+</html>
