@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Musica (proposta) · siBalla</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="logo-app.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0E0E12">
+<link rel="stylesheet" href="menu.css">
+</head>
+<body>
+<!-- Proposta di pagina Musica (dalla chat): solo per confronto con /musica; non è nel menu -->
+<style>
+  /* stessi colori del sito (tema scuro, accento giallo). Layout: barra dei BPM in alto, playlist a schede, proposte e radio sotto */
+  :root {
+    color-scheme: dark;
+    --bg: #0E0E12; --surface: #1B1B22; --surface-2: #26262F; --text: #FFFFFF; --muted: #9A9AA8;
+    --border: rgba(255,255,255,.14); --linea: rgba(255,255,255,.14); --accent: #FFD400; --accent-soft: rgba(255,212,0,.14);
+    --on-accent: #0E0E12; --lento: #56CCF2; --medio: #6FCF97; --veloce: #F2994A; --live: #C9A0FF; --yt: #FF4E45; --sp: #1ED760;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: var(--text);
+    background: radial-gradient(900px 420px at 15% -120px, rgba(255,212,0,.17), transparent 70%) no-repeat, var(--bg);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-block: 0 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  a { color: var(--accent); }
+  button, input, select { font: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .nota { margin: 12px 0 0; font-size: 12.5px; color: var(--muted); border: 1px dashed var(--linea); border-radius: 10px; padding: 6px 12px; display: inline-block; }
+  .hero { padding: 22px 0 18px; display: flex; align-items: center; gap: 18px; }
+  .logo { width: 72px; height: 72px; flex: none; border-radius: 18px; background: #fffaf2; padding: 7px; object-fit: contain;
+    box-shadow: 0 8px 30px rgba(255,212,0,.18), 0 2px 8px rgba(0,0,0,.4); }
+  h1 { margin: 0; font-size: clamp(28px, 5.5vw, 46px); line-height: 1.05; letter-spacing: -0.035em; font-weight: 800; }
+  h1 .brand { color: var(--accent); text-shadow: 0 0 28px rgba(255,212,0,.35); }
+  .sub { margin: 6px 0 0; font-size: 16px; opacity: .9; }
+  @media (max-width: 520px) { .logo { width: 56px; height: 56px; border-radius: 14px; padding: 5px; } }
+
+  h2 { margin: 34px 0 6px; font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.02em; text-wrap: balance; }
+  .intro { color: var(--muted); max-width: 680px; margin: 0 0 16px; }
+  .eti { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+  /* barra dei tempi: da 100 a 260 BPM, una fascia per playlist */
+  .tempi { background: var(--surface); border-radius: 16px; padding: 16px; margin-top: 8px; }
+  .scala { position: relative; height: 40px; border-radius: 10px; overflow: hidden; display: flex; margin-top: 10px; }
+  .scala span { display: grid; place-items: center; font-size: 12.5px; font-weight: 700; color: var(--on-accent); min-width: 0; white-space: nowrap; overflow: hidden; }
+  .tacche { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .tempi p { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+  /* piattaforma */
+  .piattaforme { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0 6px; }
+  .piattaforme button { border: 1px solid var(--linea); background: transparent; color: var(--text); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .piattaforme button[aria-pressed="true"][data-p="spotify"] { background: var(--sp); border-color: var(--sp); color: #04210f; }
+  .piattaforme button[aria-pressed="true"][data-p="youtube"] { background: var(--yt); border-color: var(--yt); color: #fff; }
+  .spieg { font-size: 13px; color: var(--muted); margin: 0 0 14px; max-width: 680px; }
+
+  /* playlist */
+  .griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .pl { background: var(--surface); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .copertina { height: 110px; position: relative; display: flex; align-items: flex-end; padding: 12px 14px; }
+  .copertina .bpm { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; color: var(--on-accent); line-height: 1; font-variant-numeric: tabular-nums; }
+  .copertina .bpm small { font-size: 12px; font-weight: 700; margin-left: 4px; }
+  .onde { position: absolute; right: 12px; top: 12px; display: flex; gap: 3px; align-items: flex-end; height: 34px; }
+  .onde i { width: 4px; background: rgba(14,14,18,.55); border-radius: 2px; }
+  .pl.suona .onde i { animation: onda 0.9s ease-in-out infinite alternate; }
+  .pl.suona .onde i:nth-child(2) { animation-delay: .15s } .pl.suona .onde i:nth-child(3) { animation-delay: .3s } .pl.suona .onde i:nth-child(4) { animation-delay: .45s }
+  @keyframes onda { from { transform: scaleY(.35) } to { transform: scaleY(1) } }
+  @media (prefers-reduced-motion: reduce) { .pl.suona .onde i { animation: none; } }
+  .pl .corpo { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .pl h3 { margin: 0; font-size: 17px; }
+  .pl .per { font-size: 13.5px; color: rgba(255,255,255,.85); }
+  .pl .meta { font-size: 12.5px; color: var(--muted); }
+  .player { margin-top: auto; display: flex; align-items: center; gap: 10px; padding-top: 8px; }
+  .play { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); cursor: pointer; font-size: 16px; font-weight: 800; }
+  .barra { flex: 1; height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+  .barra b { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .pl .avviso-play { font-size: 12px; color: var(--muted); min-height: 1em; }
+  .casuale { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn { border: 0; border-radius: 12px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: var(--accent); color: var(--on-accent); }
+  .btn.sec { background: var(--surface-2); color: var(--text); }
+
+  /* DJ e proposte */
+  .due { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  @media (max-width: 760px) { .due { grid-template-columns: minmax(0, 1fr); } }
+  .riquadro { background: var(--surface); border-radius: 16px; padding: 16px; min-width: 0; }
+  .riquadro h3 { margin: 0 0 4px; font-size: 17px; }
+  .dj { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+  .dj .av { width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 800; color: var(--on-accent); background: var(--live); }
+  form { display: grid; gap: 8px; margin-top: 10px; }
+  label { font-size: 13px; font-weight: 600; }
+  input, select { width: 100%; color: var(--text); background: var(--bg); border: 1px solid var(--linea); border-radius: 10px; padding: 8px 10px; }
+  .grazie { color: var(--sp); font-size: 14px; min-height: 1.2em; margin: 0; }
+
+  /* radio futura */
+  .radio { margin-top: 12px; border: 1px dashed rgba(255,212,0,.45); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: start; }
+  .radio .icona { width: 54px; height: 54px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 26px; }
+  .radio ul { margin: 6px 0 0; padding-left: 18px; color: rgba(255,255,255,.85); font-size: 14px; }
+  .radio li { margin-bottom: 3px; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 8px; vertical-align: 2px; margin-left: 6px; }
+  .passi { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 10px; }
+  .passo { background: var(--surface); border-radius: 14px; padding: 14px; }
+  .passo .quando { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .passo p { margin: 4px 0 0; font-size: 13.5px; color: rgba(255,255,255,.85); }
+</style>
+
+<div class="wrap">
+  <p class="nota">Proposta di pagina "Musica" da confrontare con quella attuale (/musica): playlist, nomi e DJ sono esempi e il lettore è simulato.</p>
+  <header class="hero">
+    <div class="hero-in" style="display:flex;align-items:center;gap:18px;flex:1;min-width:0">
+    <a href="/" aria-label="Torna agli eventi"><img class="logo" src="logo-app.svg" alt="" width="72" height="72"></a>
+    <div>
+      <h1>Dove <span class="brand">siBalla</span> stasera?</h1>
+      <p class="sub">Musica swing per ballare, allenarsi e scoprire le band</p>
+    </div>
+    </div>
+  </header>
+
+  <h2>Scegli la velocità</h2>
+  <p class="intro">Le playlist sono divise per <b>BPM</b> (battiti al minuto): più è alto, più il brano è veloce. Chi inizia parte dalle lente; il Balboa vive sopra i 200.</p>
+  <div class="tempi" aria-label="Fasce di velocità delle playlist">
+    <span class="eti">Fasce di tempo</span>
+    <div class="scala">
+      <span style="flex:30;background:var(--lento)">Lente</span>
+      <span style="flex:40;background:var(--medio)">Medie</span>
+      <span style="flex:20;background:var(--surface-2);color:var(--muted)">·</span>
+      <span style="flex:70;background:var(--veloce)">Veloci</span>
+    </div>
+    <div class="tacche"><span>110</span><span>140</span><span>180</span><span>200</span><span>270 BPM</span></div>
+    <p>Le "Live italiane" non hanno una fascia: sono le band della scena, di ogni velocità.</p>
+  </div>
+
+  <div class="piattaforme" role="group" aria-label="Ascolta su">
+    <span class="eti">Ascolta su</span>
+    <button type="button" data-p="spotify" aria-pressed="true">Spotify</button>
+    <button type="button" data-p="youtube" aria-pressed="false">YouTube</button>
+  </div>
+  <p class="spieg" id="spieg"></p>
+
+  <div class="griglia" id="playlist"></div>
+  <div class="casuale">
+    <button type="button" class="btn" id="tutte">🔀 Ascolta tutto in ordine casuale</button>
+    <span class="meta" style="color:var(--muted);font-size:13px">Parte una playlist a caso e va avanti da sola: una "radio" gratis.</span>
+  </div>
+
+  <h2>Dalla scena</h2>
+  <div class="due">
+    <div class="riquadro">
+      <h3>La playlist del mese <span class="pill">esempio</span></h3>
+      <p class="intro" style="margin:0">Ogni mese un DJ della scena italiana sceglie 20 brani. Lui ha visibilità, chi balla scopre musica nuova.</p>
+      <div class="dj"><div class="av">DS</div><div><b>DJ Satchmo</b> · Torino<br><span style="color:var(--muted);font-size:13px">"Swing anni '30–'40 per le social del giovedì"</span></div></div>
+      <div class="player" style="padding-top:12px"><button type="button" class="play" data-demo="dj" aria-label="Ascolta la playlist del mese">▶</button><div class="barra"><b></b></div></div>
+      <p class="avviso-play" data-avviso="dj" style="font-size:12px;color:var(--muted);margin:6px 0 0"></p>
+    </div>
+    <div class="riquadro">
+      <h3>Proponi un brano</h3>
+      <p class="intro" style="margin:0">Un brano che fa ballare tutti? Segnalalo: lo ascoltiamo e, se va, entra in una playlist.</p>
+      <form id="proponi" novalidate>
+        <div class="due" style="gap:8px">
+          <div><label for="pTitolo">Titolo</label><input id="pTitolo" placeholder="Es. Jumpin' at the Woodside"></div>
+          <div><label for="pArtista">Artista</label><input id="pArtista" placeholder="Es. Count Basie"></div>
+        </div>
+        <label for="pPlaylist">Per quale playlist</label>
+        <select id="pPlaylist"><option>Non so</option><option>Lente</option><option>Medie</option><option>Veloci</option><option>Live italiane</option></select>
+        <button type="submit" class="btn" style="justify-self:start">Invia</button>
+        <p class="grazie" id="grazie" role="status"></p>
+      </form>
+    </div>
+  </div>
+
+  <h2>Radio siBalla <span class="pill">più avanti</span></h2>
+  <div class="radio">
+    <div class="icona" aria-hidden="true">📻</div>
+    <div>
+      <b>Una web radio swing sempre accesa, uguale per tutti.</b>
+      <p class="intro" style="margin:4px 0 0">Ha senso quando il sito ha un pubblico stabile o uno sponsor che copre i costi ("Radio siBalla, offerta da…"). Serve:</p>
+      <ul>
+        <li>licenze per i diritti: SIAE per gli autori e diritti delle registrazioni (esistono licenze per web radio piccole, a costo annuale);</li>
+        <li>un servizio di streaming 24 ore su 24: alcune decine di euro al mese;</li>
+        <li>qualcuno che curi la scaletta, magari con spazi live dei DJ.</li>
+      </ul>
+      <p class="intro" style="margin:8px 0 0;font-size:13px">I dischi degli anni '30–'40 possono essere liberi come registrazioni, ma le canzoni restano protette fino a 70 anni dalla morte dell'autore: le licenze servono comunque.</p>
+    </div>
+  </div>
+
+  <h2>Come ci si arriva</h2>
+  <div class="passi">
+    <div class="passo"><div class="quando">Adesso</div><b>Pagina "Musica"</b><p>4–5 playlist incorporate, Spotify e YouTube. Costo zero: i diritti li pagano le piattaforme. Servono solo i link.</p></div>
+    <div class="passo"><div class="quando">Poi</div><b>Proposte e DJ</b><p>"Proponi un brano" e la playlist del mese curata da un DJ della scena.</p></div>
+    <div class="passo"><div class="quando">Con pubblico o sponsor</div><b>Radio siBalla</b><p>Web radio vera con licenze, streaming e chi la gestisce.</p></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var PL = [
+    { id: "lente", nome: "Lente", bpm: "110–140", colore: "var(--lento)", per: "Per chi inizia, Blues e Slow Balboa", meta: "30 brani · circa 1 h 40 min" },
+    { id: "medie", nome: "Medie", bpm: "140–180", colore: "var(--medio)", per: "Le classiche da social dance", meta: "40 brani · circa 2 h 10 min" },
+    { id: "veloci", nome: "Veloci", bpm: "200+", colore: "var(--veloce)", per: "Balboa, Shag e jam", meta: "25 brani · circa 1 h 10 min" },
+    { id: "live", nome: "Live italiane", bpm: "band", colore: "var(--live)", per: "Le band della scena italiana", meta: "35 brani · aggiornata ogni mese" }
+  ];
+  var SPIEG = {
+    spotify: "Con Spotify chi ha fatto l'accesso ascolta i brani interi; gli altri sentono un'anteprima di 30 secondi.",
+    youtube: "Con YouTube tutti ascoltano i brani interi, anche senza account, ma con la pubblicità di YouTube."
+  };
+  var piattaforma = "spotify", suona = "";
+  var $ = function (id) { return document.getElementById(id); };
+
+  function disegna() {
+    $("spieg").textContent = SPIEG[piattaforma];
+    $("playlist").innerHTML = PL.map(function (p) {
+      var on = suona === p.id;
+      return '<article class="pl' + (on ? " suona" : "") + '">' +
+        '<div class="copertina" style="background:' + p.colore + '"><div class="bpm">' + p.bpm + (p.bpm === "band" ? "" : "<small>BPM</small>") + "</div>" +
+        '<div class="onde" aria-hidden="true"><i style="height:40%"></i><i style="height:80%"></i><i style="height:55%"></i><i style="height:100%"></i></div></div>' +
+        '<div class="corpo"><h3>' + p.nome + '</h3><div class="per">' + p.per + '</div><div class="meta">' + p.meta + " · " + (piattaforma === "spotify" ? "Spotify" : "YouTube") + "</div>" +
+        '<div class="player"><button type="button" class="play" data-pl="' + p.id + '" aria-label="' + (on ? "Pausa" : "Ascolta") + " " + p.nome + '">' + (on ? "❚❚" : "▶") + "</button>" +
+        '<div class="barra"><b style="width:' + (on ? "38%" : "0") + '"></b></div></div>' +
+        '<div class="avviso-play">' + (on ? "Nella pagina vera qui suona il lettore di " + (piattaforma === "spotify" ? "Spotify" : "YouTube") + "." : "") + "</div></div></article>";
+    }).join("");
+  }
+
+  document.querySelector(".piattaforme").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-p]");
+    if (!b) return;
+    piattaforma = b.getAttribute("data-p");
+    [].forEach.call(this.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    disegna();
+  });
+  $("playlist").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-pl]");
+    if (!b) return;
+    var id = b.getAttribute("data-pl");
+    suona = suona === id ? "" : id;
+    disegna();
+  });
+  $("tutte").addEventListener("click", function () {
+    suona = PL[Math.floor(Math.random() * PL.length)].id;
+    disegna();
+  });
+  document.querySelector('[data-demo="dj"]').addEventListener("click", function () {
+    var on = this.textContent === "▶";
+    this.textContent = on ? "❚❚" : "▶";
+    this.parentNode.querySelector(".barra b").style.width = on ? "22%" : "0";
+    document.querySelector('[data-avviso="dj"]').textContent = on ? "Nella pagina vera qui suona la playlist del DJ." : "";
+  });
+  $("proponi").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var t = $("pTitolo").value.trim(), a = $("pArtista").value.trim();
+    if (!t) { $("grazie").style.color = "#FF6B6B"; $("grazie").textContent = "Scrivi almeno il titolo del brano."; $("pTitolo").focus(); return; }
+    $("grazie").style.color = "";
+    $("grazie").textContent = "Grazie! \"" + t + (a ? "\" di " + a : "\"") + " è arrivato. (Anteprima: non viene inviato davvero.)";
+    this.reset();
+  });
+  disegna();
+})();
+</script>
+
+<script src="menu.js"></script>
+<script src="piede.js"></script>
+</body>
+</html>
