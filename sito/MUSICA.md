@@ -30,7 +30,7 @@ Per aggiungere un brano, copia una riga `brano` e cambia selezione, titolo, arti
 
 Per cambiare il titolo di un riquadro modifica **Titolo selezione**, lasciando invariato il codice **Selezione**. Per nascondere un intero riquadro metti `no` sulla sua riga `selezione`: i suoi brani non compaiono, anche se attivi. Una selezione attiva senza brani mostra “Nuovi brani in arrivo”.
 
-Sono supportati link `youtube.com/watch?v=...`, `youtu.be/...`, Shorts e playlist `youtube.com/playlist?list=...`. Le ricerche `youtube.com/results?search_query=...` si aprono su YouTube. Il lettore si carica solo dopo la scelta; non parte automaticamente. Spotify non è previsto da questo template.
+Sono supportati link `youtube.com/watch?v=...`, `youtu.be/...`, Shorts e playlist `youtube.com/playlist?list=...`. Le ricerche `youtube.com/results?search_query=...` si aprono su YouTube. Il lettore si carica e avvia l'ascolto solo dopo la scelta di un brano. Al termine passa automaticamente alla voce successiva della stessa selezione, seguendo Ordine; all'ultima si ferma. Le playlist YouTube vengono completate prima di passare alla voce successiva. I link alle ricerche non entrano nella sequenza. Chiudere il lettore o cambiare filtro interrompe la sequenza. Se il browser blocca la riproduzione automatica, il lettore invita a premere Play. Spotify non è previsto da questo template.
 
 ## Aggiornamento
 

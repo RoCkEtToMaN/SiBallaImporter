@@ -5,6 +5,13 @@
   var lettore = document.getElementById('lettore');
   var video = document.getElementById('video');
   var ultimoBrano;
+  var statoRiproduzione = document.getElementById('stato-riproduzione');
+  var player;
+  var apiYouTube;
+  var sessione = 0;
+  var coda = [];
+  var posizione = 0;
+  var inTransizione = false;
   var tinte = ['#6FCF97', '#FFD400', '#F2994A', '#9B8CFF'];
   function nodo(tag, classe, testo) {
     var n = document.createElement(tag);
@@ -13,6 +20,10 @@
     return n;
   }
   function ferma() {
+    sessione++;
+    coda = [];
+    if (player) { player.destroy(); player = null; }
+    statoRiproduzione.textContent = '';
     video.replaceChildren();
     lettore.hidden = true;
     elenco.querySelectorAll('[aria-pressed]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
@@ -25,32 +36,105 @@
       var id = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v');
       var percorso = u.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})$/);
       if (percorso) id = percorso[1];
-      if (/^[A-Za-z0-9_-]{11}$/.test(id || '')) return { url: u.href, embed: 'https://www.youtube-nocookie.com/embed/' + id };
+      if (/^[A-Za-z0-9_-]{11}$/.test(id || '')) return { url: u.href, id: id, embed: 'https://www.youtube-nocookie.com/embed/' + id };
       var lista = u.searchParams.get('list');
       if (['/playlist', '/watch', '/embed/videoseries'].indexOf(u.pathname) >= 0 && /^[A-Za-z0-9_-]{10,100}$/.test(lista || '')) {
-        return { url: u.href, embed: 'https://www.youtube-nocookie.com/embed/videoseries?list=' + encodeURIComponent(lista) };
+        return { url: u.href, lista: lista, embed: 'https://www.youtube-nocookie.com/embed/videoseries?list=' + encodeURIComponent(lista) };
       }
       if (u.pathname === '/results' && (u.searchParams.get('search_query') || '').trim()) return { url: u.href };
     } catch (e) {}
     return null;
   }
-  function ascolta(brano, link, pulsante) {
-    ferma();
-    ultimoBrano = pulsante;
-    var titolo = brano.titolo_brano + (brano.artista ? ' · ' + brano.artista : '');
+  function caricaAPI() {
+    if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+    if (apiYouTube) return apiYouTube;
+    apiYouTube = new Promise(function (resolve, reject) {
+      var precedente = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () {
+        try { if (precedente) precedente(); }
+        finally { resolve(window.YT); }
+      };
+      var script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.onerror = function () { apiYouTube = null; script.remove(); reject(new Error('YouTube non disponibile')); };
+      document.head.appendChild(script);
+    });
+    return apiYouTube;
+  }
+  function aggiornaBrano() {
+    var voce = coda[posizione];
+    ultimoBrano = voce.pulsante;
+    var titolo = voce.brano.titolo_brano + (voce.brano.artista ? ' \u00b7 ' + voce.brano.artista : '');
     document.getElementById('titolo-brano').textContent = titolo;
-    document.getElementById('apri-youtube').href = link.url;
+    document.getElementById('apri-youtube').href = voce.link.url;
+    elenco.querySelectorAll('[aria-pressed]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === voce.pulsante)); });
+    var frame = video.querySelector('iframe');
+    if (frame) frame.title = titolo;
+    statoRiproduzione.textContent = 'Ascolto ' + (posizione + 1) + ' di ' + coda.length + '. I brani proseguono in ordine fino alla fine della selezione.';
+  }
+  function successivo() {
+    if (posizione + 1 >= coda.length) {
+      statoRiproduzione.textContent = 'Selezione terminata.';
+      return;
+    }
+    posizione++;
+    aggiornaBrano();
+    var link = coda[posizione].link;
+    if (link.lista) player.loadPlaylist({ list: link.lista, listType: 'playlist', index: 0 });
+    else player.loadVideoById(link.id);
+  }
+  function ascolta(voci, indice) {
+    ferma();
+    var corrente = sessione;
+    coda = voci;
+    posizione = indice;
+    inTransizione = false;
+    var link = coda[posizione].link;
     var frame = document.createElement('iframe');
-    frame.src = link.embed;
-    frame.title = titolo;
-    frame.allow = 'encrypted-media; picture-in-picture; fullscreen';
+    var src = new URL(link.embed);
+    src.searchParams.set('enablejsapi', '1');
+    src.searchParams.set('playsinline', '1');
+    if (/^https?:$/.test(location.protocol)) src.searchParams.set('origin', location.origin);
+    frame.src = src.href;
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
     frame.referrerPolicy = 'strict-origin-when-cross-origin';
     frame.allowFullscreen = true;
     video.appendChild(frame);
     lettore.hidden = false;
-    pulsante.setAttribute('aria-pressed', 'true');
+    aggiornaBrano();
+    statoRiproduzione.textContent = 'Preparazione della sequenza...';
     lettore.querySelector('button').focus({ preventScroll: true });
     lettore.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+    caricaAPI().then(function (YT) {
+      if (corrente !== sessione) return;
+      player = new YT.Player(frame, { events: {
+        onReady: function (e) {
+          if (corrente !== sessione) return;
+          aggiornaBrano();
+          e.target.playVideo();
+        },
+        onStateChange: function (e) {
+          if (corrente !== sessione) return;
+          if (e.data === 1) { inTransizione = false; aggiornaBrano(); }
+          if (e.data !== 0 || inTransizione) return;
+          // Una playlist YouTube gestisce da sola i suoi video interni.
+          if (coda[posizione].link.lista) {
+            var lista = e.target.getPlaylist();
+            if (!lista || e.target.getPlaylistIndex() < lista.length - 1) return;
+          }
+          inTransizione = true;
+          successivo();
+        },
+        onAutoplayBlocked: function () {
+          if (corrente === sessione) statoRiproduzione.textContent = 'Premi Play nel video per continuare: il browser ha bloccato la riproduzione automatica.';
+        },
+        onError: function () {
+          if (corrente === sessione) statoRiproduzione.textContent = 'Questo video non viene riprodotto. Prova il collegamento YouTube o scegli un altro brano.';
+        }
+      } });
+    }).catch(function () {
+      if (corrente === sessione) statoRiproduzione.textContent = 'Riproduzione automatica non disponibile. Puoi ascoltare il video e scegliere manualmente il brano successivo.';
+    });
   }
   function ordine(a, b) {
     function numero(r) { return r.ordine !== '' && r.ordine != null && Number.isFinite(Number(r.ordine)) ? Number(r.ordine) : 999999; }
@@ -84,6 +168,7 @@
       card.appendChild(nodo('h3', '', s.titolo_selezione));
       card.appendChild(nodo('p', 'descrizione', s.descrizione));
       var lista = nodo('ul', 'brani');
+      var sequenza = [];
       righe.filter(function (r) { return r.tipo === 'brano' && r.selezione === s.selezione && r.titolo_brano; }).sort(ordine).forEach(function (brano) {
         var link = destinazione(brano.link_youtube);
         if (!link) return;
@@ -91,7 +176,9 @@
         var b = nodo(link.embed ? 'button' : 'a', 'brano');
         if (link.embed) {
           b.type = 'button'; b.setAttribute('aria-pressed', 'false');
-          b.addEventListener('click', function () { ascolta(brano, link, b); });
+          var indice = sequenza.length;
+          sequenza.push({ brano: brano, link: link, pulsante: b });
+          b.addEventListener('click', function () { ascolta(sequenza, indice); });
         } else { b.href = link.url; b.target = '_blank'; b.rel = 'noopener noreferrer'; }
         var icona = nodo('span', 'play', link.embed ? '▶' : '↗'); icona.setAttribute('aria-hidden', 'true');
         b.appendChild(icona);
