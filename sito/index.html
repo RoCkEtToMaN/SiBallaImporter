@@ -786,7 +786,7 @@
   // --- clandestini: eventi proposti dagli utenti, letti in tempo reale da /api/clandestini (dopo l'approvazione) ---
   // per ora la scheda si vede solo nelle versioni di prova (anteprima.siballa.pages.dev, file locali):
   // per pubblicarla basta mettere CLANDESTINI_PUBBLICI = true.
-  var CLANDESTINI_PUBBLICI = false;
+  var CLANDESTINI_PUBBLICI = true;
   var clandestiniAttivi = CLANDESTINI_PUBBLICI || /\.siballa\.pages\.dev$/.test(location.hostname) ||
     location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   var vuotoClandestini = { nome: "Clandestini", colonne: [], eventi: [] };
