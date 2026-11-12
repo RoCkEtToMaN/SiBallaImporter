@@ -154,6 +154,12 @@ def cella(riga: list, i: int) -> str:
 # "contenuti" = rubriche (mossa della settimana, giornate speciali, ...): colonne Data, Rubrica, Titolo, Testo,
 # Immagine, Video, Autore; una riga compare sul sito dal giorno in "Data" in poi (così si programmano in anticipo).
 ELENCHI = ("scuole", "artisti", "community", "contenuti")
+
+# Novità del sito (nomi degli eventi puliti, file di Scuole/Artisti/Community/Contenuti): accese sulle versioni
+# di prova (ramo diverso da master, o lanciato dal PC) e SPENTE sul sito pubblico finché non si mette True.
+# Sul sito pubblico, intanto, le schede Scuole/Artisti/Community/Contenuti vengono comunque saltate (non sono eventi).
+NOVITA_PUBBLICHE = False
+NOVITA_ATTIVE = NOVITA_PUBBLICHE or os.environ.get("GITHUB_REF_NAME", "") != "master"
 CARTELLA_BOZZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "elenchi")
 CONSENSO_SI = {"sì", "si", "x", "yes", "true", "1", "ok"}
 
@@ -265,7 +271,10 @@ def main() -> None:
         if nome.strip().lower() in ELENCHI:
             elenco = nome.strip().lower()
             if len(righe_f) >= 2:
-                scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1], righe_f[2:]), "sheet")
+                if NOVITA_ATTIVE:
+                    scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1], righe_f[2:]), "sheet")
+                else:
+                    print(f"- scheda '{nome}': saltata (non è una scheda di eventi; pagine non ancora pubbliche)")
                 elenchi_fatti.add(elenco)
             continue
         if len(righe_f) < 3:
@@ -304,7 +313,7 @@ def main() -> None:
             # html.unescape: alcuni nomi arrivano dai siti con entità tipo "&#8217;"
             celle = [html.unescape(cella(rf, i)) for i in range(num_colonne)]
             # nome dell'evento (E) e organizzatore (G) puliti per la pagina; l'immagine usa già il nome originale qui sopra
-            for k in (4, 6):
+            for k in ((4, 6) if NOVITA_ATTIVE else ()):
                 if k < len(celle):
                     celle[k] = pulisci_nome(celle[k])
             # date tutte nello stesso formato (nello Sheet ci sono sia 11/11/2026 sia 2026-11-11)
@@ -343,8 +352,8 @@ def main() -> None:
         uscita["fogli"].append({"nome": nome, "colonne": colonne, "eventi": eventi})
         print(f"- '{nome}': {len(eventi)} eventi pubblicati, {scartate_passate} passati, {scartate_verifica} da verificare")
 
-    # elenchi senza scheda nello Sheet: bozza CSV del repository, altrimenti vuoti
-    for elenco in ELENCHI:
+    # elenchi senza scheda nello Sheet: bozza CSV del repository, altrimenti vuoti (solo con le novità accese)
+    for elenco in (ELENCHI if NOVITA_ATTIVE else ()):
         if elenco in elenchi_fatti:
             continue
         bozza = os.path.join(CARTELLA_BOZZE, elenco + ".csv")
