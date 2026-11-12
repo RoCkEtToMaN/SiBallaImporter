@@ -37,3 +37,25 @@ body.menu-aperto .pannello { transform: none; visibility: visible; transition: t
 .pannello .presto { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--muted);
   border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
 .pannello .sep { height: 1px; background: var(--border); margin: 8px 4px; }
+
+/* novità della bacheca (menu.js): pallino sul ☰ che pulsa 3 volte, etichetta "N nuovi", invito nella home */
+.menu-btn { position: relative; }
+.menu-btn.novita::after { content: ""; position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 2px var(--bg); animation: bacheca-pulsa 1.6s ease-out 3; }
+@keyframes bacheca-pulsa {
+  0% { box-shadow: 0 0 0 2px var(--bg), 0 0 0 2px rgba(255,212,0,.7); }
+  100% { box-shadow: 0 0 0 2px var(--bg), 0 0 0 14px rgba(255,212,0,0); }
+}
+.nuovo { margin-left: auto; flex: none; font-size: 11px; font-weight: 700; white-space: nowrap; color: var(--on-accent);
+  background: var(--accent); border-radius: 999px; padding: 1px 8px; }
+.invito-bacheca { display: flex; align-items: center; gap: 10px; margin: -2px 0 12px; padding: 8px 8px 8px 12px; font-size: 14px;
+  background: var(--accent-soft); border: 1px solid rgba(255,212,0,.35); border-radius: 12px; }
+.invito-bacheca .testo { flex: 1; min-width: 0; }
+.invito-bacheca a { color: var(--accent); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.invito-bacheca a:hover { text-decoration: underline; }
+.invito-bacheca .nuovo { margin-left: 0; }
+.chiudi-invito { flex: none; font: inherit; font-size: 14px; line-height: 1; color: var(--muted); background: transparent;
+  border: 0; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
+.chiudi-invito:hover { color: var(--text); background: rgba(255,255,255,.06); }
+.chiudi-invito:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .menu-btn.novita::after { animation: none; } }

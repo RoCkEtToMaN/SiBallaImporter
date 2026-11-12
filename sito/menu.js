@@ -75,4 +75,42 @@
     var a = e.target.closest("a[aria-current]");
     if (a) { e.preventDefault(); chiudi(); }
   });
+
+  // ---- novità della bacheca: pallino sul ☰, "N nuovi" accanto alla voce, invito nella home ----
+  // "nuovo" = annuncio con id più alto dell'ultimo visto aprendo /bacheca (ricordato solo in questo browser).
+  var VISTO = "siballa-bacheca-visto", INVITO_CHIUSO = "siballa-bacheca-invito-chiuso";
+  function leggi(k) { try { return +localStorage.getItem(k) || 0; } catch (e) { return 0; } }
+  function scrivi(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
+  function quanti(n, uno, tanti) { return n + " " + (n === 1 ? uno : tanti); }
+  if (location.protocol === "file:") return;
+  fetch("/api/bacheca")
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      var annunci = (d && d.annunci) || [];
+      var ultimo = annunci.reduce(function (m, a) { return Math.max(m, a.id || 0); }, 0);
+      if (qui === "/bacheca") { scrivi(VISTO, ultimo); return; }
+      var visto = leggi(VISTO);
+      var nuovi = annunci.filter(function (a) { return (a.id || 0) > visto; }).length;
+      if (nuovi) {
+        btn.classList.add("novita");
+        btn.setAttribute("aria-label", "Menu: " + quanti(nuovi, "annuncio nuovo", "annunci nuovi") + " in bacheca");
+        var voce = pan.querySelector('a[href="/bacheca"]');
+        if (voce) voce.insertAdjacentHTML("beforeend", '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>");
+      }
+      // invito nella home, sotto la ricerca: si chiude con ✕ e torna solo quando arrivano annunci nuovi
+      var bar = qui === "/" && document.querySelector(".bar");
+      if (!bar || !annunci.length || leggi(INVITO_CHIUSO) >= ultimo) return;
+      var inv = document.createElement("div");
+      inv.className = "invito-bacheca";
+      inv.innerHTML = '<span class="pin" aria-hidden="true">📌</span><span class="testo">Cerchi un passaggio o un partner per un festival? ' +
+        '<a href="/bacheca">' + quanti(annunci.length, "annuncio", "annunci") + " in bacheca →</a></span>" +
+        (nuovi ? '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>" : "") +
+        '<button type="button" class="chiudi-invito" aria-label="Nascondi">✕</button>';
+      bar.parentNode.insertBefore(inv, bar.nextSibling);
+      inv.querySelector(".chiudi-invito").addEventListener("click", function () {
+        scrivi(INVITO_CHIUSO, ultimo);
+        inv.remove();
+      });
+    })
+    .catch(function () {});
 })();
