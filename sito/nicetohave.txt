@@ -42,7 +42,8 @@ DA FARE
     - [fatto] sulla scheda di un evento: "2 cercano un passaggio · 1 cerca partner"
     - [fatto] chi scrive puo' togliere il proprio annuncio (dallo stesso browser)
     - [fatto] categorie Alloggio e Mercatino; da valutare DJ/band/sale
-    - Turnstile (captcha Cloudflare) se arriva spam
+    - [pronto] Turnstile (anti-bot Cloudflare) su clandestini, annunci e messaggi: si accende
+      da solo con TURNSTILE_SITEKEY (variabile) + TURNSTILE_SECRET (secret) nel progetto Pages
     - pubblicazione: merge "anteprima" -> "master" e voce nel menu pubblico
     Dettagli nel documento Word, capitolo "Bacheca degli annunci".
 [ ] Community WhatsApp aperta a tutti, da ogni parte del mondo (con calma, da decidere):

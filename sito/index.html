@@ -254,6 +254,7 @@
     <input id="cContatto" name="contatto" maxlength="120" placeholder="Email o telefono">
     <div class="scelte" style="margin-top:12px"><label><input type="checkbox" id="cGratis" checked> Ingresso gratuito</label></div>
     <div class="trappola" aria-hidden="true"><label for="cSito">Sito web</label><input id="cSito" name="sito_web" tabindex="-1" autocomplete="off"></div>
+    <div class="antibot" id="cAntibot"></div>
     <p class="esito" id="esito" role="status"></p>
     <div class="fondo">
       <button type="button" class="btn sec" id="annulla">Annulla</button>
@@ -644,6 +645,7 @@
   }
   function esito(t, errore) { $("esito").textContent = t || ""; $("esito").className = "esito" + (errore ? " err" : ""); }
   var formIniziale = $("formClandestino").innerHTML;
+  var abClandestino = null;   // anti-bot Turnstile (antibot.js): attivo solo se configurato su Cloudflare
   $("apriModulo").addEventListener("click", function () {
     var oggi = new Date();
     $("cGiorno").min = giornoISO(oggi);
@@ -651,6 +653,7 @@
     if (!$("cGiorno").value) $("cGiorno").value = giornoISO(oggi);
     esito("");
     $("modulo").showModal();
+    if (window.siBallaAntibot && $("cAntibot") && !$("cAntibot").hasChildNodes()) abClandestino = siBallaAntibot.monta($("cAntibot"));
     $("cNome").focus();
   });
   $("modulo").addEventListener("click", function (e) {
@@ -703,10 +706,12 @@
     e.preventDefault();
     var f = this, mancanti = ["cNome", "cGiorno", "cCitta", "cLuogo"].filter(function (id) { return !$(id).value.trim(); });
     if (mancanti.length) { esito("Compila nome, data, città e luogo.", true); $(mancanti[0]).focus(); return; }
+    if (abClandestino && abClandestino.inAttesa()) { esito("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia.", true); return; }
     var d = {
       nome: $("cNome").value, giorno: $("cGiorno").value, ora: $("cOra").value, citta: $("cCitta").value,
       luogo: $("cLuogo").value, dettagli: $("cDettagli").value, link: $("cLink").value, contatto: $("cContatto").value,
       gratis: $("cGratis").checked, sito_web: $("cSito").value, foto: foto || undefined,
+      turnstile: abClandestino ? abClandestino.token() : "",
       stili: [].map.call(f.querySelectorAll("#cStili input:checked"), function (x) { return x.value; })
     };
     $("invia").disabled = true;
@@ -722,6 +727,7 @@
       .catch(function (err) {
         esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
         $("invia").disabled = false;
+        if (abClandestino) abClandestino.reset();   // la verifica vale per un solo invio
       });
   });
 
@@ -743,6 +749,7 @@
 </script>
 <script src="menu.js"></script>
 <script src="piede.js"></script>
+<script src="antibot.js"></script>
 <script src="conta.js"></script>
 </body>
 </html>

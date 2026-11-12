@@ -52,7 +52,7 @@ async function coordinate(luogo, citta) {
 }
 
 async function turnstileOk(env, token, ip) {
-  if (!env.TURNSTILE_SECRET) return true;   // captcha non ancora configurato
+  if (!env.TURNSTILE_SECRET || !env.TURNSTILE_SITEKEY) return true;   // anti-bot acceso solo con entrambe le chiavi (vedi lib/antibot.js)
   const body = new FormData();
   body.append("secret", env.TURNSTILE_SECRET);
   body.append("response", token || "");

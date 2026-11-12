@@ -1,6 +1,7 @@
 import { giornoRoma } from "../../lib/visite.js";
 import { pulisci, esc } from "../../lib/clandestini.js";
 import { preparaBacheca, impronta, inviaEmail, avvisaAutore, SOGLIA_SEGNALAZIONI } from "../../lib/bacheca.js";
+import { antibotOk } from "../../lib/antibot.js";
 
 // Discussione sotto gli annunci della bacheca. I messaggi NON passano dall'approvazione: compaiono subito.
 // GET  /api/messaggi?annuncio=ID   : messaggi visibili di un annuncio approvato e non scaduto
@@ -75,6 +76,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const nick = pulisci(d.nick, 30), testo = pulisci(String(d.testo || "").replace(/\r/g, ""), 500);
   if (nick.length < 2) return json({ errore: "Scegli un nickname di almeno 2 lettere." }, 400);
   if (!testo) return json({ errore: "Scrivi un messaggio." }, 400);
+  if (!(await antibotOk(env, d.turnstile, request.headers.get("cf-connecting-ip"))))
+    return json({ errore: "Verifica anti-spam non riuscita: aspetta un attimo e riprova." }, 400);
   const an = await annuncioAperto(db, id);
   if (!an) return json({ errore: "Questo annuncio non è più in bacheca." }, 404);
 

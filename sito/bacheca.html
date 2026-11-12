@@ -162,6 +162,7 @@
     <p class="avviso-contatto">Non la vede nessuno: ti scriviamo quando l'annuncio è pubblicato e quando qualcuno ti risponde nella discussione. Viene cancellata quando l'annuncio scade o lo togli.</p>
     <div class="trappola" aria-hidden="true"><label for="fSito">Sito web</label><input id="fSito" tabindex="-1" autocomplete="off"></div>
 
+    <div class="antibot" id="fAntibot"></div>
     <p class="esito" id="esito" role="status"></p>
     <div class="fondo">
       <button type="button" class="btn sec" id="annulla">Annulla</button>
@@ -234,6 +235,7 @@
         "</article>";
     }).join("") + "</div>" : '<p class="vuoto">Nessun annuncio trovato.</p>';
     Object.keys(aperti).forEach(function (id) { mostraMessaggi(+id); });
+    montaAntibotDisc();
   }
 
   // ---- discussione sotto l'annuncio: messaggi pubblici, senza approvazione ----
@@ -265,7 +267,7 @@
       (nick ? '<p class="disc-come">Scrivi come <b>' + esc(nick) + '</b> · <button type="button" class="disc-cambia">cambia</button></p>'
         : '<input class="disc-nick" maxlength="30" placeholder="Il tuo nickname" aria-label="Nickname" autocomplete="nickname">') +
       '<textarea class="disc-testo" maxlength="500" rows="2" placeholder="Scrivi un messaggio…" aria-label="Messaggio">' + esc(bozze[a.id] || "") + "</textarea>" +
-      '<input class="trappola" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+      '<input class="trappola" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="antibot"></div>' +
       '<div class="disc-fondo"><span class="disc-nota">Messaggi pubblici: non scrivere numeri di telefono o indirizzi.</span>' +
       '<button type="submit" class="btn disc-invia">Invia</button></div><p class="esito disc-esito" role="status"></p></form>';
   }
@@ -303,7 +305,16 @@
   function annuncio(id) { return annunci.filter(function (x) { return x.id === id; })[0]; }
   function ridisegnaDisc(id) {
     var el = document.querySelector('.disc[data-id="' + id + '"]'), a = annuncio(id);
-    if (el && a) { el.innerHTML = discussione(a); mostraMessaggi(id); }
+    if (el && a) { el.innerHTML = discussione(a); mostraMessaggi(id); montaAntibotDisc(); }
+  }
+  // anti-bot nei moduli delle discussioni aperte (uno per annuncio), se configurato su Cloudflare
+  var abDisc = {};
+  function montaAntibotDisc() {
+    if (!window.siBallaAntibot) return;
+    [].forEach.call(document.querySelectorAll(".disc-form .antibot"), function (el) {
+      if (el.hasChildNodes()) return;
+      abDisc[+el.closest(".disc").getAttribute("data-id")] = siBallaAntibot.monta(el);
+    });
   }
   function posta(dati) {
     dati.token = token;
@@ -397,8 +408,11 @@
     function errore(t) { esitoEl.textContent = t; esitoEl.className = "esito disc-esito errore"; }
     if (nick.length < 2) { errore("Scegli un nickname di almeno 2 lettere."); if (campoNick) campoNick.focus(); return; }
     if (!testo.value.trim()) { testo.focus(); return; }
+    var ab = abDisc[id];
+    if (ab && ab.inAttesa()) { errore("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia."); return; }
     invia.disabled = true;
-    posta({ azione: "scrivi", annuncio: id, nick: nick, testo: testo.value, sito_web: form.querySelector(".trappola").value })
+    posta({ azione: "scrivi", annuncio: id, nick: nick, testo: testo.value, sito_web: form.querySelector(".trappola").value,
+      turnstile: ab ? ab.token() : "" })
       .then(function () {
         scriviLS("siballa-nick", nick);
         bozze[id] = "";
@@ -413,6 +427,7 @@
       .catch(function (err) {
         errore(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, riprova.");
         invia.disabled = false;
+        if (ab) ab.reset();
       });
   });
 
@@ -495,6 +510,7 @@
 
   // ---- modulo ----
   var formIniziale = $("form").innerHTML;
+  var abAnnuncio = null;
   function scelto(id) { var b = $(id).querySelector('[aria-pressed="true"]'); return b ? b.getAttribute("data-v") : ""; }
   // campi ed etichette che cambiano con la categoria
   var MODULO = {
@@ -524,6 +540,8 @@
     if (!$("invia")) { $("form").innerHTML = formIniziale; }
     aggiornaCampi();
     $("modulo").showModal();
+    // anti-bot Turnstile (antibot.js): attivo solo se configurato su Cloudflare
+    if (window.siBallaAntibot && $("fAntibot") && !$("fAntibot").hasChildNodes()) abAnnuncio = siBallaAntibot.monta($("fAntibot"));
   });
   $("form").addEventListener("click", function (e) {
     if (e.target.id === "annulla" || e.target.id === "chiudiGrazie") { $("modulo").close(); return; }
@@ -540,7 +558,8 @@
       arrivo: $("fArrivo").value, ruolo: $("fRuolo").value, giorno: $("fGiorno").value, stile: $("fStile").value,
       testo: $("fTesto").value, nome: $("fNome").value, contatto: $("fContatto").value, sito_web: $("fSito").value,
       token: token,  // così i tuoi messaggi nella discussione avranno l'etichetta "autore dell'annuncio"
-      avvisi: $("fAvvisi").value
+      avvisi: $("fAvvisi").value,
+      turnstile: abAnnuncio ? abAnnuncio.token() : ""
     };
     // errore sul campo preciso: messaggio che lo nomina, bordo rosso e cursore lì
     [].forEach.call($("form").querySelectorAll(".manca"), function (x) { x.classList.remove("manca"); });
@@ -560,6 +579,7 @@
     if (passaggio && !d.arrivo.trim() && !d.evento.trim()) { manca("fArrivo", "Scrivi dove vai: destinazione o evento."); return; }
     if (!d.nome.trim()) { manca("fNome", "Scrivi il tuo nome o un soprannome."); return; }
     if (d.avvisi.trim() && !/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i.test(d.avvisi.trim())) { manca("fAvvisi", "L'email per gli avvisi non sembra valida."); return; }
+    if (abAnnuncio && abAnnuncio.inAttesa()) { esito("Un attimo: verifica anti-spam in corso, poi premi di nuovo Invia.", true); return; }
     $("invia").disabled = true;
     esito("Invio in corso…");
     fetch("/api/bacheca", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) })
@@ -570,6 +590,7 @@
       })
       .catch(function (err) {
         esito(err.message && !/fetch/i.test(err.message) ? err.message : "Invio non riuscito, controlla la connessione e riprova.", true);
+        if (abAnnuncio) abAnnuncio.reset();   // la verifica vale per un solo invio
         $("invia").disabled = false;
       });
   });
@@ -577,5 +598,6 @@
 </script>
 <script src="menu.js"></script>
 <script src="piede.js"></script>
+<script src="antibot.js"></script>
 </body>
 </html>
