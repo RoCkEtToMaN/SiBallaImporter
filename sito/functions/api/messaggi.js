@@ -24,9 +24,12 @@ export async function onRequestGet({ request, env }) {
   if (!env.VISITE || !id) return json({ messaggi: [] });
   await preparaBacheca(env.VISITE);
   if (!(await annuncioAperto(env.VISITE, id))) return json({ messaggi: [], chiuso: true });
+  // "aut" = 1 se il messaggio viene dal browser che ha scritto l'annuncio
   const { results } = await env.VISITE.prepare(
-    `SELECT id, creato, nick, testo, substr(autore, 1, 16) AS a FROM messaggi
-     WHERE annuncio = ?1 AND nascosto = 0 ORDER BY id LIMIT ?2`).bind(id, MAX_PER_ANNUNCIO).all();
+    `SELECT m.id, m.creato, m.nick, m.testo, substr(m.autore, 1, 16) AS a,
+       (an.autore <> '' AND an.autore = m.autore) AS aut
+     FROM messaggi m JOIN annunci an ON an.id = m.annuncio
+     WHERE m.annuncio = ?1 AND m.nascosto = 0 ORDER BY m.id LIMIT ?2`).bind(id, MAX_PER_ANNUNCIO).all();
   return json({ messaggi: results });
 }
 

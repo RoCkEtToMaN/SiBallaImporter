@@ -1,6 +1,6 @@
 import { giornoRoma } from "../../lib/visite.js";
 import { pulisci, esc, dataSheet } from "../../lib/clandestini.js";
-import { preparaBacheca, CATEGORIE, RUOLI, GIORNI_SCADENZA } from "../../lib/bacheca.js";
+import { preparaBacheca, CATEGORIE, RUOLI, GIORNI_SCADENZA, impronta } from "../../lib/bacheca.js";
 
 // GET  /api/bacheca : annunci approvati e non scaduti
 // POST /api/bacheca : nuovo annuncio dal modulo della pagina /bacheca; resta "in attesa" finché non lo approvi.
@@ -71,10 +71,14 @@ export async function onRequestPost({ request, env, waitUntil }) {
     await preparaBacheca(db);
     const { n } = await db.prepare(`SELECT COUNT(*) AS n FROM annunci WHERE stato = 'attesa'`).first();
     if (n >= MAX_IN_ATTESA) return json({ errore: "Troppi annunci in attesa, riprova tra qualche ora." }, 429);
+    // impronta del codice segreto del browser (lo stesso della discussione): i messaggi che quel browser
+    // scrive sotto questo annuncio avranno l'etichetta "autore dell'annuncio"
+    const token = String(d.token || "");
+    const autore = /^[A-Za-z0-9-]{20,100}$/.test(token) ? await impronta("autore|" + token) : "";
     const r = await db.prepare(
-      `INSERT INTO annunci (creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)`)
-      .bind(new Date().toISOString(), categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto).run();
+      `INSERT INTO annunci (creato, categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto, autore)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`)
+      .bind(new Date().toISOString(), categoria, tipo, evento, giorno, scade, citta, arrivo, ruolo, stile, testo, nome, contatto, autore).run();
     const id = r.meta.last_row_id;
     waitUntil(avvisa(env, new URL(request.url).origin, { categoria, tipo, evento, giorno, citta, arrivo, ruolo, stile, testo, nome, contatto })
       .then((esito) => db.prepare(`UPDATE annunci SET email = ?1 WHERE id = ?2`).bind(esito.slice(0, 500), id).run())

@@ -46,6 +46,9 @@ export async function preparaBacheca(db) {
        nascosto INTEGER NOT NULL DEFAULT 0    -- 1 = nascosto dalle segnalazioni o da chi amministra
      )`).run();
   await db.prepare(`CREATE INDEX IF NOT EXISTS messaggi_annuncio ON messaggi (annuncio, id)`).run();
+  // colonna aggiunta dopo: impronta del browser di chi ha scritto l'annuncio, per l'etichetta
+  // "autore dell'annuncio" sui suoi messaggi nella discussione (vuota per gli annunci più vecchi)
+  try { await db.prepare(`ALTER TABLE annunci ADD COLUMN autore TEXT NOT NULL DEFAULT ''`).run(); } catch { /* c'è già */ }
   // una segnalazione per persona per messaggio
   await db.prepare(
     `CREATE TABLE IF NOT EXISTS segnalazioni (
