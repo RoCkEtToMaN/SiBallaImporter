@@ -155,6 +155,33 @@ ELENCHI = ("scuole", "artisti", "community")
 CARTELLA_BOZZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "elenchi")
 CONSENSO_SI = {"sì", "si", "x", "yes", "true", "1", "ok"}
 
+# regione di ogni evento (filtro "regione" e mappa della home): comune o provincia -> regione, dall'elenco ISTAT
+# (sito/elenchi/comuni_regioni.json, nomi normalizzati con norm()). Eventi fuori dall'Italia: "Estero".
+_REGIONI = None
+
+
+def regione_di(luogo: str) -> str:
+    global _REGIONI
+    if _REGIONI is None:
+        try:
+            with open(os.path.join(CARTELLA_BOZZE, "comuni_regioni.json"), encoding="utf-8") as f:
+                _REGIONI = json.load(f)
+        except OSError:
+            _REGIONI = {}
+    parti = [p.strip() for p in luogo.split(",") if p.strip()]
+    if not parti:
+        return ""
+    if not re.match(r"ital", parti[0], re.I):
+        return "Estero"
+    # prima la città (2° pezzo), poi gli altri pezzi dell'indirizzo (a volte la città è più avanti)
+    for pezzo in parti[1:2] + parti[2:]:
+        r = _REGIONI.get(norm(re.sub(r"\(.*?\)", "", pezzo)))
+        if r:
+            return r
+    # frazione o località non in elenco: sigla della provincia tra parentesi, es. "Silvi Marina (TE)"
+    m = re.search(r"\(([A-Za-z]{2})\)", luogo)
+    return _REGIONI.get("sigla " + m.group(1).lower(), "") if m else ""
+
 
 def chiave_colonna(h: str) -> str:
     """'Città' -> 'citta', 'Eventi nello Sheet' -> 'eventi_nello_sheet'."""
@@ -285,6 +312,9 @@ def main() -> None:
                     evento["lat"], evento["lng"] = round(lat, 5), round(lng, 5)
             elif luogo:
                 evento["mappa"] = "https://www.google.com/maps/search/?api=1&query=" + quote(luogo)
+            reg = regione_di(celle[COL_LUOGO])
+            if reg:
+                evento["regione"] = reg
             eventi.append(evento)
 
         # tengo solo le colonne scelte e non escluse (dopo l'uso degli indici fissi qui sopra; A-F restano
