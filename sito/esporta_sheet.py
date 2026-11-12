@@ -136,7 +136,7 @@ def come_data(valore) -> date | None:
     if isinstance(valore, (int, float)):
         return EPOCA_SHEETS + timedelta(days=int(valore))
     testo = str(valore).strip()
-    for formato in ("%Y-%m-%d", "%d/%m/%Y", "%d/%m/%y", "%d.%m.%Y", "%m/%d/%Y"):
+    for formato in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%y", "%d.%m.%Y", "%m/%d/%Y"):
         try:
             return datetime.strptime(testo[:10], formato).date()
         except ValueError:
