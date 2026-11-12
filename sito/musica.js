@@ -220,6 +220,12 @@
         corpo.appendChild(tutta);
       }
       if (n) corpo.appendChild(lista);
+      // stessa selezione su Spotify (colonna "Link Spotify"): si apre nell'app, anche a schermo spento
+      if (/^https:\/\/open\.spotify\.com\//.test(s.link_spotify || '')) {
+        var sp = nodo('a', 'spotify', 'Ascolta su Spotify ↗');
+        sp.href = s.link_spotify; sp.target = '_blank'; sp.rel = 'noopener noreferrer';
+        corpo.appendChild(sp);
+      }
       if (s.selezione === 'italia') {
         var azioni = nodo('div', 'azioni');
         var artisti = nodo('a', '', 'Scopri band e DJ →'); artisti.href = '/artisti';

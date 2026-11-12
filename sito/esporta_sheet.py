@@ -220,6 +220,17 @@ def link_musica(valore: str) -> bool:
         return False
 
 
+def link_spotify(valore: str) -> bool:
+    """Accetta solo link HTTPS di open.spotify.com a playlist, album, artista, brano, show o episodio."""
+    try:
+        u = urlparse(valore.strip())
+        return (u.scheme == "https" and (u.hostname or "").lower() == "open.spotify.com" and not u.username and not u.password
+                and u.port in (None, 443)
+                and bool(re.fullmatch(r"(?:/intl-[a-z]{2}(?:-[a-z]{2})?)?/(?:playlist|album|artist|track|show|episode)/[A-Za-z0-9]{10,40}/?", u.path)))
+    except ValueError:
+        return False
+
+
 def riga_musica(d: dict) -> dict | None:
     # L'attivazione e' esplicita: righe vuote, nuove o disattivate non si pubblicano.
     if norm(d.get("attivo", "")) not in CONSENSO_SI:
@@ -234,6 +245,11 @@ def riga_musica(d: dict) -> dict | None:
         print("- musica: brano senza titolo o con link YouTube non valido, saltato")
         return None
     campi = ("titolo_selezione", "sottotitolo", "descrizione", "bpm") if tipo == "selezione" else ("titolo_brano", "artista", "link_youtube")
+    if tipo == "selezione" and d.get("link_spotify") and not link_spotify(d["link_spotify"]):
+        print("- musica: link Spotify non valido nella selezione '%s', ignorato" % selezione)
+        d = {k: v for k, v in d.items() if k != "link_spotify"}
+    if tipo == "selezione":
+        campi = campi + ("link_spotify",)
     voce = {k: d[k] for k in campi if d.get(k)}
     voce.update(tipo=tipo, selezione=selezione)
     try:

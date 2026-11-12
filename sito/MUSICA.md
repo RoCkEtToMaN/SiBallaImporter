@@ -19,6 +19,7 @@ La pagina `/musica` della versione di prova usa la scheda **Musica** dello stess
 | I | Ordine | Posizione del riquadro | Posizione del brano nel suo riquadro |
 | J | Attivo | `si` per mostrare; `no` o vuoto per nascondere tutta la selezione | `si` per mostrare; `no` o vuoto per nascondere il brano |
 | K | BPM | Facoltativa: velocità mostrata sulla copertina del riquadro, es. `110–140` o `200+`; vuota = si vede il Sottotitolo | Lascia vuoto |
+| L | Link Spotify | Facoltativa: link della stessa selezione su Spotify (`https://open.spotify.com/playlist/...`). Sul riquadro compare il pulsante verde **Ascolta su Spotify**, che apre la playlist nell'app: chi ha Spotify la ascolta anche a schermo spento (senza pubblicità con Premium) | Lascia vuoto |
 
 ## Esempio minimo
 
@@ -31,7 +32,7 @@ Per aggiungere un brano, copia una riga `brano` e cambia selezione, titolo, arti
 
 Per cambiare il titolo di un riquadro modifica **Titolo selezione**, lasciando invariato il codice **Selezione**. Per nascondere un intero riquadro metti `no` sulla sua riga `selezione`: i suoi brani non compaiono, anche se attivi. Una selezione attiva senza brani mostra “Nuovi brani in arrivo”.
 
-Sono supportati link `youtube.com/watch?v=...`, `youtu.be/...`, Shorts e playlist `youtube.com/playlist?list=...`. Le ricerche `youtube.com/results?search_query=...` si aprono su YouTube. Il lettore si carica e avvia l'ascolto solo dopo la scelta di un brano. Al termine passa automaticamente alla voce successiva della stessa selezione, seguendo Ordine; all'ultima si ferma. Le playlist YouTube vengono completate prima di passare alla voce successiva. I link alle ricerche non entrano nella sequenza. Chiudere il lettore o cambiare filtro interrompe la sequenza. Se il browser blocca la riproduzione automatica, il lettore invita a premere Play. Spotify non è previsto da questo template.
+Sono supportati link `youtube.com/watch?v=...`, `youtu.be/...`, Shorts e playlist `youtube.com/playlist?list=...`. Le ricerche `youtube.com/results?search_query=...` si aprono su YouTube. Il lettore si carica e avvia l'ascolto solo dopo la scelta di un brano. Al termine passa automaticamente alla voce successiva della stessa selezione, seguendo Ordine; all'ultima si ferma. Le playlist YouTube vengono completate prima di passare alla voce successiva. I link alle ricerche non entrano nella sequenza. Chiudere il lettore o cambiare filtro interrompe la sequenza. Se il browser blocca la riproduzione automatica, il lettore invita a premere Play. Spotify non suona dentro la pagina: con la colonna **Link Spotify** la selezione si apre nell'app Spotify.
 
 ## Aggiornamento
 
