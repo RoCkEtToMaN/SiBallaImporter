@@ -377,7 +377,7 @@
       (ev._gratis ? '<span class="gratis">Gratis</span>' : "");
     var azioni = (ev._link ? '<a class="info" href="' + esc(ev._link) + '" target="_blank" rel="noopener">Info</a>' : "") +
       (ev.mappa ? '<a href="' + esc(ev.mappa) + '" target="_blank" rel="noopener">Mappa</a>' : "") +
-      (ev._inizio ? '<button type="button" class="calendario" data-ev="' + ev._id + '" title="Aggiungi al calendario">📅 Calendario</button>' : "") +
+      (ev._inizio ? '<button type="button" class="calendario" data-ev="' + ev._id + '" title="Aggiungi al tuo calendario">📅 Calendario</button>' : "") +
       '<button type="button" class="condividi" data-ev="' + ev._id + '" title="Condividi questo evento">↗ Condividi</button>';
     var dataHtml = '<div class="data">' + riquadro + "</div>";
     var dist = pos && ev._km != null ? ' · <span class="km">a ' + km(ev._km) + "</span>" : "";
@@ -488,24 +488,58 @@
     return GIORNI[i.getDay()] + " " + i.getDate() + " " + MESI[i.getMonth()] +
       (!ev._unGiorno && f ? " → " + f.getDate() + " " + MESI[f.getMonth()] : "") + (ev._ora ? ", ore " + ev._ora : "");
   }
-  // file .ics: con l'ora l'evento dura 3 ore (ora locale), altrimenti tutto il giorno (o più giorni per i workshop)
-  function scaricaIcs(ev) {
-    var i = ev._inizio, inizio, fine;
+  // orari dell'evento per il calendario: con l'ora dura 3 ore (ora locale), altrimenti giornata intera
+  // (o più giorni per i workshop; "b" è il giorno DOPO l'ultimo, come vogliono i calendari)
+  function orari(ev) {
+    var i = ev._inizio;
     if (ev._ora) {
       var hm = ev._ora.split(":"), a = new Date(i.getFullYear(), i.getMonth(), i.getDate(), +hm[0], +hm[1]);
-      var b = new Date(a.getTime() + 3 * 3600000);
-      var t = function (d) { return giornoIcs(d) + "T" + due(d.getHours()) + due(d.getMinutes()) + "00"; };
-      inizio = "DTSTART:" + t(a); fine = "DTEND:" + t(b);
-    } else {
-      var ultimo = ev._unGiorno ? i : (ev._fine || i);
-      var dopo = new Date(ultimo.getFullYear(), ultimo.getMonth(), ultimo.getDate() + 1);
-      inizio = "DTSTART;VALUE=DATE:" + giornoIcs(i); fine = "DTEND;VALUE=DATE:" + giornoIcs(dopo);
+      return { tutto: false, a: a, b: new Date(a.getTime() + 3 * 3600000) };
     }
+    var ultimo = ev._unGiorno ? i : (ev._fine || i);
+    return { tutto: true, a: i, b: new Date(ultimo.getFullYear(), ultimo.getMonth(), ultimo.getDate() + 1) };
+  }
+  function oraIcs(d) { return giornoIcs(d) + "T" + due(d.getHours()) + due(d.getMinutes()) + "00"; }
+  function noteCalendario(ev) { return [ev._chi, ev._link, "Su siBalla: " + linkEvento(ev)].filter(Boolean).join("\n"); }
+  // Google Calendar e Outlook: pagina già compilata, basta premere Salva (niente file da scaricare)
+  function linkGoogle(ev) {
+    var o = orari(ev), f = o.tutto ? giornoIcs : oraIcs;
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(ev._nome) +
+      "&dates=" + f(o.a) + "/" + f(o.b) + (o.tutto ? "" : "&ctz=Europe/Rome") +
+      "&details=" + encodeURIComponent(noteCalendario(ev)) + (ev._dove ? "&location=" + encodeURIComponent(ev._dove) : "");
+  }
+  function linkOutlook(ev) {
+    var o = orari(ev);
+    var iso = function (d) { return d.getFullYear() + "-" + due(d.getMonth() + 1) + "-" + due(d.getDate()) + (o.tutto ? "" : "T" + due(d.getHours()) + ":" + due(d.getMinutes()) + ":00"); };
+    return "https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent" +
+      "&subject=" + encodeURIComponent(ev._nome) + "&startdt=" + iso(o.a) + "&enddt=" + iso(o.b) + (o.tutto ? "&allday=true" : "") +
+      "&body=" + encodeURIComponent(noteCalendario(ev)) + (ev._dove ? "&location=" + encodeURIComponent(ev._dove) : "");
+  }
+  // scelta del calendario sotto la scheda: Google, Outlook, oppure il file .ics (iPhone, Mac e altri)
+  function sceltaCalendario(ev, bottone) {
+    var azioni = bottone.closest(".azioni"), corpo = azioni.parentNode;
+    var vecchio = corpo.querySelector(".pannello-cal");
+    [].forEach.call(corpo.querySelectorAll(".condividi-pannello"), function (x) { x.remove(); });
+    if (vecchio) return;
+    var p = document.createElement("div");
+    p.className = "condividi-pannello pannello-cal";
+    p.innerHTML = '<span>Aggiungi a:</span>' +
+      '<a target="_blank" rel="noopener" href="' + esc(linkGoogle(ev)) + '">Google Calendar</a>' +
+      '<a target="_blank" rel="noopener" href="' + esc(linkOutlook(ev)) + '">Outlook</a>' +
+      '<button type="button" class="ics">iPhone / altro</button>';
+    azioni.parentNode.insertBefore(p, azioni.nextSibling);
+    p.querySelector(".ics").addEventListener("click", function () { scaricaIcs(ev); });
+  }
+  // file .ics (calendario di iPhone e Mac, e qualsiasi altro calendario)
+  function scaricaIcs(ev) {
+    var i = ev._inizio, o = orari(ev), inizio, fine;
+    if (!o.tutto) { inizio = "DTSTART:" + oraIcs(o.a); fine = "DTEND:" + oraIcs(o.b); }
+    else { inizio = "DTSTART;VALUE=DATE:" + giornoIcs(o.a); fine = "DTEND;VALUE=DATE:" + giornoIcs(o.b); }
     var adesso = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
     var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//siBalla//Eventi swing//IT", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
       "UID:" + giornoIcs(i) + "-" + encodeURIComponent(ev._nome).slice(0, 60) + "@siballa", "DTSTAMP:" + adesso, inizio, fine,
       "SUMMARY:" + testoIcs(ev._nome), ev._dove ? "LOCATION:" + testoIcs(ev._dove) : "",
-      "DESCRIPTION:" + testoIcs([ev._chi, ev._link, "Su siBalla: " + linkEvento(ev)].filter(Boolean).join("\n")),
+      "DESCRIPTION:" + testoIcs(noteCalendario(ev)),
       ev._link ? "URL:" + ev._link : "", "END:VEVENT", "END:VCALENDAR"].filter(Boolean).join("\r\n");
     var url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
     var link = document.createElement("a");
@@ -522,7 +556,8 @@
       navigator.share({ title: ev._nome, text: testo, url: url }).catch(function () {});
       return;
     }
-    var azioni = bottone.closest(".azioni"), vecchio = azioni.parentNode.querySelector(".condividi-pannello");
+    var azioni = bottone.closest(".azioni"), vecchio = azioni.parentNode.querySelector(".condividi-pannello:not(.pannello-cal)");
+    [].forEach.call(azioni.parentNode.querySelectorAll(".pannello-cal"), function (x) { x.remove(); });
     if (vecchio) { vecchio.remove(); return; }
     var p = document.createElement("div");
     p.className = "condividi-pannello";
@@ -541,7 +576,7 @@
     if (!b) return;
     var ev = EVENTI_PER_ID[+b.getAttribute("data-ev")];
     if (!ev) return;
-    if (b.classList.contains("calendario")) scaricaIcs(ev); else condividi(ev, b);
+    if (b.classList.contains("calendario")) sceltaCalendario(ev, b); else condividi(ev, b);
   });
 
   // immagine che non si carica: tolgo la parte immagine e rimetto la data accanto al testo
