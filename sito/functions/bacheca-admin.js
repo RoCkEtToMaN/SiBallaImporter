@@ -3,7 +3,7 @@ import { esc, uguali, dataSheet } from "../lib/clandestini.js";
 import { preparaBacheca, CATEGORIE, SOGLIA_SEGNALAZIONI, avvisaAutore } from "../lib/bacheca.js";
 
 // GET  /bacheca-admin?chiave=... : pagina nascosta con gli annunci della bacheca, da approvare o rifiutare.
-// POST /bacheca-admin            : pulsanti Approva / Rifiuta / Togli / Rimetti in attesa.
+// POST /bacheca-admin            : pulsanti Approva / Rifiuta / Togli / Rimetti in attesa / Elimina.
 // Stessa chiave delle statistiche (secret STATS_KEY); senza la chiave giusta risponde 404.
 
 const nonTrovata = () => new Response("Not found", { status: 404 });
@@ -29,6 +29,14 @@ export async function onRequestPost({ request, env }) {
       } catch (e) { console.log("avviso all'autore non inviato: " + e); }
     }
   }
+  // cancellazione definitiva dell'annuncio, con la sua discussione e le segnalazioni
+  else if (f.get("azione") === "elimina" && id) {
+    await env.VISITE.batch([
+      env.VISITE.prepare(`DELETE FROM segnalazioni WHERE messaggio IN (SELECT id FROM messaggi WHERE annuncio = ?1)`).bind(id),
+      env.VISITE.prepare(`DELETE FROM messaggi WHERE annuncio = ?1`).bind(id),
+      env.VISITE.prepare(`DELETE FROM annunci WHERE id = ?1`).bind(id),
+    ]);
+  }
   // messaggi delle discussioni
   else if (f.get("azione") === "cancella_msg" && id) {
     await env.VISITE.prepare(`DELETE FROM messaggi WHERE id = ?1`).bind(id).run();
@@ -53,8 +61,10 @@ export async function onRequestGet({ request, env }) {
     await preparaBacheca(env.VISITE);
     const { results } = await env.VISITE.prepare(
       `SELECT * FROM annunci WHERE scade >= ?1 ORDER BY id DESC LIMIT 300`).bind(giornoRoma()).all();
+    const CONFERME = { elimina: "Eliminare per sempre questo annuncio e la sua discussione? Non si può annullare.",
+      cancella_msg: "Cancellare per sempre questo messaggio?" };
     const pulsante = (r, azione, testo, cls = "") =>
-      `<form method="post"><input type="hidden" name="chiave" value="${esc(chiave)}"><input type="hidden" name="id" value="${r.id}">` +
+      `<form method="post"${CONFERME[azione] ? ` onsubmit="return confirm('${CONFERME[azione].replace(/'/g, "\'")}')"` : ""}><input type="hidden" name="chiave" value="${esc(chiave)}"><input type="hidden" name="id" value="${r.id}">` +
       `<button name="azione" value="${azione}" class="${cls}">${testo}</button></form>`;
     const scheda = (r) => `<article>
       <div class="quando">${esc(CATEGORIE[r.categoria]?.[r.tipo] || r.categoria)}${r.giorno ? " · " + esc(dataSheet(r.giorno)) : ""}</div>
@@ -66,7 +76,8 @@ export async function onRequestGet({ request, env }) {
       <div class="m piccolo">Inviato il ${esc(new Date(r.creato).toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}
         · scade il ${esc(dataSheet(r.scade))} · ✉️ ${r.email ? esc(r.email) : "esito non registrato"}</div>
       <div class="azioni">${r.stato === "attesa" ? pulsante(r, "approva", "✓ Approva", "si") + pulsante(r, "rifiuta", "✕ Rifiuta")
-        : r.stato === "ok" ? pulsante(r, "togli", "Togli dalla bacheca") : pulsante(r, "riapri", "Rimetti in attesa")}</div>
+        : r.stato === "ok" ? pulsante(r, "togli", "Togli dalla bacheca") : pulsante(r, "riapri", "Rimetti in attesa")}
+        ${pulsante(r, "elimina", "🗑 Elimina", "no")}</div>
     </article>`;
     const gruppo = (titolo, righe, vuoto) =>
       `<section><h2>${titolo} <span class="n">${righe.length}</span></h2>${righe.length ? righe.map(scheda).join("") : `<p class="vuoto">${vuoto}</p>`}</section>`;
@@ -106,6 +117,7 @@ article{background:var(--surface);border-radius:14px;padding:12px 14px;margin:10
 article.msg{padding:10px 14px}article.msg.nascosto{opacity:.75;border:1px dashed #FF9F43}.azioni{display:flex;gap:8px;margin-top:10px}form{margin:0}
 button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:var(--surface-2);color:var(--text);cursor:pointer}
 button.si{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}.azioni{flex-wrap:wrap}
 </style></head><body><main>
 <h1>Bacheca <span>siBalla</span></h1>
 <p class="sub">Annunci inviati dagli utenti, non ancora scaduti. Quelli approvati compaiono subito nella pagina Bacheca (entro un minuto).
