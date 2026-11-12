@@ -76,11 +76,24 @@
     if (a) { e.preventDefault(); chiudi(); }
   });
 
-  // ---- novità della bacheca: pallino sul ☰, "N nuovi" accanto alla voce, invito nella home ----
-  // "nuovo" = annuncio con id più alto dell'ultimo visto aprendo /bacheca (ricordato solo in questo browser).
-  var VISTO = "siballa-bacheca-visto", INVITO_CHIUSO = "siballa-bacheca-invito-chiuso";
+  // ---- novità della bacheca: pallino sul ☰, "N nuovi" accanto alla voce, invito nella home, riga sulle schede ----
+  // Ogni segnale è evidenziato (giallo) finché non ci clicchi una volta, poi torna normale; si riaccende
+  // solo quando arriva un annuncio nuovo. Tutto ricordato solo in questo browser (localStorage), per id dell'annuncio:
+  //   VISTO          aprendo /bacheca (o cliccando la voce del menu)  -> toglie "N nuovi" dal menu
+  //   MENU_APERTO    aprendo il menu ☰                                 -> toglie il pallino dal ☰
+  //   INVITO_VISTO   cliccando il link dell'invito nella home          -> invito non più giallo
+  //   INVITO_CHIUSO  cliccando ✕ sull'invito                           -> invito nascosto
+  //   EVENTI         cliccando la riga su una scheda evento            -> quella riga non più gialla
+  var VISTO = "siballa-bacheca-visto", MENU_APERTO = "siballa-bacheca-menu", INVITO_VISTO = "siballa-bacheca-invito-visto",
+    INVITO_CHIUSO = "siballa-bacheca-invito-chiuso", EVENTI = "siballa-bacheca-eventi";
   function leggi(k) { try { return +localStorage.getItem(k) || 0; } catch (e) { return 0; } }
   function scrivi(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
+  function leggiEventi() { try { return JSON.parse(localStorage.getItem(EVENTI) || "{}") || {}; } catch (e) { return {}; } }
+  function scriviEvento(k, id) {
+    var m = leggiEventi();
+    m[k] = id;
+    try { localStorage.setItem(EVENTI, JSON.stringify(m)); } catch (e) {}
+  }
   function quanti(n, uno, tanti) { return n + " " + (n === 1 ? uno : tanti); }
   function norm(s) { return String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 
@@ -101,12 +114,12 @@
         if (art.querySelector(".bacheca-ev")) return;
         var h = art.querySelector("h3"), corpo = art.querySelector(".corpo");
         if (!h || !corpo) return;
-        var titolo = norm(h.textContent), conta = {}, nomeEvento = "";
+        var titolo = norm(h.textContent), conta = {}, nomeEvento = "", ultimoEv = 0;
         conEvento.forEach(function (a) {
           var e = norm(a.evento);
           if (e === titolo || titolo.indexOf(e) >= 0 || (e.indexOf(titolo) >= 0 && titolo.length >= 5)) {
             var k = a.categoria + "|" + a.tipo;
-            if (FRASI[k]) { conta[k] = (conta[k] || 0) + 1; nomeEvento = nomeEvento || a.evento; }
+            if (FRASI[k]) { conta[k] = (conta[k] || 0) + 1; nomeEvento = nomeEvento || a.evento; ultimoEv = Math.max(ultimoEv, a.id || 0); }
           }
         });
         var parti = Object.keys(FRASI).filter(function (k) { return conta[k]; }).map(function (k) {
@@ -114,9 +127,10 @@
         });
         if (!parti.length) return;
         var link = document.createElement("a");
-        link.className = "bacheca-ev";
+        link.className = "bacheca-ev" + (ultimoEv > (leggiEventi()[titolo] || 0) ? " evid" : "");
         link.href = "/bacheca?q=" + encodeURIComponent(nomeEvento);
         link.textContent = parti.join(" · ") + " →";
+        link.addEventListener("click", function () { scriviEvento(titolo, ultimoEv); link.classList.remove("evid"); });
         corpo.appendChild(link);
       });
     }
@@ -136,9 +150,20 @@
       // accanto alla voce: "N nuovi" in giallo se ci sono annunci non visti, altrimenti il totale in grigio
       var voce = pan.querySelector('a[href="/bacheca"]');
       if (nuovi) {
-        btn.classList.add("novita");
-        btn.setAttribute("aria-label", "Menu: " + quanti(nuovi, "annuncio nuovo", "annunci nuovi") + " in bacheca");
-        if (voce) voce.insertAdjacentHTML("beforeend", '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>");
+        // pallino sul ☰ finché non apri il menu una volta
+        if (ultimo > leggi(MENU_APERTO)) {
+          btn.classList.add("novita");
+          btn.setAttribute("aria-label", "Menu: " + quanti(nuovi, "annuncio nuovo", "annunci nuovi") + " in bacheca");
+          btn.addEventListener("click", function () {
+            scrivi(MENU_APERTO, ultimo);
+            btn.classList.remove("novita");
+            btn.removeAttribute("aria-label");
+          });
+        }
+        if (voce) {
+          voce.insertAdjacentHTML("beforeend", '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>");
+          voce.addEventListener("click", function () { scrivi(VISTO, ultimo); });
+        }
       } else if (voce && annunci.length) {
         voce.insertAdjacentHTML("beforeend", '<span class="totale" title="Annunci in bacheca">' + annunci.length + "</span>");
       }
@@ -147,12 +172,19 @@
       var bar = qui === "/" && document.querySelector(".bar");
       if (!bar || !annunci.length || leggi(INVITO_CHIUSO) >= ultimo) return;
       var inv = document.createElement("div");
-      inv.className = "invito-bacheca";
+      // giallo finché non clicchi il link una volta (o finché non arrivano annunci nuovi)
+      inv.className = "invito-bacheca" + (ultimo > leggi(INVITO_VISTO) ? " evid" : "");
       inv.innerHTML = '<span class="pin" aria-hidden="true">📌</span><span class="testo">Cerchi un passaggio o un partner per un festival? ' +
         '<a href="/bacheca">' + quanti(annunci.length, "annuncio", "annunci") + " in bacheca →</a></span>" +
-        (nuovi ? '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>" : "") +
+        (nuovi && ultimo > leggi(INVITO_VISTO) ? '<span class="nuovo">' + quanti(nuovi, "nuovo", "nuovi") + "</span>" : "") +
         '<button type="button" class="chiudi-invito" aria-label="Nascondi">✕</button>';
       bar.parentNode.insertBefore(inv, bar.nextSibling);
+      inv.querySelector("a").addEventListener("click", function () {
+        scrivi(INVITO_VISTO, ultimo);
+        inv.classList.remove("evid");
+        var n = inv.querySelector(".nuovo");
+        if (n) n.remove();
+      });
       inv.querySelector(".chiudi-invito").addEventListener("click", function () {
         scrivi(INVITO_CHIUSO, ultimo);
         inv.remove();
