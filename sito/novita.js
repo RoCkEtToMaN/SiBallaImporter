@@ -5,6 +5,21 @@
 (function () {
   var NOVITA = [
     {
+      versione: "2026.11.13",
+      data: "Novembre 2026",
+      titolo: "Condividi la serata giusta",
+      intro: "Il link che mandi agli amici ora porta proprio alla data che hai scelto.",
+      voci: [
+        {
+          tipo: "Migliorato", titolo: "↗ Condividi",
+          punti: [
+            "<b>Solo l'evento che condividi:</b> chi apre il link vede quella serata, non tutte le date con lo stesso nome.",
+            "<b>Mostra tutte le date:</b> se vuole, con un tocco vede anche le altre date dello stesso evento."
+          ]
+        }
+      ]
+    },
+    {
       versione: "2026.11.12",
       data: "Novembre 2026",
       titolo: "Bacheca, Clandestini e mappa",
