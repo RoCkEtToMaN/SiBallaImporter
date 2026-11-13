@@ -61,8 +61,8 @@
         "lng": 10.9298224,
         "geocodedAddress": "via Cason Forte Lugagnano",
         "verified": true,
-        "source": "sheet",
-        "verifiedOn": "2026-10-30",
+        "source": "manuale",
+        "verifiedOn": "2026-11-13",
         "notes": null
       }
     }
@@ -3136,14 +3136,17 @@
         "country": "Italia",
         "eventCount": null,
         "venueName": null,
-        "address": null,
+        "address": "Via della Canalina 19",
         "lat": 44.67784881591797,
         "lng": 10.611430168151855,
-        "geocodedAddress": null,
-        "verified": false,
-        "source": "iniziale",
-        "verifiedOn": null,
-        "notes": null
+        "geocodedAddress": "Via della Canalina 19",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-11-13",
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -8124,6 +8127,24 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      },
+      "balboa studio day con elena alberto": {
+        "organizer": null,
+        "city": "Genova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via Eugenio Ruspoli 5A, Genova",
+        "lat": 44.39493942260742,
+        "lng": 8.910759925842285,
+        "geocodedAddress": "Via Eugenio Ruspoli 5A, Genova",
+        "verified": true,
+        "source": "manuale",
+        "verifiedOn": "2026-11-13",
         "notes": null,
         "stili": [
           "Balboa"
@@ -13198,6 +13219,25 @@
         "stili": [
           "Blues"
         ]
+      },
+      "newton family in slow town talk class and social dance": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "Via San Pio V 15 bis",
+        "lat": 45.060089111328125,
+        "lng": 7.68366003036499,
+        "geocodedAddress": "Via San Pio V 15 bis",
+        "verified": true,
+        "source": "manuale",
+        "verifiedOn": "2026-11-13",
+        "notes": null,
+        "stili": [
+          "Blues",
+          "Lindy"
+        ]
       }
     }
   },
@@ -16385,14 +16425,17 @@
         "country": "Italia",
         "eventCount": null,
         "venueName": null,
-        "address": null,
+        "address": "Via Parma 29/B",
         "lat": 45.078369140625,
         "lng": 7.693280220031738,
-        "geocodedAddress": null,
-        "verified": false,
-        "source": "iniziale",
-        "verifiedOn": null,
-        "notes": null
+        "geocodedAddress": "Via Parma 29/B",
+        "verified": true,
+        "source": "manuale",
+        "verifiedOn": "2026-11-13",
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
