@@ -163,8 +163,10 @@ internal static class ImportRunner
         var radiusEmail = opzioni.RadiusEmail ?? opzioni.Radius;
         bool NelPeriodo(Event x) => DateTime.Today <= x.DateStart && x.DateStart <= DateTime.Today.AddDays(opzioni.Giorni);
 
-        // Sheet: le righe "da verificare" (non ancora controllate da te) vanno nella sezione a parte, non nel bollettino
+        // Sheet: le righe "da verificare" (non ancora controllate da te) vanno nella sezione a parte, non nel bollettino;
+        // le righe "no" (scartate da te) non compaiono
         var righeSheet = sheetEvents
+            .Where(x => !ImportData.Scartato(x))
             .Where(NelPeriodo)
             .Where(x => EventFilter.IsWithinEmailRadius(x, radiusEmail))
             .ToList();
@@ -222,13 +224,18 @@ internal static class ImportRunner
         await EventImages.ApplyToSheetEventsAsync(sheetEvents, appWriteService);
 
         // il DB è la copia dello Sheet: sostituisco tutto, così arrivano anche modifiche e cancellazioni.
-        // Le righe "da verificare" (aggiunte dal programma, indirizzo non controllato) restano fuori finché non scrivi "ok".
+        // Le righe "da verificare" (aggiunte dal programma, indirizzo non controllato) restano fuori finché non scrivi "ok",
+        // le righe "no" (scartate da te) sempre.
         // Con lo Sheet vuoto (lettura fallita) non tocco la collezione per non svuotarla
         List<Event> Confermati(List<Event> eventi)
         {
-            var ok = eventi.Where(x => x.LuogoVerificato != ImportData.VerifiedPending).ToList();
-            if (ok.Count < eventi.Count)
-                Console.WriteLine($"⏳ {eventi.Count - ok.Count} righe '{ImportData.VerifiedPending}' non vanno sul DB");
+            int inAttesa = eventi.Count(x => x.LuogoVerificato == ImportData.VerifiedPending);
+            int scartati = eventi.Count(ImportData.Scartato);
+            var ok = eventi.Where(x => x.LuogoVerificato != ImportData.VerifiedPending && !ImportData.Scartato(x)).ToList();
+            if (inAttesa > 0)
+                Console.WriteLine($"⏳ {inAttesa} righe '{ImportData.VerifiedPending}' non vanno sul DB");
+            if (scartati > 0)
+                Console.WriteLine($"🚫 {scartati} righe '{ImportData.VerifiedNo}' (scartate) non vanno sul DB");
             return ok;
         }
         if (eventiSheet.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)

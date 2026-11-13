@@ -44,6 +44,7 @@ COL_LUOGO = 5  # F: "Paese, Città, Indirizzo(lat;lng)"
 COLONNE_ESCLUSE = {"lindy", "blues", "boogie", "balboa"}
 VERIFIED_HEADER = "luogo verificato"
 VERIFIED_PENDING = "da verificare"
+VERIFIED_NO = "no"  # evento scartato a mano: resta nello Sheet ma non si pubblica
 COORDINATE = re.compile(r"\(\s*(-?\d+(?:[.,]\d+)?)\s*;\s*(-?\d+(?:[.,]\d+)?)\s*\)")
 EPOCA_SHEETS = date(1899, 12, 30)
 IMAGE_HEADER = "immagine"
@@ -374,7 +375,7 @@ def main() -> None:
             if fine is None or fine < oggi:
                 scartate_passate += 1
                 continue
-            if col_verificato is not None and cella(rf, col_verificato).lower() == VERIFIED_PENDING:
+            if col_verificato is not None and cella(rf, col_verificato).lower() in (VERIFIED_PENDING, VERIFIED_NO):
                 scartate_verifica += 1
                 continue
 

@@ -86,7 +86,7 @@ namespace SiBallaImportingData.Service
                 // senza la colonna non posso segnarla "gemini": al giro dopo sembrerebbe un indirizzo scritto da te
                 .Where(e => e.SheetVerifiedColumn is not null)
                 // eventi che Gemini ha già messo in dubbio: prima decidi tu se tenerli
-                .Where(e => e.LuogoVerificato != ImportData.VerifiedPending)
+                .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && !ImportData.Scartato(e))
                 .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
                 .Where(e => !soloSito || !string.IsNullOrWhiteSpace(e.EventDetail?.WebSite))
                 .GroupBy(e => KnownVenueStore.MakeKey(e.Organizer!, e.City!) + "|" + KnownVenueStore.NormalizeTitle(e.PartyName))

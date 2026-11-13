@@ -54,7 +54,9 @@ motivo, poi:
 
 - se l'evento va bene, controlla indirizzo e coordinate e scrivi `ok` (o svuota la cella): al
   caricamento successivo su Appwrite arriva nell'app, e il giro dopo toglie da solo colore e nota;
-- se non ti interessa, cancella la riga.
+- se non ti interessa, scrivi `no`: la riga resta nello Sheet ma non va da nessuna parte (app, sito,
+  email, dizionario) e il giro dopo perde il colore. Meglio che cancellarla: una riga cancellata,
+  se l'evento è ancora online, al giro dopo viene riaggiunta come `da verificare`.
 
 Il colore lo toglie il programma a ogni giro, anche quando l'aggiunta allo Sheet è spenta. Tocca
 solo le righe con quel colore preciso: gli altri colori che usi nello Sheet restano.
@@ -69,6 +71,7 @@ Valori di **Luogo verificato**, in sintesi:
 | `nuovo` | il programma, evento swing per Gemini | sì | no, finché non scrivi `ok` |
 | `gemini` | il programma, indirizzo trovato da Gemini (vedi sotto) | sì | no, finché non scrivi `ok` |
 | `da verificare` | il programma, evento da controllare | **no** | no |
+| `no` | tu, evento scartato (niente app, sito né email) | **no** | no |
 
 Una riga `nuovo` senza indirizzo può prendere quello del dizionario (se lo stesso evento in un'altra
 riga ha un indirizzo verificato): in quel caso diventa `auto`.
