@@ -27,6 +27,28 @@
     border: 1px solid var(--border); background: transparent; color: var(--text); }
   .contenuto .azioni button:hover { border-color: var(--accent); }
   .esito-cond { font-size: 13px; color: var(--muted); align-self: center; }
+  /* sondaggio "Quali rubriche vorresti?" */
+  .sondaggio { max-width: 760px; margin-top: 24px; }
+  .sondaggio h3 { font-size: 19px; }
+  .sondaggio .sub-s { margin: 4px 0 12px; font-size: 14px; color: var(--muted); }
+  .opz { display: grid; gap: 8px; }
+  .opz label { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
+  .opz label:hover { border-color: rgba(255,212,0,.5); }
+  .opz input { accent-color: var(--accent); width: 18px; height: 18px; margin: 2px 0 0; flex: none; }
+  .opz input:checked + span b { color: var(--accent); }
+  .opz small { display: block; color: var(--muted); font-size: 13px; }
+  .opz .barra { position: relative; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+  .opz .barra i { position: absolute; inset: 0 auto 0 0; background: var(--accent); opacity: .8; }
+  .opz .perc { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .sondaggio .proposta { width: 100%; margin-top: 10px; font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; }
+  .sondaggio .proposta:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .sondaggio .invia { font: inherit; font-weight: 700; font-size: 14px; padding: 9px 16px; border-radius: 10px; border: 0; cursor: pointer;
+    background: var(--accent); color: var(--on-accent); }
+  .sondaggio .invia[disabled] { opacity: .6; cursor: default; }
+  .esito-s { font-size: 13px; color: var(--muted); align-self: center; }
+  .esito-s.errore { color: #FF6B6B; }
+  .trappola { position: absolute; left: -9999px; }
 </style>
 </head>
 <body>
@@ -44,6 +66,14 @@
     <h2 class="titolo-sez">Rubriche</h2>
     <p class="intro">La mossa della settimana, le giornate speciali della scena swing e altre storie. I più recenti in alto.</p>
     <div id="contenuto"><p class="vuoto">Caricamento…</p></div>
+    <form class="card sondaggio" id="sondaggio" hidden>
+      <h3>Quali rubriche vorresti?</h3>
+      <p class="sub-s">Scegline quante vuoi: apriamo prima quelle più votate. Puoi cambiare il voto quando vuoi.</p>
+      <div class="opz" id="opz"></div>
+      <input class="proposta" id="proposta" maxlength="200" placeholder="Altra idea? Scrivila qui (facoltativo)" aria-label="Proponi una rubrica">
+      <input class="trappola" name="sito_web" id="sitoWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="azioni"><button type="submit" class="invia" id="inviaS">Vota</button><span class="esito-s" id="esitoS" role="status"></span></div>
+    </form>
   </main>
 </div>
 <script>
@@ -119,6 +149,65 @@
       if (el) { el.classList.add("evidenziato"); el.scrollIntoView({ block: "start" }); }
     })
     .catch(function () { box.innerHTML = '<p class="vuoto">Impossibile caricare le rubriche, riprova più tardi.</p>'; });
+})();
+
+// Sondaggio "Quali rubriche vorresti?" (functions/api/sondaggio.js). Il browser ricorda un codice segreto
+// (lo stesso della bacheca): serve solo a riconoscere il proprio voto per poterlo cambiare.
+(function () {
+  var form = document.getElementById("sondaggio"), opzEl = document.getElementById("opz");
+  var esito = document.getElementById("esitoS"), btn = document.getElementById("inviaS"), prop = document.getElementById("proposta");
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  var token = "";
+  try { token = localStorage.getItem("siballa-token") || ""; } catch (e) {}
+  if (!/^[A-Za-z0-9-]{20,100}$/.test(token)) {
+    token = crypto.randomUUID ? crypto.randomUUID() + "-" + crypto.randomUUID()
+      : Array.from(crypto.getRandomValues(new Uint8Array(24)), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+    try { localStorage.setItem("siballa-token", token); } catch (e) {}
+  }
+  var opzioni = [];
+
+  // risultati visibili solo a chi ha già votato (così il voto non è influenzato)
+  function disegna(d) {
+    var mio = d.mio, scelte = mio ? mio.scelte : [];
+    opzEl.innerHTML = opzioni.map(function (o) {
+      var n = (d.conta && d.conta[o.k]) || 0, p = d.totale ? Math.round(n / d.totale * 100) : 0;
+      return '<label><input type="checkbox" value="' + esc(o.k) + '"' + (scelte.indexOf(o.k) >= 0 ? " checked" : "") + ">" +
+        '<span style="flex:1;min-width:0"><b>' + esc(o.t) + "</b><small>" + esc(o.d) + "</small>" +
+        (mio ? '<span class="barra"><i style="width:' + p + '%"></i></span>' : "") + "</span>" +
+        (mio ? '<span class="perc">' + p + "%</span>" : "") + "</label>";
+    }).join("");
+    if (mio && mio.proposta && !prop.value) prop.value = mio.proposta;
+    btn.textContent = mio ? "Cambia voto" : "Vota";
+    if (mio) esito.textContent = d.totale === 1 ? "Hai votato solo tu, per ora." : "Hanno votato " + d.totale + " persone.";
+    esito.className = "esito-s";
+  }
+
+  fetch("/api/sondaggio?token=" + encodeURIComponent(token), { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      if (!d.attivo || !d.opzioni) return;
+      opzioni = d.opzioni;
+      disegna(d);
+      form.hidden = false;
+    })
+    .catch(function () {});
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var scelte = Array.prototype.map.call(opzEl.querySelectorAll("input:checked"), function (i) { return i.value; });
+    if (!scelte.length && !prop.value.trim()) { esito.textContent = "Scegli almeno una rubrica o scrivi la tua idea."; esito.className = "esito-s errore"; return; }
+    btn.disabled = true; esito.textContent = "Invio…"; esito.className = "esito-s";
+    fetch("/api/sondaggio", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: token, scelte: scelte, proposta: prop.value, sito_web: document.getElementById("sitoWeb").value }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.errore || "Errore " + r.status); return j; }); })
+      .then(function (d) { disegna(d); esito.textContent = "Grazie! " + esito.textContent; })
+      .catch(function (err) { esito.textContent = err.message || "Errore, riprova."; esito.className = "esito-s errore"; })
+      .then(function () { btn.disabled = false; });
+  });
 })();
 </script>
 <script src="menu.js"></script>
