@@ -159,12 +159,13 @@ namespace SiBallaImportingData.Utils
                                     LuogoVerificato = verifiedCol is int vc && row.Count > vc ? row[vc]?.ToString()?.Trim().ToLowerInvariant() : null,
                                     DateStart = Convert.ToDateTime(row[0]),
                                     DateFinish = Convert.ToDateTime(row[1]),
-                                    PartyName = row[4].ToString(),
+                                    // righe vecchie scritte con entità HTML ("&amp;"): in chiaro per l'app e per il confronto con gli eventi online
+                                    PartyName = WebUtility.HtmlDecode(row[4].ToString()),
                                     //MonthYear = Month + " " + Convert.ToDateTime(row[0]).Year.ToString(),
-                                    NameAndData = Convert.ToDateTime(row[0]).Date.Day.ToString() + "th: " + row[4].ToString(),// + " " + Convert.ToDateTime(row[0]).Date.ToString("dd/MM/YYYY"),
+                                    NameAndData = Convert.ToDateTime(row[0]).Date.Day.ToString() + "th: " + WebUtility.HtmlDecode(row[4].ToString()),// + " " + Convert.ToDateTime(row[0]).Date.ToString("dd/MM/YYYY"),
                                     EventDetail = new EventDetail
                                     {
-                                        PartyName = row[4].ToString(),
+                                        PartyName = WebUtility.HtmlDecode(row[4].ToString()),
                                         Location = loc.Address,
                                         Address = loc.Address,
                                         City = loc.City,
@@ -176,7 +177,7 @@ namespace SiBallaImportingData.Utils
                                         HasImage = imageCol is int ic && row.Count > ic && (IsYes(row[ic]?.ToString()) || IsLogo(row[ic]?.ToString()))
                                     },
                                     Organizer = (row != null && row.Count > 6 && row[6] != null)
-                                        ? row[6].ToString()
+                                        ? WebUtility.HtmlDecode(row[6].ToString())
                                         : string.Empty,
                                     City = row[5].ToString().Split(",")[1].Split('(')[0].Trim(),
                                     Country = row[5].ToString().Split(',')[0].Trim(),
