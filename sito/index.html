@@ -119,6 +119,8 @@
   .azioni a.info { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
   .azioni a:hover { border-color: var(--accent); }
   .stasera { margin: 24px 0 -8px; color: var(--muted); font-size: 14px; }
+  .solo-data { margin: 16px 0 -8px; color: var(--muted); font-size: 14px; }
+  .solo-data button { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
   .km { color: var(--accent); font-weight: 600; white-space: nowrap; }
   /* vicino a me */
   .vicino { font: inherit; font-weight: 600; color: var(--text); background: var(--surface); border: 1px solid var(--border);
@@ -326,6 +328,8 @@
 <script>
 (function () {
   var dati = null, attivo = 0, scelti = {};
+  // /?q=nome&d=AAAAMMGG (link condiviso): mostra solo l'evento di quel giorno, non tutte le date con lo stesso nome
+  var soloGiorno = "";
   var pos = null, raggioKm = 50;   // "Vicino a me": posizione dell'utente (solo in memoria) e distanza massima
   var $ = function (id) { return document.getElementById(id); };
   var GIORNI = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
@@ -471,6 +475,7 @@
       if (attivi.length && !ev._stili.some(function (s) { return scelti[s]; })) return false;
       if (pos && raggioKm && (ev._km == null || ev._km > raggioKm)) return false;
       if (regioneScelta && ev.regione !== regioneScelta) return false;
+      if (soloGiorno && (!ev._inizio || giornoIcs(ev._inizio) !== soloGiorno)) return false;
       return !q || ev._testo.indexOf(q) >= 0;
     });
     // vicino a me: dentro ogni sezione prima i più vicini (l'ordine delle sezioni resta per data)
@@ -498,6 +503,7 @@
     var nienteStasera = foglio._serate && eventi.length && !gruppi["1"]
       ? '<p class="stasera">Stasera ' + (foglio._clandestini ? "nessun clandestino" : "nessuna serata") + (pos && raggioKm ? " entro " + raggioKm + " km" : filtri ? " con questi filtri" : "") +
         ": ecco le prossime.</p>" : "";
+    if (soloGiorno) nienteStasera = '<p class="solo-data">Stai vedendo solo la data condivisa. <button type="button" id="tutteDate">Mostra tutte le date</button></p>';
     $("lista").innerHTML = nienteStasera + ordine.map(function (k) {
       var g = gruppi[k];
       return '<section class="sezione' + (g.top ? " top" : "") + '"><h2>' + esc(g.t) +
@@ -537,7 +543,10 @@
     tabs(); disegna();
     if (dati.fogli[attivo]._clandestini) aggiornaClandestini();
   });
-  $("q").addEventListener("input", disegna);
+  $("q").addEventListener("input", function () { soloGiorno = ""; disegna(); });
+  $("lista").addEventListener("click", function (e) {
+    if (e.target.id === "tutteDate") { soloGiorno = ""; disegna(); }
+  });
   $("stili").addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b) return;
@@ -670,7 +679,9 @@
   function giornoIcs(d) { return d.getFullYear() + due(d.getMonth() + 1) + due(d.getDate()); }
   // testo per il file .ics: \ , ; e a capo vanno "protetti"
   function testoIcs(s) { return String(s || "").replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\r?\n/g, "\\n"); }
-  function linkEvento(ev) { return location.origin + "/?q=" + encodeURIComponent(ev._nome); }
+  function linkEvento(ev) {
+    return location.origin + "/?q=" + encodeURIComponent(ev._nome) + (ev._inizio ? "&d=" + giornoIcs(ev._inizio) : "");
+  }
   function quando(ev) {
     var i = ev._inizio, f = ev._fine;
     if (!i) return "";
@@ -1003,7 +1014,20 @@
       var t = new Date(d.aggiornato);
       $("agg").textContent = "Aggiornato il " + t.toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" });
       // /?q=testo: ricerca già compilata (link "prossimi eventi" dalle pagine Scuole e Artisti)
-      try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("q").value = q0; } catch (e) {}
+      try {
+        var qs = new URLSearchParams(location.search), q0 = qs.get("q"), d0 = qs.get("d");
+        if (q0) $("q").value = q0;
+        if (q0 && /^\d{8}$/.test(d0 || "")) {
+          soloGiorno = d0;
+          // apro la scheda (Serate, Workshop…) che contiene l'evento condiviso
+          var cerca = q0.trim().toLowerCase();
+          d.fogli.some(function (f, k) {
+            var c = f.eventi.some(function (ev) { return ev._inizio && giornoIcs(ev._inizio) === d0 && ev._testo.indexOf(cerca) >= 0; });
+            if (c) attivo = k;
+            return c;
+          });
+        }
+      } catch (e) {}
       tabs(); disegna();
     })
     .catch(function () { $("agg").textContent = "Impossibile caricare gli eventi, riprova più tardi."; });
