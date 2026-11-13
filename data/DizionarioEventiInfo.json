@@ -7988,7 +7988,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "lindy hop weekend with fred alexandra": {
@@ -8021,6 +8024,24 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-08",
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "lindy hop workshop with fred alexandra in antwerp": {
+        "organizer": null,
+        "city": "Antwerp",
+        "country": "Belgium",
+        "eventCount": null,
+        "venueName": null,
+        "address": "‘t Spant - Boomsesteenweg 335",
+        "lat": 51.22047,
+        "lng": 4.40026,
+        "geocodedAddress": null,
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-11-13",
+        "notes": null,
         "stili": [
           "Lindy"
         ]
