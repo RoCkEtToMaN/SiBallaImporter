@@ -16,6 +16,12 @@
             "<b>Solo l'evento che condividi:</b> chi apre il link vede quella serata, non tutte le date con lo stesso nome.",
             "<b>Mostra tutte le date:</b> se vuole, con un tocco vede anche le altre date dello stesso evento."
           ]
+        },
+        {
+          tipo: "Nuovo", titolo: "Bacheca",
+          punti: [
+            "<b>↗ Condividi su ogni annuncio:</b> mandalo a chi potrebbe essere interessato, su WhatsApp arriva con l'anteprima dell'annuncio."
+          ]
         }
       ]
     },

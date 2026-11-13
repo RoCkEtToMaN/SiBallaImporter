@@ -1,4 +1,5 @@
 import { preparaTabella, giornoRoma } from "../lib/visite.js";
+import { OPZIONI, risultati } from "../lib/sondaggio.js";
 
 // GET /statistiche?chiave=...&giorni=7|30|365|0 : pagina nascosta con le visite per regione e città.
 // Senza la chiave giusta risponde 404, come se la pagina non esistesse.
@@ -116,6 +117,8 @@ export async function onRequestGet({ request, env }) {
          FROM statistiche WHERE giorno >= ?1 GROUP BY mese ORDER BY mese DESC LIMIT 24`),
       env.VISITE.prepare(`SELECT MIN(giorno) AS g FROM statistiche`).all().then((r) => r.results),
     ]);
+    // sondaggio "Quali rubriche vorresti?" (pagina /rubriche): non dipende dal periodo scelto
+    const sond = await risultati(env.VISITE, true);
     const tot = totale[0]?.n || 0;
     const vis = Object.fromEntries(visitatori.map((r) => [r.chiave, r.n]));
     // media sui giorni del periodo da quando esistono questi dati (oggi compreso)
@@ -158,6 +161,10 @@ export async function onRequestGet({ request, env }) {
       ${tabella("Da dove arrivano", fonti, (r) => esc(r.chiave))}
       ${tabella("Dispositivi", disp, (r) => esc(r.chiave))}
       ${tabella("Click su eventi e link esterni", click, (r) => esc(r.chiave))}
+      ${sond.totale ? tabella(`Sondaggio rubriche · ${sond.totale} ${sond.totale === 1 ? "voto" : "voti"} (da sempre)`,
+        OPZIONI.map(([k, t]) => ({ t, n: sond.conta[k] })).sort((a, b) => b.n - a.n), (r) => esc(r.t)) +
+        (sond.proposte.length ? `<section><h2>Rubriche proposte</h2><table>${sond.proposte.map((r) =>
+          `<tr><td>${esc(r.proposta)} <span class="paese">· ${dataIt(r.aggiornato.slice(0, 10))}</span></td></tr>`).join("")}</table></section>` : "") : ""}
       ${tabella("Regioni", regioni, regione)}
       ${tabella("Città", citta, nomeCitta, "n", togli,
         `<p class="nota">✕ toglie le visite di quel luogo ${periodo} (bot, visite tue). Per un solo giorno, apri il giorno nella tabella “Giorni”.</p>`)}

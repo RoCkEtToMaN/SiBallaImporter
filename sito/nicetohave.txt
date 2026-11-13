@@ -74,6 +74,9 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
     insegnanti che fanno i video a turno 4) Giornate speciali entro il 26 maggio
     5) "Cosa mi metto" quando c'e' uno sponsor. La parte difficile e' la costanza dei
     contenuti: legarli a insegnanti e DJ della scena (Artisti), che ne hanno interesse.
+    Sondaggio "Quali rubriche vorresti?" in fondo alla pagina (anteprima): scelta multipla + idea libera,
+    un voto per browser (si puo' cambiare), percentuali visibili solo dopo aver votato; risultati e
+    proposte in /statistiche. Opzioni in sito/lib/sondaggio.js. Usarlo per decidere l'ordine qui sopra.
 [ ] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
     pagina da condividere con numero di eventi, citta' piu' attiva, mese piu'
     ballato, stili piu' presenti.
