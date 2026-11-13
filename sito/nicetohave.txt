@@ -17,34 +17,29 @@ GIA' FATTI
     nella versione di prova)
 [x] Versione di prova https://anteprima.siballa.pages.dev, visibile solo con login
     Cloudflare Access (email dell'account Cloudflare)
+[x] Sito pubblico dal 12/11/2026 (merge anteprima -> master):
+    - menu ☰ con Eventi, Bacheca e Novita' (le altre sezioni solo nella versione di prova:
+      sul pubblico rimandano alla home; per pubblicarne una: pubblica: true in sito/menu.js)
+    - Bacheca degli annunci (passaggi, partner, alloggio, mercatino) con discussione,
+      email private facoltative, "Togli il mio annuncio", approvazione in /bacheca-admin
+      (con pulsante Elimina)
+    - scheda Clandestini: "Aggiungi clandestino", "Chiedi di toglierlo" (email + sezione
+      nella pagina di approvazione), Elimina nell'admin, si aggiornano da soli ogni minuto
+    - filtro per regione e "🗺️ Mappa" con i segnaposti
+    - pulsanti "📅 Calendario" (Google, Outlook, file .ics) e "↗ Condividi"
+    - pulizia dei nomi "sporchi" (grassetto Unicode, barre, stelline, "-Italy")
+    - versione del sito in fondo alla pagina
+[x] Pagina Novita' (/novita) con avviso "✨ Novita'" lampeggiante finche' non la apri;
+    a ogni rilascio visibile si aggiunge una versione in cima a NOVITA in sito/novita.js
+[x] Condividi (13/11/2026): il link porta la data (/?q=nome&d=AAAAMMGG) e mostra solo
+    quell'evento, con "Mostra tutte le date" (i link mandati prima mostrano tutte le date)
 
 DA FARE
 -------
-[~] Bacheca degli annunci (/bacheca): passaggi e cerco partner.
-    STATO: fatta solo sulla versione di prova (ramo "anteprima"): elenco con filtri e
-    ricerca, modulo, approvazione in /bacheca-admin?chiave=..., email di avviso,
-    scadenza automatica (data indicata o 30 giorni), voce "Bacheca" nel menu.
-    Stesso database D1 e stesse chiavi dei clandestini: niente da configurare.
-    Avvisi: pallino sul menu, invito in home, riga sulle schede evento (gialli fino al clic);
-    nel modulo data e destinazione dall'evento, suggerimenti filtrati per citta'.
-    DISCUSSIONE sotto ogni annuncio (in prova): messaggi SENZA approvazione, nickname
-    ricordato dal browser, si aggiorna ogni 12 s; "Segnala" (2 persone -> nascosto + email),
-    "Cancella" per i propri; limiti 5/minuto e 60/giorno; in /bacheca-admin elenco dei
-    messaggi con Cancella / Nascondi / Rendi visibile. Sparisce con l'annuncio.
-    Etichetta "autore dell'annuncio" sui messaggi di chi l'ha scritto (stesso browser).
-    Modulo: contatto facoltativo (senza -> "scrivimi nella discussione"), Cerco/Offro da
-    scegliere (non preselezionato), errori che indicano il campo preciso.
-    Email privata facoltativa (avviso di pubblicazione e dei messaggi, max 1 ogni 30 min),
-    "Togli il mio annuncio" dallo stesso browser, categorie Alloggio e Mercatino.
-    COSA SERVIREBBE:
-    - provarla sulla versione di prova (annuncio -> email -> approvazione -> pagina)
-    - [fatto] contatto non pubblico: ora facoltativo, ci si accorda nella discussione
-    - [fatto] sulla scheda di un evento: "2 cercano un passaggio · 1 cerca partner"
-    - [fatto] chi scrive puo' togliere il proprio annuncio (dallo stesso browser)
-    - [fatto] categorie Alloggio e Mercatino; da valutare DJ/band/sale
-    - [pronto] Turnstile (anti-bot Cloudflare) su clandestini, annunci e messaggi: si accende
-      da solo con TURNSTILE_SITEKEY (variabile) + TURNSTILE_SECRET (secret) nel progetto Pages
-    - pubblicazione: merge "anteprima" -> "master" e voce nel menu pubblico
+[ ] Bacheca (pubblica dal 12/11/2026), cosa resta:
+    - accendere Turnstile (anti-bot Cloudflare) su clandestini, annunci e messaggi: e' pronto,
+      basta mettere TURNSTILE_SITEKEY (variabile) + TURNSTILE_SECRET (secret) nel progetto Pages
+    - da valutare categorie DJ / band / sale
     Dettagli nel documento Word, capitolo "Bacheca degli annunci".
 [ ] Community WhatsApp aperta a tutti, da ogni parte del mondo (con calma, da decidere):
     oggi c'e' solo la community siBalla (link chat.whatsapp.com, zona "Tutta Italia").
@@ -59,15 +54,6 @@ DA FARE
       con approvazione dell'amministratore (link pubblici = spam)
     - App mobile: pulsanti degli store; sito installabile sul telefono (PWA)
     Quando una sezione e' pronta: pronta: true in sito/menu.js e togliere il "noindex".
-[ ] Mostrare il menu sul sito pubblico: MENU_PUBBLICO = true in sito/menu.js.
-[~] Pulsanti sulla scheda "📅 Calendario" (file .ics) e "↗ Condividi" (menu del telefono;
-    sul computer WhatsApp / Copia link): fatti sulla versione di prova, arrivano col merge.
-[~] Pulizia dei nomi "sporchi" (grassetto Unicode, barre ┃ ⎜, stelline ☆, "-Italy"):
-    fatta in esporta_sheet.py (pulisci_nome), arriva col merge.
-[~] Filtro per regione (menu a tendina con il numero di eventi, "Estero" a parte) e
-    "🗺️ Mappa" con i segnaposti (Leaflet + cartina OpenStreetMap scurita, gratis e senza chiave):
-    fatti sulla versione di prova. La regione la calcola esporta_sheet.py dalla citta'
-    (elenco ISTAT in sito/elenchi/comuni_regioni.json, anche sigla provincia).
 [ ] Link all'app SiBalla (se e' sugli store): voce "App mobile" nel menu, piu' magari
     un pulsante "Scarica l'app" sempre visibile.
 [ ] Dominio vostro, es. eventi.siballa.it al posto di siballa.pages.dev
@@ -113,8 +99,7 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
        morte dell'autore (Basie, Ellington...): le licenze servono comunque.
 [ ] "Cosa mi metto": guida allo stile vintage (moda anni '40, scarpe, acconciature).
     Si condivide molto su Instagram e si lega agli sponsor di abbigliamento/scarpe.
-[ ] Passaggi verso festival ed eventi: bacheca per dividere l'auto
-    (sostenibilita' + community).
+[x] Passaggi verso festival ed eventi: fatto con la Bacheca (categoria Passaggi).
 [ ] Giornate speciali: 26 maggio, compleanno di Frankie Manning (International
     Lindy Hop Day); Shim Sham; challenge di solo jazz da ripostare
     ("balla lo Shim Sham nella tua citta'").
@@ -141,9 +126,9 @@ PICCOLE COSE IN SOSPESO
 [ ] Attribuzione dell'icona dell'app, se viene da Flaticon (va citato l'autore).
 [ ] Cancellare il vecchio salvataggio automatico di git: git stash drop stash@{0}
 
-ORDINE CONSIGLIATO
-------------------
+ORDINE CONSIGLIATO (aggiornato il 13/11/2026)
+------------------------------------------------
 1. "siBalla 2026 in numeri" (scadenza naturale: dicembre)
-2. Pulsanti calendario/condividi + pulizia dei nomi (poco lavoro, si vede subito)
-3. Vista mappa / filtro per citta' o regione
+2. Accendere Turnstile sul sito pubblico (ora che Bacheca e Clandestini sono aperti a tutti)
+3. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle
 4. Il resto quando serve
