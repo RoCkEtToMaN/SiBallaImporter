@@ -87,7 +87,10 @@ namespace SiBallaImportingData.Utils
             }).ToList();            
 
             foreach (var e in filteredEvents)
-            {            
+            {
+                // i siti mandano titoli e organizzatori con entità HTML ("&amp;", "&#8217;"): nello Sheet e nell'app vanno in chiaro
+                e.Title = System.Net.WebUtility.HtmlDecode(e.Title);
+                e.Organizer = System.Net.WebUtility.HtmlDecode(e.Organizer);
                 if (IsInsideCircle(e.Latitude, e.Longitude, e.City, e.Country, radiusKm))
                 {
                     Console.WriteLine("Data evento e città : " + e.Start + ", " + e.City);

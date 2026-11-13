@@ -398,7 +398,7 @@ namespace SiBallaImportingData.Utils
                             if ((countMesi) < mesi.Count() - 1 && numeroNodoEvento > mesi[countMesi].Line && numeroNodoEvento != mesi[countMesi].Line)
                                 continue;
 
-                            var titolo = news.InnerText;
+                            var titolo = WebUtility.HtmlDecode(news.InnerText);
                             var contenuto = news.InnerText;
 
                             ev.WorkshopName = titolo;
