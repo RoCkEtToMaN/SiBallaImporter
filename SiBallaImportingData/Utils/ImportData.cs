@@ -915,6 +915,10 @@ namespace SiBallaImportingData.Utils
         public const string VerifiedNew = "nuovo";
         // indirizzo trovato da Gemini e confermato da Photon: va sul DB, ma non insegna niente al dizionario finché non scrivi "ok"
         public const string VerifiedGemini = "gemini";
+        // evento scartato da te: la riga resta nello Sheet (così il programma non lo riaggiunge) ma non va da nessuna parte:
+        // né sul DB né sul sito né nell'email, e non insegna niente al dizionario
+        public const string VerifiedNo = "no";
+        public static bool Scartato(Event e) => e.LuogoVerificato == VerifiedNo;
 
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";

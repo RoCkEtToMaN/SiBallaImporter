@@ -110,7 +110,8 @@ public class KnownVenueStore
         {
             if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
             // scritta dal programma e non ancora controllata ("da verificare", "nuovo", "gemini"): indirizzo e coordinate non sono una fonte
-            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini) continue;
+            // "no": evento scartato da te, non è una fonte nemmeno lui
+            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedNo) continue;
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0) continue;
@@ -169,7 +170,7 @@ public class KnownVenueStore
     {
         var righe = sheetEvents
             .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
-            .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && !e.StileDedotto)
+            .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && !ImportData.Scartato(e) && !e.StileDedotto)
             .Select(e => (Evento: e, Stili: SiBallaImportingData.Utils.StiliEvento.Normalizza(e.SheetStiliRaw)))
             .Where(x => x.Stili.Count > 0)
             .ToList();
@@ -385,7 +386,7 @@ public class KnownVenueStore
         {
             if (e.EventDetail is null || string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
             // non la tocco: riscrivendola diventerebbe "auto" e finirebbe sul DB senza che tu l'abbia controllata
-            if (e.LuogoVerificato == ImportData.VerifiedPending) continue;
+            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNo) continue;
             if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) continue;
 
             var t = NormalizeTitle(e.PartyName);
