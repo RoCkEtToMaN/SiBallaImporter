@@ -15,6 +15,7 @@
   .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer; background: var(--accent); color: var(--on-accent); }
   .btn.sec { background: var(--surface-2); color: var(--text); }
   .btn:focus-visible, .scelta button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .annuncio .testa-ann { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .annuncio .cosa { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
   .annuncio .cosa.offro { color: #25D366; }
   .annuncio h3 { margin-top: 3px; }
@@ -29,6 +30,15 @@
   .togli-ann { margin-top: 10px; text-align: right; }
   .togli { font: inherit; font-size: 12.5px; color: var(--muted); background: none; border: 0; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
   .togli:hover { color: #FF6B6B; }
+  .condividi { flex: none; font: inherit; font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 9px; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text); }
+  .condividi:hover { border-color: var(--accent); }
+  .condividi:focus-visible, .condividi-pannello a:focus-visible, .condividi-pannello button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .condividi-pannello { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .condividi-pannello a, .condividi-pannello button { font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; padding: 5px 12px;
+    border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
+  .condividi-pannello a.wa { background: #25D366; border-color: #25D366; color: #0b2814; }
+  .esito-copia { overflow-wrap: anywhere; }
 
   dialog.modulo { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--border); border-radius: 18px;
     background: var(--surface); color: var(--text); padding: 0; }
@@ -223,8 +233,9 @@
       var dove = a.categoria === "passaggio" ? esc(a.citta) + (a.arrivo ? " → " + esc(a.arrivo) : "") : esc(a.citta);
       var extra = [a.ruolo && a.ruolo.charAt(0).toUpperCase() + a.ruolo.slice(1), a.stile].filter(Boolean).join(" · ");
       var mioAnn = mio && a.a === mio;
-      return '<article class="card annuncio' + (mioAnn ? " mio-ann" : "") + '" id="annuncio-' + a.id + '"><div class="cosa ' + (a.tipo === "offro" ? "offro" : "") + '">' +
+      return '<article class="card annuncio' + (mioAnn ? " mio-ann" : "") + '" id="annuncio-' + a.id + '"><div class="testa-ann"><div class="cosa ' + (a.tipo === "offro" ? "offro" : "") + '">' +
         esc(c[a.tipo] || c.cerco) + (mioAnn ? '<span class="tuo">il tuo annuncio</span>' : "") + "</div>" +
+        '<button type="button" class="condividi" data-id="' + a.id + '" title="Manda questo annuncio a chi potrebbe essere interessato">↗ Condividi</button></div>' +
         "<h3>" + dove + (a.evento ? " · " + esc(a.evento) : "") + "</h3>" +
         (a.giorno ? '<div class="data-ann">' + esc(data(a.giorno)) + "</div>" : "") +
         (extra ? '<div class="tag"><span>' + esc(extra) + "</span></div>" : "") +
@@ -366,6 +377,37 @@
         .catch(function () { b.disabled = false; });
     }
   });
+  // "↗ Condividi": sul telefono il menu di condivisione (WhatsApp, Telegram…); sul computer WhatsApp o "Copia link".
+  // Il link /bacheca?annuncio=ID porta dritto all'annuncio (e WhatsApp ne mostra l'anteprima, vedi functions/bacheca.js).
+  function testoCondividi(a) {
+    var c = CAT[a.categoria] || CAT.passaggio;
+    return [c[a.tipo] || c.cerco, a.citta + (a.categoria === "passaggio" && a.arrivo ? " → " + a.arrivo : ""), a.evento, data(a.giorno)]
+      .filter(Boolean).join(" · ");
+  }
+  $("lista").addEventListener("click", function (e) {
+    var b = e.target.closest("button.condividi");
+    if (!b) return;
+    var a = annuncio(+b.getAttribute("data-id"));
+    if (!a) return;
+    var url = location.origin + "/bacheca?annuncio=" + a.id, testo = testoCondividi(a);
+    if (navigator.share) {
+      navigator.share({ title: "Bacheca siBalla", text: testo, url: url }).catch(function () {});
+      return;
+    }
+    var art = b.closest(".annuncio"), vecchio = art.querySelector(".condividi-pannello");
+    if (vecchio) { vecchio.remove(); return; }
+    var p = document.createElement("div");
+    p.className = "condividi-pannello";
+    p.innerHTML = '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(testo + "\n" + url) + '">WhatsApp</a>' +
+      '<button type="button" class="copia">Copia link</button><span class="esito-copia" role="status"></span>';
+    art.querySelector(".testa-ann").insertAdjacentElement("afterend", p);
+    p.querySelector(".copia").addEventListener("click", function () {
+      var esito = p.querySelector(".esito-copia");
+      var mostra = function () { esito.textContent = url; };   // se la copia non riesce, il link resta da selezionare
+      if (navigator.clipboard) navigator.clipboard.writeText(testo + "\n" + url).then(function () { esito.textContent = "Link copiato"; }, mostra);
+      else mostra();
+    });
+  });
   // "Togli il mio annuncio" (solo dallo stesso browser che l'ha scritto), con conferma
   $("lista").addEventListener("click", function (e) {
     var b = e.target.closest("button.togli");
@@ -444,7 +486,11 @@
   function apriDaLink() {
     var id = 0;
     try { id = +new URLSearchParams(location.search).get("annuncio") || 0; } catch (e) {}
-    if (!id || !annuncio(id)) return;
+    if (!id) return;
+    if (!annuncio(id)) {   // link vecchio: l'annuncio è scaduto o è stato tolto
+      $("lista").insertAdjacentHTML("afterbegin", "<p class=\"box\">Questo annuncio non è più in bacheca: è scaduto o chi l'ha scritto l'ha tolto. Qui sotto trovi gli altri.</p>");
+      return;
+    }
     aperti[id] = true;
     ridisegnaDisc(id);
     caricaMessaggi(id);
