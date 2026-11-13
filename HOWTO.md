@@ -80,6 +80,33 @@ Gemini viene chiamato una volta sola per evento: la classificazione fatta per lo
 per l'email. Al primo giro con lo Sheet vuoto deve classificare tutti gli eventi trovati online (a
 gruppi di 20), quindi il giro dura di più; dai giri successivi solo quelli nuovi.
 
+### Spostare una riga da Serate a Workshop (o viceversa)
+
+Nei due fogli alcune colonne non si scrivono a mano: le riempie una formula nella **riga 2**
+(`ARRAYFORMULA`) per tutte le righe sotto.
+
+| Foglio | Colonne calcolate |
+|---|---|
+| Serate | C (Giorni), D (N), I-L (Lindy, Blues, Boogie, Balboa) |
+| Workshop | C (Giorni), D (N), I-P (Lindy, Blues, Boogie, Balboa, Shag, Jazz, Aerials, Afrodance) |
+
+Se in una di queste celle c'è un valore incollato, la formula non può scriverci sopra e si blocca:
+l'intestazione mostra `#REF!` e la colonna resta vuota in **tutto** il foglio. Copiando una riga
+intera da un foglio all'altro i valori calcolati vengono incollati come testo, e succede proprio questo.
+
+Le colonne poi non sono nella stessa posizione: Workshop ha quattro stili in più (M-P), quindi
+Gratis, Riferimento, Immagine, Ordine e Luogo verificato in Workshop sono 4 colonne più a destra.
+
+Come spostare una riga:
+- copia a parte **A-B** (date), **E-H** (nome, luogo, organizzatore, stile) e le colonne **da Gratis in
+  poi**, incollandole nelle colonne con la stessa intestazione;
+- oppure incolla la riga intera e poi **svuota** C, D e le colonne degli stili (seleziona e Canc).
+
+Se vedi `#REF!` nelle intestazioni: cerca nelle colonne calcolate le celle con un valore scritto e
+svuotale, la formula riparte subito. Lo può fare anche Claude leggendo lo Sheet con il service
+account del programma (`SiBallaImportingData/Resources/siballa-*.json`), che può anche svuotare
+solo quelle celle.
+
 ### Indirizzi trovati da Gemini
 
 Con `CercaIndirizzi` (flag `--indirizzi`, Variable di GitHub `CERCA_INDIRIZZI`) il programma cerca
