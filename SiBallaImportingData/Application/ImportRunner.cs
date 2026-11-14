@@ -12,7 +12,7 @@ internal static class ImportRunner
     {
         var opzioni = settings.Import;
 
-        // RESET: svuota lo Sheet dalla riga 3 (intestazioni, formati e macro restano) dopo averne salvato una copia, poi si ferma.
+        // RESET: svuota Serate e Workshop dalla riga 3 (intestazioni, formati e macro restano) dopo averle copiate nello Sheet ("Backup ...") e in un JSON, poi si ferma.
         // Su GitHub Actions no: un "ResetExcel": true finito per sbaglio nel repo svuoterebbe lo Sheet a ogni giro
         if (opzioni.ResetExcel && await ImportCommands.ResetSheetAsync())
             return;

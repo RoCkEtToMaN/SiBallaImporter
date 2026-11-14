@@ -338,6 +338,10 @@ def main() -> None:
     for nome, vf, vg in zip(fogli, formattati, grezzi):
         righe_f = vf.get("values", [])
         righe_g = vg.get("values", [])
+        # "Backup Serate 2026-11-14 15.30": copie fatte dal reset dello Sheet (ImportData.ResetSheetAsync), non si pubblicano
+        if nome.strip().lower().startswith("backup "):
+            print(f"- scheda '{nome}': saltata (copia di backup)")
+            continue
         # Scuole / Artisti / Community / Contenuti: non sono eventi (riga 2 = intestazioni, dati dalla riga 3)
         if nome.strip().lower() in ELENCHI:
             elenco = nome.strip().lower()
