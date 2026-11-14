@@ -134,9 +134,10 @@ Soglie indicative (visitatori unici al mese, vedi /statistiche):
 
 PICCOLE COSE IN SOSPESO
 -----------------------
-[x] Attribuzione dell'icona dell'app: non viene da Flaticon (14/11/2026), nessuna citazione
-    da aggiungere. Se si scopre che viene da un sito di icone gratuite, citare l'autore nel
-    piede delle pagine (sito/piede.js).
+[~] Attribuzione dell'icona dell'app: viene da Flaticon, autore Magnific (gruppo Freepik),
+    licenza gratuita (14/11/2026). Riga "Icona di Magnific da Flaticon" nel piede di tutte le
+    pagine (ICONA in cima a sito/piede.js), per ora sulla versione di prova. Resta: mettere in
+    "pagina" il link dell'icona su Flaticon e portarla sul sito pubblico.
 [ ] Cancellare il vecchio salvataggio automatico di git: git stash drop stash@{0}
 
 ORDINE CONSIGLIATO (aggiornato il 13/11/2026)
