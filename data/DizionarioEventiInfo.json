@@ -22160,5 +22160,40 @@
         ]
       }
     }
+  },
+  "the happy swingers grilli dj e altri 2|bologna": {
+    "default": {
+      "organizer": "The Happy Swingers, Grilli dj e altri 2",
+      "city": "Bologna",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "new year party": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-14"
+      }
+    }
   }
 }
