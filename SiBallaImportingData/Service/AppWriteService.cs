@@ -250,13 +250,39 @@ public class AppWriteService
         }
     }
 
+    // documento unico di ogni collezione: viene sovrascritto a ogni giro
+    public const string DocumentoCorrenteId = "corrente";
+
     /// <summary>
     /// Sostituisce il contenuto della collezione con un unico documento: app e bot leggono sempre una sola copia dello Sheet.
-    /// Prima salva il nuovo e poi cancella i vecchi: se il salvataggio fallisce restano i dati del giro prima,
-    /// invece di una collezione vuota. Per qualche secondo ci sono due copie
+    /// Sovrascrive sempre lo stesso documento (DocumentoCorrenteId) in un colpo solo: niente momenti con due copie
+    /// (eventi doppi nell'app) né con la collezione vuota. Se la sovrascrittura non riesce (es. permessi),
+    /// fa come prima: salva un documento nuovo e poi cancella i vecchi
     /// </summary>
     public async Task<Document?> ReplaceCollectionAsJsonAsync<T>(string collectionId, List<T> itemsList)
     {
+        try
+        {
+#pragma warning disable CS0618
+            var corrente = await Databases.UpsertDocument(
+                databaseId: DatabaseId,
+                collectionId: collectionId,
+                documentId: DocumentoCorrenteId,
+                data: new Dictionary<string, object> { { "json", JsonSerializer.Serialize(itemsList) } }
+            );
+#pragma warning restore CS0618
+            Console.WriteLine($"✅ '{collectionId}': documento '{DocumentoCorrenteId}' sovrascritto ({itemsList.Count} eventi)");
+
+            // documenti dei giri precedenti (con ID casuale): li tolgo, il giro dopo non trova più niente da cancellare
+            if (!await ClearCollectionAsync(collectionId, keepId: corrente.Id))
+                Environment.ExitCode = 1;
+            return corrente;
+        }
+        catch (AppwriteException ex)
+        {
+            Console.WriteLine($"⚠️ '{collectionId}': sovrascrittura del documento '{DocumentoCorrenteId}' non riuscita [{ex.Code}]: {ex.Message} -> salvo un documento nuovo");
+        }
+
         var nuovo = await SaveCollectionAsJsonAsync(collectionId, itemsList);
         if (nuovo is null)
         {

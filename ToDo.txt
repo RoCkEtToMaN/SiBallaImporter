@@ -16,10 +16,10 @@ Da fare
     pubblicati anche i commit locali non ancora pushati (è già successo).
     Ora: --no-push = niente commit né push; senza, il push parte solo da master e solo se non ci sono altri commit non pubblicati.
 
-[ ] App SiBalla (repo SiBallaApp): leggere solo il documento più recente
+[x] App SiBalla (repo SiBallaApp): eventi doppi durante il salvataggio su Appwrite (14/11/2026)
     Durante il salvataggio su Appwrite, per qualche secondo ogni collezione ha due documenti
     (prima salva il nuovo, poi cancella il vecchio). Se l'app li unisce, in quei secondi
-    vede gli eventi doppi. Controllare come li legge.
+    vede gli eventi doppi. Ora: un solo documento "corrente" per collezione, sovrascritto con UpsertDocument.
 
 [x] DB vuoto se nello Sheet ci sono solo righe "da verificare" (fatto il 14/11/2026)
     Con lo Sheet vuoto il DB non viene toccato, ma con solo righe "da verificare" sul DB va una
