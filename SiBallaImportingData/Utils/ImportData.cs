@@ -724,6 +724,60 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"[sheet] 🎨 tolto il colore a {requests.Count / 2} righe controllate");
         }
 
+        // ---------- Formule dell'intestazione bloccate (#REF!) ----------
+
+        // oltre questo numero di valori fissi in una colonna non è una riga spostata per sbaglio: non tocco niente
+        private const int MaxValoriFissiPerColonna = 20;
+
+        /// <summary>
+        /// Le colonne con una formula a matrice nell'intestazione (riga 2: ARRAYFORMULA o {"Titolo"; ...}) riempiono da sole
+        /// la colonna. Un valore scritto sotto (es. una riga copiata da Serate a Workshop con le "X"/"Y" già calcolate)
+        /// le blocca e l'intestazione diventa #REF!. Qui trovo quei valori fissi e li svuoto, così la formula riparte
+        /// </summary>
+        public static async Task SbloccaFormuleIntestazioneAsync()
+        {
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+            var fogli = Enum.GetNames<TipoEvento>();
+            var get = service.Spreadsheets.Values.BatchGet(spreadsheetId);
+            get.Ranges = fogli.Select(f => $"'{f}'!A2:Z").ToList();
+            get.ValueRenderOption = SpreadsheetsResource.ValuesResource.BatchGetRequest.ValueRenderOptionEnum.FORMULA;
+            var risposta = await get.ExecuteAsync();
+
+            var daSvuotare = new List<string>();
+            for (int f = 0; f < fogli.Length; f++)
+            {
+                var righe = risposta.ValueRanges[f].Values;
+                if (righe is null || righe.Count < 2) continue;
+                var intestazione = righe[0];
+                for (int c = 0; c < intestazione.Count; c++)
+                {
+                    var h = intestazione[c]?.ToString()?.Trim() ?? "";
+                    bool aMatrice = h.StartsWith('=') && (h.Contains("ARRAYFORMULA", StringComparison.OrdinalIgnoreCase) || h.Contains('{'));
+                    if (!aMatrice) continue;
+
+                    // con FORMULA le celle riempite dalla formula risultano vuote: quelle piene sono valori (o formule) scritti a mano
+                    var lettera = (char)('A' + c);
+                    var piene = Enumerable.Range(1, righe.Count - 1)
+                        .Where(r => c < righe[r].Count && !string.IsNullOrWhiteSpace(righe[r][c]?.ToString()))
+                        .Select(r => r + 2)   // righe[0] è la riga 2 dello Sheet
+                        .ToList();
+                    if (piene.Count == 0) continue;
+                    if (piene.Count > MaxValoriFissiPerColonna)
+                    {
+                        Console.WriteLine($"[sheet] ⚠️ '{fogli[f]}' colonna {lettera}: {piene.Count} valori scritti sotto la formula dell'intestazione, troppi per svuotarli da solo: controlla tu");
+                        continue;
+                    }
+                    Console.WriteLine($"[sheet] 🔧 '{fogli[f]}' colonna {lettera} ({intestazione[c]?.ToString()?.Split('"').ElementAtOrDefault(1)}): " +
+                                      $"svuoto i valori fissi che bloccavano la formula, righe {string.Join(", ", piene)}");
+                    daSvuotare.AddRange(piene.Select(r => $"'{fogli[f]}'!{lettera}{r}"));
+                }
+            }
+            if (daSvuotare.Count == 0) return;
+
+            await service.Spreadsheets.Values.BatchClear(new BatchClearValuesRequest { Ranges = daSvuotare }, spreadsheetId).ExecuteAsync();
+        }
+
         // ---------- Riclassificazione delle vecchie righe "da verificare" (--riclassifica-sheet) ----------
 
         private static SheetsService ServizioSheet()

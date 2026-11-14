@@ -64,6 +64,19 @@ internal static class ImportRunner
             return;
         }
 
+        // formule dell'intestazione bloccate da valori scritti sotto (#REF!): li svuoto, solo nei giri che scrivono sullo Sheet
+        if (opzioni.EnableImportingOnExcel)
+        {
+            try
+            {
+                await ImportData.SbloccaFormuleIntestazioneAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[sheet] ⚠️ controllo delle formule dell'intestazione non riuscito: {ex.Message}");
+            }
+        }
+
         // 1. righe con indirizzo -> luoghi verificati
         store.ImportFromSheet(sheetEvents);
         //    colonna H -> stili di eventi e organizzatori (escluse le celle con lo stile dedotto non ancora confermato)
