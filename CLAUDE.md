@@ -1,0 +1,5 @@
+- [Git push needs schannel](git-push-schannel.md) — HTTPS push fails with openssl backend; use -c http.sslBackend=schannel
+- [Appwrite in pausa per inattività](appwrite-pausa-inattivita.md) — keep-alive/scritture non bastano; piano: JSON app su Cloudflare
+- [Sito: anteprima e interruttori](sito-anteprima-e-interruttori.md) — novità solo sul ramo anteprima; pubblico solo su richiesta esplicita (menu: voci "pubblica: true", riservata.js, NOVITA_PUBBLICHE)
+- [Novità a ogni rilascio](sito-novita-per-versione.md) — nuova versione in cima a NOVITA in sito/novita.js quando arriva su master qualcosa di visibile
+- [Leggere lo Sheet da qui](sheet-lettura-service-account.md) — service account + venv; colonne ARRAYFORMULA che danno #REF! se incolli valori
