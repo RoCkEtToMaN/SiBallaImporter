@@ -141,28 +141,64 @@ internal static class ImportCommands
             return;
         }
 
-        await SwingEventClassifier.SegnaPerSheetAsync(righe, settings.Gemini);
-        var esiti = new List<(Event, bool, string, List<string>)>();
+        await SwingEventClassifier.ClassificaSoloAsync(righe, settings.Gemini);
+
+        // 1. esito di Gemini; "informazioni insufficienti" e simili non diventano "no" ma "da controllare"
+        var esiti = new List<(Event Ev, EsitoStorico Esito, string Motivo, List<string> Stili, bool Coerenza)>();
         int nonClassificate = 0;
         foreach (var ev in righe)
         {
-            if (SwingEventClassifier.Esito(ev) is not { } esito)
+            if (SwingEventClassifier.Esito(ev) is not { } e)
             {
                 nonClassificate++;   // resta senza nota: il prossimo giro la riprova
                 continue;
             }
-            var stili = SwingEventClassifier.StiliDaGemini(ev) ?? [];
-            esiti.Add((ev, esito.IsSwing, esito.Motivo, stili));
-            Console.WriteLine($"   {(esito.IsSwing ? "✅ swing" : "🚫 no   ")} | {ev.SheetName} riga {ev.SheetRow} | {ev.DateStart:yyyy-MM-dd} | {ev.PartyName?.Trim()}" +
-                              (esito.IsSwing ? (stili.Count > 0 ? $"  [{StiliEvento.Testo(stili)}]" : "") : $"  -> {esito.Motivo}"));
+            var esito = e.IsSwing ? EsitoStorico.Swing : MotivoIncerto.IsMatch(e.Motivo) ? EsitoStorico.DaControllare : EsitoStorico.No;
+            esiti.Add((ev, esito, e.Motivo, SwingEventClassifier.StiliDaGemini(ev) ?? [], false));
         }
-        Console.WriteLine($"\nSwing: {esiti.Count(x => x.Item2)}, non swing: {esiti.Count(x => !x.Item2)}, non classificate (riprovare): {nonClassificate}");
+
+        // 2. coerenza sugli eventi che si ripetono (stesso organizzatore, città e titolo): vale la maggioranza delle date
+        //    con un esito netto, a parità vince "swing"; segue la maggioranza anche chi era "da controllare"
+        int cambiati = 0;
+        foreach (var gruppo in esiti.Select((x, i) => (x, i))
+                     .GroupBy(t => KnownVenueStore.MakeKey(t.x.Ev.Organizer ?? "", t.x.Ev.City ?? "") + "|" + KnownVenueStore.NormalizeTitle(t.x.Ev.PartyName))
+                     .Where(g => g.Count() > 1 && KnownVenueStore.NormalizeTitle(g.First().x.Ev.PartyName).Length > 0))
+        {
+            int si = gruppo.Count(t => t.x.Esito == EsitoStorico.Swing), no = gruppo.Count(t => t.x.Esito == EsitoStorico.No);
+            if (si + no == 0) continue;
+            var maggioranza = si >= no ? EsitoStorico.Swing : EsitoStorico.No;
+            foreach (var (x, i) in gruppo.Where(t => t.x.Esito != maggioranza))
+            {
+                esiti[i] = x with
+                {
+                    Esito = maggioranza,
+                    Motivo = maggioranza == EsitoStorico.Swing ? "swing nelle altre date dello stesso evento" : $"{x.Motivo} (come le altre date dello stesso evento)",
+                    Coerenza = true
+                };
+                cambiati++;
+            }
+        }
+
+        foreach (var (ev, esito, motivo, stili, coerenza) in esiti)
+            Console.WriteLine($"   {esito switch { EsitoStorico.Swing => "✅ swing", EsitoStorico.No => "🚫 no   ", _ => "❔ ?    " }} | " +
+                              $"{ev.SheetName} riga {ev.SheetRow} | {ev.DateStart:yyyy-MM-dd} | {ev.PartyName?.Trim()}" +
+                              (esito == EsitoStorico.Swing ? (stili.Count > 0 ? $"  [{StiliEvento.Testo(stili)}]" : "") : $"  -> {motivo}") +
+                              (coerenza ? "  (coerenza)" : ""));
+        Console.WriteLine($"\nSwing: {esiti.Count(x => x.Esito == EsitoStorico.Swing)}, non swing: {esiti.Count(x => x.Esito == EsitoStorico.No)}, " +
+                          $"da controllare: {esiti.Count(x => x.Esito == EsitoStorico.DaControllare)}, non classificate (riprovare): {nonClassificate}");
+        Console.WriteLine($"Cambiati per coerenza con le altre date dello stesso evento: {cambiati}");
 
         if (scrivi)
-            await ImportData.ScriviEsitoStoricoAsync(esiti);
+            await ImportData.ScriviEsitoStoricoAsync(esiti.Select(x => (x.Ev, x.Esito, x.Motivo, x.Stili)).ToList());
         else
             Console.WriteLine("Anteprima: niente scritto nello Sheet. Per scriverlo: --riclassifica-storico-scrivi");
     }
+
+    // motivi di Gemini che dicono "non lo so" più che "non è swing": la riga resta "storico" con la nota da controllare
+    private static readonly System.Text.RegularExpressions.Regex MotivoIncerto = new(
+        @"insufficient|non (sono |è )?specificat|non specifican|senza (dettagli|informazioni)|non identificat|non (è )?chiar|" +
+        @"non emerge|non si capisce|titolo generico|un semplice avviso|non ci sono informazioni",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
     public static async Task TestIndirizziAsync(AppSettings settings, List<Event> daCompilare, AddressResolver resolver)
     {

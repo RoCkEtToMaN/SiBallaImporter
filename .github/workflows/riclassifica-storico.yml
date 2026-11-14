@@ -72,7 +72,7 @@ jobs:
           Import__RiclassificaStoricoScrivi: ${{ inputs.scrivi }}
         run: dotnet SiBallaImportingData.dll 2>&1 | tee riclassifica-storico.log
 
-      # esito per email (stessi destinatari dell'email degli eventi): riepilogo in cima, elenco dei non swing
+      # esito per email (stessi destinatari dell'email degli eventi): riepilogo in cima, elenco dei non swing e dei "da controllare"
       # con il motivo, log completo in allegato. Non fa mai fallire il run
       - name: Email con l'esito
         if: always()
@@ -83,7 +83,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Riclassifica storico (${{ inputs.scrivi == 'true' && 'scritto nello Sheet' || 'anteprima' }})
-          ELENCO: "🚫 no"
+          ELENCO: "🚫 no|❔"
         run: python3 .github/scripts/email_log.py out/riclassifica-storico.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log
