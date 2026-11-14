@@ -250,6 +250,12 @@ internal static class ImportRunner
         // Con lo Sheet vuoto (lettura fallita) non tocco la collezione per non svuotarla
         List<Event> Confermati(List<Event> eventi)
         {
+            // lo Sheet tiene anche lo storico: all'app servono solo gli eventi non ancora finiti
+            bool Finito(Event x) => (x.DateFinish ?? x.DateStart).Date < DateTime.Today;
+            int passati = eventi.Count(Finito);
+            if (passati > 0)
+                Console.WriteLine($"📜 {passati} righe di eventi già finiti restano nello Sheet ma non vanno sul DB");
+            eventi = eventi.Where(x => !Finito(x)).ToList();
             int inAttesa = eventi.Count(x => x.LuogoVerificato == ImportData.VerifiedPending);
             int scartati = eventi.Count(ImportData.Scartato);
             var ok = eventi.Where(x => x.LuogoVerificato != ImportData.VerifiedPending && !ImportData.Scartato(x)).ToList();

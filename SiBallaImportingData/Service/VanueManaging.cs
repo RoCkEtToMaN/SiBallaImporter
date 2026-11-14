@@ -111,7 +111,9 @@ public class KnownVenueStore
             if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
             // scritta dal programma e non ancora controllata ("da verificare", "nuovo", "gemini"): indirizzo e coordinate non sono una fonte
             // "no": evento scartato da te, non è una fonte nemmeno lui
-            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedNo) continue;
+            // "storico": evento passato recuperato dalle vecchie versioni, mai controllato
+            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedNo
+                or ImportData.VerifiedStorico) continue;
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0) continue;
@@ -170,7 +172,8 @@ public class KnownVenueStore
     {
         var righe = sheetEvents
             .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City))
-            .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && !ImportData.Scartato(e) && !e.StileDedotto)
+            .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && e.LuogoVerificato != ImportData.VerifiedStorico
+                        && !ImportData.Scartato(e) && !e.StileDedotto)
             .Select(e => (Evento: e, Stili: SiBallaImportingData.Utils.StiliEvento.Normalizza(e.SheetStiliRaw)))
             .Where(x => x.Stili.Count > 0)
             .ToList();
