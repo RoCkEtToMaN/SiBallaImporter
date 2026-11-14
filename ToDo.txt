@@ -4,11 +4,12 @@ ToDo - SiBalla Importer
 Da fare
 -------
 
-[ ] Righe "da verificare" vecchie nello Sheet (centinaia, aggiunte prima dei colori)
+[x] Righe "da verificare" vecchie nello Sheet (centinaia, aggiunte prima dei colori) (14/11/2026)
     Non sono colorate, non hanno il motivo di Gemini e la ricerca degli indirizzi le salta.
     Idea: passaggio una tantum --riclassifica-sheet che le fa classificare da Gemini:
     swing -> "nuovo", le altre -> colorate con il motivo nella nota. Le righe "ok" non le tocca.
-    In alternativa: cancellarle a mano e rilanciare con l'aggiunta allo Sheet attiva.
+    Fatto --riclassifica-sheet (anteprima) e --riclassifica-sheet-scrivi. Prova del 14/11: 0 righe future da
+    riclassificare su 259 "da verificare" (tutte già colorate o con nota). Serve la chiave Gemini.
 
 [x] Prove dal PC che fanno commit e push del dizionario da sole (fatto il 14/11/2026)
     A fine giro il programma salva DizionarioEventiInfo.json e fa commit + push: così vengono

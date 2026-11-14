@@ -30,6 +30,8 @@ namespace SiBallaImportingData.Utils
             ["--test-indirizzi"] = "Import:TestIndirizzi",
             ["--pulisci-lezioni"] = "Import:PulisciLezioni",
             ["--pulisci-lezioni-scrivi"] = "Import:PulisciLezioniScrivi",
+            ["--riclassifica-sheet"] = "Import:RiclassificaSheet",
+            ["--riclassifica-sheet-scrivi"] = "Import:RiclassificaSheetScrivi",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -83,7 +85,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
-            Console.WriteLine($"  NoPush = {Import.NoPush}");
+            Console.WriteLine($"  NoPush = {Import.NoPush}, RiclassificaSheet = {Import.RiclassificaSheet}, RiclassificaSheetScrivi = {Import.RiclassificaSheetScrivi}");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km, RadiusEmail = {Import.RadiusEmail ?? Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
@@ -121,6 +123,10 @@ namespace SiBallaImportingData.Utils
         public bool PulisciLezioni { get; set; }
         // come PulisciLezioni, ma le cancella davvero dallo Sheet
         public bool PulisciLezioniScrivi { get; set; }
+        // vecchie righe future "da verificare" senza colore né nota: le classifica Gemini e mostra l'esito
+        public bool RiclassificaSheet { get; set; }
+        // come RiclassificaSheet, ma scrive nello Sheet ("nuovo" oppure riga arancione con il motivo nella nota)
+        public bool RiclassificaSheetScrivi { get; set; }
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }

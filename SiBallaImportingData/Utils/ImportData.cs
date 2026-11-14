@@ -724,6 +724,115 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"[sheet] 🎨 tolto il colore a {requests.Count / 2} righe controllate");
         }
 
+        // ---------- Riclassificazione delle vecchie righe "da verificare" (--riclassifica-sheet) ----------
+
+        private static SheetsService ServizioSheet()
+        {
+            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
+                ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
+            return new SheetsService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(SheetsService.Scope.Spreadsheets),
+                ApplicationName = "Google Sheets API .NET"
+            });
+        }
+
+        /// <summary>
+        /// Tra le righe passate, quelle "da verificare" mai classificate: senza il colore arancione e senza nota
+        /// nella colonna "Luogo verificato" (aggiunte prima che il programma colorasse le righe)
+        /// </summary>
+        public static async Task<List<Event>> DaVerificareSenzaColoreAsync(IEnumerable<Event> righe)
+        {
+            var candidate = righe.Where(e => e.LuogoVerificato == VerifiedPending
+                                             && e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null).ToList();
+            if (candidate.Count == 0) return [];
+
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+            var perFoglio = candidate.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.ToDictionary(e => e.SheetRow!.Value));
+            var colonne = candidate.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.First().SheetVerifiedColumn!.Value);
+            var get = service.Spreadsheets.Get(spreadsheetId);
+            get.Ranges = perFoglio.Select(f => $"'{f.Key}'!{(char)('A' + colonne[f.Key])}3:{(char)('A' + colonne[f.Key])}{f.Value.Keys.Max()}").ToList();
+            get.IncludeGridData = true;
+            get.Fields = "sheets(properties(title),data(startRow,rowData(values(note,userEnteredFormat(backgroundColor)))))";
+            var spreadsheet = await get.ExecuteAsync();
+
+            var risultato = new List<Event>();
+            foreach (var sheet in spreadsheet.Sheets)
+            {
+                if (!perFoglio.TryGetValue(sheet.Properties.Title, out var perRiga)) continue;
+                foreach (var data in sheet.Data ?? new List<GridData>())
+                {
+                    int start = data.StartRow ?? 0;
+                    for (int i = 0; i < (data.RowData?.Count ?? 0); i++)
+                    {
+                        int riga = start + i + 1;
+                        if (!perRiga.TryGetValue(riga, out var ev)) continue;
+                        var cella = data.RowData![i].Values?.FirstOrDefault();
+                        if (IsColoreDaVerificare(cella?.UserEnteredFormat?.BackgroundColor) || !string.IsNullOrWhiteSpace(cella?.Note)) continue;
+                        risultato.Add(ev);
+                    }
+                }
+            }
+            return risultato;
+        }
+
+        /// <summary>
+        /// Scrive l'esito di Gemini (StatoNuovaRiga, MotivoVerifica): swing -> "nuovo" in "Luogo verificato" (al prossimo --db va sul DB),
+        /// gli altri restano "da verificare" con la riga arancione e il motivo nella nota, come le righe aggiunte oggi dal programma
+        /// </summary>
+        public static async Task ScriviRiclassificazioneAsync(List<Event> righe)
+        {
+            if (righe.Count == 0) return;
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+
+            var nuove = righe.Where(e => e.StatoNuovaRiga == VerifiedNew).ToList();
+            if (nuove.Count > 0)
+                await service.Spreadsheets.Values.BatchUpdate(new BatchUpdateValuesRequest
+                {
+                    ValueInputOption = "RAW",
+                    Data = nuove.Select(e => new ValueRange
+                    {
+                        Range = $"'{e.SheetName}'!{(char)('A' + e.SheetVerifiedColumn!.Value)}{e.SheetRow}",
+                        Values = new List<IList<object>> { new List<object> { VerifiedNew } }
+                    }).ToList()
+                }, spreadsheetId).ExecuteAsync();
+
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+            var requests = new List<Request>();
+            foreach (var e in righe.Where(e => e.StatoNuovaRiga != VerifiedNew && sheetIds.ContainsKey(e.SheetName!)))
+            {
+                var sheetId = sheetIds[e.SheetName!];
+                int r = e.SheetRow!.Value - 1;   // l'API conta da 0
+                requests.Add(new Request
+                {
+                    RepeatCell = new RepeatCellRequest
+                    {
+                        Range = new GridRange { SheetId = sheetId, StartRowIndex = r, EndRowIndex = r + 1, StartColumnIndex = 0, EndColumnIndex = 26 },
+                        Cell = new CellData { UserEnteredFormat = new CellFormat { BackgroundColor = ColoreDaVerificare } },
+                        Fields = "userEnteredFormat.backgroundColor"
+                    }
+                });
+                if (!string.IsNullOrWhiteSpace(e.MotivoVerifica))
+                    requests.Add(new Request
+                    {
+                        UpdateCells = new UpdateCellsRequest
+                        {
+                            Start = new GridCoordinate { SheetId = sheetId, RowIndex = r, ColumnIndex = e.SheetVerifiedColumn },
+                            Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = e.MotivoVerifica } } } },
+                            Fields = "note"
+                        }
+                    });
+            }
+            if (requests.Count > 0)
+                await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
+
+            Console.WriteLine($"[sheet] riclassificate {righe.Count} righe: {nuove.Count} '{VerifiedNew}', {righe.Count - nuove.Count} '{VerifiedPending}' colorate con il motivo");
+        }
+
         /// <summary>
         /// Scrive sullo Sheet gli indirizzi trovati da Gemini: colonna F "Paese, Città, Indirizzo(lat;lng)" con la nota
         /// (locale, fonte, confidenza) e "gemini" in "Luogo verificato"
