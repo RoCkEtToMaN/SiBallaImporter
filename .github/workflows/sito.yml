@@ -60,13 +60,15 @@ jobs:
         run: python sito/esporta_sheet.py _sito/eventi.json
 
       - name: Prepara il sito
-        run: cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og.png _sito/
+        run: cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og*.png _sito/
 
-      # versione mostrata in fondo alle pagine (sito/piede.js): data e codice dell'ultimo commit, ramo, ora
+      # versione mostrata in fondo alle pagine (sito/piede.js): numero dell'ultima versione delle Novità
+      # (prima "versione:" di sito/novita.js, es. 1.1.1.0), codice dell'ultimo commit, ramo, ora
       - name: Versione
         run: |
+          VERSIONE=$(grep -m1 -oE 'versione: *"[^"]+"' sito/novita.js | sed -E 's/.*"([^"]+)"/\1/')
           printf '{"versione":"%s","commit":"%s","ramo":"%s","pubblicata":"%s"}\n' \
-            "$(git log -1 --format=%cd --date=format:%Y.%m.%d)" "$(git rev-parse --short HEAD)" \
+            "${VERSIONE:-$(git log -1 --format=%cd --date=format:%Y.%m.%d)}" "$(git rev-parse --short HEAD)" \
             "$GITHUB_REF_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > _sito/versione.json
           cat _sito/versione.json
 

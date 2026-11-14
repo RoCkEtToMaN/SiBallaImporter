@@ -2,10 +2,32 @@
 // L'avviso compare a chi non ha ancora visto l'ultima versione: sparisce quando apre /novita (ricordato in questo browser).
 // Per annunciare una versione nuova basta aggiungere un elemento IN CIMA a NOVITA: l'avviso si riaccende per tutti.
 // I testi possono contenere <b>…</b>: sono scritti da noi, non dagli utenti.
+// Numero di versione: MAGGIORE.MINORE.CORREZIONE.BUILD (es. 1.2.0.0 = funzioni nuove, 1.1.1.0 = piccole correzioni).
+// Il workflow del sito legge la prima "versione:" di questo file e la mostra in fondo a ogni pagina (piede.js).
 (function () {
   var NOVITA = [
     {
-      versione: "2026.11.13",
+      versione: "1.1.1.0",
+      data: "Novembre 2026",
+      titolo: "Piccole sistemazioni",
+      intro: "Qualche ritocco per mettere in ordine le cose.",
+      voci: [
+        {
+          tipo: "Migliorato", titolo: "Numeri di versione",
+          punti: [
+            "<b>Le versioni ora hanno un numero classico</b> (come 1.1.1.0), lo stesso che trovi in fondo a ogni pagina: così è più facile capire cosa è cambiato e quando."
+          ]
+        },
+        {
+          tipo: "Nuovo", titolo: "Crediti",
+          punti: [
+            "<b>In fondo a ogni pagina</b> trovi chi ha disegnato l'icona di siBalla."
+          ]
+        }
+      ]
+    },
+    {
+      versione: "1.1.0.0",
       data: "Novembre 2026",
       titolo: "Condividi la serata giusta",
       intro: "Il link che mandi agli amici ora porta proprio alla data che hai scelto.",
@@ -26,7 +48,7 @@
       ]
     },
     {
-      versione: "2026.11.12",
+      versione: "1.0.0.0",
       data: "Novembre 2026",
       titolo: "Bacheca, Clandestini e mappa",
       intro: "Una bacheca per organizzarsi tra ballerini, i clandestini proposti da voi, la mappa degli eventi e qualche comodità in più su ogni serata.",
