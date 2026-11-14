@@ -39,7 +39,11 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Le intestazioni di C, D e degli stili (Serate I–L, Workshop I–P) sono `ARRAYFORMULA`: un valore scritto sotto
   le blocca (`#REF!`). Non incollare righe intere da una scheda all'altra (vedi `HOWTO.md`); i giri con `--excel`
   svuotano da soli i valori fissi (max 20 per colonna).
-- Lo Sheet contiene solo eventi dall'8/11/2026 in poi: i mesi precedenti non ci sono (vanno cercati nei backup su Drive).
+- Lo Sheet deve fare da storico: le righe passate restano (nessun codice le cancella). Contiene eventi solo
+  dall'8/11/2026 perché quel giorno è stato fatto un reset: i mesi prima sono nel `backup-sheet-*.json` del PC di casa
+  o nella cronologia versioni dello Sheet.
+- `--reset-excel` (solo dal PC) prima copia Serate e Workshop nello Sheet come "Backup Serate AAAA-MM-GG hh.mm"
+  (+ JSON locale), poi svuota solo quelle due schede. Il sito salta le schede "Backup ...".
 - Lettura da qui: service account `googlesheet@siballa.iam.gserviceaccount.com`, chiave in
   `SiBallaImportingData/Resources/siballa-8c6d48649c13.json`. Python: `py` + venv nella scratchpad con
   `google-auth requests`, riusando le funzioni di `sito/esporta_sheet.py`. La Drive API non è abilitata: altri

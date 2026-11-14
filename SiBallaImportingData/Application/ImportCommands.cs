@@ -14,7 +14,7 @@ internal static class ImportCommands
         }
         else
         {
-            Console.WriteLine("⚠️ ResetExcel: svuoto lo Sheet dalla riga 3 (copia di sicurezza prima)...");
+            Console.WriteLine("⚠️ ResetExcel: svuoto Serate e Workshop dalla riga 3 (copia di sicurezza nello Sheet prima)...");
             await ImportData.ResetSheetAsync();
             Console.WriteLine("Fatto. Rimetti \"ResetExcel\": false in appsettings.json");
             return true;

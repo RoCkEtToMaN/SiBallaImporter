@@ -1129,6 +1129,9 @@ namespace SiBallaImportingData.Utils
         /// la formattazione, le convalide e le macro (Apps Script, che non sta nelle celle).
         /// Prima salva una copia di tutti i valori in un JSON nella cartella dati. Restituisce il percorso della copia.
         /// </summary>
+        // nome delle schede di backup create dal reset: il sito (esporta_sheet.py) le salta
+        public const string PrefissoBackup = "Backup ";
+
         public static async Task<string?> ResetSheetAsync()
         {
             var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
@@ -1156,15 +1159,38 @@ namespace SiBallaImportingData.Utils
             File.WriteAllText(backupPath, System.Text.Json.JsonSerializer.Serialize(backup));
             Console.WriteLine($"[sheet] 💾 copia dello Sheet salvata in {backupPath}");
 
-            // 2. svuoto dalla riga 3 all'ultima di ogni foglio
-            var ranges = spreadsheet.Sheets
+            // solo le schede degli eventi: Contenuti, Musica, Scuole, ... e le schede "Backup ..." restano come sono
+            var nomiEventi = Enum.GetNames<TipoEvento>();
+            var fogliEventi = spreadsheet.Sheets.Where(s => nomiEventi.Contains(s.Properties.Title)).ToList();
+
+            // 2. copia delle schede dentro lo Sheet stesso ("Backup Serate 2026-11-14 15.30"), in fondo: così lo storico
+            //    resta su Drive e si vede da qualsiasi PC. Se la copia non riesce l'eccezione ferma il reset prima di svuotare
+            var timbro = DateTime.Now.ToString("yyyy-MM-dd HH.mm");
+            int indice = spreadsheet.Sheets.Count;
+            await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+            {
+                Requests = fogliEventi.Select(s => new Request
+                {
+                    DuplicateSheet = new DuplicateSheetRequest
+                    {
+                        SourceSheetId = s.Properties.SheetId,
+                        NewSheetName = $"{PrefissoBackup}{s.Properties.Title} {timbro}",
+                        InsertSheetIndex = indice++
+                    }
+                }).ToList()
+            }, spreadsheetId).ExecuteAsync();
+            foreach (var s in fogliEventi)
+                Console.WriteLine($"[sheet] 📑 copia della scheda '{s.Properties.Title}' salvata nello Sheet come '{PrefissoBackup}{s.Properties.Title} {timbro}'");
+
+            // 3. svuoto dalla riga 3 all'ultima delle schede degli eventi
+            var ranges = fogliEventi
                 .Where(s => (s.Properties.GridProperties?.RowCount ?? 0) >= 3)
                 .Select(s => $"'{s.Properties.Title}'!3:{s.Properties.GridProperties.RowCount}")
                 .ToList();
             if (ranges.Count == 0) return backupPath;
 
             await service.Spreadsheets.Values.BatchClear(new BatchClearValuesRequest { Ranges = ranges }, spreadsheetId).ExecuteAsync();
-            foreach (var s in spreadsheet.Sheets)
+            foreach (var s in fogliEventi)
                 Console.WriteLine($"[sheet] 🧹 '{s.Properties.Title}': {Math.Max(0, backup[s.Properties.Title].Count - 2)} righe svuotate");
             return backupPath;
         }
