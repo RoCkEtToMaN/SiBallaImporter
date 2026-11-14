@@ -287,8 +287,34 @@ internal static class ImportRunner
                 Console.WriteLine($"⚠️ '{collectionId}': nessuna riga confermata nello Sheet, il DB non viene toccato (restano i dati precedenti)");
                 return;
             }
+            foreach (var e in confermati)
+                AllineaDettaglio(e);
             await appWriteService.ReplaceCollectionAsJsonAsync(collectionId, confermati);
         }
+    }
+
+    // EventDetail eredita da Event, quindi nel JSON porta una copia di tutti i campi dell'evento.
+    // L'app legge nome, città e paese da quella copia (pagine di dettaglio): la riempio con i valori
+    // dell'evento, altrimenti date, organizzatore e tipo arrivano vuoti (DateStart = 0001-01-01)
+    private static void AllineaDettaglio(Event e)
+    {
+        if (e.EventDetail is not { } d)
+            return;
+
+        d.PartyName ??= e.PartyName;
+        d.WorkshopName ??= e.WorkshopName;
+        d.City ??= e.City;
+        d.Country ??= e.Country;
+        d.DateStart = e.DateStart;
+        d.DateFinish = e.DateFinish;
+        d.Duration = e.Duration;
+        d.Type = e.Type;
+        d.Organizer = e.Organizer;
+        d.NameAndData = e.NameAndData;
+        d.MonthYear = e.MonthYear;
+        d.TeachersConfirmed = e.TeachersConfirmed;
+        d.ExchangeConfirmed = e.ExchangeConfirmed;
+        d.Gratis = e.Gratis;
     }
 
     // una fonte che non risponde (sito giù, timeout) non deve fermare il giro: si va avanti con le altre
