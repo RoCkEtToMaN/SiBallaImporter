@@ -2,6 +2,8 @@
 
 Uso (nel workflow, dopo "Esegui importatore"): python .github/scripts/email_log.py <log> <appsettings.json>
 Variabili d'ambiente: MAILJET_API_KEY, MAILJET_API_SECRET, ESITO (success/failure/...), RUN_URL, RUN_NUMBER.
+Facoltative (per gli altri workflow, es. "Riclassifica storico"): TITOLO = nome nell'oggetto (default "Importatore"),
+ELENCO = espressione regolare: le righe del log che la contengono finiscono in un elenco nel testo dell'email.
 Destinatari: Email:Recipients di appsettings.json (gli stessi dell'email degli eventi).
 Non fa mai fallire il workflow: se qualcosa non va lo scrive e basta.
 """
@@ -28,7 +30,35 @@ RIEPILOGO = [
     ("Immagini", r"🖼️ Righe dello Sheet: .*"),
     ("Celle Immagine", r"\[sheet\] colonna 'Immagine' aggiornata: .*"),
     ("Email eventi", r"(📭|📬) .*"),
+    # workflow "Riclassifica storico"
+    ("Storico", r"===== Storico: .*"),
+    ("Esito Gemini", r"Swing: \d+, non swing: .*"),
+    ("Scritto nello Sheet", r"\[sheet\] storico controllato .*"),
+    ("Solo anteprima", r"Anteprima: niente scritto nello Sheet.*"),
 ]
+
+
+def senza_commenti(testo: str) -> str:
+    """appsettings.json ha commenti // (li accetta .NET, non json.loads): li tolgo, tranne dentro le stringhe."""
+    out, in_stringa, i = [], False, 0
+    while i < len(testo):
+        c = testo[i]
+        if in_stringa:
+            out.append(c)
+            if c == "\\" and i + 1 < len(testo):
+                out.append(testo[i + 1]); i += 1
+            elif c == '"':
+                in_stringa = False
+        elif c == '"':
+            in_stringa = True; out.append(c)
+        elif testo.startswith("//", i):
+            while i < len(testo) and testo[i] != "\n":
+                i += 1
+            continue
+        else:
+            out.append(c)
+        i += 1
+    return "".join(out)
 
 
 def main() -> None:
@@ -39,7 +69,7 @@ def main() -> None:
         return
 
     with open(settings_path, encoding="utf-8-sig") as f:
-        destinatari = [x.strip() for x in json.load(f)["Email"]["Recipients"].split(";") if x.strip()]
+        destinatari = [x.strip() for x in json.loads(senza_commenti(f.read()))["Email"]["Recipients"].split(";") if x.strip()]
     if not destinatari:
         print("Nessun destinatario in Email:Recipients: email del log non inviata")
         return
@@ -70,7 +100,8 @@ def main() -> None:
     except Exception:  # senza il database dei fusi orari: ora locale (il job ha già TZ=Europe/Rome)
         oggi = datetime.now().strftime("%d/%m/%Y")
     numero = os.environ.get("RUN_NUMBER", "")
-    soggetto = f"{'✅' if ok else '❌'} Importatore #{numero} {oggi}" + ("" if ok else f" ({esito or 'errore'})") + \
+    titolo = os.environ.get("TITOLO") or "Importatore"
+    soggetto = f"{'✅' if ok else '❌'} {titolo} #{numero} {oggi}" + ("" if ok else f" ({esito or 'errore'})") + \
         (f" · {len(errori)} errori" if errori else "")
 
     def esc(s: str) -> str:
@@ -85,15 +116,22 @@ def main() -> None:
         html.append(f"<tr><td style='color:#666;white-space:nowrap'>{esc(nome)}</td><td>{esc(valore)}</td></tr>")
     html.append(f"<tr><td style='color:#666'>Errori</td><td>{len(errori)}</td></tr>")
     html.append(f"<tr><td style='color:#666'>Avvisi</td><td>{len(avvisi)}</td></tr></table>")
-    for titolo, elenco in (("Errori", errori), ("Avvisi", avvisi)):
+    for sezione, elenco in (("Errori", errori), ("Avvisi", avvisi)):
         if elenco:
-            html.append(f"<h3>{titolo} (primi 30)</h3><pre style='font-size:12px;white-space:pre-wrap'>"
+            html.append(f"<h3>{sezione} (primi 30)</h3><pre style='font-size:12px;white-space:pre-wrap'>"
                         + esc("\n".join(elenco[:30])) + "</pre>")
+    elenco_re = os.environ.get("ELENCO")
+    if elenco_re:
+        scelte = [r.strip() for r in righe if re.search(elenco_re, r)]
+        html.append(f"<h3>Elenco ({len(scelte)}{', primi 300' if len(scelte) > 300 else ''})</h3>"
+                    "<pre style='font-size:12px;white-space:pre-wrap'>"
+                    + esc("\n".join(scelte[:300]) or "(nessuna riga)") + "</pre>")
     html.append("<p style='color:#666'>Log completo in allegato.</p>")
 
-    nome_file, contenuto, tipo = "importatore.log.txt", log, "text/plain"
+    base = re.sub(r"[^a-z0-9]+", "-", titolo.lower()).strip("-") or "importatore"
+    nome_file, contenuto, tipo = f"{base}.log.txt", log, "text/plain"
     if len(log) > MAX_ALLEGATO:
-        nome_file, contenuto, tipo = "importatore.log.gz", gzip.compress(log), "application/gzip"
+        nome_file, contenuto, tipo = f"{base}.log.gz", gzip.compress(log), "application/gzip"
 
     messaggio = {
         "From": MITTENTE,
