@@ -12,7 +12,7 @@
  *   su Storage le immagini di data/immagini, dei siti e i loghi, scrive "sì" nella colonna Immagine e
  *   aggiorna il DB dell'app), poi aggiorna il sito. Ci mette 5-10 minuti.
  * - Menu SiBalla > Eventi passati: controllo con Gemini delle righe "storico" (workflow "Riclassifica storico"):
- *   "anteprima" scrive l'esito solo nel log su GitHub; "controlla e scrivi" mette la nota (swing) oppure "no" + motivo.
+ *   "anteprima" manda l'esito per email (elenco dei non swing); "controlla e scrivi" mette la nota (swing) oppure "no" + motivo.
  *   Le righe già controllate hanno la nota e vengono saltate. Ci mette 5-15 minuti.
  *
  * Configurazione (una volta sola):
@@ -51,7 +51,7 @@ function storicoAnteprima() {
   const esito = avviaWorkflow_(WORKFLOW_STORICO, { scrivi: 'false' });
   SpreadsheetApp.getActive().toast(
     esito.ok
-      ? 'Anteprima avviata: tra 5-15 minuti l\'esito è nel log su GitHub (Actions > Riclassifica storico). Lo Sheet non cambia.'
+      ? 'Anteprima avviata: tra 5-15 minuti ti arriva l\'esito per email (elenco dei non swing, log in allegato). Lo Sheet non cambia.'
       : 'Errore: ' + esito.messaggio,
     'SiBalla', 15);
 }
@@ -67,7 +67,7 @@ function storicoScrivi() {
   const esito = avviaWorkflow_(WORKFLOW_STORICO, { scrivi: 'true' });
   SpreadsheetApp.getActive().toast(
     esito.ok
-      ? 'Controllo avviato: tra 5-15 minuti trovi le note nella colonna "Luogo verificato".'
+      ? 'Controllo avviato: tra 5-15 minuti trovi le note nella colonna "Luogo verificato" e ti arriva il riepilogo per email.'
       : 'Errore: ' + esito.messaggio,
     'SiBalla', 15);
 }
