@@ -64,6 +64,14 @@ internal static class ImportRunner
             return;
         }
 
+        // STORICO: righe "storico" mai controllate -> Gemini (swing = nota, non swing = "no"). Si lancia anche da GitHub
+        // con il workflow "Riclassifica storico". --riclassifica-storico mostra soltanto, -scrivi scrive. Poi il programma si ferma
+        if (opzioni.RiclassificaStorico || opzioni.RiclassificaStoricoScrivi)
+        {
+            await ImportCommands.RiclassificaStoricoAsync(settings, sheetEvents);
+            return;
+        }
+
         // formule dell'intestazione bloccate da valori scritti sotto (#REF!): li svuoto, solo nei giri che scrivono sullo Sheet
         if (opzioni.EnableImportingOnExcel)
         {

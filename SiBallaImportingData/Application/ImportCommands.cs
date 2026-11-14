@@ -125,6 +125,45 @@ internal static class ImportCommands
             Console.WriteLine("\nAnteprima: niente scritto nello Sheet. Per scriverlo: --riclassifica-sheet-scrivi");
     }
 
+    // righe "storico" (eventi passati recuperati dalle vecchie versioni) mai controllate: le classifica Gemini.
+    // --riclassifica-storico mostra soltanto l'esito, --riclassifica-storico-scrivi lo scrive nello Sheet
+    public static async Task RiclassificaStoricoAsync(AppSettings settings, List<Event> sheetEvents)
+    {
+        var scrivi = settings.Import.RiclassificaStoricoScrivi;
+        var righe = (await ImportData.DaVerificareSenzaColoreAsync(sheetEvents, ImportData.VerifiedStorico))
+            .OrderBy(e => e.DateStart).ToList();
+        int tutte = sheetEvents.Count(e => e.LuogoVerificato == ImportData.VerifiedStorico);
+        Console.WriteLine($"\n===== Storico: {righe.Count} righe '{ImportData.VerifiedStorico}' ancora da controllare (su {tutte}) =====");
+        if (righe.Count == 0) return;
+        if (string.IsNullOrWhiteSpace(settings.Gemini.ApiKey) || string.IsNullOrWhiteSpace(settings.Gemini.Model))
+        {
+            Console.WriteLine("⚠️ Chiave Gemini (Gemini:ApiKey o GEMINI_API_KEY) o modello non impostati: controllo non fatto");
+            return;
+        }
+
+        await SwingEventClassifier.SegnaPerSheetAsync(righe, settings.Gemini);
+        var esiti = new List<(Event, bool, string, List<string>)>();
+        int nonClassificate = 0;
+        foreach (var ev in righe)
+        {
+            if (SwingEventClassifier.Esito(ev) is not { } esito)
+            {
+                nonClassificate++;   // resta senza nota: il prossimo giro la riprova
+                continue;
+            }
+            var stili = SwingEventClassifier.StiliDaGemini(ev) ?? [];
+            esiti.Add((ev, esito.IsSwing, esito.Motivo, stili));
+            Console.WriteLine($"   {(esito.IsSwing ? "✅ swing" : "🚫 no   ")} | {ev.SheetName} riga {ev.SheetRow} | {ev.DateStart:yyyy-MM-dd} | {ev.PartyName?.Trim()}" +
+                              (esito.IsSwing ? (stili.Count > 0 ? $"  [{StiliEvento.Testo(stili)}]" : "") : $"  -> {esito.Motivo}"));
+        }
+        Console.WriteLine($"\nSwing: {esiti.Count(x => x.Item2)}, non swing: {esiti.Count(x => !x.Item2)}, non classificate (riprovare): {nonClassificate}");
+
+        if (scrivi)
+            await ImportData.ScriviEsitoStoricoAsync(esiti);
+        else
+            Console.WriteLine("Anteprima: niente scritto nello Sheet. Per scriverlo: --riclassifica-storico-scrivi");
+    }
+
     public static async Task TestIndirizziAsync(AppSettings settings, List<Event> daCompilare, AddressResolver resolver)
     {
         var opzioni = settings.Import;

@@ -793,12 +793,13 @@ namespace SiBallaImportingData.Utils
         }
 
         /// <summary>
-        /// Tra le righe passate, quelle "da verificare" mai classificate: senza il colore arancione e senza nota
-        /// nella colonna "Luogo verificato" (aggiunte prima che il programma colorasse le righe)
+        /// Tra le righe passate, quelle con lo stato indicato (di solito "da verificare") mai classificate: senza il colore
+        /// arancione e senza nota nella colonna "Luogo verificato" (aggiunte prima che il programma colorasse le righe,
+        /// o righe "storico" recuperate dalle vecchie versioni)
         /// </summary>
-        public static async Task<List<Event>> DaVerificareSenzaColoreAsync(IEnumerable<Event> righe)
+        public static async Task<List<Event>> DaVerificareSenzaColoreAsync(IEnumerable<Event> righe, string stato = VerifiedPending)
         {
-            var candidate = righe.Where(e => e.LuogoVerificato == VerifiedPending
+            var candidate = righe.Where(e => e.LuogoVerificato == stato
                                              && e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null).ToList();
             if (candidate.Count == 0) return [];
 
@@ -830,6 +831,52 @@ namespace SiBallaImportingData.Utils
                 }
             }
             return risultato;
+        }
+
+        /// <summary>
+        /// Esito di Gemini sulle righe "storico": swing -> resta "storico" con la nota "Gemini: swing" (e lo stile in H se mancava),
+        /// non swing -> "no" con il motivo nella nota. La nota segna la riga come già controllata
+        /// </summary>
+        public static async Task ScriviEsitoStoricoAsync(List<(Event Evento, bool Swing, string Motivo, List<string> Stili)> esiti)
+        {
+            if (esiti.Count == 0) return;
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+
+            var valori = new List<ValueRange>();
+            foreach (var (e, swing, _, stili) in esiti)
+            {
+                if (!swing)
+                    valori.Add(new ValueRange
+                    {
+                        Range = $"'{e.SheetName}'!{(char)('A' + e.SheetVerifiedColumn!.Value)}{e.SheetRow}",
+                        Values = new List<IList<object>> { new List<object> { VerifiedNo } }
+                    });
+                else if (stili.Count > 0 && string.IsNullOrWhiteSpace(e.SheetStiliRaw))
+                    valori.Add(new ValueRange
+                    {
+                        Range = $"'{e.SheetName}'!{(char)('A' + ColonnaStili)}{e.SheetRow}",
+                        Values = new List<IList<object>> { new List<object> { StiliEvento.Testo(stili) } }
+                    });
+            }
+            for (int i = 0; i < valori.Count; i += 500)
+                await service.Spreadsheets.Values.BatchUpdate(new BatchUpdateValuesRequest { ValueInputOption = "RAW", Data = valori.Skip(i).Take(500).ToList() }, spreadsheetId).ExecuteAsync();
+
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+            var note = esiti.Where(x => sheetIds.ContainsKey(x.Evento.SheetName!)).Select(x => new Request
+            {
+                UpdateCells = new UpdateCellsRequest
+                {
+                    Start = new GridCoordinate { SheetId = sheetIds[x.Evento.SheetName!], RowIndex = x.Evento.SheetRow!.Value - 1, ColumnIndex = x.Evento.SheetVerifiedColumn },
+                    Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = x.Swing ? "Gemini: swing" : $"Gemini: {x.Motivo}" } } } },
+                    Fields = "note"
+                }
+            }).ToList();
+            for (int i = 0; i < note.Count; i += 500)
+                await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = note.Skip(i).Take(500).ToList() }, spreadsheetId).ExecuteAsync();
+
+            Console.WriteLine($"[sheet] storico controllato da Gemini: {esiti.Count(x => x.Swing)} swing, {esiti.Count(x => !x.Swing)} segnate '{VerifiedNo}'");
         }
 
         /// <summary>

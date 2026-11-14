@@ -32,6 +32,8 @@ namespace SiBallaImportingData.Utils
             ["--pulisci-lezioni-scrivi"] = "Import:PulisciLezioniScrivi",
             ["--riclassifica-sheet"] = "Import:RiclassificaSheet",
             ["--riclassifica-sheet-scrivi"] = "Import:RiclassificaSheetScrivi",
+            ["--riclassifica-storico"] = "Import:RiclassificaStorico",
+            ["--riclassifica-storico-scrivi"] = "Import:RiclassificaStoricoScrivi",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -127,6 +129,10 @@ namespace SiBallaImportingData.Utils
         public bool RiclassificaSheet { get; set; }
         // come RiclassificaSheet, ma scrive nello Sheet ("nuovo" oppure riga arancione con il motivo nella nota)
         public bool RiclassificaSheetScrivi { get; set; }
+        // righe "storico" (eventi passati recuperati) mai controllate: le classifica Gemini e mostra l'esito
+        public bool RiclassificaStorico { get; set; }
+        // come RiclassificaStorico, ma scrive nello Sheet (swing: nota + stile; non swing: "no" + motivo)
+        public bool RiclassificaStoricoScrivi { get; set; }
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }

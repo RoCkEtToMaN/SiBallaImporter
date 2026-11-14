@@ -54,4 +54,11 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Su questo PC mancano le chiavi di Gemini e Appwrite (ci sono sul PC di casa e su GitHub).
 - `--no-push`: il dizionario dei luoghi torna nel repo senza commit né push. Senza, il push automatico del dizionario
   parte solo da `master` e solo se non ci sono altri commit non pubblicati.
-- Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]` (senza `-scrivi` = anteprima).
+- Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
+  (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
+
+## Storico nello Sheet
+- Il 14/11/2026 sono state rimesse 1.114 righe passate (1/8 – 7/11/2026) recuperate dalle 118 versioni dello Sheet
+  (Drive API, ora abilitata): stato "storico" = mai controllate, "da verificare" = altri balli o non controllate allora.
+- Righe passate: non vanno su DB, sito né email; "storico" non insegna niente al dizionario (luoghi e stili).
+- Prima dell'agosto 2026 lo Sheet aveva poche righe a mano, e diverse con l'anno sbagliato (eventi 2027 segnati 2026).
