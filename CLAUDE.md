@@ -1,5 +1,53 @@
-- [Git push needs schannel](git-push-schannel.md) — HTTPS push fails with openssl backend; use -c http.sslBackend=schannel
-- [Appwrite in pausa per inattività](appwrite-pausa-inattivita.md) — keep-alive/scritture non bastano; piano: JSON app su Cloudflare
-- [Sito: anteprima e interruttori](sito-anteprima-e-interruttori.md) — novità solo sul ramo anteprima; pubblico solo su richiesta esplicita (menu: voci "pubblica: true", riservata.js, NOVITA_PUBBLICHE)
-- [Novità a ogni rilascio](sito-novita-per-versione.md) — nuova versione in cima a NOVITA in sito/novita.js quando arriva su master qualcosa di visibile
-- [Leggere lo Sheet da qui](sheet-lettura-service-account.md) — service account + venv; colonne ARRAYFORMULA che danno #REF! se incolli valori
+# SiBalla – note per Claude
+
+Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nello Google Sheet, il sito
+(https://siballa.pages.dev) e l'app SiBalla li mostrano. Si lavora in italiano.
+
+## Struttura
+- `SiBallaImportingData/`: importer .NET (cerca eventi online → Sheet → email → DB Appwrite). Opzioni da riga di
+  comando in `Utils/AppSettings.cs`, ricette commentate in cima a `appsettings.json`.
+- `sito/`: sito statico su Cloudflare Pages (+ `sito/functions/` per Bacheca, Clandestini, statistiche).
+  `sito/esporta_sheet.py` trasforma lo Sheet nel JSON del sito.
+- `.github/workflows/`: `importatore.yml` (giro notturno, usa il codice di `master`), `sito.yml` (pubblica il sito).
+- Liste di lavoro: `ToDo.txt` (importer), `sito/nicetohave.txt` (sito), `HOWTO.md` (istruzioni per l'utente).
+
+## Git
+- Il push in HTTPS da Windows richiede `git -c http.sslBackend=schannel push` (con openssl fallisce).
+- Rami: `master` = sito pubblico + giro notturno; `anteprima` = versione di prova su https://anteprima.siballa.pages.dev
+  (login Cloudflare Access). Le novità si fanno su `anteprima`; su `master` solo quando l'utente lo chiede.
+  Dopo il merge riallineare `anteprima` a `master`.
+
+## Sito
+- Pagine non ancora pubbliche: `<script src="riservata.js">` nel `<head>` (sul pubblico rimandano alla home).
+  Per pubblicarle: togliere quella riga e mettere `pubblica: true` alla voce in `sito/menu.js`.
+  In `esporta_sheet.py`, `NOVITA_PUBBLICHE` accende sul pubblico le parti nuove dell'export.
+- A ogni rilascio su `master` con qualcosa di visibile: nuova voce IN CIMA a `NOVITA` in `sito/novita.js`.
+  Versione numerica MAGGIORE.MINORE.CORREZIONE.BUILD (funzioni nuove → 1.2.0.0, ritocchi → 1.1.2.0).
+  `sito.yml` legge la prima `versione:` di `novita.js` e la mostra nel piede (`sito/piede.js`).
+- `sito.yml` copia solo `sito/*.html|css|js`, `logo-app.svg` e `og*.png`: altri file vanno aggiunti lì.
+- Icona dell'app: Flaticon, licenza gratuita, autore Magnific → citazione in `ICONA` in `sito/piede.js`.
+
+## Database Appwrite
+- Resta (deciso il 14/11/2026: non sostituirlo con un JSON su Cloudflare). L'app non è ancora sugli store.
+- Ogni collezione (`serate`, `workshop`) ha un solo documento, ID `corrente`, sovrascritto con `UpsertDocument`.
+- Se nessuna riga dello Sheet è confermata, il DB non viene toccato (niente app vuota).
+
+## Google Sheet
+- ID `1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo`, schede `Serate` e `Workshop`: riga 2 = intestazioni, dati dalla 3.
+- Colonna "Luogo verificato": vuoto/`ok` = confermato, `nuovo` = aggiunto e swing per Gemini, `gemini` = indirizzo
+  trovato da Gemini, `da verificare` = non va su sito/DB (riga arancione), `no` = scartato.
+- Le intestazioni di C, D e degli stili (Serate I–L, Workshop I–P) sono `ARRAYFORMULA`: un valore scritto sotto
+  le blocca (`#REF!`). Non incollare righe intere da una scheda all'altra (vedi `HOWTO.md`); i giri con `--excel`
+  svuotano da soli i valori fissi (max 20 per colonna).
+- Lo Sheet contiene solo eventi dall'8/11/2026 in poi: i mesi precedenti non ci sono (vanno cercati nei backup su Drive).
+- Lettura da qui: service account `googlesheet@siballa.iam.gserviceaccount.com`, chiave in
+  `SiBallaImportingData/Resources/siballa-8c6d48649c13.json`. Python: `py` + venv nella scratchpad con
+  `google-auth requests`, riusando le funzioni di `sito/esporta_sheet.py`. La Drive API non è abilitata: altri
+  file si leggono solo se condivisi con il service account e passati per link.
+- Non scrivere nello Sheet senza una richiesta esplicita dell'utente.
+
+## Importer dal PC
+- Su questo PC mancano le chiavi di Gemini e Appwrite (ci sono sul PC di casa e su GitHub).
+- `--no-push`: il dizionario dei luoghi torna nel repo senza commit né push. Senza, il push automatico del dizionario
+  parte solo da `master` e solo se non ci sono altri commit non pubblicati.
+- Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]` (senza `-scrivi` = anteprima).
