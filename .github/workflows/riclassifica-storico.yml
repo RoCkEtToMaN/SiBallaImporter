@@ -1,0 +1,81 @@
+# Controllo con Gemini delle righe "storico" dello Sheet (eventi passati recuperati dalle vecchie versioni).
+# Si lancia a mano: GitHub -> Actions -> "Riclassifica storico" -> Run workflow.
+#   scrivi = false: mostra soltanto l'esito nel log (anteprima)
+#   scrivi = true:  swing -> resta "storico" con la nota "Gemini: swing" (e lo stile se mancava);
+#                   non swing -> "no" con il motivo nella nota
+# Le righe già controllate hanno la nota e vengono saltate: si può rilanciare per finire quelle rimaste.
+# Usa gli stessi secrets dell'importatore (GOOGLE_SERVICE_ACCOUNT_JSON, GEMINI_API_KEY).
+
+name: Riclassifica storico
+
+on:
+  workflow_dispatch:
+    inputs:
+      scrivi:
+        description: Scrive l'esito nello Sheet (false = solo anteprima nel log)
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+
+# stesso gruppo dell'importatore: non scrivono nello Sheet nello stesso momento
+concurrency:
+  group: importatore
+  cancel-in-progress: false
+
+jobs:
+  riclassifica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TZ: Europe/Rome
+      PROJECT: SiBallaImportingData/SiBallaImportingData.csproj
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Service account Google
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        shell: pwsh
+        run: |
+          if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) { throw "Secret GOOGLE_SERVICE_ACCOUNT_JSON mancante" }
+          Set-Content -Path SiBallaImportingData/Resources/siballa-8c6d48649c13.json -Value $env:GOOGLE_SERVICE_ACCOUNT_JSON -Encoding utf8NoBOM
+
+      - name: Build
+        run: dotnet publish "$PROJECT" -c Release -o "$OUT"
+
+      # stessi file GeoNames dell'importatore (solo lettura della cache)
+      - name: Cache dati GeoNames
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            out/allCountries.txt
+            out/cities15000.txt
+          key: geonames-v1
+
+      - name: Riclassifica storico
+        working-directory: out
+        shell: bash
+        env:
+          Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
+          Import__EnableSearching: "false"
+          Import__EnableSending: "false"
+          Import__EnableImportingOnExcel: "false"
+          Import__EnableImportingOnDB: "false"
+          Import__ResetExcel: "false"
+          Import__ResetDb: "false"
+          Import__RiclassificaStorico: "true"
+          Import__RiclassificaStoricoScrivi: ${{ inputs.scrivi }}
+        run: dotnet SiBallaImportingData.dll 2>&1 | tee riclassifica-storico.log
+
+      - name: Allega il log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: riclassifica-storico-${{ github.run_number }}
+          path: out/riclassifica-storico.log
+          retention-days: 30
