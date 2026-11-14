@@ -20,9 +20,9 @@ Da fare
     (prima salva il nuovo, poi cancella il vecchio). Se l'app li unisce, in quei secondi
     vede gli eventi doppi. Controllare come li legge.
 
-[ ] DB vuoto se nello Sheet ci sono solo righe "da verificare"
+[x] DB vuoto se nello Sheet ci sono solo righe "da verificare" (fatto il 14/11/2026)
     Con lo Sheet vuoto il DB non viene toccato, ma con solo righe "da verificare" sul DB va una
-    lista vuota e l'app non mostra eventi. Valutare se estendere la protezione a questo caso.
+    lista vuota e l'app non mostra eventi. Ora: se nessuna riga è confermata il DB non viene toccato.
 
 
 Da valutare

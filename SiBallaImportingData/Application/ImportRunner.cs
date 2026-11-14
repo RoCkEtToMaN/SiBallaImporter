@@ -239,9 +239,21 @@ internal static class ImportRunner
             return ok;
         }
         if (eventiSheet.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
-            await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.SerateCollectionId, Confermati(serate));
+            await SostituisciSeNonVuota(AppWriteService.SerateCollectionId, Confermati(serate));
         if (eventiSheet.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
-            await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.WorkshopsCollectionId, Confermati(workshops));
+            await SostituisciSeNonVuota(AppWriteService.WorkshopsCollectionId, Confermati(workshops));
+
+        // Sheet pieno ma nessuna riga confermata (tutte "da verificare" o "no"): una lista vuota sul DB
+        // lascerebbe l'app senza eventi, quindi tengo i dati del giro prima
+        async Task SostituisciSeNonVuota(string collectionId, List<Event> confermati)
+        {
+            if (confermati.Count == 0)
+            {
+                Console.WriteLine($"⚠️ '{collectionId}': nessuna riga confermata nello Sheet, il DB non viene toccato (restano i dati precedenti)");
+                return;
+            }
+            await appWriteService.ReplaceCollectionAsJsonAsync(collectionId, confermati);
+        }
     }
 
     // una fonte che non risponde (sito giù, timeout) non deve fermare il giro: si va avanti con le altre
