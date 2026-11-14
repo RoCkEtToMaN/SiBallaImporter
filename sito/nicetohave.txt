@@ -77,9 +77,17 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
     Sondaggio "Quali rubriche vorresti?" in fondo alla pagina (anteprima): scelta multipla + idea libera,
     un voto per browser (si puo' cambiare), percentuali visibili solo dopo aver votato; risultati e
     proposte in /statistiche. Opzioni in sito/lib/sondaggio.js. Usarlo per decidere l'ordine qui sopra.
-[ ] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
+[~] "siBalla 2026 in numeri" stile Wrapped di fine anno (da fare per dicembre!):
     pagina da condividere con numero di eventi, citta' piu' attiva, mese piu'
     ballato, stili piu' presenti.
+    14/11/2026: pagina /2026 sulla versione di prova (voce "2026 in numeri" nel menu), con
+    NUMERI DI ESEMPIO nell'oggetto DATI in cima allo script. 8 schermate a scorrimento,
+    "📸 Salva per le storie" su ognuna (immagine 1080x1920; dal telefono si apre la
+    condivisione verso Instagram), anteprima WhatsApp og-2026.png, Condividi in fondo.
+    Resta: script che calcola DATI dallo Sheet (controllare che gli eventi passati del 2026
+    ci siano ancora) e da /statistiche; pubblicarla verso il 10 dicembre (togliere
+    riservata.js, pubblica: true nel menu, avviso in home); storie una al giorno con lo
+    sticker Link verso siballa.pages.dev/2026?utm_source=instagram.
 [~] Playlist per BPM: FATTA in prova la pagina /musica (scheda Musica dello Sheet: selezioni con
     BPM, lettore YouTube continuo, Ascolta tutto in ordine casuale, Proponi un brano, pulsante
     Ascolta su Spotify con le playlist del proprio account). Resta: riempire le selezioni,
@@ -126,7 +134,10 @@ Soglie indicative (visitatori unici al mese, vedi /statistiche):
 
 PICCOLE COSE IN SOSPESO
 -----------------------
-[ ] Attribuzione dell'icona dell'app, se viene da Flaticon (va citato l'autore).
+[~] Attribuzione dell'icona dell'app: viene da Flaticon, autore Magnific (gruppo Freepik),
+    licenza gratuita (14/11/2026). Riga "Icona di Magnific da Flaticon" nel piede di tutte le
+    pagine (ICONA in cima a sito/piede.js), per ora sulla versione di prova. Resta: mettere in
+    "pagina" il link dell'icona su Flaticon e portarla sul sito pubblico.
 [ ] Cancellare il vecchio salvataggio automatico di git: git stash drop stash@{0}
 
 ORDINE CONSIGLIATO (aggiornato il 13/11/2026)

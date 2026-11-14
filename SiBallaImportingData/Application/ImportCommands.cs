@@ -93,6 +93,38 @@ internal static class ImportCommands
             Console.WriteLine("\nAnteprima: niente cancellato. Per cancellarle: --pulisci-lezioni-scrivi");
     }
 
+    // vecchie righe future "da verificare" mai classificate (senza colore né nota): le classifica Gemini.
+    // --riclassifica-sheet mostra soltanto l'esito, --riclassifica-sheet-scrivi lo scrive nello Sheet
+    public static async Task RiclassificaSheetAsync(AppSettings settings, List<Event> sheetEvents)
+    {
+        var scrivi = settings.Import.RiclassificaSheetScrivi;
+        var future = sheetEvents.Where(e => e.DateStart.Date >= DateTime.Today).ToList();
+        var righe = (await ImportData.DaVerificareSenzaColoreAsync(future))
+            .OrderBy(e => e.SheetName).ThenBy(e => e.SheetRow).ToList();
+        int tutte = future.Count(e => e.LuogoVerificato == ImportData.VerifiedPending);
+        Console.WriteLine($"\n===== Riclassificazione: {righe.Count} righe future '{ImportData.VerifiedPending}' senza colore né nota (su {tutte}) =====");
+        if (righe.Count == 0) return;
+        // senza Gemini ogni riga risulterebbe "non classificata" e verrebbe colorata lo stesso: meglio fermarsi
+        if (string.IsNullOrWhiteSpace(settings.Gemini.ApiKey) || string.IsNullOrWhiteSpace(settings.Gemini.Model))
+        {
+            Console.WriteLine("⚠️ Chiave Gemini (Gemini:ApiKey o GEMINI_API_KEY) o modello non impostati: riclassificazione non fatta");
+            return;
+        }
+
+        await SwingEventClassifier.SegnaPerSheetAsync(righe, settings.Gemini);
+        foreach (var ev in righe)
+        {
+            var esito = ev.StatoNuovaRiga == ImportData.VerifiedNew ? "✅ nuovo        " : "🟧 da verificare";
+            Console.WriteLine($"   {esito} | {ev.SheetName} riga {ev.SheetRow} | {ev.DateStart:yyyy-MM-dd} | {ev.PartyName?.Trim()}" +
+                              (ev.MotivoVerifica is null ? "" : $"  -> {ev.MotivoVerifica}"));
+        }
+
+        if (scrivi)
+            await ImportData.ScriviRiclassificazioneAsync(righe);
+        else
+            Console.WriteLine("\nAnteprima: niente scritto nello Sheet. Per scriverlo: --riclassifica-sheet-scrivi");
+    }
+
     public static async Task TestIndirizziAsync(AppSettings settings, List<Event> daCompilare, AddressResolver resolver)
     {
         var opzioni = settings.Import;

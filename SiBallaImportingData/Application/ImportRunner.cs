@@ -56,6 +56,14 @@ internal static class ImportRunner
             return;
         }
 
+        // RICLASSIFICA: vecchie righe future "da verificare" senza colore né nota -> Gemini (swing = "nuovo", altri = colorati con il motivo)
+        // --riclassifica-sheet mostra soltanto, --riclassifica-sheet-scrivi scrive nello Sheet. Poi il programma si ferma
+        if (opzioni.RiclassificaSheet || opzioni.RiclassificaSheetScrivi)
+        {
+            await ImportCommands.RiclassificaSheetAsync(settings, sheetEvents);
+            return;
+        }
+
         // 1. righe con indirizzo -> luoghi verificati
         store.ImportFromSheet(sheetEvents);
         //    colonna H -> stili di eventi e organizzatori (escluse le celle con lo stile dedotto non ancora confermato)
@@ -96,7 +104,7 @@ internal static class ImportRunner
         {
             // 3. scrivo il file, anche se l'import va in errore a metà
             store.Save();
-            DictionaryRepoSync.PushFromBin(dizionarioPath);
+            DictionaryRepoSync.PushFromBin(dizionarioPath, opzioni.NoPush);
         }
 
         if (eventiOnline.Any(x => x.City == "undefined"))
@@ -239,9 +247,21 @@ internal static class ImportRunner
             return ok;
         }
         if (eventiSheet.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
-            await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.SerateCollectionId, Confermati(serate));
+            await SostituisciSeNonVuota(AppWriteService.SerateCollectionId, Confermati(serate));
         if (eventiSheet.TryGetValue(TipoEvento.Workshop, out var workshops) && workshops.Count > 0)
-            await appWriteService.ReplaceCollectionAsJsonAsync(AppWriteService.WorkshopsCollectionId, Confermati(workshops));
+            await SostituisciSeNonVuota(AppWriteService.WorkshopsCollectionId, Confermati(workshops));
+
+        // Sheet pieno ma nessuna riga confermata (tutte "da verificare" o "no"): una lista vuota sul DB
+        // lascerebbe l'app senza eventi, quindi tengo i dati del giro prima
+        async Task SostituisciSeNonVuota(string collectionId, List<Event> confermati)
+        {
+            if (confermati.Count == 0)
+            {
+                Console.WriteLine($"⚠️ '{collectionId}': nessuna riga confermata nello Sheet, il DB non viene toccato (restano i dati precedenti)");
+                return;
+            }
+            await appWriteService.ReplaceCollectionAsJsonAsync(collectionId, confermati);
+        }
     }
 
     // una fonte che non risponde (sito giù, timeout) non deve fermare il giro: si va avanti con le altre
