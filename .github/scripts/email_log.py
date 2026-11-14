@@ -33,6 +33,7 @@ RIEPILOGO = [
     # workflow "Riclassifica storico"
     ("Storico", r"===== Storico: .*"),
     ("Esito Gemini", r"Swing: \d+, non swing: .*"),
+    ("Coerenza", r"Cambiati per coerenza .*"),
     ("Scritto nello Sheet", r"\[sheet\] storico controllato .*"),
     ("Solo anteprima", r"Anteprima: niente scritto nello Sheet.*"),
 ]
