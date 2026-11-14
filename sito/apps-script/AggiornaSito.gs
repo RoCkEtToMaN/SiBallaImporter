@@ -11,6 +11,9 @@
  * - Menu SiBalla > Carica immagini e aggiorna sito: giro veloce dell'importatore ("solo immagini": carica
  *   su Storage le immagini di data/immagini, dei siti e i loghi, scrive "sì" nella colonna Immagine e
  *   aggiorna il DB dell'app), poi aggiorna il sito. Ci mette 5-10 minuti.
+ * - Menu SiBalla > Eventi passati: controllo con Gemini delle righe "storico" (workflow "Riclassifica storico"):
+ *   "anteprima" scrive l'esito solo nel log su GitHub; "controlla e scrivi" mette la nota (swing) oppure "no" + motivo.
+ *   Le righe già controllate hanno la nota e vengono saltate. Ci mette 5-15 minuti.
  *
  * Configurazione (una volta sola):
  * 1. Impostazioni progetto (rotella) > Proprietà script > aggiungi GITHUB_TOKEN = token GitHub con permesso
@@ -23,6 +26,7 @@
 const REPO = 'RoCkEtToMaN/SiBallaImporter';
 const WORKFLOW = 'sito.yml';
 const WORKFLOW_IMPORTATORE = 'importatore.yml';
+const WORKFLOW_STORICO = 'riclassifica-storico.yml';
 const BRANCH = 'master';
 const RAMO_PROVA = 'anteprima';   // versione di prova; '' per non aggiornarla mai dallo Sheet
 const ATTESA_MINUTI = 3;
@@ -35,7 +39,37 @@ function onOpen() {
     .addItem('Carica immagini e aggiorna sito', 'caricaImmagini')
     .addSeparator()
     .addItem('Aggiorna versione di prova', 'aggiornaProva')
+    .addSeparator()
+    .addSubMenu(SpreadsheetApp.getUi().createMenu('Eventi passati (storico)')
+      .addItem('Controlla con Gemini: solo anteprima', 'storicoAnteprima')
+      .addItem('Controlla con Gemini e scrivi nello Sheet', 'storicoScrivi'))
     .addToUi();
+}
+
+/** Voce di menu: Gemini controlla le righe "storico" e scrive l'esito solo nel log del workflow su GitHub. */
+function storicoAnteprima() {
+  const esito = avviaWorkflow_(WORKFLOW_STORICO, { scrivi: 'false' });
+  SpreadsheetApp.getActive().toast(
+    esito.ok
+      ? 'Anteprima avviata: tra 5-15 minuti l\'esito è nel log su GitHub (Actions > Riclassifica storico). Lo Sheet non cambia.'
+      : 'Errore: ' + esito.messaggio,
+    'SiBalla', 15);
+}
+
+/** Voce di menu: come l'anteprima, ma scrive nello Sheet (swing = nota, non swing = "no" con il motivo). */
+function storicoScrivi() {
+  const ui = SpreadsheetApp.getUi();
+  const conferma = ui.alert('Eventi passati',
+    'Gemini controlla le righe "storico" ancora senza nota.\n' +
+    'Swing: resta "storico" con la nota "Gemini: swing".\nNon swing: diventa "no" con il motivo nella nota.\n\nProcedo?',
+    ui.ButtonSet.OK_CANCEL);
+  if (conferma !== ui.Button.OK) return;
+  const esito = avviaWorkflow_(WORKFLOW_STORICO, { scrivi: 'true' });
+  SpreadsheetApp.getActive().toast(
+    esito.ok
+      ? 'Controllo avviato: tra 5-15 minuti trovi le note nella colonna "Luogo verificato".'
+      : 'Errore: ' + esito.messaggio,
+    'SiBalla', 15);
 }
 
 /** Voce di menu: giro veloce dell'importatore (solo immagini e DB); a fine giro parte anche il sito. */
