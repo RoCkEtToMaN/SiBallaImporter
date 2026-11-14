@@ -837,16 +837,17 @@ namespace SiBallaImportingData.Utils
         /// Esito di Gemini sulle righe "storico": swing -> resta "storico" con la nota "Gemini: swing" (e lo stile in H se mancava),
         /// non swing -> "no" con il motivo nella nota. La nota segna la riga come già controllata
         /// </summary>
-        public static async Task ScriviEsitoStoricoAsync(List<(Event Evento, bool Swing, string Motivo, List<string> Stili)> esiti)
+        public static async Task ScriviEsitoStoricoAsync(List<(Event Evento, EsitoStorico Esito, string Motivo, List<string> Stili)> esiti)
         {
             if (esiti.Count == 0) return;
             const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
             var service = ServizioSheet();
 
             var valori = new List<ValueRange>();
-            foreach (var (e, swing, _, stili) in esiti)
+            foreach (var (e, esito, _, stili) in esiti)
             {
-                if (!swing)
+                bool swing = esito == EsitoStorico.Swing;
+                if (esito == EsitoStorico.No)
                     valori.Add(new ValueRange
                     {
                         Range = $"'{e.SheetName}'!{(char)('A' + e.SheetVerifiedColumn!.Value)}{e.SheetRow}",
@@ -869,14 +870,21 @@ namespace SiBallaImportingData.Utils
                 UpdateCells = new UpdateCellsRequest
                 {
                     Start = new GridCoordinate { SheetId = sheetIds[x.Evento.SheetName!], RowIndex = x.Evento.SheetRow!.Value - 1, ColumnIndex = x.Evento.SheetVerifiedColumn },
-                    Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = x.Swing ? "Gemini: swing" : $"Gemini: {x.Motivo}" } } } },
+                    Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = x.Esito switch
+                    {
+                        EsitoStorico.Swing => "Gemini: swing",
+                        EsitoStorico.No => $"Gemini: {x.Motivo}",
+                        _ => $"Gemini: da controllare - {x.Motivo}"
+                    } } } } },
                     Fields = "note"
                 }
             }).ToList();
             for (int i = 0; i < note.Count; i += 500)
                 await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = note.Skip(i).Take(500).ToList() }, spreadsheetId).ExecuteAsync();
 
-            Console.WriteLine($"[sheet] storico controllato da Gemini: {esiti.Count(x => x.Swing)} swing, {esiti.Count(x => !x.Swing)} segnate '{VerifiedNo}'");
+            Console.WriteLine($"[sheet] storico controllato da Gemini: {esiti.Count(x => x.Esito == EsitoStorico.Swing)} swing, " +
+                              $"{esiti.Count(x => x.Esito == EsitoStorico.No)} segnate '{VerifiedNo}', " +
+                              $"{esiti.Count(x => x.Esito == EsitoStorico.DaControllare)} da controllare (restano '{VerifiedStorico}' con la nota)");
         }
 
         /// <summary>
