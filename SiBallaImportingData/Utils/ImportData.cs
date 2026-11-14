@@ -1082,6 +1082,9 @@ namespace SiBallaImportingData.Utils
         // evento scartato da te: la riga resta nello Sheet (così il programma non lo riaggiunge) ma non va da nessuna parte:
         // né sul DB né sul sito né nell'email, e non insegna niente al dizionario
         public const string VerifiedNo = "no";
+        // evento passato recuperato dalle vecchie versioni dello Sheet (storico per il riepilogo dell'anno), mai controllato:
+        // non insegna niente al dizionario (luoghi e stili). Essendo passato non va comunque su DB, sito o email
+        public const string VerifiedStorico = "storico";
         public static bool Scartato(Event e) => e.LuogoVerificato == VerifiedNo;
 
         public const string ImageHeader = "Immagine";
