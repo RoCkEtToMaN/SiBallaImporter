@@ -34,6 +34,7 @@ namespace SiBallaImportingData.Utils
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
             ["--radius-email"] = "Import:RadiusEmail",
+            ["--no-push"] = "Import:NoPush",
         };
 
         public static AppSettings Load(string[] args)
@@ -82,6 +83,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
+            Console.WriteLine($"  NoPush = {Import.NoPush}");
             Console.WriteLine($"  Giorni = {Import.Giorni}, Radius = {Import.Radius} km, RadiusEmail = {Import.RadiusEmail ?? Import.Radius} km");
             Console.WriteLine($"  Cartella dati = {DataPaths.Directory}");
             Console.WriteLine($"  Mailjet = {(Email.HasMailjetKeys ? "configurato" : "mancante")}, Gemini = {(string.IsNullOrWhiteSpace(Gemini.ApiKey) ? "mancante" : Gemini.Model)}");
@@ -97,6 +99,8 @@ namespace SiBallaImportingData.Utils
         public bool EmailSoloSeCambia { get; set; }
         public bool EnableImportingOnExcel { get; set; }
         public bool EnableImportingOnDB { get; set; }
+        // prove dal PC: a fine giro il dizionario dei luoghi torna nel repo, ma senza commit né push
+        public bool NoPush { get; set; }
         // riscrive sullo sheet (colonna F) le coordinate trovate da Photon o verificate nel JSON
         public bool UpdateSheetCoordinates { get; set; }
         public bool ResetDb { get; set; }

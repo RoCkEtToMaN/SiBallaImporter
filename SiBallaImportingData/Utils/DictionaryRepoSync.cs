@@ -41,13 +41,23 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"Dizionario luoghi: preso dal repo ({RepoRelativePath})");
         }
 
-        public static void PushFromBin(string binPath)
+        public static void PushFromBin(string binPath, bool noPush = false)
         {
             if (RepoRoot is null || !File.Exists(binPath)) return;
 
             Directory.CreateDirectory(Path.GetDirectoryName(RepoFile)!);
             File.Copy(binPath, RepoFile, overwrite: true);
             if (OnGitHub) return;
+
+            if (noPush)
+            {
+                Console.WriteLine($"Dizionario luoghi: copiato in {RepoRelativePath}, niente commit né push (--no-push)");
+                return;
+            }
+
+            // il push manda online TUTTI i commit locali del ramo, non solo quello del dizionario:
+            // lo faccio solo da master e solo se non c'è altro in attesa di essere pubblicato
+            var motivoNoPush = MotivoPerNonPubblicare();
 
             Git("add", RepoRelativePath);
             if (Git("diff", "--cached", "--quiet", "--", RepoRelativePath) == 0)
@@ -60,6 +70,12 @@ namespace SiBallaImportingData.Utils
             if (Git("commit", "-m", $"Dizionario luoghi: aggiornato da {Environment.MachineName}", "--", RepoRelativePath) != 0)
             {
                 Console.WriteLine("⚠️ Dizionario luoghi: commit non riuscito");
+                return;
+            }
+
+            if (motivoNoPush is not null)
+            {
+                Console.WriteLine($"⚠️ Dizionario luoghi: commit fatto in locale, push saltato ({motivoNoPush}): fai push a mano quando sei pronto");
                 return;
             }
 
@@ -95,7 +111,31 @@ namespace SiBallaImportingData.Utils
             return null;
         }
 
-        private static int Git(params string[] args)
+        // null = si può fare push; altrimenti il motivo per non farlo
+        private static string? MotivoPerNonPubblicare()
+        {
+            var ramo = GitOutput("rev-parse", "--abbrev-ref", "HEAD");
+            if (ramo != "master")
+                return $"sei sul ramo '{ramo ?? "?"}', non su master";
+
+            var inAttesa = GitOutput("rev-list", "--count", "@{u}..HEAD");
+            if (inAttesa is null)
+                return "non riesco a confrontare master con GitHub";
+            if (inAttesa != "0")
+                return $"su master ci sono già {inAttesa} commit non pubblicati";
+
+            return null;
+        }
+
+        private static string? GitOutput(params string[] args)
+        {
+            var (code, output) = Run(args);
+            return code == 0 ? output.Trim() : null;
+        }
+
+        private static int Git(params string[] args) => Run(args).Code;
+
+        private static (int Code, string Output) Run(string[] args)
         {
             try
             {
@@ -115,16 +155,16 @@ namespace SiBallaImportingData.Utils
                 {
                     p.Kill(entireProcessTree: true);
                     Console.WriteLine($"   git {string.Join(' ', args)}: timeout");
-                    return -1;
+                    return (-1, "");
                 }
                 if (p.ExitCode != 0 && args[0] != "diff")
                     Console.WriteLine($"   git {string.Join(' ', args)}: {(stderr.Result + stdout.Result).Trim()}");
-                return p.ExitCode;
+                return (p.ExitCode, stdout.Result);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"   git {string.Join(' ', args)}: {ex.Message}");
-                return -1;
+                return (-1, "");
             }
         }
     }

@@ -10,10 +10,10 @@ Da fare
     swing -> "nuovo", le altre -> colorate con il motivo nella nota. Le righe "ok" non le tocca.
     In alternativa: cancellarle a mano e rilanciare con l'aggiunta allo Sheet attiva.
 
-[ ] Prove dal PC che fanno commit e push del dizionario da sole
+[x] Prove dal PC che fanno commit e push del dizionario da sole (fatto il 14/11/2026)
     A fine giro il programma salva DizionarioEventiInfo.json e fa commit + push: così vengono
     pubblicati anche i commit locali non ancora pushati (è già successo).
-    Idea: opzione per non fare commit/push durante i test (es. --no-push).
+    Ora: --no-push = niente commit né push; senza, il push parte solo da master e solo se non ci sono altri commit non pubblicati.
 
 [ ] App SiBalla (repo SiBallaApp): leggere solo il documento più recente
     Durante il salvataggio su Appwrite, per qualche secondo ogni collezione ha due documenti

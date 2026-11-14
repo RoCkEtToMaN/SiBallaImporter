@@ -96,7 +96,7 @@ internal static class ImportRunner
         {
             // 3. scrivo il file, anche se l'import va in errore a metà
             store.Save();
-            DictionaryRepoSync.PushFromBin(dizionarioPath);
+            DictionaryRepoSync.PushFromBin(dizionarioPath, opzioni.NoPush);
         }
 
         if (eventiOnline.Any(x => x.City == "undefined"))
