@@ -1,4 +1,4 @@
-﻿
+
 namespace SiBallaImportingData.Model
 {
     public class EventDetail : Event
@@ -12,6 +12,8 @@ namespace SiBallaImportingData.Model
         public string? Address { get; set; }
         public string? WebSite { get; set; }        
         public string? ImageUrl { get; set; }
+        // URL della miniatura WebP usata nelle card dell'app; il sito continua a usare ImageUrl.
+        public string? ImageThumbnailUrl { get; set; }
         // colonna "Immagine" dello Sheet: l'immagine è su Appwrite Storage e ImageUrl ne contiene il link
         public bool HasImage { get; set; }
         public string When { get; set; }
