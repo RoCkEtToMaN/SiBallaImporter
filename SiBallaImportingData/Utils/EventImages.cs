@@ -3,6 +3,8 @@ using SiBallaImportingData.Model;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
 
 namespace SiBallaImportingData.Utils
 {
@@ -28,6 +30,57 @@ namespace SiBallaImportingData.Utils
             return "ev" + hash[..32];
         }
 
+        private static string ThumbnailFileId(string fileId)
+        {
+            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("thumbnail|" + fileId))).ToLowerInvariant();
+            return "th" + hash[..32];
+        }
+
+        private static async Task<bool> EnsureThumbnailAsync(string fileId, byte[]? originalBytes, HashSet<string> knownFiles, AppWriteService appWrite)
+        {
+            var thumbnailId = ThumbnailFileId(fileId);
+            if (knownFiles.Contains(thumbnailId)) return true;
+
+            if (originalBytes is null)
+            {
+                var original = await DownloadAsync(AppWriteService.ImageViewUrl(fileId));
+                if (original is not { } downloaded) return false;
+                originalBytes = downloaded.Bytes;
+            }
+
+            var thumbnailBytes = await CreateThumbnailAsync(originalBytes);
+            if (thumbnailBytes is null) return false;
+
+            if (!await appWrite.UploadImageAsync(thumbnailId, thumbnailBytes, thumbnailId + ".webp", "image/webp"))
+                return false;
+
+            knownFiles.Add(thumbnailId);
+            Console.WriteLine($"🖼️ Miniatura creata per {fileId}: {originalBytes.Length / 1024} KB → {thumbnailBytes.Length / 1024} KB");
+            return true;
+        }
+
+        private static async Task<byte[]?> CreateThumbnailAsync(byte[] sourceBytes)
+        {
+            try
+            {
+                using var input = new MemoryStream(sourceBytes);
+                using var image = await SixLabors.ImageSharp.Image.LoadAsync(input);
+                image.Mutate(x => x.AutoOrient().Resize(new ResizeOptions
+                {
+                    Size = new SixLabors.ImageSharp.Size(900, 900),
+                    Mode = ResizeMode.Max
+                }));
+
+                using var output = new MemoryStream();
+                await image.SaveAsWebpAsync(output, new WebpEncoder { Quality = 82 });
+                return output.ToArray();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ Miniatura non creata: {ex.Message}");
+                return null;
+            }
+        }
         /// <summary>
         /// Eventi trovati online che stanno per finire nello Sheet: scarica l'immagine e la carica su Storage.
         /// Se va a buon fine segna EventDetail.HasImage, così AppendToGoogleSheet scrive "sì" nella colonna "Immagine"
@@ -93,6 +146,7 @@ namespace SiBallaImportingData.Utils
 
             // null = elenco non disponibile: mi fido dello Sheet
             var ids = await appWrite.GetImageFilesAsync();
+            var knownFiles = new HashSet<string>(ids?.Keys ?? Enumerable.Empty<string>(), StringComparer.Ordinal);
             int mancanti = 0;
             foreach (var ev in conImmagine)
             {
@@ -108,6 +162,9 @@ namespace SiBallaImportingData.Utils
                     continue;
                 }
                 ev.EventDetail.ImageUrl = AppWriteService.ImageViewUrl(fileId);
+                ev.EventDetail.ImageThumbnailUrl = await EnsureThumbnailAsync(fileId, null, knownFiles, appWrite)
+                    ? AppWriteService.ImageViewUrl(ThumbnailFileId(fileId))
+                    : null;
             }
             Console.WriteLine($"🖼️ Eventi dello Sheet con immagine: {conImmagine.Count - mancanti}, file mancanti: {mancanti}");
         }
@@ -248,7 +305,12 @@ namespace SiBallaImportingData.Utils
                 {
                     // c'era l'immagine trovata online (o una versione precedente del file): la sostituisco
                     if (current is not null)
+                    {
                         await appWrite.DeleteImageAsync(fileId);
+                        var thumbnailId = ThumbnailFileId(fileId);
+                        await appWrite.DeleteImageAsync(thumbnailId);
+                        storage.Remove(thumbnailId);
+                    }
                     if (!await appWrite.UploadImageAsync(fileId, bytes, name, FolderMimeTypes[ext]))
                         continue;
                     caricate++;
@@ -313,6 +375,9 @@ namespace SiBallaImportingData.Utils
                         continue;
                     }
                     await appWrite.DeleteImageAsync(fileId);
+                    var thumbnailId = ThumbnailFileId(fileId);
+                    await appWrite.DeleteImageAsync(thumbnailId);
+                    files.Remove(thumbnailId);
                 }
                 if (await appWrite.UploadImageAsync(fileId, bytes, name, mimeTypes[ext]))
                 {
