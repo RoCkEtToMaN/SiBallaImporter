@@ -1631,6 +1631,24 @@
         "stili": [
           "Lindy"
         ]
+      },
+      "the moochers live swing in technicolor": {
+        "organizer": null,
+        "city": "Genova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "SoloJazz"
+        ]
       }
     }
   },
@@ -22141,7 +22159,10 @@
       "verified": false,
       "source": null,
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Balboa"
+      ]
     },
     "events": {
       "camp balboa bern": {
@@ -22290,6 +22311,326 @@
         "notes": null,
         "stili": [
           "Blues"
+        ]
+      }
+    }
+  },
+  "ristorante freccia azzurra e ingo singer pasquali|ancona": {
+    "default": {
+      "organizer": "Ristorante Freccia Azzurra e Ingo Singer Pasquali",
+      "city": "Ancona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "ingo singer live retro style dancing freccia azzurra": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "moonshine swing dance|mantova": {
+    "default": {
+      "organizer": "Moonshine Swing Dance",
+      "city": "Mantova",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "moonshine dance night": {
+        "organizer": null,
+        "city": "Mantova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing roads|forli cesena": {
+    "default": {
+      "organizer": "Swing Roads",
+      "city": "Forlì-Cesena",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa"
+      ]
+    },
+    "events": {
+      "play with swing close cozy l arte di ballare vicini": {
+        "organizer": null,
+        "city": "Forlì-Cesena",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "balboa highway from east to west dal lindy al balboa": {
+        "organizer": null,
+        "city": "Forlì-Cesena",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing toronto|toronto": {
+    "default": {
+      "organizer": "Swing Toronto",
+      "city": "Toronto",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "roaring 20s jazz age dance weekend november": {
+        "organizer": null,
+        "city": "Toronto",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      }
+    }
+  },
+  "mamba eventi|reggio emilia": {
+    "default": {
+      "organizer": "Mamba Eventi",
+      "city": "Reggio Emilia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "a strange world of tania": {
+        "organizer": null,
+        "city": "Reggio Emilia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "karlskrona december swing oresund swing blues dance calendar e altri 3|blekinge county": {
+    "default": {
+      "organizer": "Karlskrona December Swing, Öresund Swing & Blues Dance Calendar e altri 3",
+      "city": "Blekinge County",
+      "country": "Sweden",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "karlskrona december swing": {
+        "organizer": null,
+        "city": "Blekinge County",
+        "country": "Sweden",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "annette achhammer e veranstaltungen und mehr|vicenza": {
+    "default": {
+      "organizer": "Annette Achhammer e Veranstaltungen und mehr! \uD83C\uDDE6\uD83C\uDDF9",
+      "city": "Vicenza",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "king swing": {
+        "organizer": null,
+        "city": "Vicenza",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "mecanika swing|metropolitan france": {
+    "default": {
+      "organizer": "Mécanika'Swing",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "propulse balboa decollage et mise en orbite": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
         ]
       }
     }
