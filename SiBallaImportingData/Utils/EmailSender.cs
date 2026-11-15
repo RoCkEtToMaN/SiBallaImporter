@@ -126,9 +126,11 @@ namespace SiBallaImportingData.Utils
 
                 foreach (var ev in city.OrderBy(e => e.DateStart)) // Ordina eventi per data
                 {
-                    var duration = ev.Duration.Days != 0
-                        ? $"{ev.Duration.Days} giorni"
-                        : $"{ev.Duration.Hours} ore";
+                    var duration = ev.Duration == TimeSpan.Zero
+                        ? "orario non indicato"
+                        : ev.Duration.Days != 0
+                            ? $"{ev.Duration.Days} giorni"
+                            : $"{ev.Duration.Hours} ore";
 
                     text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
                     i++;
