@@ -10356,7 +10356,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "the roaring twenties night swing dance la locanda del fornaio": {
@@ -22193,6 +22196,101 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-14"
+      }
+    }
+  },
+  "ponente in swing e luigi caforio|imperia": {
+    "default": {
+      "organizer": "Ponente in SWING e Luigi Caforio",
+      "city": "Imperia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing a badalucco in uparte natale dic": {
+        "organizer": null,
+        "city": "Imperia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "dancemode berlin|berlin": {
+    "default": {
+      "organizer": "DanceMode Berlin",
+      "city": "Berlin",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Blues"
+      ]
+    },
+    "events": {
+      "berlin blues experience": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      },
+      "camp blues": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
       }
     }
   }
