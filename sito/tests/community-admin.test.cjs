@@ -42,3 +42,21 @@ test('API pubblica seleziona solo dati pubblici approvati',async()=>{
  const query=queries.find(q=>q.includes('titolo AS nome'));assert.match(query,/WHERE stato = 'ok'/);assert(!query.includes('email'));assert(!query.includes('notifica'));
  assert.deepEqual(body.esclusi,['https://hidden.example']);assert(!JSON.stringify(body).includes('private@example.com'));
 });
+test('il pannello riutilizzato dalle statistiche mostra richieste e gruppi iniziali',async()=>{
+ const html=await context.pannelloCommunity(db(),'secret');
+ assert.match(html,/Community dall.elenco iniziale/);
+ assert.match(html,/Da valutare/);
+ assert.match(html,/Elimina definitivamente/);
+ assert.match(html,/Togli dal sito/);
+ const stats=fs.readFileSync('sito/functions/statistiche.js','utf8');
+ assert.match(stats,/await pannelloCommunity\(env.VISITE, chiave, '\/statistiche'\)/);
+ assert.match(stats,/Community presenti e richieste/);
+});
+
+test('azioni avviate dalle statistiche tornano alla sezione community',async()=>{
+ const {response}=await post({azione:'elimina',ritorno:'/statistiche'});
+ assert.equal(response.headers.get('Location'),'/statistiche?chiave=secret#community');
+ const html=await context.pannelloCommunity(db(),'secret','/statistiche');
+ assert.match(html,/<form method="post" action="\/community-admin"/);
+ assert.match(html,/name="ritorno" value="\/statistiche"/);
+});

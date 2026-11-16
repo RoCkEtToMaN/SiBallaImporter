@@ -7,6 +7,13 @@
 (function () {
   var NOVITA = [
     {
+      versione: "1.2.1.0",
+      data: "Novembre 2026",
+      titolo: "Gestione delle community",
+      intro: "Piccoli miglioramenti alla gestione delle community.",
+      voci: []
+    },
+    {
       versione: "1.2.0.0",
       data: "Novembre 2026",
       titolo: "Le community della tua citt\u00e0",
