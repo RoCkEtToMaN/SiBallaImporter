@@ -12,7 +12,7 @@
     if (invia.disabled || !form.reportValidity()) return;
     if (antibot.inAttesa()) { esito('Verifica anti-spam in corso: attendi un attimo e riprova.', 'errore'); return; }
     invia.disabled = true;
-    esito('Invio in corso?', 'attesa');
+    esito('Invio in corso...', 'attesa');
     try {
       var dati = Object.fromEntries(new FormData(form));
       dati.turnstile = antibot.token();
