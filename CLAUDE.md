@@ -8,12 +8,12 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   comando in `Utils/AppSettings.cs`, ricette commentate in cima a `appsettings.json`.
 - `sito/`: sito statico su Cloudflare Pages (+ `sito/functions/` per Bacheca, Clandestini, statistiche).
   `sito/esporta_sheet.py` trasforma lo Sheet nel JSON del sito.
-- `.github/workflows/`: `importatore.yml` (giro notturno, usa il codice di `master`), `sito.yml` (pubblica il sito).
+- `.github/workflows/`: `importatore.yml` (giro completo orario, usa il codice di `master`), `sito.yml` (pubblica il sito).
 - Liste di lavoro: `ToDo.txt` (importer), `sito/nicetohave.txt` (sito), `HOWTO.md` (istruzioni per l'utente).
 
 ## Git
 - Il push in HTTPS da Windows richiede `git -c http.sslBackend=schannel push` (con openssl fallisce).
-- Rami: `master` = sito pubblico + giro notturno; `anteprima` = versione di prova su https://anteprima.siballa.pages.dev
+- Rami: `master` = sito pubblico + giro completo orario; `anteprima` = versione di prova su https://anteprima.siballa.pages.dev
   (login Cloudflare Access). Le novità si fanno su `anteprima`; su `master` solo quando l'utente lo chiede.
   Dopo il merge riallineare `anteprima` a `master`.
 

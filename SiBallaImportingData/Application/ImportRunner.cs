@@ -25,17 +25,6 @@ internal static class ImportRunner
         var resolver = new AddressResolver(store);
         await InizializzaGeografiaAsync();
 
-        // Giro orario: sola lettura dello Sheet, senza ricerca online o scritture su Sheet/DB.
-        if (opzioni.EmailSoloSheet)
-        {
-            if (!opzioni.EnableSending) return;
-            var calendario = ImportData.LoadFile();
-            var righe = calendario.Values.SelectMany(x => x).ToList();
-            store.ApplyToSheetEvents(righe);
-            await InviaEmailAsync(settings, calendario, righe, []);
-            return;
-        }
-
         // TEST: conta le immagini trovate senza scrivere su foglio o DB
         // (Import:TestImmagini in appsettings.json, oppure dotnet run -- --test-immagini)
         if (opzioni.TestImmagini)
