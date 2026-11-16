@@ -108,7 +108,6 @@ button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}
 </style></head><body><main>
 <h1>Clandestini <span>siBalla</span></h1>
 <p class="sub">Eventi proposti dagli utenti dal sito, da oggi in poi. Quelli approvati compaiono subito nella scheda "Clandestini" (entro un minuto).
-· <a href="/community-admin?chiave=${encodeURIComponent(chiave)}">Community</a>
 · <a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche delle visite</a></p>
 ${corpo}
 </main></body></html>`;

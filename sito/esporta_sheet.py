@@ -346,7 +346,7 @@ def main() -> None:
         if nome.strip().lower() in ELENCHI:
             elenco = nome.strip().lower()
             if len(righe_f) >= 2 or elenco == "musica":
-                if NOVITA_ATTIVE or elenco == "community":
+                if NOVITA_ATTIVE:
                     scrivi_elenco(cartella, elenco, righe_elenco(elenco, righe_f[1] if len(righe_f) >= 2 else [], righe_f[2:]), "sheet")
                 else:
                     print(f"- scheda '{nome}': saltata (non è una scheda di eventi; pagine non ancora pubbliche)")
@@ -428,7 +428,7 @@ def main() -> None:
         print(f"- '{nome}': {len(eventi)} eventi pubblicati, {scartate_passate} passati, {scartate_verifica} da verificare")
 
     # elenchi senza scheda nello Sheet: bozza CSV del repository, altrimenti vuoti (solo con le novità accese)
-    for elenco in (ELENCHI if NOVITA_ATTIVE else ("community",)):
+    for elenco in (ELENCHI if NOVITA_ATTIVE else ()):
         if elenco in elenchi_fatti:
             continue
         bozza = os.path.join(CARTELLA_BOZZE, elenco + ".csv")

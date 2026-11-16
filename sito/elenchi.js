@@ -96,18 +96,12 @@
   function community() {
     return conta(dati, "regione").map(function (g) {
       var righe = dati.filter(function (r) { return (r.regione || "Altro") === g[0]; });
-      return '<section class="sezione community-regione"><h2>' + esc(g[0]) + ' <span class="c">' + g[1] + '</span></h2>' +
-        conta(righe, "citta").map(function (c) {
-          var gruppi = righe.filter(function (r) { return (r.citta || "Altro") === c[0]; })
-            .sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), "it"); });
-          return '<section class="community-citta"><h3>' + esc(c[0] === "Altro" ? "Citt\u00e0 non specificata" : c[0]) +
-            ' <span class="c">' + c[1] + '</span></h3><div class="griglia">' + gruppi.map(function (r) {
-              var canale = /canal/i.test(r.tipo || "");
-              return '<article class="card riga"><div class="wa-ico">' + WA + "</div><div><h4>" + esc(r.nome) + '</h4><div class="meta2">' +
-                esc(r.descrizione || "") + '</div><span class="tipo' + (canale ? "" : " app") + '\">' +
-                esc(r.tipo || "Gruppo") + '</span><div class="azioni">' + bottone(r.link, canale ? "Segui il canale" : "Chiedi di entrare", "wa") + "</div></div></article>";
-            }).join("") + "</div></section>";
-        }).join("") + "</section>";
+      return '<section class="sezione"><h2>' + esc(g[0]) + ' <span class="c">' + g[1] + '</span></h2><div class="griglia">' + righe.map(function (r) {
+        var canale = /canal/i.test(r.tipo || "");
+        return '<article class="card riga"><div class="wa-ico">' + WA + "</div><div><h3>" + esc(r.nome) + '</h3><div class="meta2">' +
+          esc([r.citta, r.descrizione].filter(Boolean).join(" · ")) + '</div><span class="tipo' + (canale ? "" : " app") + '">' +
+          esc(r.tipo || "Gruppo") + '</span><div class="azioni">' + bottone(r.link, canale ? "Segui il canale" : "Chiedi di entrare", "wa") + "</div></div></article>";
+      }).join("") + "</div></section>";
     }).join("");
   }
 
@@ -142,19 +136,7 @@
 
   function json(url) { return fetch(url, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
   var eventi = (elenco === "community" ? Promise.resolve(null) : json("eventi.json")).catch(function () { return null; });
-  function caricaElenco() {
-    if (elenco !== 'community') return json(elenco + '.json');
-    return Promise.all([json('community.json'), json('/api/community')]).then(function (risultati) {
-      var base = risultati[0], aggiornamenti = risultati[1];
-      var esclusi = new Set(aggiornamenti.esclusi || []), visti = new Set();
-      base.righe = (base.righe || []).concat(aggiornamenti.righe || []).filter(function (r) {
-        if (esclusi.has(r.link) || visti.has(r.link)) return false;
-        visti.add(r.link); return true;
-      });
-      return base;
-    });
-  }
-  caricaElenco()
+  json(elenco + ".json")
     .then(function (d) {
       dati = (d.righe || []).slice().sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), "it"); });
       fonte = d.fonte || "";
