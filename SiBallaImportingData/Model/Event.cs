@@ -6,6 +6,9 @@ namespace SiBallaImportingData.Model
     {
         public int Id { get; set; }
 
+        // Copia per il bollettino: integrare gli orari non deve modificare lo Sheet in memoria.
+        public Event Copy() => (Event)MemberwiseClone();
+
         // posizione nello sheet: valorizzata solo per gli eventi letti dallo sheet, non va su AppWrite
         [JsonIgnore] public string? SheetName { get; set; }
         [JsonIgnore] public int? SheetRow { get; set; }             // numero di riga (1 = prima riga)

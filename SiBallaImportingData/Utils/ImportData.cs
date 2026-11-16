@@ -159,6 +159,7 @@ namespace SiBallaImportingData.Utils
                                     LuogoVerificato = verifiedCol is int vc && row.Count > vc ? row[vc]?.ToString()?.Trim().ToLowerInvariant() : null,
                                     DateStart = Convert.ToDateTime(row[0]),
                                     DateFinish = Convert.ToDateTime(row[1]),
+                                    Duration = duration > TimeSpan.Zero ? duration : TimeSpan.Zero,
                                     // righe vecchie scritte con entità HTML ("&amp;"): in chiaro per l'app e per il confronto con gli eventi online
                                     PartyName = WebUtility.HtmlDecode(row[4].ToString()),
                                     //MonthYear = Month + " " + Convert.ToDateTime(row[0]).Year.ToString(),

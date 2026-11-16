@@ -199,7 +199,9 @@ internal static class ImportRunner
             .Where(NelPeriodo)
             .Where(x => EventFilter.IsWithinEmailRadius(x, radiusEmail))
             .ToList();
-        var bollettino = righeSheet.Where(x => x.LuogoVerificato != ImportData.VerifiedPending).ToList();
+        // Recupera gli orari online prima di escludere gli eventi gia presenti nello Sheet.
+        var bollettino = EventIdentity.CompleteEmailTiming(
+            righeSheet.Where(x => x.LuogoVerificato != ImportData.VerifiedPending), eventiOnline);
         var daVerificare = righeSheet
             .Where(x => x.LuogoVerificato == ImportData.VerifiedPending)
             .Select(x => (Evento: x, Motivo: x.MotivoVerifica ?? $"riga '{ImportData.VerifiedPending}' nello Sheet"))
