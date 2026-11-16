@@ -7,6 +7,13 @@
 (function () {
   var NOVITA = [
     {
+      versione: "1.1.2.0",
+      data: "Novembre 2026",
+      titolo: "Community siBalla",
+      intro: "Il nome della community ora indica Genova e dintorni.",
+      voci: []
+    },
+    {
       versione: "1.1.1.0",
       data: "Novembre 2026",
       titolo: "Piccole sistemazioni",
