@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+<ItemGroup>
+<Compile Include="../../SiBallaImportingData/Model/Event.cs" Link="Event.cs" />
+<Compile Include="../../SiBallaImportingData/Model/EventDetail.cs" Link="EventDetail.cs" />
+<Compile Include="../../SiBallaImportingData/Utils/EventIdentity.cs" Link="EventIdentity.cs" />
+</ItemGroup>
+</Project>

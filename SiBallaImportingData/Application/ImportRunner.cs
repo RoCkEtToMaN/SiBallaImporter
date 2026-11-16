@@ -176,9 +176,9 @@ internal static class ImportRunner
             await SincronizzaDatabaseAsync(eventiSheet, sheetEvents, appWriteService);
     }
 
-    // stesso confronto dell'import: nome della serata + giorno
+    // Stesso confronto dell?import, indipendente dalla durata e dalle varianti del titolo.
     private static bool NelloSheet(Dictionary<TipoEvento, List<Event>> eventiSheet, Event ev) =>
-        eventiSheet.Values.Any(lista => lista.Any(x => x.PartyName == ev.PartyName && x.DateStart.Date == ev.DateStart.Date));
+        eventiSheet.Values.Any(lista => lista.Any(x => EventIdentity.Same(x, ev)));
 
     /// <summary>
     /// Il bollettino viene dallo Sheet (il calendario curato: indirizzi corretti, righe aggiunte a mano).
