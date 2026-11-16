@@ -4,7 +4,7 @@
   var dialog = $('communityDialog'), form = $('communityForm'), invia = $('inviaCommunity');
   var antibot = window.siBallaAntibot.monta($('cAntibot'));
   function esito(testo, stato) { $('cEsito').textContent = testo; $('cEsito').dataset.stato = stato; }
-  $('segnalaCommunity').addEventListener('click', function () { dialog.showModal(); });
+  $('segnalaCommunity').addEventListener('click', function () { esito('', ''); $('communityConferma').textContent = ''; dialog.showModal(); });
   $('chiudiCommunity').addEventListener('click', function () { dialog.close(); });
   dialog.addEventListener('close', function () { $('segnalaCommunity').focus(); });
   form.addEventListener('submit', async function (e) {
@@ -20,7 +20,9 @@
       var risposta = await r.json();
       if (!r.ok || !risposta.ok) throw new Error(risposta.errore || 'Invio non riuscito. Riprova.');
       form.reset();
-      esito('Grazie! La richiesta \u00e8 stata ricevuta. La valuteremo e potremo contattarti via email.', 'ok');
+      esito('', '');
+      $('communityConferma').textContent = 'Grazie! La richiesta \u00e8 stata ricevuta. La valuteremo e potremo contattarti via email.';
+      dialog.close();
     } catch (err) {
       esito(err.message || 'Invio non riuscito. Riprova pi\u00f9 tardi.', 'errore');
     } finally { invia.disabled = false; antibot.reset(); }

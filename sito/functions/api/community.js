@@ -52,7 +52,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (env.STATS_KEY) gestione.searchParams.set('chiave', env.STATS_KEY);
   waitUntil((async () => {
     const notifica = await inviaEmail(env, prefissoProva(request.url) + `Community proposta: ${titolo}`,
-      `<div style="font-family:system-ui,sans-serif"><h2>Nuova richiesta community #${id}</h2><table>${righe.map(([k,v]) => `<tr><th style="text-align:left;vertical-align:top;padding-right:16px">${k}</th><td style="white-space:pre-wrap">${esc(v)}</td></tr>`).join("")}</table><p>Valuta la richiesta prima di aggiungerla alla scheda Community dello Sheet. Non pubblicare l'email di contatto.</p><p><a href="${esc(gestione.href)}">Gestisci le community</a></p></div>`,
+      `<div style="font-family:system-ui,sans-serif"><h2>Nuova richiesta community #${id}</h2><table>${righe.map(([k,v]) => `<tr><th style="text-align:left;vertical-align:top;padding-right:16px">${k}</th><td style="white-space:pre-wrap">${esc(v)}</td></tr>`).join("")}</table><p>Apri Gestisci le community per approvare, rifiutare o eliminare la richiesta. Non pubblicare l'email di contatto.</p><p><a href="${esc(gestione.href)}">Gestisci le community</a></p></div>`,
       `Nuova richiesta community #${id}\n\n` + righe.map(([k,v]) => `${k}: ${v}`).join("\n\n") + `\n\nGestisci: ${gestione.href}`);
     await db.prepare(`UPDATE community_proposte SET notifica = ?1 WHERE id = ?2`).bind(notifica, id).run();
     if (!notifica.startsWith("inviata")) console.log("notifica community #" + id + ": " + notifica);
