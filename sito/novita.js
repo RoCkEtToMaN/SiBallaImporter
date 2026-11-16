@@ -7,6 +7,16 @@
 (function () {
   var NOVITA = [
     {
+      versione: "1.2.0.0",
+      data: "Novembre 2026",
+      titolo: "Le community della tua citt\u00e0",
+      intro: "Scopri i gruppi swing per regione e citt\u00e0 e segnala la tua community.",
+      voci: [{ tipo: "Nuovo", titolo: "Community WhatsApp", link: "/community", punti: [
+        "Gruppi organizzati per regione e citt\u00e0.",
+        "Proponi una community dal modulo: la valutiamo prima di pubblicarla. La tua email di contatto resta privata."
+      ] }]
+    },
+    {
       versione: "1.1.2.0",
       data: "Novembre 2026",
       titolo: "Community siBalla",

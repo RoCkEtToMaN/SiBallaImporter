@@ -202,6 +202,7 @@ table{width:100%;border-collapse:collapse}td{padding:5px 4px;border-top:1px soli
 .num{text-align:right;font-variant-numeric:tabular-nums;width:3.5em;font-weight:600}.barra{width:35%}
 .barra span{display:block;height:8px;border-radius:4px;background:var(--accent);opacity:.8}.paese{color:var(--muted);font-size:13px}
 </style></head><body><main>
+<nav><a href="/community-admin?chiave=${encodeURIComponent(chiave)}">Gestisci le community</a></nav>
 <h1>Statistiche <span>siBalla</span></h1>
 <p class="sub">Visite anonime per luogo (approssimativo, ricavato dall'IP: la città può essere imprecisa). Aggiornato al ${esc(new Date().toLocaleString("it-IT", { timeZone: "Europe/Rome" }))}.</p>
 <nav>${link(7, "7 giorni")}${link(30, "30 giorni")}${link(365, "1 anno")}${link(0, "Sempre")}${chipGiorno}</nav>

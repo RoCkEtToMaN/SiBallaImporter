@@ -122,6 +122,7 @@ button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}.azioni{flex-wrap:wrap
 <h1>Bacheca <span>siBalla</span></h1>
 <p class="sub">Annunci inviati dagli utenti, non ancora scaduti. Quelli approvati compaiono subito nella pagina Bacheca (entro un minuto).
 · <a href="/clandestini-admin?chiave=${encodeURIComponent(chiave)}">Clandestini</a>
+· <a href="/community-admin?chiave=${encodeURIComponent(chiave)}">Community</a>
 · <a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche delle visite</a></p>
 ${corpo}
 </main></body></html>`;

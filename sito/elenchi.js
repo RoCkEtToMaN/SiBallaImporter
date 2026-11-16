@@ -142,7 +142,19 @@
 
   function json(url) { return fetch(url, { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
   var eventi = (elenco === "community" ? Promise.resolve(null) : json("eventi.json")).catch(function () { return null; });
-  json(elenco + ".json")
+  function caricaElenco() {
+    if (elenco !== 'community') return json(elenco + '.json');
+    return Promise.all([json('community.json'), json('/api/community')]).then(function (risultati) {
+      var base = risultati[0], aggiornamenti = risultati[1];
+      var esclusi = new Set(aggiornamenti.esclusi || []), visti = new Set();
+      base.righe = (base.righe || []).concat(aggiornamenti.righe || []).filter(function (r) {
+        if (esclusi.has(r.link) || visti.has(r.link)) return false;
+        visti.add(r.link); return true;
+      });
+      return base;
+    });
+  }
+  caricaElenco()
     .then(function (d) {
       dati = (d.righe || []).slice().sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), "it"); });
       fonte = d.fonte || "";
