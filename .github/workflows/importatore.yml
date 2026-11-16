@@ -149,6 +149,13 @@ jobs:
           key: luoghi-${{ github.run_id }}
           restore-keys: luoghi-
 
+      - name: Ripristina ultima email
+        uses: actions/cache/restore@v4
+        with:
+          path: out/ultima-email.json
+          key: email-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: email-
+
       - name: Esegui importatore
         id: importatore
         working-directory: out
@@ -201,6 +208,13 @@ jobs:
         with:
           path: fatto
           key: fatto-${{ needs.orario.outputs.giorno }}
+
+      - name: Salva ultima email
+        if: always() && steps.importatore.outcome != 'skipped'
+        uses: actions/cache/save@v4
+        with:
+          path: out/ultima-email.json
+          key: email-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Salva dizionario luoghi
         if: always()

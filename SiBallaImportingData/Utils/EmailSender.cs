@@ -8,13 +8,13 @@ namespace SiBallaImportingData.Utils
     public static class EmailSender
     {
         /// <summary>true se l'email è partita (o è stata salvata l'anteprima)</summary>
-        public static async Task<bool> SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
+        public static async Task<bool> SendWithMailjetAnonymous(List<Event> eventi, AppSettings settings, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null, List<Event>? nuovi = null)
         {
             try
             {
                 if (!string.IsNullOrWhiteSpace(settings.Email.PreviewFile))
                 {
-                    await File.WriteAllTextAsync(settings.Email.PreviewFile, TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare));
+                    await File.WriteAllTextAsync(settings.Email.PreviewFile, TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare, nuovi));
                     Console.WriteLine($"📄 Email non inviata, anteprima salvata in {settings.Email.PreviewFile}");
                     return true;
                 }
@@ -57,8 +57,8 @@ namespace SiBallaImportingData.Utils
                                 .Select(email => new { Email = email }).ToArray(),
                             Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
                                 $"{DateTime.Today.AddDays(settings.Import.Giorni).ToString("dd/MM/yyyy")}",
-                            TextPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare),
-                            HTMLPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare)
+                            TextPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare, nuovi),
+                            HTMLPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare, nuovi)
                         }
                     }
                 };
@@ -107,7 +107,7 @@ namespace SiBallaImportingData.Utils
             }
             return false;
         }
-        private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null)
+        private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null, List<Event>? nuovi = null)
         {
             string text = $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
                           $"{DateTime.Now} - {DateTime.Today.AddDays(opzioni.Giorni)} ,<br>" +
@@ -115,6 +115,16 @@ namespace SiBallaImportingData.Utils
                           $"Bollettino ({DateTime.Today.Day}/{DateTime.Today.Month} - " +
                           $"{DateTime.Today.AddDays(opzioni.Giorni).Day}/" +
                           $"{DateTime.Today.AddDays(opzioni.Giorni).Month})<br><br>";
+
+            var novita = (nuovi ?? []).Select(UltimaEmail.Chiave).ToHashSet();
+            var eventiVisibili = EventIdentity.Unique(eventi.Concat(daVerificare?.Select(x => x.Evento) ?? []).Concat(luogoDaVerificare ?? []));
+            var nuoviVisibili = eventiVisibili.Where(e => novita.Contains(UltimaEmail.Chiave(e))).ToList();
+            if (nuoviVisibili.Count > 0)
+            {
+                var citta = string.Join(", ", nuoviVisibili.Select(e => string.IsNullOrWhiteSpace(e.City) ? "città da verificare" : e.City).Distinct().OrderBy(x => x));
+                text += $"🆕 {nuoviVisibili.Count} eventi nuovi: {System.Net.WebUtility.HtmlEncode(citta)}.<br><br>";
+            }
+            string Segno(Event e) => novita.Contains(UltimaEmail.Chiave(e)) ? "🆕 " : "";
 
             text += $"*Bollettino della settimana*🗓️:<br>";
 
@@ -132,7 +142,7 @@ namespace SiBallaImportingData.Utils
                             ? $"{ev.Duration.Days} giorni"
                             : $"{ev.Duration.Hours} ore";
 
-                    text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
+                    text += $"  ·{Segno(ev)}{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.PartyName}; {duration}; {ev.Organizer}; {ev.EventDetail.WebSite}<br>";
                     i++;
                 }
             }
@@ -142,7 +152,7 @@ namespace SiBallaImportingData.Utils
                 text += $"<br><br>*Eventi da verificare (secondo l'AI probabilmente non swing)*❓:<br>";
 
                 foreach (var (ev, motivo) in daVerificare.OrderBy(x => x.Evento.DateStart))
-                    text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.City}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{motivo}</i><br>";
+                    text += $"  ·{Segno(ev)}{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.City}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{motivo}</i><br>";
             }
 
             // eventi di cui non si sa la città: non so se sono dentro il raggio, li segnalo invece di perderli
@@ -151,7 +161,7 @@ namespace SiBallaImportingData.Utils
                 text += $"<br><br>*Luogo da verificare (città sconosciuta)*📍:<br>";
 
                 foreach (var ev in luogoDaVerificare.OrderBy(x => x.DateStart))
-                    text += $"  ·{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.Country}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{ev.ProblemaLuogo}</i><br>";
+                    text += $"  ·{Segno(ev)}{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.Country}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{ev.ProblemaLuogo}</i><br>";
             }
 
             //Togliere la data nel titolo e mettere durata in ore

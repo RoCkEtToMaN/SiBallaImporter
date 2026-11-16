@@ -94,3 +94,75 @@ jobs:
           # da sito/ così wrangler include anche sito/functions (contatore visite e pagina statistiche)
           cd sito
           wrangler pages deploy ../_sito --project-name="$PROGETTO" --branch="$RAMO_CF" --commit-dirty=true
+
+  email-novita:
+    # Solo produzione: le anteprime non inviano email e non aggiornano lo storico.
+    needs: pubblica
+    if: github.ref_name == 'master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Lo stesso gruppo dell'importatore impedisce invii contemporanei.
+    concurrency:
+      group: importatore
+      cancel-in-progress: false
+    env:
+      TZ: Europe/Rome
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Service account Google
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        shell: pwsh
+        run: |
+          if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) { throw "Secret GOOGLE_SERVICE_ACCOUNT_JSON mancante" }
+          Set-Content -Path SiBallaImportingData/Resources/siballa-8c6d48649c13.json -Value $env:GOOGLE_SERVICE_ACCOUNT_JSON -Encoding utf8NoBOM
+      - name: Build
+        run: dotnet publish SiBallaImportingData/SiBallaImportingData.csproj -c Release -o "$OUT"
+      - name: Cache dati GeoNames
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/allCountries.txt
+            out/cities15000.txt
+          key: geonames-v1
+      # Conserva gli stessi percorsi della vecchia cache per poter recuperare lo storico iniziale.
+      - name: Ripristina storico precedente
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            out/DizionarioEventiInfo.json
+            out/venues.json
+            out/custom_locations.json
+            out/ultima-email.json
+          key: luoghi-${{ github.run_id }}
+          restore-keys: luoghi-
+      - name: Ripristina ultima email
+        uses: actions/cache/restore@v4
+        with:
+          path: out/ultima-email.json
+          key: email-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: email-
+      - name: Invia solo se ci sono eventi nuovi
+        working-directory: out
+        env:
+          Import__EmailSoloSheet: "true"
+          Import__EnableSending: ${{ vars.ENABLE_SENDING || 'true' }}
+          Import__EmailSoloSeCambia: "true"
+          Import__Giorni: ${{ vars.GIORNI || '7' }}
+          Import__NoPush: "true"
+          Import__ResetExcel: "false"
+          Email__PreviewFile: ""
+          Email__MailjetApiKey: ${{ secrets.MAILJET_API_KEY }}
+          Email__MailjetApiSecret: ${{ secrets.MAILJET_API_SECRET }}
+          Paths__DataDirectory: ${{ env.OUT }}
+        run: dotnet SiBallaImportingData.dll
+      - name: Salva ultima email
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: out/ultima-email.json
+          key: email-${{ github.run_id }}-${{ github.run_attempt }}

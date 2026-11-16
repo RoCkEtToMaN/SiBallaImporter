@@ -97,6 +97,7 @@ namespace SiBallaImportingData.Utils
 
     public class ImportOptions
     {
+        public bool EmailSoloSheet { get; set; }
         public bool EnableSearching { get; set; } = true;
         public bool EnableSending { get; set; }
         // manda l'email solo se ci sono eventi che l'ultima email non aveva (giro quotidiano su GitHub)

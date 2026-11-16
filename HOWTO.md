@@ -353,3 +353,13 @@ La copia di riferimento del dizionario è nel repo, in `data/DizionarioEventiInf
 
 Su GitHub succede lo stesso, ma commit e push li fa il workflow. Se il pull o il push non riescono il
 programma lo scrive nel log e va avanti; il commit resta in locale e lo pubblichi tu con un push.
+
+
+### Email delle novita dello Sheet
+
+Dopo ogni pubblicazione del sito pubblico (anche nel giro orario al minuto 17), viene letto lo Sheet:
+se ci sono eventi nuovi rispetto all'ultima email, parte un bollettino con gli stessi filtri di zona e periodo.
+Gli eventi restano raggruppati per citta; il simbolo 🆕 identifica le aggiunte e in cima compare
+il numero di eventi nuovi con le citta interessate. Il giro notturno e quello orario condividono lo storico
+e non inviano in contemporanea. Le anteprime del sito non inviano email. Le anteprime email locali
+non aggiornano lo storico degli invii. La variabile ENABLE_SENDING disabilita entrambi gli invii.
