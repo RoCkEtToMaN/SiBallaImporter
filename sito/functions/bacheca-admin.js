@@ -1,4 +1,3 @@
-import { pannelloCommunity } from "./community-admin.js";
 import { giornoRoma } from "../lib/visite.js";
 import { esc, uguali, dataSheet } from "../lib/clandestini.js";
 import { preparaBacheca, CATEGORIE, SOGLIA_SEGNALAZIONI, avvisaAutore } from "../lib/bacheca.js";
@@ -103,11 +102,6 @@ export async function onRequestGet({ request, env }) {
       gruppo("Rifiutati o tolti", results.filter((r) => r.stato === "no"), "Nessuno.");
   }
 
-  let community = '';
-  if (env.VISITE) {
-    try { community = await pannelloCommunity(env.VISITE, chiave, '/bacheca-admin'); }
-    catch (e) { console.log('Community nella bacheca admin: ' + e); community = '<p>Impossibile caricare le community. Ricarica la pagina.</p>'; }
-  }
   const html = `<!doctype html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>Bacheca siBalla</title><link rel="icon" href="/logo-app.svg">
@@ -124,14 +118,12 @@ article.msg{padding:10px 14px}article.msg.nascosto{opacity:.75;border:1px dashed
 button{font:inherit;font-weight:600;padding:6px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:var(--surface-2);color:var(--text);cursor:pointer}
 button.si{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 button.no{color:#FF6B6B;border-color:rgba(255,107,107,.4)}.azioni{flex-wrap:wrap}
-#community{margin:20px 0;border:1px solid var(--accent);border-radius:14px;padding:14px}#community summary{color:var(--accent);font-weight:700;cursor:pointer}#community h1{font-size:20px;margin:14px 0}#community nav{margin:10px 0}#community .descrizione{white-space:pre-wrap}
 </style></head><body><main>
 <h1>Bacheca <span>siBalla</span></h1>
 <p class="sub">Annunci inviati dagli utenti, non ancora scaduti. Quelli approvati compaiono subito nella pagina Bacheca (entro un minuto).
 · <a href="/clandestini-admin?chiave=${encodeURIComponent(chiave)}">Clandestini</a>
-· <a href="/community-admin?chiave=${encodeURIComponent(chiave)}">Community</a>
+· <a href="/community-admin?chiave=${encodeURIComponent(chiave)}">Gestisci community WhatsApp</a>
 · <a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche delle visite</a></p>
-<details id="community" open><summary>Gestisci le community WhatsApp</summary>${community}</details>
 ${corpo}
 </main></body></html>`;
   return new Response(html, {
