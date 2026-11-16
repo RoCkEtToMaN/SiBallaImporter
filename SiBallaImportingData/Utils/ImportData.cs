@@ -230,13 +230,11 @@ namespace SiBallaImportingData.Utils
 
                 // Verifica se l'evento è già presente tra i Workshop su Excel
                 bool giaPresenteInWorkshop = eventiFromExcel.TryGetValue(TipoEvento.Workshop, out var workshop)
-                    && workshop.Any(x => string.Equals(x.PartyName?.Trim(), ev.PartyName?.Trim(), StringComparison.OrdinalIgnoreCase)
-                                      && x.DateStart.Date == ev.DateStart.Date);
+                    && workshop.Any(x => EventIdentity.Same(x, ev));
 
                 // Verifica se l'evento è già presente tra le Serate su Excel
                 bool giaPresenteInSerate = eventiFromExcel.TryGetValue(TipoEvento.Serate, out var serate)
-                    && serate.Any(x => string.Equals(x.PartyName?.Trim(), ev.PartyName?.Trim(), StringComparison.OrdinalIgnoreCase)
-                                      && x.DateStart.Date == ev.DateStart.Date);
+                    && serate.Any(x => EventIdentity.Same(x, ev));
 
                 //if (date.Value.TotalDays > 1 && eventiFromExcel.TryGetValue(TipoEvento.Workshop, out var workshop) && !workshop.Any(x => x.PartyName == ev.PartyName
                 //      && x.DateStart.Date == ev.DateStart.Date))
