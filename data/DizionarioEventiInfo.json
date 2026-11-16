@@ -22669,5 +22669,42 @@
         ]
       }
     }
+  },
+  "swing sherbrooke|sherbrooke": {
+    "default": {
+      "organizer": "Swing Sherbrooke",
+      "city": "Sherbrooke",
+      "country": "undefined",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "soiree mixte avec saveur rockabilly jive": {
+        "organizer": null,
+        "city": "Sherbrooke",
+        "country": "undefined",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
   }
 }
