@@ -1,15 +1,17 @@
 # SiBalla Importer — come funziona
 
-Il repo contiene il programma che cerca gli eventi swing e due automazioni (workflow di
+Il repo contiene il programma che cerca gli eventi swing e le automazioni (workflow di
 GitHub Actions) che lo fanno girare da sole. Si trovano in `.github/workflows/` e si
 vedono nella tab **Actions** del repo su GitHub.
 
 | Workflow | File | Quando parte | Cosa fa |
 |---|---|---|---|
-| **Importatore eventi** | `importatore.yml` | ogni notte, il primo tentativo riuscito tra le 0:01 e le 6:01 (ora italiana) | cerca gli eventi, manda l'email se ci sono eventi nuovi, opzionalmente aggiorna Sheet e Appwrite |
+| **Importatore eventi** | `importatore.yml` | ogni ora al minuto 00 | cerca online, aggiunge i nuovi eventi allo Sheet, aggiorna Appwrite e avvia il sito; email solo con eventi nuovi |
+| **Sito pubblico** | `sito.yml` | ogni ora al minuto 17, a fine importazione e su richiesta | legge lo Sheet e pubblica gli eventi sul sito, senza inviare email |
 | **Appwrite keep-alive** | `appwrite-keepalive.yml` | ogni giorno alle 06:17 UTC | legge un documento dal database Appwrite per non farlo andare in pausa |
 
-I due workflow sono indipendenti: se uno fallisce l'altro gira comunque.
+L'importatore avvia anche la pubblicazione del sito a fine giro. Il sito ha inoltre un proprio
+avvio orario indipendente; il keep-alive resta separato.
 
 ---
 
@@ -24,9 +26,10 @@ I due workflow sono indipendenti: se uno fallisce l'altro gira comunque.
    impostato (`Radius`) da Genova.
 4. **Confronta con lo Sheet**: gli eventi trovati online che nello Sheet non ci sono sono i "nuovi".
 5. Poi, in base alle impostazioni:
-   - **Email** (`EnableSending`): prende gli eventi dei prossimi `Giorni`, li fa controllare a
-     Gemini (gli eventi non swing finiscono in una sezione "da verificare") e manda l'email con Mailjet.
-     Con `EmailSoloSeCambia` (attivo nel giro notturno) l'email parte solo se ci sono eventi che
+   - **Email** (`EnableSending`): prende gli eventi dello Sheet dei prossimi `Giorni` e gli
+     eventuali eventi online non ancora presenti nello Sheet. Gemini controlla solo questi ultimi;
+     le righe dello Sheet già curate non vengono riclassificate per il bollettino. Invia con Mailjet.
+     Con `EmailSoloSeCambia` (attivo nel giro orario) l'email parte solo se ci sono eventi che
      l'ultima email inviata non aveva.
    - **Sheet** (`EnableImportingOnExcel`): aggiunge i nuovi eventi allo Sheet, dopo averli fatti
      classificare da Gemini (vedi [Righe nuove nello Sheet](#righe-nuove-nello-sheet-nuovo-e-da-verificare)).
@@ -202,8 +205,8 @@ programma non riesce a prenderla. Nello Sheet non va cambiato niente.
    - oppure dal PC in `C:\Iroi\Fork\SiBallaImportingData\data\immagini\` (la cartella principale del
      repo, **non** `SiBallaImportingData\SiBallaImportingData\data`), poi commit e push.
 4. **Nello Sheet: menu SiBalla → Carica immagini e aggiorna sito.** Dopo 5-10 minuti nella colonna
-   **Immagine** c'è `sì` e il sito mostra l'immagine. Senza questo passo l'immagine arriva col giro
-   della notte.
+   **Immagine** c'è `sì` e il sito mostra l'immagine. Senza questo passo l'immagine arriva con il prossimo giro
+   orario.
 
 Se la colonna resta `no`, nel log del giro cerca `===== Immagini messe a mano =====`: dice se il nome
 non corrisponde a nessuna riga (`nessuna riga dello Sheet il ... con titolo ...`). Se poi cambi data o
@@ -234,15 +237,15 @@ Configurazione su Appwrite (una volta sola):
 3. Nello Sheet, riga 2 di **Serate** e **Workshop**: intestazione `Immagine` dopo l'ultima colonna
    (entro la Z).
 
-### Impostazioni dell'esecuzione automatica notturna
+### Impostazioni dell'esecuzione automatica oraria
 
 | Impostazione | Default | Variable di GitHub per cambiarlo |
 |---|---|---|
 | Email | sì | `ENABLE_SENDING` |
-| Aggiunta allo Sheet | no | `ENABLE_IMPORTING_ON_EXCEL` |
-| Caricamento su Appwrite | no | `ENABLE_IMPORTING_ON_DB` |
+| Aggiunta allo Sheet | **sì** | `ENABLE_IMPORTING_ON_EXCEL` |
+| Caricamento su Appwrite | **sì** | `ENABLE_IMPORTING_ON_DB` |
 | Coordinate sullo Sheet | no | `UPDATE_SHEET_COORDINATES` |
-| Immagini per le righe dello Sheet | no | `CERCA_IMMAGINI_SHEET` |
+| Immagini per le righe dello Sheet | **sì** | `CERCA_IMMAGINI_SHEET` |
 | Indirizzi con Gemini per le righe dello Sheet | **sì** | `CERCA_INDIRIZZI` (`false` per spegnerla; max per giro: `CERCA_INDIRIZZI_MAX`, default 20) |
 | Giorni coperti dall'email | 7 | `GIORNI` |
 
@@ -262,7 +265,7 @@ dello Sheet su Appwrite" a `true` e, se non vuoi l'email, "Invia l'email" a `fal
 
 L'opzione **"Giro veloce: solo immagini"** (`solo_immagini`, quella usata dal menu dello Sheet) fa
 solo immagini (data/immagini, siti, loghi) e caricamento sul DB: niente ricerca online, email degli
-eventi e indirizzi con Gemini. Non conta come giro del giorno (quello della notte parte comunque) e
+eventi e indirizzi con Gemini. Non sostituisce il giro completo pianificato ogni ora;
 l'email del log arriva solo se va in errore.
 
 A fine giro, veloce o completo, l'importatore avvia il workflow **Sito pubblico**: righe nuove e
@@ -314,7 +317,7 @@ dopo aver riattivato il progetto, per controllare che risponda.
 Se nel repo non arriva **nessun commit per 60 giorni**, GitHub disattiva tutti i workflow
 pianificati, quindi sia l'importatore sia il keep-alive. I run automatici non contano come attività.
 
-Il segnale è che **nella tab Actions non compaiono più run notturni** (l'email da sola non basta:
+Il segnale è che **nella tab Actions non compaiono più run orari** (l'email da sola non basta:
 parte solo quando ci sono eventi nuovi). Per riattivarli: Actions → seleziona il
 workflow → **Enable workflow** (per tutti e due). Dopo, conviene controllare che il progetto
 Appwrite non sia andato in pausa nel frattempo.
@@ -355,16 +358,30 @@ Su GitHub succede lo stesso, ma commit e push li fa il workflow. Se il pull o il
 programma lo scrive nel log e va avanti; il commit resta in locale e lo pubblichi tu con un push.
 
 
-### Importazione oraria ed email delle novita
+### Importazione oraria: fonti online, Sheet, email, app e sito
 
-L'importatore completo parte ogni ora al minuto 00: legge le fonti online, aggiorna lo Sheet e il DB
-e avvia la pubblicazione del sito. Gli avvii automatici possono subire ritardi su GitHub Actions;
-le importazioni vengono eseguite senza sovrapporsi. Resta anche la pubblicazione oraria del sito
-al minuto 17, utile per le modifiche manuali allo Sheet: questa non invia email.
+Con le impostazioni predefinite, ogni ora al minuto 00 parte il giro completo:
+
+1. Cerca gli eventi sulle fonti online (e-swing e SwingPlanit).
+2. Aggiunge allo Sheet gli eventi nuovi, dopo la classificazione; rilegge lo Sheet per includerli
+   nel bollettino e nel DB dello stesso giro.
+3. Invia l'email soltanto se ci sono eventi nuovi rispetto all'ultimo invio, nei filtri di zona e periodo.
+4. Aggiorna il database Appwrite da cui legge l'app.
+5. A fine giro avvia il workflow **Sito pubblico**, che legge lo Sheet aggiornato e ripubblica il sito.
+
+Quindi le novità non arrivano soltanto per email: vengono aggiunte allo Sheet e, se pubblicabili,
+arrivano anche nell'app e sul sito. Le righe **da verificare** e quelle scartate non vengono pubblicate;
+gli eventi passati restano nello storico dello Sheet. Anche modifiche manuali allo Sheet vengono
+recepite nei successivi aggiornamenti di app e sito.
+
+Gli avvii automatici possono subire ritardi su GitHub Actions e le importazioni non si sovrappongono.
+La pubblicazione oraria del sito al minuto 17 resta attiva anche indipendentemente dall'importatore;
+questa non cerca online e non invia email. Le variabili o le opzioni di lancio riportate sopra
+permettono di disabilitare separatamente email, scrittura nello Sheet o aggiornamento del DB.
 
 Il bollettino viene inviato solo se ci sono eventi nuovi rispetto all'ultima email, con gli stessi
-filtri di zona e periodo. Gli eventi restano raggruppati per citta, con il simbolo 🆕 sulle aggiunte
-e il riepilogo iniziale delle citta interessate. Lo storico degli invii viene conservato; le anteprime
+filtri di zona e periodo. Gli eventi restano raggruppati per città, con il simbolo 🆕 sulle aggiunte
+e il riepilogo iniziale delle città interessate. Lo storico degli invii viene conservato; le anteprime
 email locali non lo modificano. ENABLE_SENDING disabilita l'invio dei bollettini.
 Nei giri automatici l'email tecnica con il log parte solo se l'importatore va in errore;
 nei lanci manuali resta disponibile anche a giro riuscito.
