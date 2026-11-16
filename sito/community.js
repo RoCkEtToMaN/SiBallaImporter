@@ -20,9 +20,9 @@
       var risposta = await r.json();
       if (!r.ok || !risposta.ok) throw new Error(risposta.errore || 'Invio non riuscito. Riprova.');
       form.reset();
-      esito('Grazie! La richiesta ? stata ricevuta. La valuteremo e potremo contattarti via email.', 'ok');
+      esito('Grazie! La richiesta \u00e8 stata ricevuta. La valuteremo e potremo contattarti via email.', 'ok');
     } catch (err) {
-      esito(err.message || 'Invio non riuscito. Riprova pi? tardi.', 'errore');
+      esito(err.message || 'Invio non riuscito. Riprova pi\u00f9 tardi.', 'errore');
     } finally { invia.disabled = false; antibot.reset(); }
   });
 })();
