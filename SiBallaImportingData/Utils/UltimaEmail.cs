@@ -12,7 +12,7 @@ namespace SiBallaImportingData.Utils
     {
         private static string Percorso => DataPaths.Get("ultima-email.json");
 
-        private static string Chiave(Event e) => $"{e.PartyName?.Trim().ToLowerInvariant()}|{e.DateStart:yyyy-MM-dd}";
+        internal static string Chiave(Event e) => $"{e.PartyName?.Trim().ToLowerInvariant()}|{e.DateStart:yyyy-MM-dd}";
 
         /// <summary>Gli eventi che l'ultima email non aveva (tutti, se non c'è ancora un'ultima email)</summary>
         public static List<Event> Nuovi(List<Event> eventi)

@@ -25,6 +25,17 @@ internal static class ImportRunner
         var resolver = new AddressResolver(store);
         await InizializzaGeografiaAsync();
 
+        // Giro orario: sola lettura dello Sheet, senza ricerca online o scritture su Sheet/DB.
+        if (opzioni.EmailSoloSheet)
+        {
+            if (!opzioni.EnableSending) return;
+            var calendario = ImportData.LoadFile();
+            var righe = calendario.Values.SelectMany(x => x).ToList();
+            store.ApplyToSheetEvents(righe);
+            await InviaEmailAsync(settings, calendario, righe, []);
+            return;
+        }
+
         // TEST: conta le immagini trovate senza scrivere su foglio o DB
         // (Import:TestImmagini in appsettings.json, oppure dotnet run -- --test-immagini)
         if (opzioni.TestImmagini)
@@ -237,12 +248,12 @@ internal static class ImportRunner
                 bollettino.AddRange(swingOnline);
                 daVerificare.AddRange(nonSwingOnline);
             }
-            var inviata = await EmailSender.SendWithMailjetAnonymous(bollettino, settings, daVerificare, luogoSconosciuto);
+            var inviata = await EmailSender.SendWithMailjetAnonymous(bollettino, settings, daVerificare, luogoSconosciuto, nuovi);
             // se non è partita gli eventi restano "nuovi" e il programma esce con errore:
             // su GitHub il run fallisce (arriva la mail) e il tentativo dell'ora dopo la rimanda
-            if (inviata)
+            if (inviata && string.IsNullOrWhiteSpace(settings.Email.PreviewFile))
                 UltimaEmail.Ricorda(eventiEmail);
-            else
+            else if (!inviata)
                 Environment.ExitCode = 1;
         }
     }
