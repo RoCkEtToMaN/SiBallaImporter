@@ -20,7 +20,7 @@ name: Importatore eventi
 on:
   schedule:
     # Giro completo ogni ora; email degli eventi solo se ci sono novita.
-    - cron: "37 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       enable_sending:

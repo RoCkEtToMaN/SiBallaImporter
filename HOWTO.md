@@ -357,7 +357,7 @@ programma lo scrive nel log e va avanti; il commit resta in locale e lo pubblich
 
 ### Importazione oraria ed email delle novita
 
-L'importatore completo parte ogni ora al minuto 37: legge le fonti online, aggiorna lo Sheet e il DB
+L'importatore completo parte ogni ora al minuto 00: legge le fonti online, aggiorna lo Sheet e il DB
 e avvia la pubblicazione del sito. Gli avvii automatici possono subire ritardi su GitHub Actions;
 le importazioni vengono eseguite senza sovrapporsi. Resta anche la pubblicazione oraria del sito
 al minuto 17, utile per le modifiche manuali allo Sheet: questa non invia email.
