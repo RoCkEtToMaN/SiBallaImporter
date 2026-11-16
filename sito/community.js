@@ -18,10 +18,10 @@
       dati.turnstile = antibot.token();
       var r = await fetch('/api/community', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dati) });
       var risposta = await r.json();
-      if (!r.ok || !risposta.ok) throw new Error(risposta.errore || 'Invio non riuscito. Riprova.');
+      if (!r.ok || !risposta.ok || !Number.isSafeInteger(risposta.id) || risposta.id < 1) throw new Error(risposta.errore || 'Invio non riuscito. Riprova.');
       form.reset();
       esito('', '');
-      $('communityConferma').textContent = 'Grazie! La richiesta \u00e8 stata ricevuta. La valuteremo e potremo contattarti via email.';
+      $('communityConferma').textContent = 'Grazie! La richiesta #' + risposta.id + ' \u00e8 stata ricevuta. La valuteremo e potremo contattarti via email.';
       dialog.close();
     } catch (err) {
       esito(err.message || 'Invio non riuscito. Riprova pi\u00f9 tardi.', 'errore');

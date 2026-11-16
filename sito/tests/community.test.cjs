@@ -43,11 +43,17 @@ test('modale con sei campi obbligatori e script inclusi nel deploy',()=>{
  const html=fs.readFileSync('sito/community.html','utf8');
  for(const name of Object.keys(valid)) assert.match(html,new RegExp('name="'+name+'"[^>]*required'));
  assert.match(html,/<dialog[^>]*aria-labelledby=/);
- assert.match(html,/<script src="antibot.js"><\/script>\s*<script src="community.js">/);
+ assert.match(html,/<script src="antibot.js"><\/script>\s*<script src="community.js\?v=3">/);
  assert(!html.includes('mailto:'));
 });
 test('aggiorna la tabella esistente per conservare la citta', async()=>{
   const {response,database}=await run(valid,db({legacy:true}));
   assert.equal(response.status,200);
   assert(database.writes.some(x=>x.sql.startsWith('ALTER TABLE community_proposte ADD COLUMN citta')));
+});
+
+test('antispam non simula mai un salvataggio riuscito', async()=>{
+ const before=notifications.length;
+ const {response,body,database}=await run({...valid,sito_web:'autofill'});
+ assert.equal(response.status,400);assert(!body.ok);assert.equal(database.writes.length,0);assert.equal(notifications.length,before);
 });

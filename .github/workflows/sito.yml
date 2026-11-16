@@ -94,3 +94,11 @@ jobs:
           # da sito/ così wrangler include anche sito/functions (contatore visite e pagina statistiche)
           cd sito
           wrangler pages deploy ../_sito --project-name="$PROGETTO" --branch="$RAMO_CF" --commit-dirty=true
+
+      - name: Diagnostica richieste Community (sola lettura)
+        if: github.ref_name == 'anteprima'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python .github/scripts/diagnostica_community.py

@@ -15,7 +15,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   let d;
   try { d = await request.json(); } catch { return json({ errore: "Richiesta non valida." }, 400); }
   if (!d || typeof d !== "object" || Array.isArray(d)) return json({ errore: "Richiesta non valida." }, 400);
-  if (d.sito_web) return json({ ok: true });
+  if (d.sito_web) return json({ errore: "Invio bloccato dal controllo antispam. Ricarica la pagina e riprova." }, 400);
   if (!(await antibotOk(env, d.turnstile, request.headers.get("cf-connecting-ip"))))
     return json({ errore: "Verifica anti-spam non riuscita: riprova." }, 400);
   const limiti = { titolo:120, descrizione:1500, link:500, regione:80, citta:120, email:254 };
