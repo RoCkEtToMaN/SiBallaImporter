@@ -6,10 +6,10 @@ const source = fs.readFileSync('sito/functions/api/community.js', 'utf8').replac
 const notifications = [];
 const context = vm.createContext({ Response, URL, Date, console, pulisci:(s,n)=>s.trim().slice(0,n), esc:s=>s.replace(/</g,'&lt;'), antibotOk:async(env)=>!env.rejectBot, inviaEmail:async(...args)=>{ notifications.push(args); return 'inviata a admin'; }, prefissoProva:()=> '[PROVA] ' });
 vm.runInContext(source, context);
-const valid = { titolo:'Swing Genova', descrizione:'Community swing', link:'https://chat.whatsapp.com/esempio', regione:'Liguria', email:'proponente@example.com' };
+const valid = { titolo:'Swing Genova', descrizione:'Community swing', link:'https://chat.whatsapp.com/esempio', regione:'Liguria', citta:'Genova', email:'proponente@example.com' };
 function db(options={}) {
   const writes=[];
-  return { writes, prepare(sql) { let args=[]; return { bind(...a){args=a; return this;}, async first(){return {n:options.limit?200:0};}, async run(){if(options.fail) throw Error('DB'); writes.push({sql,args}); return {meta:{last_row_id:42}};} }; } };
+  return { writes, prepare(sql) { let args=[]; return { bind(...a){args=a; return this;}, async all(){return {results:options.legacy?[]:[{name:'citta'}]};}, async first(){return {n:options.limit?200:0};}, async run(){if(options.fail) throw Error('DB'); writes.push({sql,args}); return {meta:{last_row_id:42}};} }; } };
 }
 async function run(data, database=db(), extra={}) {
   const pending=[];
@@ -17,7 +17,7 @@ async function run(data, database=db(), extra={}) {
   await Promise.all(pending);
   return { response, body:await response.json(), database };
 }
-test('salva i cinque campi, notifica e restituisce solo id ed esito',async()=>{
+test('salva i sei campi, notifica e restituisce solo id ed esito',async()=>{
   const before=notifications.length;
   const {response,body,database}=await run(valid);
   assert.equal(response.status,200); assert.deepEqual(body,{ok:true,id:42});
@@ -25,6 +25,7 @@ test('salva i cinque campi, notifica e restituisce solo id ed esito',async()=>{
   assert.deepEqual(Array.from(insert.args.slice(1)),Object.values(valid));
   assert.equal(notifications.length,before+1);
   assert.match(notifications.at(-1)[3],/proponente@example.com/);
+  assert.match(notifications.at(-1)[3],/Genova/);
   assert(database.writes.some(x=>x.sql.startsWith('UPDATE')&&x.args[0].startsWith('inviata')));
 });
 test('rifiuta campi mancanti, regione, email, link e payload non validi',async()=>{
@@ -38,10 +39,15 @@ test('limite, antispam e indisponibilità non danno successo',async()=>{
   assert.equal((await run(valid,null)).response.status,503);
   assert.equal((await run(valid,db({fail:true}))).response.status,500);
 });
-test('modale con cinque campi obbligatori e script inclusi nel deploy',()=>{
+test('modale con sei campi obbligatori e script inclusi nel deploy',()=>{
  const html=fs.readFileSync('sito/community.html','utf8');
  for(const name of Object.keys(valid)) assert.match(html,new RegExp('name="'+name+'"[^>]*required'));
  assert.match(html,/<dialog[^>]*aria-labelledby=/);
  assert.match(html,/<script src="antibot.js"><\/script>\s*<script src="community.js">/);
  assert(!html.includes('mailto:'));
+});
+test('aggiorna la tabella esistente per conservare la citta', async()=>{
+  const {response,database}=await run(valid,db({legacy:true}));
+  assert.equal(response.status,200);
+  assert(database.writes.some(x=>x.sql.startsWith('ALTER TABLE community_proposte ADD COLUMN citta')));
 });
