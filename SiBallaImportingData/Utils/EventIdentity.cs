@@ -43,6 +43,26 @@ public static class EventIdentity
             && (first.IsSubsetOf(second) || second.IsSubsetOf(first));
     }
 
+    public static List<Event> CompleteEmailTiming(IEnumerable<Event> curated, IEnumerable<Event> online)
+    {
+        var sources = online.ToList();
+        return curated.Select(original =>
+        {
+            var copy = original.Copy();
+            foreach (var source in sources.Where(e => Same(original, e)))
+            {
+                if (copy.Duration <= TimeSpan.Zero && source.Duration > TimeSpan.Zero)
+                    copy.Duration = source.Duration;
+                if (copy.DateStart.TimeOfDay == TimeSpan.Zero && source.DateStart.TimeOfDay != TimeSpan.Zero)
+                    copy.DateStart = source.DateStart;
+                if ((!copy.DateFinish.HasValue || copy.DateFinish <= copy.DateStart)
+                    && source.DateFinish > copy.DateStart)
+                    copy.DateFinish = source.DateFinish;
+            }
+            return copy;
+        }).ToList();
+    }
+
     public static List<Event> Unique(IEnumerable<Event> events)
     {
         var result = new List<Event>();

@@ -36,3 +36,13 @@ early.DateStart = early.DateStart.AddHours(16);
 late.DateStart = late.DateStart.AddHours(21);
 Check(!EventIdentity.Same(early, late), "Orari espliciti distinti");
 Check(!EventIdentity.Same(luzzati, Make("Social Swing Dance al porto", "Garage Hoppers", 19)), "Titoli con luoghi distinti");
+
+
+shim.EventDetail = new EventDetail { WebSite = "https://curated.example" };
+complete.EventDetail = new EventDetail { WebSite = "https://online.example" };
+var email = EventIdentity.CompleteEmailTiming(new[] { shim }, new[] { complete }).Single();
+Check(email.Duration == TimeSpan.FromHours(4), "Sheet senza durata: recupera quattro ore online prima del filtro");
+Check(email.EventDetail.WebSite == shim.EventDetail.WebSite, "Conserva riferimento curato");
+Check(shim.Duration == TimeSpan.Zero, "Non modifica evento originale");
+Check(EventIdentity.CompleteEmailTiming(new[] { complete }, new[] { shim }).Single().Duration == TimeSpan.FromHours(4), "Non cancella durata gia nota");
+Check(EventIdentity.CompleteEmailTiming(new[] { shim }, new[] { otherDay }).Single().Duration == TimeSpan.Zero, "Nessun recupero da eventi distinti");
