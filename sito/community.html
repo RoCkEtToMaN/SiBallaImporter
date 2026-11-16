@@ -19,10 +19,9 @@
 .community-head button { font:inherit; font-size:28px; background:transparent; border:0; color:var(--text); cursor:pointer; }
 #communityDialog p { color:var(--muted); font-size:14px; }
 #communityForm label { display:block; font-weight:600; margin:14px 0 6px; }
-#communityForm input:not(.community-trappola), #communityForm textarea, #communityForm select { box-sizing:border-box; width:100%; font:inherit; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:9px; padding:10px; }
+#communityForm input, #communityForm textarea, #communityForm select { box-sizing:border-box; width:100%; font:inherit; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:9px; padding:10px; }
 #communityForm textarea { resize:vertical; }
 #communityForm :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-.community-trappola { position:absolute; left:-10000px; width:1px; height:1px; }
 #cEsito[data-stato="errore"] { color:#ff9b9b; }
 #cEsito[data-stato="ok"] { color:#6fcf97; }
 </style>
@@ -59,14 +58,13 @@
     <label for="cCitta">Citt&agrave;</label><input id="cCitta" name="citta" required maxlength="120" autocomplete="address-level2">
     <label for="cEmail">Email a cui contattarti</label><input id="cEmail" name="email" type="email" required maxlength="254" autocomplete="email" aria-describedby="cPrivacy">
     <p id="cPrivacy">La tua email serve solo per contattarti sulla richiesta e non viene pubblicata.</p>
-    <input id="cSito" class="community-trappola" name="sito_web" tabindex="-1" autocomplete="off" aria-hidden="true">
     <div id="cAntibot"></div>
     <button type="submit" class="community-btn" id="inviaCommunity">Invia richiesta</button>
     <p id="cEsito" role="status" aria-live="polite"></p>
   </form>
 </dialog>
 <script src="antibot.js"></script>
-<script src="community.js?v=3"></script>
+<script src="community.js?v=4"></script>
 <script src="elenchi.js"></script>
 <script src="menu.js"></script>
 <script src="novita.js"></script>

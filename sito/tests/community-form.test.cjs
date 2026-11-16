@@ -31,3 +31,10 @@ test('una risposta senza id non chiude la modale e non cancella i dati',async()=
  await form.listeners.submit({preventDefault(){}});
  assert.equal(dialog.open,true);assert.equal(form.resettato,undefined);assert.equal(elementi.cEsito.dataset.stato,'errore');
 });
+
+test('il modulo non espone campi invisibili compilabili automaticamente',()=>{
+ const html=fs.readFileSync('sito/community.html','utf8');
+ assert(!html.includes('name="sito_web"'));
+ assert(!html.includes('id="cSito"'));
+ assert(html.includes('id="cAntibot"'));
+});

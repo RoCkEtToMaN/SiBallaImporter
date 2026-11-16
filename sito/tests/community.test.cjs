@@ -43,7 +43,7 @@ test('modale con sei campi obbligatori e script inclusi nel deploy',()=>{
  const html=fs.readFileSync('sito/community.html','utf8');
  for(const name of Object.keys(valid)) assert.match(html,new RegExp('name="'+name+'"[^>]*required'));
  assert.match(html,/<dialog[^>]*aria-labelledby=/);
- assert.match(html,/<script src="antibot.js"><\/script>\s*<script src="community.js\?v=3">/);
+ assert.match(html,/<script src="antibot.js"><\/script>\s*<script src="community.js\?v=4">/);
  assert(!html.includes('mailto:'));
 });
 test('aggiorna la tabella esistente per conservare la citta', async()=>{
