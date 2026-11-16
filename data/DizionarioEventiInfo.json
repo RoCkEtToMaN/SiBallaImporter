@@ -941,6 +941,24 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "swing golf e lindy hop": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -2173,8 +2191,7 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Balboa",
-        "Lindy"
+        "Balboa"
       ]
     },
     "events": {
@@ -2242,6 +2259,24 @@
         "notes": null,
         "stili": [
           "Lindy"
+        ]
+      },
+      "balboa night galleria vittorio emanuele": {
+        "organizer": null,
+        "city": "Pistoia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
         ]
       }
     }
