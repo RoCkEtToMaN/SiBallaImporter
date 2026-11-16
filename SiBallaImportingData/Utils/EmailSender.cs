@@ -120,7 +120,7 @@ namespace SiBallaImportingData.Utils
 
             int i = 1;            
           
-            foreach (var city in eventi.GroupBy(x => x.City).OrderByDescending(g => string.Equals(g.Key, "Genova", StringComparison.Ordinal)).ThenBy(g => g.Key))
+            foreach (var city in EventIdentity.Unique(eventi).GroupBy(x => x.City).OrderByDescending(g => string.Equals(g.Key, "Genova", StringComparison.Ordinal)).ThenBy(g => g.Key))
             {
                 text += $"_*{city.Key}*_:<br>";
 
