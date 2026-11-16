@@ -4,7 +4,7 @@ import { antibotOk } from "../../lib/antibot.js";
 
 // POST /api/community: sei campi obbligatori; email privata, nessuna pubblicazione automatica.
 // 200 {ok:true,id}; 400 dati/antispam non validi; 429 limite giornaliero; 503 DB assente; 500 salvataggio fallito.
-const REGIONI = ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte", "Puglia", "Sardegna", "Sicilia", "Toscana", "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"];
+export const REGIONI = ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", "Friuli-Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte", "Puglia", "Sardegna", "Sicilia", "Toscana", "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"];
 const json = (o, status = 200) => new Response(JSON.stringify(o), {
   status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
 });

@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync('sito/functions/api/community.js', 'utf8').replace(/^import .*;\r?\n/gm, '').replace(/export async function/g, 'async function');
+const source = fs.readFileSync('sito/functions/api/community.js', 'utf8').replace(/^import .*;\r?\n/gm, '').replace(/export /g, '');
 const notifications = [];
 const context = vm.createContext({ Response, URL, Date, console, pulisci:(s,n)=>s.trim().slice(0,n), esc:s=>s.replace(/</g,'&lt;'), antibotOk:async(env)=>!env.rejectBot, inviaEmail:async(...args)=>{ notifications.push(args); return 'inviata a admin'; }, prefissoProva:()=> '[PROVA] ' });
 vm.runInContext(source, context);

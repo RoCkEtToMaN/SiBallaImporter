@@ -7,6 +7,13 @@
 (function () {
   var NOVITA = [
     {
+      versione: "1.2.2.0",
+      data: "Novembre 2026",
+      titolo: "Gestione community WhatsApp",
+      intro: "Miglioramenti alla gestione delle community.",
+      voci: []
+    },
+    {
       versione: "1.2.1.0",
       data: "Novembre 2026",
       titolo: "Gestione delle community",

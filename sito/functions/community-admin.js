@@ -1,5 +1,5 @@
-import { esc, uguali } from '../lib/clandestini.js';
-import { preparaCommunity } from './api/community.js';
+import { esc, uguali, pulisci } from '../lib/clandestini.js';
+import { preparaCommunity, REGIONI } from './api/community.js';
 
 const headers = { 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'X-Robots-Tag':'noindex, nofollow', 'Referrer-Policy':'no-referrer' };
 const nonTrovata = () => new Response('Not found', {status:404, headers:{'Cache-Control':'no-store'}});
@@ -11,7 +11,26 @@ export async function onRequestPost({request, env}) {
   await preparaCommunity(env.VISITE);
   const azione = f.get('azione'), id = Number(f.get('id'));
   const stati = {approva:'ok', rifiuta:'no', togli:'no', riapri:'da valutare'};
-  if (stati[azione] && Number.isSafeInteger(id) && id > 0) {
+  if (azione === 'aggiungi') {
+    const limiti = {titolo:120, descrizione:1500, link:500, regione:80, citta:120, email:254};
+    const dati = {};
+    for (const [campo, limite] of Object.entries(limiti)) {
+      const valore = String(f.get(campo) || '').trim();
+      if (!valore || valore.length > limite) return new Response('Compila tutti i campi. Torna indietro per correggere.', {status:400, headers});
+      dati[campo] = valore;
+    }
+    let linkValido = false;
+    try {
+      const u = new URL(dati.link);
+      linkValido = ['https:', 'http:'].includes(u.protocol) && u.hostname.includes('.') && !u.username && !u.password;
+    } catch {}
+    const titolo = pulisci(dati.titolo,120), descrizione = pulisci(dati.descrizione,1500), citta = pulisci(dati.citta,120);
+    if (!titolo || !descrizione || !citta || !REGIONI.includes(dati.regione) || !linkValido || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dati.email))
+      return new Response('Controlla titolo, descrizione, regione, citta, link ed email. Torna indietro per correggere.', {status:400, headers});
+    await env.VISITE.prepare(`INSERT INTO community_proposte (creato, titolo, descrizione, link, regione, citta, email, stato, notifica)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'ok', 'Inserita dall amministratore')`)
+      .bind(new Date().toISOString(), titolo, descrizione, dati.link, dati.regione, citta, dati.email).run();
+  } else if (stati[azione] && Number.isSafeInteger(id) && id > 0) {
     await env.VISITE.prepare('UPDATE community_proposte SET stato = ?1 WHERE id = ?2').bind(stati[azione], id).run();
   } else if (azione === 'elimina' && Number.isSafeInteger(id) && id > 0) {
     await env.VISITE.prepare('DELETE FROM community_proposte WHERE id = ?1').bind(id).run();
@@ -25,7 +44,8 @@ export async function onRequestPost({request, env}) {
   } else if (azione === 'ripristina') {
     await env.VISITE.prepare('DELETE FROM community_escluse WHERE link = ?1').bind(String(f.get('link') || '')).run();
   } else return new Response('Azione non valida', {status:400});
-  return new Response(null, {status:303, headers:{Location:(f.get('ritorno') === '/statistiche' ? '/statistiche' : '/community-admin')+'?chiave='+encodeURIComponent(chiave)+(f.get('ritorno') === '/statistiche' ? '#community' : ''), 'Cache-Control':'no-store'}});
+  const ritorno = ['/statistiche', '/bacheca-admin'].includes(f.get('ritorno')) ? f.get('ritorno') : '/community-admin';
+  return new Response(null, {status:303, headers:{Location:ritorno+'?chiave='+encodeURIComponent(chiave)+(ritorno !== '/community-admin' ? '#community' : ''), 'Cache-Control':'no-store'}});
 }
 
 export async function onRequestGet({request, env}) {
@@ -48,8 +68,17 @@ export async function pannelloCommunity(db, chiave, ritorno = '/community-admin'
     <div class="azioni">${r.stato === 'ok' ? pulsante(r,'togli','Togli dal sito') : pulsante(r,'approva','Approva e pubblica')}
     ${r.stato === 'da valutare' ? pulsante(r,'rifiuta','Rifiuta') : pulsante(r,'riapri','Rimetti in attesa')}${pulsante(r,'elimina','Elimina definitivamente')}</div></article>`;
   const gruppo = (titolo, stato) => { const righe = richieste.filter(r=>r.stato===stato); return `<section><h2>${titolo} (${righe.length})</h2>${righe.map(scheda).join('') || '<p>Nessuna community.</p>'}</section>`; };
-  return `    <h1>Gestione community</h1><nav><a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche</a> &middot; <a href="/bacheca-admin?chiave=${encodeURIComponent(chiave)}">Bacheca</a> &middot; <a href="/clandestini-admin?chiave=${encodeURIComponent(chiave)}">Clandestini</a> &middot; <a href="/community">Pagina pubblica</a></nav>
+  return `    <style>.community-aggiungi label{display:block;margin:10px 0}.community-aggiungi input,.community-aggiungi textarea,.community-aggiungi select{display:block;box-sizing:border-box;width:100%;font:inherit;background:#0E0E12;color:#fff;border:1px solid #555;border-radius:8px;padding:9px;margin-top:5px}.community-aggiungi button{margin-top:10px}</style><h1>Gestione community WhatsApp</h1><nav><a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche</a> &middot; <a href="/bacheca-admin?chiave=${encodeURIComponent(chiave)}">Bacheca</a> &middot; <a href="/clandestini-admin?chiave=${encodeURIComponent(chiave)}">Clandestini</a> &middot; <a href="/community">Pagina pubblica</a></nav>
     <p>Le proposte compaiono sul sito solo dopo l'approvazione. Togli dal sito le nasconde; Elimina definitivamente cancella anche la richiesta e il contatto privato. Gli aggiornamenti si vedono ricaricando la pagina pubblica.</p>
+    <section class="community-aggiungi"><h2>Aggiungi una community WhatsApp</h2><p>La community inserita da qui viene pubblicata direttamente. L'email di contatto resta privata.</p>
+    <form method="post" action="/community-admin">${chiaveInput}<input type="hidden" name="azione" value="aggiungi">
+    <label>Titolo community<input name="titolo" required maxlength="120"></label>
+    <label>Descrizione<textarea name="descrizione" required maxlength="1500" rows="3"></textarea></label>
+    <label>Link della community<input name="link" type="url" required maxlength="500" placeholder="https://"></label>
+    <label>Regione<select name="regione" required><option value="">Scegli una regione</option>${REGIONI.map(r=>`<option>${esc(r)}</option>`).join('')}</select></label>
+    <label>Citt&agrave;<input name="citta" required maxlength="120" autocomplete="address-level2"></label>
+    <label>Email di contatto (privata)<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+    <button>Aggiungi e pubblica</button></form></section>
     ${gruppo('Da valutare','da valutare')}${gruppo('Approvate','ok')}${gruppo('Rifiutate o tolte','no')}
     <section><h2>Community dall'elenco iniziale</h2><p>Puoi toglierle dal sito e ripristinarle qui. Il file di origine rimane conservato.</p><div id="iniziali">Caricamento...</div></section>
     <section><h2>Tolte dall'elenco iniziale</h2>${escluse.map(r=>`<article><h3>${esc(r.nome)}</h3><p>${esc(r.link)}</p><form method="post" action="/community-admin">${chiaveInput}<input type="hidden" name="link" value="${esc(r.link)}"><button name="azione" value="ripristina">Ripristina sul sito</button></form></article>`).join('') || '<p>Nessuna.</p>'}</section>

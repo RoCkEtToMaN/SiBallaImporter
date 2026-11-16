@@ -2,8 +2,8 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm');
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-const source=fs.readFileSync('sito/functions/community-admin.js','utf8').replace(/^import .*;\r?\n/gm,'').replace(/export async function/g,'async function');
-const context=vm.createContext({Response,URL,Date,console,esc,uguali:(a,b)=>a===b,preparaCommunity:async()=>{}});
+const source=fs.readFileSync('sito/functions/community-admin.js','utf8').replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
+const context=vm.createContext({Response,URL,Date,console,esc,uguali:(a,b)=>a===b,preparaCommunity:async()=>{},REGIONI:['Liguria'],pulisci:(s,n)=>s.trim().slice(0,n)});
 vm.runInContext(source,context);
 function db(){const writes=[];return{writes,prepare(sql){let args=[];return{bind(...a){args=a;return this;},async run(){writes.push({sql,args});},async all(){return{results:sql.includes('community_escluse')?[]:[{id:7,titolo:'<script>bad</script>',regione:'Liguria',citta:'Genova',descrizione:'Swing',link:'https://example.com',email:'private@example.com',creato:'2026-11-16T12:00:00Z',notifica:'inviata',stato:'da valutare'}]};}};}};}
 async function post(fields,key='secret'){
@@ -34,7 +34,7 @@ test('pagina privata mostra esito notifica ed esegue escaping',async()=>{
  assert.match(html,/Notifica: inviata/);assert.match(html,/Elimina definitivamente/);
 });
 test('API pubblica seleziona solo dati pubblici approvati',async()=>{
- const api=fs.readFileSync('sito/functions/api/community.js','utf8').replace(/^import .*;\r?\n/gm,'').replace(/export async function/g,'async function');
+ const api=fs.readFileSync('sito/functions/api/community.js','utf8').replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
  const c=vm.createContext({Response,console});vm.runInContext(api,c);
  const queries=[];
  const database={prepare(sql){queries.push(sql);return{async run(){},async all(){return{results:sql.includes('PRAGMA')?[{name:'citta'}]:sql.includes('SELECT link')?[{link:'https://hidden.example'}]:[{nome:'Swing',regione:'Liguria',citta:'Genova'}]};}};}};
@@ -59,4 +59,20 @@ test('azioni avviate dalle statistiche tornano alla sezione community',async()=>
  const html=await context.pannelloCommunity(db(),'secret','/statistiche');
  assert.match(html,/<form method="post" action="\/community-admin"/);
  assert.match(html,/name="ritorno" value="\/statistiche"/);
+});
+
+test('inserimento amministrativo pubblica e torna alla Bacheca',async()=>{
+ const dati={azione:'aggiungi',ritorno:'/bacheca-admin',titolo:'Swing Genova',descrizione:'Community swing',link:'https://chat.whatsapp.com/esempio',regione:'Liguria',citta:'Genova',email:'admin@example.com'};
+ const {response,database}=await post(dati);
+ assert.equal(response.status,303);
+ assert.equal(response.headers.get('Location'),'/bacheca-admin?chiave=secret#community');
+ assert.match(database.writes[0].sql,/INSERT INTO community_proposte/);
+ assert.match(database.writes[0].sql,/'ok'/);
+ assert.equal(database.writes[0].args[1],'Swing Genova');
+ for(const modifica of [{email:'errata'},{link:'javascript:alert(1)'},{regione:'inesistente'},{citta:''},{titolo:'x'.repeat(121)}]){
+  const risultato=await post({...dati,...modifica});assert.equal(risultato.response.status,400);assert.equal(risultato.database.writes.length,0);
+ }
+ const html=await context.pannelloCommunity(db(),'secret','/bacheca-admin');
+ assert.match(html,/Aggiungi una community WhatsApp/);
+ assert.match(html,/name="ritorno" value="\/bacheca-admin"/);
 });
