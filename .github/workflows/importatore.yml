@@ -19,12 +19,8 @@ name: Importatore eventi
 
 on:
   schedule:
-    # Tutti i giorni, un tentativo ogni ora dalle 0:01 alle 6:01 italiane (l'email parte solo se ci sono
-    # eventi nuovi, vedi Import__EmailSoloSeCambia). GitHub a volte salta o ritarda di ore i cron, quindi
-    # più tentativi: il job "orario" fa girare solo il primo della giornata italiana, gli altri si fermano subito.
-    # GitHub usa solo UTC: 22:01-05:01 UTC copre 0:01-6:01 sia con l'ora legale sia con la solare
-    # (con la solare 22:01 UTC sono le 23:01 del giorno prima, e "orario" lo scarta).
-    - cron: "1 22,23,0-5 * * *"
+    # Giro completo ogni ora; email degli eventi solo se ci sono novita.
+    - cron: "37 * * * *"
   workflow_dispatch:
     inputs:
       enable_sending:
@@ -61,42 +57,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # dei tentativi pianificati fa girare solo il primo del giorno italiano: il run riuscito lascia in cache
-  # la chiave fatto-<data> (vedi "Segna giorno fatto"); il lancio manuale gira sempre
-  orario:
-    runs-on: ubuntu-latest
-    outputs:
-      esegui: ${{ steps.verifica.outputs.esegui }}
-      giorno: ${{ steps.giorno.outputs.giorno }}
-    steps:
-      - id: giorno
-        run: echo "giorno=$(TZ=Europe/Rome date +%F)" >> "$GITHUB_OUTPUT"
-
-      - id: fatto
-        if: github.event_name == 'schedule'
-        uses: actions/cache/restore@v4
-        with:
-          path: fatto
-          key: fatto-${{ steps.giorno.outputs.giorno }}
-          lookup-only: true
-
-      - id: verifica
-        env:
-          CRON: ${{ github.event.schedule }}
-          FATTO: ${{ steps.fatto.outputs.cache-hit }}
-        run: |
-          esegui=true
-          if [ -n "$CRON" ]; then
-            ora=$(TZ=Europe/Rome date +%H)
-            # 22-23: tentativo delle 23:01 con l'ora solare (o ritardo enorme), è ancora il giorno prima
-            if [ "$ora" -ge 22 ] || [ "$FATTO" = "true" ]; then esegui=false; fi
-          fi
-          echo "cron: ${CRON:-avvio manuale}, ora italiana: $(TZ=Europe/Rome date +%H:%M), già fatto oggi: ${FATTO:-no}, esegui: $esegui"
-          echo "esegui=$esegui" >> "$GITHUB_OUTPUT"
-
   importa:
-    needs: orario
-    if: needs.orario.outputs.esegui == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # contents: commit del dizionario dei luoghi; actions: avvio del workflow del sito a fine giro
@@ -171,9 +132,9 @@ jobs:
           # solo_immagini (menu SiBalla dello Sheet): niente ricerca online, email e indirizzi con Gemini
           Import__EnableSearching: ${{ inputs.solo_immagini == 'true' && 'false' || 'true' }}
           Import__EnableSending: ${{ inputs.solo_immagini == 'true' && 'false' || (inputs.enable_sending || vars.ENABLE_SENDING || 'true') }}
-          # giro quotidiano: email solo se ci sono eventi che l'ultima email non aveva
+          # giro orario: email solo se ci sono eventi che l'ultima email non aveva
           Import__EmailSoloSeCambia: "true"
-          # di notte gli eventi nuovi vanno nello Sheet e lo Sheet va sul DB dell'app (le righe "da verificare" restano fuori);
+          # a ogni giro gli eventi nuovi vanno nello Sheet e lo Sheet va sul DB dell'app (le righe "da verificare" restano fuori);
           # dopo una correzione a mano nello Sheet basta un lancio manuale per riallineare il DB
           Import__EnableImportingOnExcel: ${{ inputs.enable_importing_on_excel || vars.ENABLE_IMPORTING_ON_EXCEL || 'true' }}
           Import__EnableImportingOnDB: ${{ inputs.enable_importing_on_db || vars.ENABLE_IMPORTING_ON_DB || 'true' }}
@@ -195,19 +156,6 @@ jobs:
           Paths__DataDirectory: ${{ env.OUT }}
         # output anche in out/importatore.log: va nello ZIP del run e nell'email del log
         run: dotnet SiBallaImportingData.dll 2>&1 | tee importatore.log
-
-      # i tentativi successivi di oggi trovano la chiave e non ripartono (i run sono in fila per la concurrency)
-      # il giro veloce "solo immagini" non conta: quello completo della notte deve partire comunque
-      - name: Segna giorno fatto
-        if: inputs.solo_immagini != 'true'
-        run: mkdir -p fatto && echo "run ${{ github.run_number }}" > fatto/giorno
-
-      - name: Salva giorno fatto
-        if: inputs.solo_immagini != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: fatto
-          key: fatto-${{ needs.orario.outputs.giorno }}
 
       - name: Salva ultima email
         if: always() && steps.importatore.outcome != 'skipped'
@@ -262,10 +210,11 @@ jobs:
           retention-days: 30
 
       # log del giro per email (stessi destinatari dell'email degli eventi) con un riepilogo in cima;
+      # nei giri automatici solo in caso di errore; nei manuali mantiene il comportamento precedente.
       # parte anche se il programma è andato in errore e non fa mai fallire il run
       # nel giro veloce "solo immagini" solo se va in errore
       - name: Email con il log
-        if: always() && steps.importatore.outcome != 'skipped' && (inputs.solo_immagini != 'true' || steps.importatore.outcome == 'failure')
+        if: always() && steps.importatore.outcome != 'skipped' && (github.event_name != 'schedule' || steps.importatore.outcome == 'failure') && (inputs.solo_immagini != 'true' || steps.importatore.outcome == 'failure')
         env:
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}

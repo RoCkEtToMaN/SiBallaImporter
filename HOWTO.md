@@ -355,11 +355,16 @@ Su GitHub succede lo stesso, ma commit e push li fa il workflow. Se il pull o il
 programma lo scrive nel log e va avanti; il commit resta in locale e lo pubblichi tu con un push.
 
 
-### Email delle novita dello Sheet
+### Importazione oraria ed email delle novita
 
-Dopo ogni pubblicazione del sito pubblico (anche nel giro orario al minuto 17), viene letto lo Sheet:
-se ci sono eventi nuovi rispetto all'ultima email, parte un bollettino con gli stessi filtri di zona e periodo.
-Gli eventi restano raggruppati per citta; il simbolo 🆕 identifica le aggiunte e in cima compare
-il numero di eventi nuovi con le citta interessate. Il giro notturno e quello orario condividono lo storico
-e non inviano in contemporanea. Le anteprime del sito non inviano email. Le anteprime email locali
-non aggiornano lo storico degli invii. La variabile ENABLE_SENDING disabilita entrambi gli invii.
+L'importatore completo parte ogni ora al minuto 37: legge le fonti online, aggiorna lo Sheet e il DB
+e avvia la pubblicazione del sito. Gli avvii automatici possono subire ritardi su GitHub Actions;
+le importazioni vengono eseguite senza sovrapporsi. Resta anche la pubblicazione oraria del sito
+al minuto 17, utile per le modifiche manuali allo Sheet: questa non invia email.
+
+Il bollettino viene inviato solo se ci sono eventi nuovi rispetto all'ultima email, con gli stessi
+filtri di zona e periodo. Gli eventi restano raggruppati per citta, con il simbolo 🆕 sulle aggiunte
+e il riepilogo iniziale delle citta interessate. Lo storico degli invii viene conservato; le anteprime
+email locali non lo modificano. ENABLE_SENDING disabilita l'invio dei bollettini.
+Nei giri automatici l'email tecnica con il log parte solo se l'importatore va in errore;
+nei lanci manuali resta disponibile anche a giro riuscito.
