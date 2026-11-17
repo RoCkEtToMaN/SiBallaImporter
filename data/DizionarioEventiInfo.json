@@ -14499,7 +14499,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "swing it berlin sold out swing dance festival years swing base": {
@@ -14517,6 +14520,24 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-10",
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "weihnachtsball am kudamm w the savoy satellites jumpin six": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
         "stili": [
           "Lindy"
         ]
@@ -21955,7 +21976,12 @@
       "verified": false,
       "source": null,
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Shag",
+        "Lindy"
+      ]
     },
     "events": {
       "zjazd ii shag n bal college": {
@@ -21976,6 +22002,25 @@
         "stili": [
           "Balboa",
           "Lindy"
+        ]
+      },
+      "zjazd iii shag n bal college": {
+        "organizer": null,
+        "city": "Gdańsk",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Shag"
         ]
       }
     }
@@ -22703,6 +22748,118 @@
         "notes": null,
         "stili": [
           "Lindy"
+        ]
+      }
+    }
+  },
+  "institut francais berlin|berlin": {
+    "default": {
+      "organizer": "Institut français Berlin",
+      "city": "Berlin",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing ball": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "ganzo eventi culturali e vintage fest|grosseto": {
+    "default": {
+      "organizer": "Ganzo Eventi Culturali e Vintage Fest",
+      "city": "Grosseto",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "vintage fest grosseto": {
+        "organizer": null,
+        "city": "Grosseto",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-17",
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "sweet blues berlin e zane alexander|berlin": {
+    "default": {
+      "organizer": "Sweet Blues Berlin e Zane Alexander",
+      "city": "Berlin",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lovelite blues": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
         ]
       }
     }
