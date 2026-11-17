@@ -60,7 +60,9 @@ jobs:
         run: python sito/esporta_sheet.py _sito/eventi.json
 
       - name: Prepara il sito
-        run: cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og*.png _sito/
+        run: |
+          cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og*.png _sito/
+          mkdir -p _sito/video && cp sito/video/*.mp4 sito/video/*.jpg _sito/video/   # video how-to (sito/howto.js)
 
       # versione mostrata in fondo alle pagine (sito/piede.js): numero dell'ultima versione delle Novità
       # (prima "versione:" di sito/novita.js, es. 1.1.1.0), codice dell'ultimo commit, ramo, ora
