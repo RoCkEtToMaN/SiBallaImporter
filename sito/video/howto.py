@@ -5,6 +5,10 @@ import imageio_ffmpeg
 from playwright.sync_api import sync_playwright
 
 W, H = 390, 760
+# formati: (larghezza, altezza, scala) -> video di larghezza*scala x altezza*scala
+FORMATI = {"sito": (390, 760, 2), "social": (360, 640, 3)}   # social = 1080x1920 per Reels e Storie
+# Reels/Storie: Instagram copre ~15% in alto e ~20% in basso, la didascalia sta sopra quella fascia
+CSS_SOCIAL = "#hw-cap{bottom:24%;font-size:23px;padding:16px 18px} #hw-cap small{font-size:17px} #hw-cap.su{top:16%}"
 LOCALE = "http://127.0.0.1:8765"
 PUBBLICO = "https://siballa.pages.dev"
 
@@ -23,7 +27,8 @@ OVERLAY = r"""
   #hw-dito{position:fixed;z-index:2147483647;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
     background:rgba(255,190,40,.55);border:3px solid rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(0,0,0,.35);
     left:50%;top:110%;transition:left .7s ease-in-out,top .7s ease-in-out,transform .15s;pointer-events:none}
-  #hw-dito.giu{transform:scale(.7)}`;
+  #hw-dito.giu{transform:scale(.7)}
+  #hwBtn{display:none!important}`;
   document.head.appendChild(st);
   const c = document.createElement('div'); c.id = 'hw-cap'; document.body.appendChild(c);
   const d = document.createElement('div'); d.id = 'hw-dito'; document.body.appendChild(d);
@@ -120,14 +125,15 @@ class Regia:
         self.cap("siballa.pages.dev", "Buone danze! 💃🕺", 3)
 
 
-def registra(nome, url, copione, out, attesa_sel=None, geo=False):
+def registra(nome, url, copione, out, attesa_sel=None, geo=False, formato="sito"):
+    W, H, K = FORMATI[formato]
     tmp = os.path.join(out, "_raw_" + nome)
     shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(tmp)
     with sync_playwright() as p:
         br = p.chromium.launch()
         extra = dict(geolocation={"latitude": 45.4642, "longitude": 9.19}, permissions=["geolocation"]) if geo else {}
-        ctx = br.new_context(viewport={"width": W, "height": H}, device_scale_factor=2, is_mobile=True,
+        ctx = br.new_context(viewport={"width": W, "height": H}, device_scale_factor=K, is_mobile=True,
                              has_touch=True, locale="it-IT", **extra)
         ctx.route("**/api/**", _api)
         pg = ctx.new_page()
@@ -137,6 +143,8 @@ def registra(nome, url, copione, out, attesa_sel=None, geo=False):
         pg.wait_for_timeout(800)
         r = Regia(pg)
         r.overlay()
+        if formato == "social":
+            pg.add_style_tag(content=CSS_SOCIAL)
         cdp = ctx.new_cdp_session(pg)
         frames = []
 
@@ -151,7 +159,7 @@ def registra(nome, url, copione, out, attesa_sel=None, geo=False):
                 pass
 
         cdp.on("Page.screencastFrame", su_frame)
-        cdp.send("Page.startScreencast", {"format": "jpeg", "quality": 90, "maxWidth": W * 2, "maxHeight": H * 2})
+        cdp.send("Page.startScreencast", {"format": "jpeg", "quality": 90, "maxWidth": W * K, "maxHeight": H * K})
         r.attendi(0.6)
         copione(r)
         r.attendi(0.4)
@@ -168,9 +176,10 @@ def registra(nome, url, copione, out, attesa_sel=None, geo=False):
         fh.write(f"file '{os.path.basename(frames[-1][0])}'\n")
     ff = imageio_ffmpeg.get_ffmpeg_exe()
     mp4 = os.path.join(out, f"howto-{nome}.mp4")
+    crf = "26" if formato == "sito" else "20"
     subprocess.run([ff, "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", lista,
                     "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2,fps=30", "-c:v", "libx264", "-preset", "slow",
-                    "-crf", "26", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", mp4], check=True)
+                    "-crf", crf, "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", mp4], check=True)
     subprocess.run([ff, "-y", "-loglevel", "error", "-ss", "1.5", "-i", mp4, "-frames:v", "1", "-q:v", "4",
                     os.path.join(out, f"howto-{nome}.jpg")], check=True)
     shutil.rmtree(tmp, ignore_errors=True)
