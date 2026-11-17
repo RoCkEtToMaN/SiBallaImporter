@@ -93,22 +93,53 @@
   }
 
   var WA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>';
+  var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  // tipi di gruppo: colore, etichetta del pulsante e spiegazione per la legenda
+  var TIPI = {
+    canale: { nome: "Canale", azione: "Segui il canale", spiega: "solo annunci, entri subito" },
+    community: { nome: "Community", azione: "Chiedi di entrare", spiega: "un amministratore approva chi entra" },
+    gruppo: { nome: "Gruppo", azione: "Entra nel gruppo", spiega: "chat aperta tra ballerini" }
+  };
+  function tipoDi(r) { var t = norm(r.tipo); return /canal/.test(t) ? "canale" : /community/.test(t) || !t ? "community" : "gruppo"; }
+  // "savona" -> "Savona" (solo se scritto tutto minuscolo, per non rovinare sigle come "siBalla")
+  function maiuscola(s) {
+    s = String(s || "").trim();
+    return s && s === s.toLowerCase() ? s.replace(/(^|[\s'\-])(\p{L})/gu, function (m, a, b) { return a + b.toUpperCase(); }) : s;
+  }
+  function ufficiale(r) { return norm(r.nome).indexOf("siballa") === 0; }
+  function cardGruppo(r, grande) {
+    var t = tipoDi(r), desc = norm(r.descrizione) === norm(r.nome) || norm(r.descrizione) === norm(r.citta) ? "" : r.descrizione;
+    return '<article class="card cm-card cm-' + t + (grande ? " cm-grande" : "") + '">' +
+      (grande ? '<span class="cm-badge">\u2605 Ufficiale siBalla</span>' : "") +
+      '<div class="riga"><div class="wa-ico">' + WA + "</div><div><h4>" + esc(maiuscola(r.nome)) + "</h4>" +
+      (r.citta ? '<div class="cm-luogo">' + PIN + esc(maiuscola(r.citta)) + "</div>" : "") + "</div></div>" +
+      (desc ? '<p class="cm-desc">' + esc(desc) + "</p>" : "") +
+      '<div class="cm-piede"><span class="cm-tipo">' + TIPI[t].nome + "</span>" + bottone(r.link, TIPI[t].azione, "cm-entra") + "</div></article>";
+  }
   function community() {
-    return conta(dati, "regione").map(function (g) {
-      var righe = dati.filter(function (r) { return (r.regione || "Altro") === g[0]; });
-      return '<section class="sezione community-regione"><h2>' + esc(g[0]) + ' <span class="c">' + g[1] + '</span></h2>' +
-        conta(righe, "citta").map(function (c) {
-          var gruppi = righe.filter(function (r) { return (r.citta || "Altro") === c[0]; })
-            .sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), "it"); });
-          return '<section class="community-citta"><h3>' + esc(c[0] === "Altro" ? "Citt\u00e0 non specificata" : c[0]) +
-            ' <span class="c">' + c[1] + '</span></h3><div class="griglia">' + gruppi.map(function (r) {
-              var canale = /canal/i.test(r.tipo || "");
-              return '<article class="card riga"><div class="wa-ico">' + WA + "</div><div><h4>" + esc(r.nome) + '</h4><div class="meta2">' +
-                esc(r.descrizione || "") + '</div><span class="tipo' + (canale ? "" : " app") + '\">' +
-                esc(r.tipo || "Gruppo") + '</span><div class="azioni">' + bottone(r.link, canale ? "Segui il canale" : "Chiedi di entrare", "wa") + "</div></div></article>";
-            }).join("") + "</div></section>";
-        }).join("") + "</section>";
+    var citta = {}, regioni = {}, presenti = {};
+    dati.forEach(function (r) {
+      if (r.citta) citta[norm(r.citta)] = 1;
+      if (r.regione) regioni[norm(r.regione)] = 1;
+      presenti[tipoDi(r)] = 1;
+    });
+    function numero(n, uno, tanti) { return "<div><b>" + n + "</b><span>" + (n === 1 ? uno : tanti) + "</span></div>"; }
+    var numeri = '<div class="cm-numeri">' + numero(dati.length, "gruppo", "gruppi") +
+      numero(Object.keys(citta).length, "citt\u00e0", "citt\u00e0") + numero(Object.keys(regioni).length, "regione", "regioni") + "</div>";
+    var legenda = '<ul class="cm-legenda">' + Object.keys(TIPI).filter(function (t) { return presenti[t]; }).map(function (t) {
+      return '<li class="cm-' + t + '"><span class="cm-tipo">' + TIPI[t].nome + "</span> " + TIPI[t].spiega + "</li>";
+    }).join("") + "</ul>";
+    var top = dati.filter(ufficiale), altri = dati.filter(function (r) { return !ufficiale(r); });
+    var evidenza = top.length ? '<section class="sezione"><h2>In evidenza</h2><div class="griglia cm-top">' +
+      top.map(function (r) { return cardGruppo(r, true); }).join("") + "</div></section>" : "";
+    var perRegione = conta(altri, "regione").map(function (g) {
+      var righe = altri.filter(function (r) { return (r.regione || "Altro") === g[0]; }).sort(function (a, b) {
+        return norm(a.citta).localeCompare(norm(b.citta), "it") || String(a.nome).localeCompare(String(b.nome), "it");
+      });
+      return '<section class="sezione"><h2>' + esc(g[0] === "Altro" ? "Altre zone" : g[0]) + ' <span class="c">' + g[1] + "</span></h2>" +
+        '<div class="griglia">' + righe.map(function (r) { return cardGruppo(r, false); }).join("") + "</div></section>";
     }).join("");
+    return numeri + legenda + evidenza + perRegione;
   }
 
   var VUOTO = {
