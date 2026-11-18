@@ -193,9 +193,9 @@ PICCOLE COSE IN SOSPESO
 -----------------------
 [~] Attribuzione dell'icona dell'app: viene da Flaticon, autore Magnific (gruppo Freepik),
     licenza gratuita (14/11/2026). Riga "Icona di Magnific da Flaticon" nel piede di tutte le
-    pagine (ICONA in cima a sito/piede.js), per ora sulla versione di prova. Resta: mettere in
-    "pagina" il link dell'icona su Flaticon (ICONA.pagina e' ancora vuoto) e portarla sul
-    sito pubblico.
+    pagine (ICONA in cima a sito/piede.js), anche sul sito pubblico (verificato il 18/11/2026).
+    Resta solo: mettere in "pagina" il link dell'icona su Flaticon (ICONA.pagina e' ancora
+    vuoto: oggi il nome dell'autore porta alla home di Flaticon). Serve il link dall'utente.
 [ ] Cancellare il vecchio salvataggio automatico di git: git stash drop stash@{0}
     (18/11/2026: lo stash "autostash" c'e' ancora)
 
