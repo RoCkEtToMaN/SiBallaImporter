@@ -484,19 +484,30 @@ namespace SiBallaImportingData.Utils
         private static async Task EvidenziaDaVerificareAsync(SheetsService service, string spreadsheetId, Spreadsheet spreadsheet,
             string sheetName, string? updatedRange, List<Event> events, int? verifiedCol, int colonne)
         {
-            if (verifiedCol is null && !events.Any(e => e.StileDedottoDa is not null)) return;
-
             // es. "Serate!A15:V20" o "'Serate'!A15:V20": la prima riga scritta è la 15
             var m = Regex.Match(updatedRange ?? "", @"![A-Z]+(\d+)");
             var sheetId = spreadsheet.Sheets.FirstOrDefault(s => s.Properties.Title == sheetName)?.Properties.SheetId;
             if (!m.Success || sheetId is null)
             {
-                Console.WriteLine($"[sheet] '{sheetName}': non so in che righe sono finiti gli eventi ({updatedRange}), righe da verificare non colorate");
+                Console.WriteLine($"[sheet] '{sheetName}': non so in che righe sono finiti gli eventi ({updatedRange}), righe da verificare non colorate e date non formattate");
                 return;
             }
             int primaRiga = int.Parse(m.Groups[1].Value) - 1;   // l'API conta da 0
 
-            var requests = new List<Request>();
+            // date di inizio e fine (A, B) come le altre righe dello Sheet: scritte "2026-11-18" (non ambiguo),
+            // mostrate "18/11/2026"
+            var requests = new List<Request>
+            {
+                new()
+                {
+                    RepeatCell = new RepeatCellRequest
+                    {
+                        Range = new GridRange { SheetId = sheetId, StartRowIndex = primaRiga, EndRowIndex = primaRiga + events.Count, StartColumnIndex = 0, EndColumnIndex = 2 },
+                        Cell = new CellData { UserEnteredFormat = new CellFormat { NumberFormat = FormatoData } },
+                        Fields = "userEnteredFormat.numberFormat"
+                    }
+                }
+            };
             for (int i = 0; i < events.Count; i++)
             {
                 var ev = events[i];
@@ -522,7 +533,7 @@ namespace SiBallaImportingData.Utils
                         }
                     });
             }
-            int righeColorate = requests.Count(r => r.RepeatCell is not null);
+            int righeColorate = requests.Count(r => r.RepeatCell is not null) - 1;   // meno il formato delle date
 
             int stiliDedotti = 0;
             for (int i = 0; i < events.Count; i++)
@@ -543,11 +554,12 @@ namespace SiBallaImportingData.Utils
                 });
                 stiliDedotti++;
             }
-            if (requests.Count == 0) return;
-
             await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
             Console.WriteLine($"[sheet] '{sheetName}': {righeColorate} righe '{VerifiedPending}' colorate, {stiliDedotti} stili dedotti da confermare");
         }
+
+        // formato delle colonne A e B in tutto lo Sheet (uniformato il 18/11/2026: prima c'erano sia 2026-11-18 sia 18/11/2026)
+        private static readonly NumberFormat FormatoData = new() { Type = "DATE", Pattern = "dd/MM/yyyy" };
 
         // ---------- Stili dedotti (colonna H) ----------
 
