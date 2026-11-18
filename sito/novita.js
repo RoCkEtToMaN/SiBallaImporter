@@ -7,6 +7,25 @@
 (function () {
   var NOVITA = [
     {
+      versione: "1.2.0.0",
+      data: "Novembre 2026",
+      titolo: "Community e video guide",
+      intro: "Trova i gruppi WhatsApp della tua città e scopri come usare il sito.",
+      voci: [
+        {
+          tipo: "Migliorato", titolo: "Community WhatsApp",
+          punti: [
+            "Cerca i gruppi per città, consulta gli eventi della settimana e scansiona il QR code dal computer per aprire un gruppo sul telefono.",
+            "Se conosci un gruppo che manca, puoi segnalarlo dalla pagina Community."
+          ]
+        },
+        {
+          tipo: "Nuovo", titolo: "Come funziona",
+          punti: ["Apri il pulsante <b>Come funziona</b> per guardare la video guida della pagina."]
+        }
+      ]
+    },
+    {
       versione: "1.1.1.0",
       data: "Novembre 2026",
       titolo: "Piccole sistemazioni",

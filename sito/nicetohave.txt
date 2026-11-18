@@ -33,9 +33,22 @@ GIA' FATTI
     a ogni rilascio visibile si aggiunge una versione in cima a NOVITA in sito/novita.js
 [x] Condividi (13/11/2026): il link porta la data (/?q=nome&d=AAAAMMGG) e mostra solo
     quell'evento, con "Mostra tutte le date" (i link mandati prima mostrano tutte le date)
+[x] Video how-to (17/11/2026, versione di prova): pulsante "▶ Come funziona" su ogni pagina
+    (tranne Artisti, vuota) con un video verticale, didascalie e niente audio (sito/howto.js,
+    sito/video/). Fatti anche 3 Reel per Instagram in sito/video/social/ (home, Bacheca,
+    Community). Tutto spiegato nella guida Word, capitolo "Video how-to".
 
 DA FARE
 -------
+[ ] Video how-to, cosa resta (dettagli nella guida Word, capitolo "Video how-to"):
+    - contare i tocchi su "Come funziona" nelle statistiche; dopo un mese decidere se tenerlo
+      ovunque o solo su Bacheca, Clandestini e Community
+    - rifare i video di Rubriche (oggi testo di prova) e Community (un solo gruppo), fare quello
+      di Artisti quando ci sono le prime righe
+    - Reel "2026 in numeri" a dicembre, con i numeri veri
+    - pubblicare i Reel su Instagram (musica scelta dalla libreria di Instagram)
+    - app: niente video, ma schermate di benvenuto e suggerimenti al primo uso
+    - al passaggio su master: voce in NOVITA (sito/novita.js)
 [ ] Bacheca (pubblica dal 12/11/2026), cosa resta:
     - accendere Turnstile (anti-bot Cloudflare) su clandestini, annunci e messaggi: e' pronto,
       basta mettere TURNSTILE_SITEKEY (variabile) + TURNSTILE_SECRET (secret) nel progetto Pages

@@ -60,7 +60,9 @@ jobs:
         run: python sito/esporta_sheet.py _sito/eventi.json
 
       - name: Prepara il sito
-        run: cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og*.png _sito/
+        run: |
+          cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og*.png _sito/
+          mkdir -p _sito/video && cp sito/video/*.mp4 sito/video/*.jpg _sito/video/   # video how-to (sito/howto.js)
 
       # versione mostrata in fondo alle pagine (sito/piede.js): numero dell'ultima versione delle Novità
       # (prima "versione:" di sito/novita.js, es. 1.1.1.0), codice dell'ultimo commit, ramo, ora
@@ -94,3 +96,11 @@ jobs:
           # da sito/ così wrangler include anche sito/functions (contatore visite e pagina statistiche)
           cd sito
           wrangler pages deploy ../_sito --project-name="$PROGETTO" --branch="$RAMO_CF" --commit-dirty=true
+
+      - name: Diagnostica richieste Community (sola lettura)
+        if: github.ref_name == 'anteprima'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python .github/scripts/diagnostica_community.py

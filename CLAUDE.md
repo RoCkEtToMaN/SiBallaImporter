@@ -25,6 +25,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   Versione numerica MAGGIORE.MINORE.CORREZIONE.BUILD (funzioni nuove → 1.2.0.0, ritocchi → 1.1.2.0).
   `sito.yml` legge la prima `versione:` di `novita.js` e la mostra nel piede (`sito/piede.js`).
 - `sito.yml` copia solo `sito/*.html|css|js`, `logo-app.svg` e `og*.png`: altri file vanno aggiunti lì.
+- Video how-to: pulsante "▶ Come funziona" da `sito/howto.js` (elenco `VIDEO`), file in `sito/video/howto-<pagina>.mp4|jpg`,
+  rifatti con `sito/video/copioni.py` (istruzioni in cima). Se una pagina cambia molto, rifare il suo video.
+  Reel per Instagram (1080×1920): `sito/video/social.py` → `sito/video/social/` (non vanno sul sito).
 - Icona dell'app: Flaticon, licenza gratuita, autore Magnific → citazione in `ICONA` in `sito/piede.js`.
 
 ## Database Appwrite
