@@ -59,6 +59,20 @@ Da verificare
     Guardare le note sulla colonna F: fonte, confidenza, locale. Se gli indirizzi sono buoni
     scrivere "ok"; se sono spesso sbagliati valutare di accettare solo confidenza "alta"
     o di abbassare CercaIndirizziMax.
+    Controllo del 18/11/2026: 62 righe "gemini" (43 Serate + 19 Workshop), 60 con confidenza alta,
+    60 indirizzi di Gemini confermati da Photon, 2 trovati da Photon col nome del locale.
+    Sono quasi tutti locali veri e coerenti (100 Club, Festsaal Kreuzberg, Teatro del Sale, La Scighera,
+    Lindy Focus al Crowne Plaza...). Restano da guardare a mano:
+    - SwingFLOOR Party, Zurigo: "Swing Productions, Röschibachstrasse 22" (sede dell'organizzatore?)
+    - Impromptu Swing party (Sylvain Gautier), Parigi: "Place Colette", 6 date, fonte Facebook
+      (trovato l'8/11, prima che i link Facebook venissero saltati)
+    - Red Deer "Scott Block Theatre, Gaetz Avenue" e Berlin Balboa "Bellmer": confidenza media
+    - alcune vie senza numero civico (Fermo Via del Lavoro, Catania Via Cardinale Dusmet, Torquay,
+      Bournemouth, Grenoble Rue de la Mégisserie): coordinate buone per la mappa
+    Nota a parte: la città in F viene dalla riga originale, non da Gemini, e a volte è la provincia
+    o la zona ("Ancona" per Senigallia, "Metropolitan France", "Buncombe County", "Saxony").
+    Le righe arancioni ("da verificare", colore 0.99/0.9/0.8) sono 231 + 67; nessuna riga "ok",
+    "nuovo" o "gemini" è rimasta arancione.
 
 [x] Righe vuote "geminiNonTrovato": null nel dizionario
     Finite nel commit b0637d1, sparite al salvataggio successivo.
