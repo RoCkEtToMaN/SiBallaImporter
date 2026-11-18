@@ -40,3 +40,6 @@ _sito/
 
 # cache di Python
 __pycache__/
+
+# export locale dello Sheet (il sito lo rigenera da solo in sito.yml)
+sito/eventi.json
