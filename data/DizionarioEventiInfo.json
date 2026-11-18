@@ -1686,7 +1686,6 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Blues",
         "Lindy"
       ]
     },
@@ -1704,7 +1703,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       },
       "gemma club burnin moon boogie woogie rockabilly patrick the crazy slivers dj henry lazzeri": {
         "organizer": null,
@@ -3200,7 +3202,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "switch the beat nuova stagione swing sunday school": {
@@ -6345,7 +6350,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
       }
     }
   },
@@ -6889,7 +6897,11 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "SoloJazz"
+      ]
     },
     "events": {
       "solo jazz rhythm with ann sofie in leuven": {
@@ -6920,7 +6932,11 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
       },
       "solo jazz improvisation with ann sofie in leuven": {
         "organizer": null,
@@ -9748,7 +9764,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -9816,7 +9835,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-18"
       }
     }
   },
@@ -10321,6 +10341,24 @@
         "stili": [
           "Balboa"
         ]
+      },
+      "swing the night away pratica di lindy hop": {
+        "organizer": null,
+        "city": "Como",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.777278900146484,
+        "lng": 9.098520278930664,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -10673,7 +10711,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -11163,7 +11204,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Shag"
+        ]
       }
     }
   },
@@ -11954,7 +11998,11 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-18",
+        "stili": [
+          "Blues"
+        ]
       }
     }
   },
@@ -23011,6 +23059,77 @@
         "organizer": null,
         "city": "Novara",
         "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "gheswingers vida loca e altri 2|mogliano veneto": {
+    "default": {
+      "organizer": "GheswingerS, Vida Loca e altri 2",
+      "city": "Mogliano Veneto",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "happy birthday boogie woogie": {
+        "organizer": null,
+        "city": "Mogliano Veneto",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": "via Raffaello Sanzio 19",
+        "lat": 45.5882682800293,
+        "lng": 12.305700302124023,
+        "geocodedAddress": "via Raffaello Sanzio 19",
+        "verified": true,
+        "source": "sheet",
+        "verifiedOn": "2026-11-18",
+        "notes": null
+      }
+    }
+  },
+  "la swing ambassade|capitale nationale": {
+    "default": {
+      "organizer": "La Swing Ambassade",
+      "city": "Capitale-Nationale",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "ffervescence azz oel les ateliers": {
+        "organizer": null,
+        "city": "Capitale-Nationale",
+        "country": "Canada",
         "eventCount": null,
         "venueName": null,
         "address": null,
