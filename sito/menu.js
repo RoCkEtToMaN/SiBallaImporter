@@ -20,7 +20,7 @@
       ico: '<path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/>' },
     { url: "/novita", t: "Novità", d: "Cosa c'è di nuovo su siBalla", pronta: true, pubblica: true,
       ico: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>' },
-    { url: "/2026", t: "2026 in numeri", d: "Il tuo anno di swing", pronta: true,
+    { url: "/2026", t: "2026 in numeri", d: "Il tuo anno di swing", pronta: true, pubblica: "2026-12-10",
       ico: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
     { url: "/app", t: "App mobile", d: "siBalla sul telefono", pronta: true,
       ico: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>' }
@@ -37,7 +37,9 @@
   var prova = /\.siballa\.pages\.dev$/.test(location.hostname) || location.protocol === "file:" ||
     /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   if (!MENU_PUBBLICO && !prova) return;
-  if (!prova) VOCI = VOCI.filter(function (v) { return v.pubblica; });
+  // pubblica: "aaaa-mm-gg" = voce pubblica da quel giorno (data italiana), vedi riservata.js
+  var oggi = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(new Date());
+  if (!prova) VOCI = VOCI.filter(function (v) { return v.pubblica === true || (typeof v.pubblica === "string" && oggi >= v.pubblica); });
   var hero = document.querySelector(".hero");
   if (!hero) return;
   var qui = location.pathname.replace(/\/index(\.html)?$/, "/").replace(/\.html$/, "").replace(/(.)\/$/, "$1") || "/";
