@@ -37,6 +37,18 @@ late.DateStart = late.DateStart.AddHours(21);
 Check(!EventIdentity.Same(early, late), "Orari espliciti distinti");
 Check(!EventIdentity.Same(luzzati, Make("Social Swing Dance al porto", "Garage Hoppers", 19)), "Titoli con luoghi distinti");
 
+// 18/11/2026: righe riaggiunte a ogni giro perche' nello Sheet la citta' era stata riscritta
+Event Luogo(string city, double lat, double lng) => new()
+{
+    PartyName = "Soiree Westie Swing", Organizer = "Westie Montreal", City = city, DateStart = new DateTime(2026, 11, 20),
+    EventDetail = new EventDetail { City = city, Latitude = lat, Longitude = lng }
+};
+Check(EventIdentity.Same(Luogo("Montreal (administrative region)", 45.5376, -73.6261), Luogo("Montreal", 45.5376, -73.6261)), "Citta riscritta con regione");
+Check(EventIdentity.Same(Luogo("Estrie", 45.3993, -71.8887), Luogo("Sherbrooke", 45.3993, -71.8887)), "Citta diversa, stesse coordinate");
+Check(EventIdentity.Same(Luogo("Ipswich, Massachusetts", 0, 0), Luogo("Ipswich", 0, 0)), "Citta con stato");
+Check(!EventIdentity.Same(Luogo("Montreal", 45.5376, -73.6261), Luogo("Laval", 45.6066, -73.7124)), "Citta vicine ma distinte");
+Check(!EventIdentity.Same(Luogo("Genova", 0, 0), Luogo("Savona", 0, 0)), "Coordinate mancanti non uniscono");
+
 
 shim.EventDetail = new EventDetail { WebSite = "https://curated.example" };
 complete.EventDetail = new EventDetail { WebSite = "https://online.example" };
