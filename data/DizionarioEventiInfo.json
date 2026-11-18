@@ -20529,6 +20529,26 @@
           "Lindy",
           "SoloJazz"
         ]
+      },
+      "dragon swing festival": {
+        "organizer": null,
+        "city": "Krakow",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Charleston",
+          "Lindy",
+          "SoloJazz"
+        ]
       }
     }
   },
