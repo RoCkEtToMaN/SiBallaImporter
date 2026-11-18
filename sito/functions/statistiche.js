@@ -104,7 +104,7 @@ export async function onRequestGet({ request, env }) {
     const cestino = await env.VISITE.prepare(
       `SELECT paese, regione, citta, SUM(n) AS n, MIN(giorno) AS dal, MAX(giorno) AS al FROM visite_tolte
        GROUP BY paese, regione, citta ORDER BY MAX(tolte_il) DESC LIMIT 40`).all().then((r) => r.results);
-    const [totale, perGiorno, regioni, citta, paesi, primo, visitatori, pagine, fonti, disp, click, reti, bot, mesi, primoStat] = await Promise.all([
+    const [totale, perGiorno, regioni, citta, paesi, primo, visitatori, pagine, fonti, disp, click, reti, bot, mesi, primoStat, howto] = await Promise.all([
       q(`SELECT COALESCE(SUM(n),0) AS n FROM visite WHERE giorno >= ?1`),
       q(`SELECT v.giorno, SUM(v.n) AS n, (SELECT n FROM statistiche s WHERE s.giorno = v.giorno AND tipo = 'visitatori' AND chiave = 'giorno') AS u
          FROM visite v WHERE v.giorno >= ?1 GROUP BY v.giorno ORDER BY v.giorno DESC LIMIT 60`),
@@ -117,6 +117,7 @@ export async function onRequestGet({ request, env }) {
            SUM(CASE WHEN tipo='visitatori' AND chiave='mese' THEN n ELSE 0 END) AS u
          FROM statistiche WHERE giorno >= ?1 GROUP BY mese ORDER BY mese DESC LIMIT 24`),
       env.VISITE.prepare(`SELECT MIN(giorno) AS g FROM statistiche`).all().then((r) => r.results),
+      s("howto", 60),
     ]);
     // sondaggio "Quali rubriche vorresti?" (pagina /rubriche): non dipende dal periodo scelto
     const sond = await risultati(env.VISITE, true);
@@ -130,6 +131,15 @@ export async function onRequestGet({ request, env }) {
     const nomeMese = (m) => NOMI_MESI[Number(m.slice(5, 7)) - 1] + " " + m.slice(0, 4);
     const estero = (p) => (p && p !== "IT" && p !== "?" ? ` <span class="paese">(${esc(nomePaese(p))})</span>` : "");
     const regione = (r) => (r.regione === "?" ? "sconosciuta" : esc(REGIONI[r.regione] || r.regione)) + estero(r.paese);
+    // video "Come funziona" (howto.js): chiavi "<pagina>|aperto" e "<pagina>|finito" -> una riga per pagina,
+    // confrontata con le visite alla stessa pagina (nelle pagine viste la home è "/")
+    const videoHowto = Object.values(howto.reduce((acc, r) => {
+      const [pag, cosa] = String(r.chiave).split("|");
+      const x = acc[pag] || (acc[pag] = { pagina: pag, aperto: 0, finito: 0,
+        viste: pagine.find((p) => p.chiave === (pag === "home" ? "/" : "/" + pag))?.n || 0 });
+      if (cosa === "aperto" || cosa === "finito") x[cosa] += r.n;
+      return acc;
+    }, {})).filter((r) => r.aperto).sort((a, b) => b.aperto - a.aperto);
     const tabella = (titolo, righe, etichetta, campo = "n", extra = null, nota = "") => {
       if (!righe.length) return "";
       const max = Math.max(...righe.map((r) => r[campo]));
@@ -162,6 +172,8 @@ export async function onRequestGet({ request, env }) {
       ${tabella("Da dove arrivano", fonti, (r) => esc(r.chiave))}
       ${tabella("Dispositivi", disp, (r) => esc(r.chiave))}
       ${tabella("Click su eventi e link esterni", click, (r) => esc(r.chiave))}
+      ${tabella("Video «Come funziona» · aperture per pagina", videoHowto, (r) => `${esc(r.pagina)} <span class="paese">· ${r.finito} visti fino in fondo` +
+        (r.viste ? ` · aperto nel ${Math.round((r.aperto / r.viste) * 100)}% delle ${r.viste} visite alla pagina` : "") + "</span>", "aperto")}
       ${sond.totale ? tabella(`Sondaggio rubriche · ${sond.totale} ${sond.totale === 1 ? "voto" : "voti"} (da sempre)`,
         OPZIONI.map(([k, t]) => ({ t, n: sond.conta[k] })).sort((a, b) => b.n - a.n), (r) => esc(r.t)) +
         (sond.proposte.length ? `<section><h2>Rubriche proposte</h2><table>${sond.proposte.map((r) =>

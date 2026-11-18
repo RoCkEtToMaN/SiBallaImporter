@@ -66,7 +66,7 @@ export async function onRequestPost({ request, env }) {
     const cf = request.cf || {};
     if (daDatacenter(cf)) {
       // probabile bot: non entra nei conteggi, si conta solo la rete (tabella "Probabili bot esclusi")
-      if (d.t !== "click") {
+      if (d.t !== "click" && d.t !== "howto") {
         const rete = pulisci(cf.asOrganization, 60) + (cf.country ? ` (${pulisci(cf.country, 3)})` : "");
         await db.batch([stat("bot", rete)]);
       }
@@ -75,6 +75,10 @@ export async function onRequestPost({ request, env }) {
     if (d.t === "click") {
       const cosa = pulisci(d.cosa, 90), tipo = pulisci(d.tipo, 30);
       if (cosa) op.push(stat("click", tipo ? `${cosa} · ${tipo}` : cosa));
+    } else if (d.t === "howto") {
+      // pulsante "▶ Come funziona" (howto.js): chiave "<pagina>|aperto" o "<pagina>|finito"
+      if (/^[a-z0-9\-]{1,20}$/.test(d.pagina || "") && (d.cosa === "aperto" || d.cosa === "finito"))
+        op.push(stat("howto", `${d.pagina}|${d.cosa}`));
     } else {
       op.push(stat("rete", pulisci(cf.asOrganization, 60) || "?"));
       op.push(db.prepare(

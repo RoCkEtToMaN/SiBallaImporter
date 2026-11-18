@@ -12,6 +12,8 @@
   if (leggi("siballa_noconta") === "1") return;
 
   function invia(dati) { try { navigator.sendBeacon("/api/visita", JSON.stringify(dati)); } catch (e) {} }
+  // per gli altri script (es. howto.js): esiste solo se questa visita si conta (non su anteprima né con ?noconta)
+  window.siballaConta = invia;
   var pagina = location.pathname.replace(/\/index(\.html)?$/, "/").replace(/\.html$/, "").replace(/(.)\/$/, "$1") || "/";
   var oggi = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(new Date());
   var ultima = leggi("siballa_ultima");
