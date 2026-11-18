@@ -123,24 +123,46 @@
 <nav class="punti" id="punti" aria-label="Schermate"></nav>
 <main id="wrapped"></main>
 <script>
-// Numeri dell'anno. In futuro li scrive uno script (dallo Sheet + /statistiche); per ora sono DI ESEMPIO.
-var DATI = {
+// Numeri dell'anno: eventi da numeri-2026.json (sito/numeri_anno.py, dallo Sheet, rifatto a ogni giro del sito)
+// e numeri del sito da /api/numeri (database delle visite). Se il file non c'è (pagina aperta dal PC) si usano
+// i numeri DI ESEMPIO qui sotto, con la scritta "Numeri di esempio".
+// daMese: primo mese con dati nello Sheet (fa da storico solo da agosto 2026): la pagina mostra i mesi da lì.
+var ANNO = 2026;
+var ESEMPIO = {
   esempio: true,
-  anno: 2026,
-  serate: 214, workshop: 38, festival: 12,
+  anno: ANNO, daMese: 1,
+  serate: 214, workshop: 38, festival: 12, estero: 0,
   citta: 47, regioni: 15, organizzatori: 96,
   classificaCitta: [["Milano", 52], ["Roma", 41], ["Bologna", 29], ["Torino", 24], ["Firenze", 18]],
   mesi: [12, 15, 21, 24, 26, 19, 9, 4, 18, 31, 22, 15],
   stili: [["Lindy Hop", 58], ["Balboa", 14], ["Blues", 11], ["Charleston", 9], ["Solo jazz", 8]],
-  sito: { visitatori: 3840, condivisioni: 612, annunci: 27, clandestini: 19 }
+  sito: { visitatori: 3840, pagine: 12400, annunci: 27, clandestini: 19 }
 };
 
 (function () {
+  function carica(url) {
+    return fetch(url, { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  Promise.all([carica("numeri-" + ANNO + ".json"), carica("/api/numeri?anno=" + ANNO)]).then(function (r) {
+    var D = r[0] && r[0].serate != null && (r[0].classificaCitta || []).length ? r[0] : ESEMPIO;
+    if (!D.esempio) D.sito = r[1] || null;
+    avvia(D);
+  });
+})();
+
+function avvia(D) {
   var MESI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-  var D = DATI, n = function (x) { return x.toLocaleString("it-IT"); };
+  var n = function (x) { return x.toLocaleString("it-IT"); };
   var conta = function (x) { return '<span data-conta="' + x + '">0</span>'; };
-  var maxMese = Math.max.apply(null, D.mesi), iTop = D.mesi.indexOf(maxMese), eventi = D.serate + D.workshop;
+  // solo i mesi con dati (da daMese a dicembre); M0 = indice del primo
+  var M0 = Math.max(0, (D.daMese || 1) - 1), mesiV = D.mesi.slice(M0);
+  var maxMese = Math.max.apply(null, mesiV), iTop = mesiV.indexOf(maxMese), eventi = D.serate + D.workshop;
+  var periodo = M0 ? "da " + MESI[M0].toLowerCase() + " a dicembre" : "in un anno";
+  var Periodo = periodo.charAt(0).toUpperCase() + periodo.slice(1);
+  var settimane = Math.max(1, Math.round(mesiV.length * 4.35));
+  var sigla = function (i) { return mesiV.length > 6 ? MESI[M0 + i].charAt(0) : MESI[M0 + i].slice(0, 3); };
   var primaCitta = D.classificaCitta[0];
+  var sito = D.sito && D.sito.visitatori ? D.sito : null;   // senza numeri del sito la schermata "E su siBalla" non c'è
   var INDIRIZZO = "siballa.pages.dev/" + D.anno;
 
   // Ogni schermata: html per la pagina + "storia" = cosa disegnare nell'immagine 1080x1920 per Instagram.
@@ -150,25 +172,28 @@ var DATI = {
         '<p class="occhiello apparire">Dove siBalla stasera?</p>' +
         '<h1 class="titolo apparire">Il tuo anno di swing</h1>' +
         '<p class="anno apparire">' + D.anno + '</p>' +
-        '<p class="testo apparire">Serate, workshop, città e stili: com\'è andata in pista.</p>' +
+        '<p class="testo apparire">' + (M0 ? Periodo + ': serate' : 'Serate') + ', workshop, città e stili: com\'è andata in pista.</p>' +
       '</div><span class="scorri">scorri ↓</span></section>',
-      storia: { occhiello: "Il tuo anno di swing", grande: String(D.anno), titolo: "siBalla in numeri", testo: "Scopri com'è andata in pista" } },
+      storia: { occhiello: "Il tuo anno di swing", grande: String(D.anno), titolo: "siBalla in numeri",
+        testo: M0 ? Periodo + ": com'è andata in pista" : "Scopri com'è andata in pista" } },
 
     { html: '<section class="slide" style="--x:85%;--y:20%"><div class="in">' +
-        '<p class="occhiello apparire">Quest\'anno</p>' +
+        '<p class="occhiello apparire">' + (M0 ? Periodo : 'Quest\'anno') + '</p>' +
         '<p class="grande apparire">' + conta(eventi) + '</p>' +
         '<h2 class="titolo apparire">occasioni per <em>ballare</em></h2>' +
         '<div class="coppia apparire"><div class="tess"><strong>' + conta(D.serate) + '</strong><span>serate</span></div>' +
         '<div class="tess"><strong>' + conta(D.workshop) + '</strong><span>workshop</span></div></div>' +
-        '<p class="testo apparire">Di cui <b>' + D.festival + ' festival</b>. In media <b>' + Math.round(eventi / 52) + ' a settimana</b>.</p>' +
+        '<p class="testo apparire">In Italia, in media <b>' + Math.round(eventi / settimane) + ' a settimana</b>. ' +
+          'Tra i workshop, <b>' + D.festival + ' festival e weekend</b>' +
+          (D.estero ? '. E altri <b>' + n(D.estero) + ' eventi</b> all\'estero' : '') + '.</p>' +
       '</div></section>',
-      storia: { occhiello: "Quest'anno", grande: n(eventi), titolo: "occasioni per ballare",
-        righe: [["Serate", n(D.serate)], ["Workshop", n(D.workshop)], ["Festival", n(D.festival)]] } },
+      storia: { occhiello: M0 ? Periodo : "Quest'anno", grande: n(eventi), titolo: "occasioni per ballare",
+        righe: [["Serate", n(D.serate)], ["Workshop", n(D.workshop)], ["Festival e weekend", n(D.festival)]] } },
 
     { html: '<section class="slide" style="--x:10%;--y:70%"><div class="in">' +
         '<p class="occhiello apparire">La città più ballerina</p>' +
         '<h2 class="titolo apparire"><em>' + primaCitta[0] + '</em></h2>' +
-        '<p class="testo apparire"><b>' + primaCitta[1] + ' eventi</b> in un anno. Ecco il podio (e un po\' di più):</p>' +
+        '<p class="testo apparire"><b>' + primaCitta[1] + ' eventi</b> ' + periodo + '. Ecco il podio (e un po\' di più):</p>' +
         '<ol class="classifica apparire">' + D.classificaCitta.map(function (c, i) {
           return '<li style="--p:' + Math.round(c[1] / primaCitta[1] * 100) + '%"><span class="pos">' + (i + 1) + '</span>' +
             '<span class="nome">' + c[0] + '</span><span class="val">' + c[1] + '</span></li>';
@@ -189,14 +214,14 @@ var DATI = {
 
     { html: '<section class="slide" style="--x:30%;--y:15%"><div class="in">' +
         '<p class="occhiello apparire">Il mese più ballato</p>' +
-        '<h2 class="titolo apparire"><em>' + MESI[iTop] + '</em></h2>' +
-        '<p class="testo apparire"><b>' + maxMese + ' eventi</b> in un solo mese. Agosto invece… tutti in vacanza.</p>' +
-        '<div class="mesi apparire" role="img" aria-label="Eventi per mese">' + D.mesi.map(function (v, i) {
+        '<h2 class="titolo apparire"><em>' + MESI[M0 + iTop] + '</em></h2>' +
+        '<p class="testo apparire"><b>' + maxMese + ' eventi</b> in un solo mese.</p>' +
+        '<div class="mesi apparire" role="img" aria-label="Eventi per mese">' + mesiV.map(function (v, i) {
           return '<div class="mese' + (i === iTop ? " top" : "") + '" style="--h:' + Math.max(4, Math.round(v / maxMese * 100)) + '%">' +
-            '<i></i><small>' + MESI[i].charAt(0) + '</small></div>';
+            '<i></i><small>' + sigla(i) + '</small></div>';
         }).join("") + '</div>' +
       '</div></section>',
-      storia: { occhiello: "Il mese più ballato", titolo: MESI[iTop], giallo: true, testo: maxMese + " eventi in un solo mese", mesi: true } },
+      storia: { occhiello: "Il mese più ballato", titolo: MESI[M0 + iTop], giallo: true, testo: maxMese + " eventi in un solo mese", mesi: true } },
 
     { html: '<section class="slide" style="--x:90%;--y:50%"><div class="in">' +
         '<p class="occhiello apparire">Gli stili</p>' +
@@ -209,15 +234,15 @@ var DATI = {
       storia: { occhiello: "Lo stile più ballato", titolo: D.stili[0][0], giallo: true,
         righe: D.stili.map(function (s) { return [s[0], s[1] + "%", s[1] / 100]; }) } },
 
-    { html: '<section class="slide" style="--x:20%;--y:40%"><div class="in">' +
+    sito && { html: '<section class="slide" style="--x:20%;--y:40%"><div class="in">' +
         '<p class="occhiello apparire">E su siBalla</p>' +
-        '<p class="grande apparire">' + conta(D.sito.visitatori) + '</p>' +
+        '<p class="grande apparire">' + conta(sito.visitatori) + '</p>' +
         '<h2 class="titolo apparire">ballerini hanno cercato una serata</h2>' +
-        '<div class="coppia apparire"><div class="tess"><strong>' + conta(D.sito.condivisioni) + '</strong><span>eventi condivisi</span></div>' +
-        '<div class="tess"><strong>' + conta(D.sito.annunci + D.sito.clandestini) + '</strong><span>annunci e clandestini</span></div></div>' +
+        '<div class="coppia apparire"><div class="tess"><strong>' + conta(sito.pagine) + '</strong><span>pagine viste</span></div>' +
+        '<div class="tess"><strong>' + conta(sito.annunci + sito.clandestini) + '</strong><span>annunci e clandestini</span></div></div>' +
       '</div></section>',
-      storia: { occhiello: "E su siBalla", grande: n(D.sito.visitatori), titolo: "ballerini hanno cercato una serata",
-        righe: [["Eventi condivisi", n(D.sito.condivisioni)], ["Annunci e clandestini", n(D.sito.annunci + D.sito.clandestini)]] } },
+      storia: { occhiello: "E su siBalla", grande: n(sito.visitatori), titolo: "ballerini hanno cercato una serata",
+        righe: [["Pagine viste", n(sito.pagine)], ["Annunci e clandestini", n(sito.annunci + sito.clandestini)]] } },
 
     { html: '<section class="slide" style="--x:50%;--y:60%"><div class="in">' +
         '<p class="occhiello apparire">Grazie a tutti</p>' +
@@ -227,7 +252,7 @@ var DATI = {
         '<a class="bott vuoto" href="/">Vedi gli eventi →</a></div>' +
       '</div></section>',
       storia: { occhiello: "Grazie a tutti", titolo: "Ci vediamo in pista nel " + (D.anno + 1), testo: "Trova la tua prossima serata su " + "siballa.pages.dev" } }
-  ];
+  ].filter(Boolean);
 
   document.getElementById("wrapped").innerHTML = SCHERMATE.map(function (s) { return s.html; }).join("");
   if (D.esempio) document.getElementById("esempio").hidden = false;
@@ -344,12 +369,12 @@ var DATI = {
     }
 
     if (s.mesi) {
-      var hMax = 520, base = y + 120 + hMax, gap = 18, bw = (L - gap * 11) / 12;
-      D.mesi.forEach(function (v, i) {
+      var k = mesiV.length, hMax = 520, base = y + 120 + hMax, gap = k > 6 ? 18 : 36, bw = (L - gap * (k - 1)) / k;
+      mesiV.forEach(function (v, i) {
         var h = Math.max(16, v / maxMese * hMax), bx = X + i * (bw + gap);
         rett(ctx, bx, base - h, bw, h, 14); ctx.fillStyle = i === iTop ? GIALLO : SCURO; ctx.fill();
         ctx.font = (i === iTop ? "800" : "600") + " 36px " + FONT; ctx.fillStyle = i === iTop ? GIALLO : GRIGIO;
-        ctx.textAlign = "center"; ctx.fillText(MESI[i].charAt(0), bx + bw / 2, base + 56); ctx.textAlign = "left";
+        ctx.textAlign = "center"; ctx.fillText(sigla(i), bx + bw / 2, base + 56); ctx.textAlign = "left";
       });
       y = base + 56;
     }
@@ -378,7 +403,7 @@ var DATI = {
       }, "image/png");
     });
   }
-})();
+}
 </script>
 <script src="howto.js"></script>
 <script src="conta.js"></script>

@@ -59,6 +59,13 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
         run: python sito/esporta_sheet.py _sito/eventi.json
 
+      # numeri per la pagina /2026 ("siBalla 2026 in numeri"): se lo script fallisce la pagina usa i numeri di esempio
+      - name: Numeri del 2026
+        continue-on-error: true
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python sito/numeri_anno.py _sito/numeri-2026.json 2026
+
       - name: Prepara il sito
         run: |
           cp sito/*.html sito/*.css sito/*.js sito/logo-app.svg sito/og*.png _sito/

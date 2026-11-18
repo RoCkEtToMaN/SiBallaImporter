@@ -127,12 +127,16 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
     NUMERI DI ESEMPIO nell'oggetto DATI in cima allo script. 8 schermate a scorrimento,
     "📸 Salva per le storie" su ognuna (immagine 1080x1920; dal telefono si apre la
     condivisione verso Instagram), anteprima WhatsApp og-2026.png, Condividi in fondo.
-    18/11/2026: ancora numeri di esempio (esempio: true in sito/2026.html). SCADENZA VICINA.
-    ATTENZIONE: lo Sheet ha dati affidabili solo da agosto 2026 (storico rimesso il 14/11);
-    prima poche righe a mano e alcune con l'anno sbagliato. O la pagina dice "da agosto a
-    oggi", o si recuperano i mesi prima dal backup-sheet-*.json del PC di casa.
-    Resta: script che calcola DATI dallo Sheet (controllare che gli eventi passati del 2026
-    ci siano ancora) e da /statistiche; pubblicarla verso il 10 dicembre (togliere
+    18/11/2026: NUMERI VERI (scelta A: "da agosto a dicembre", lo Sheet fa da storico solo da
+    agosto 2026). sito/numeri_anno.py li calcola dallo Sheet a ogni giro del sito (step "Numeri
+    del 2026" in sito.yml -> numeri-2026.json); /api/numeri da' visitatori, pagine viste,
+    annunci e clandestini dal database. Regole: solo Italia (gli eventi all'estero sono una
+    riga a parte), niente "no"/"da verificare", doppioni tolti, festival = workshop di almeno
+    2 giorni, mesi mostrati da agosto. Al 18/11: 705 serate, 23 workshop, 77 citta', 18 regioni,
+    Milano prima, ottobre il mese piu' ballato, Lindy Hop 66%. Se il file manca la pagina torna
+    ai numeri di esempio. La schermata delle condivisioni e' diventata "pagine viste" (le
+    condivisioni non si contano). Da guardare su anteprima.
+    Resta: pubblicarla verso il 10 dicembre (togliere
     riservata.js, pubblica: true nel menu, avviso in home); storie una al giorno con lo
     sticker Link verso siballa.pages.dev/2026?utm_source=instagram.
 [~] Playlist per BPM: FATTA in prova la pagina /musica (scheda Musica dello Sheet: selezioni con
@@ -206,7 +210,7 @@ ALTRE IDEE (18/11/2026)
 
 ORDINE CONSIGLIATO (aggiornato il 18/11/2026)
 ------------------------------------------------
-1. Script dei numeri per "siBalla 2026 in numeri" (pubblicazione verso il 10 dicembre)
+1. "siBalla 2026 in numeri": numeri veri fatti, controllarla su anteprima e pubblicarla verso il 10 dicembre
 2. Controllare/accendere Turnstile sul sito pubblico (Bacheca, Clandestini e Community aperti a tutti)
 3. Pubblicare Storia e Scuole (quasi pronte)
 4. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle
