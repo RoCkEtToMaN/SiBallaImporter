@@ -41,23 +41,30 @@ GIA' FATTI
 [x] Community WhatsApp pubblica (1.2.0.0): pagina /community con ricerca per citta' (pillole),
     griglia per regione, gruppo siBalla in evidenza, legenda dei tipi, eventi della settimana,
     QR code da computer, "Segnala un gruppo" / "Fondala tu" con modale e email di notifica,
-    approvazione e gestione in /community-admin (anche da /statistiche e /bacheca-admin).
+    approvazione e gestione in /community-admin (non piu' dentro /statistiche dal 18/11/2026).
     Elenco in sito/elenchi/community.csv (per ora 1 gruppo: siBalla Genova e dintorni).
 [x] Storia del ballo: testo fatto (5 capitoli, dagli anni '20 a "La scena italiana" oggi)
     + glossario degli stili. Ancora solo sulla versione di prova (vedi DA FARE).
 [x] Scuole: elenco di 98 scuole in sito/elenchi/scuole.csv (nome, citta', regione, stili,
     sito/Instagram/Facebook). Pagina ancora solo sulla versione di prova (vedi DA FARE).
+[x] Statistiche, 18/11/2026 (pubblico, merge su master 8186f94):
+    - conta.js su TUTTE le pagine (prima solo sulla home: Bacheca, Community, Novita'
+      non venivano contate) -> da qui le visite totali salgono perche' contano anche le
+      altre pagine; "Pagine piu' viste" ora ha senso
+    - tabella "Video «Come funziona» · aperture per pagina": aperture, visti fino in fondo,
+      % delle visite alla pagina (compare dopo il primo tocco da un browser che conta)
+    - tolto da /statistiche il riquadro di gestione Community (c'e' /community-admin);
+      in cima pulsanti Bacheca · Clandestini · Community verso le pagine di gestione
+    Pagine nascoste (chiave = secret STATS_KEY su Cloudflare, senza chiave -> 404):
+      /statistiche?chiave=...      /bacheca-admin?chiave=...
+      /clandestini-admin?chiave=...  /community-admin?chiave=...
 
 DA FARE
 -------
 [ ] Video how-to, cosa resta (dettagli nella guida Word, capitolo "Video how-to"):
-    - FATTO (18/11/2026, su anteprima): i tocchi su "Come funziona" si contano. In /statistiche
-      tabella "Video «Come funziona»": aperture per pagina, quanti visti fino in fondo, % delle
-      visite alla pagina. Insieme, conta.js e' stato aggiunto a TUTTE le pagine (prima era solo
-      sulla home: Bacheca, Community e Novita' non venivano contate) -> dal rilascio le visite
-      totali salgono perche' contano anche le altre pagine.
-      Resta: dopo un mese di dati (meta' dicembre se pubblicato ora) decidere se tenerlo
-      ovunque o solo su Bacheca, Clandestini e Community
+    - i tocchi su "Come funziona" si contano dal 18/11/2026 (vedi GIA' FATTI, Statistiche).
+      Verso il 18/12/2026, con un mese di dati, decidere se tenerlo ovunque o solo su
+      Bacheca, Clandestini e Community
     - rifare i video di Rubriche (oggi testo di prova) e Community (un solo gruppo), fare quello
       di Artisti quando ci sono le prime righe
     - Reel "2026 in numeri" a dicembre, con i numeri veri
@@ -201,7 +208,7 @@ ORDINE CONSIGLIATO (aggiornato il 18/11/2026)
 ------------------------------------------------
 1. Script dei numeri per "siBalla 2026 in numeri" (pubblicazione verso il 10 dicembre)
 2. Controllare/accendere Turnstile sul sito pubblico (Bacheca, Clandestini e Community aperti a tutti)
-3. Portare su master il conteggio di "Come funziona" (fatto su anteprima, serve un mese di dati)
-4. Pubblicare Storia e Scuole (quasi pronte)
-5. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle
+3. Pubblicare Storia e Scuole (quasi pronte)
+4. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle
+5. Verso il 18/12/2026: guardare i numeri di "Come funziona" e decidere dove tenerlo
 6. Il resto quando serve
