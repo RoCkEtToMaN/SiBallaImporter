@@ -4,8 +4,28 @@
 // I testi possono contenere <b>…</b>: sono scritti da noi, non dagli utenti.
 // Numero di versione: MAGGIORE.MINORE.CORREZIONE.BUILD (es. 1.2.0.0 = funzioni nuove, 1.1.1.0 = piccole correzioni).
 // Il workflow del sito legge la prima "versione:" di questo file e la mostra in fondo a ogni pagina (piede.js).
+// "dal: 'aaaa-mm-gg'" = versione programmata: sul sito pubblico compare (e fa lampeggiare l'avviso) solo da quel
+// giorno, data italiana; nelle versioni di prova si vede subito. Il workflow del sito salta le versioni non ancora uscite.
 (function () {
   var NOVITA = [
+    {
+      versione: "1.3.0.0",
+      data: "Dicembre 2026",
+      dal: "2026-12-10",
+      titolo: "siBalla 2026 in numeri",
+      intro: "Il tuo anno di swing: quante serate, la città più ballerina, il mese più ballato e gli stili più amati.",
+      voci: [
+        {
+          tipo: "Nuovo", titolo: "2026 in numeri", link: "/2026",
+          sotto: "I numeri veri della scena swing italiana, da agosto a dicembre 2026.",
+          punti: [
+            "Scorri le schermate: serate e workshop, la classifica delle città, il mese più ballato e gli stili.",
+            "Con <b>📸 Salva per le storie</b> ogni schermata diventa un'immagine pronta per Instagram.",
+            "La trovi anche nel menu ☰, alla voce <b>2026 in numeri</b>."
+          ]
+        }
+      ]
+    },
     {
       versione: "1.2.0.0",
       data: "Novembre 2026",
@@ -123,6 +143,11 @@
       ]
     }
   ];
+
+  var prova = /\.siballa\.pages\.dev$/.test(location.hostname) || location.protocol === "file:" ||
+    /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  var oggi = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(new Date());
+  if (!prova) NOVITA = NOVITA.filter(function (v) { return !v.dal || oggi >= v.dal; });
 
   var VISTA = "siballa-novita-vista";
   var ultima = NOVITA[0].versione;

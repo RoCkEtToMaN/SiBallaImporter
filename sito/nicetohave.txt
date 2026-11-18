@@ -136,9 +136,13 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
     Milano prima, ottobre il mese piu' ballato, Lindy Hop 66%. Se il file manca la pagina torna
     ai numeri di esempio. La schermata delle condivisioni e' diventata "pagine viste" (le
     condivisioni non si contano). Da guardare su anteprima.
-    Resta: pubblicarla verso il 10 dicembre (togliere
-    riservata.js, pubblica: true nel menu, avviso in home); storie una al giorno con lo
-    sticker Link verso siballa.pages.dev/2026?utm_source=instagram.
+    PUBBLICAZIONE AUTOMATICA il 10/12/2026 (data italiana), gia' su master: riservata.js con
+    data-dal="2026-12-10" (prima rimanda alla home), voce del menu con pubblica: "2026-12-10",
+    Novita' 1.3.0.0 con dal: "2026-12-10" (l'avviso "✨ Novita'" lampeggia da quel giorno) e
+    versione nel piede che passa da sola a 1.3.0.0 (sito.yml salta le versioni con dal futuro).
+    Promemoria cloud il 10/12 alle 9:00 (claude.ai/code/routines) per controllare.
+    Resta (a mano): storie una al giorno con lo sticker Link verso
+    siballa.pages.dev/2026?utm_source=instagram; Reel "2026 in numeri" con i numeri veri.
 [~] Playlist per BPM: FATTA in prova la pagina /musica (scheda Musica dello Sheet: selezioni con
     BPM, lettore YouTube continuo, Ascolta tutto in ordine casuale, Proponi un brano, pulsante
     Ascolta su Spotify con le playlist del proprio account). Oggi (18/11/2026) in musica.csv:
@@ -210,7 +214,7 @@ ALTRE IDEE (18/11/2026)
 
 ORDINE CONSIGLIATO (aggiornato il 18/11/2026)
 ------------------------------------------------
-1. "siBalla 2026 in numeri": numeri veri fatti, controllarla su anteprima e pubblicarla verso il 10 dicembre
+1. "siBalla 2026 in numeri": si pubblica da sola il 10/12/2026; quel giorno controllarla e fare storie/Reel
 2. Controllare/accendere Turnstile sul sito pubblico (Bacheca, Clandestini e Community aperti a tutti)
 3. Pubblicare Storia e Scuole (quasi pronte)
 4. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle

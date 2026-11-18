@@ -75,7 +75,8 @@ jobs:
       # (prima "versione:" di sito/novita.js, es. 1.1.1.0), codice dell'ultimo commit, ramo, ora
       - name: Versione
         run: |
-          VERSIONE=$(grep -m1 -oE 'versione: *"[^"]+"' sito/novita.js | sed -E 's/.*"([^"]+)"/\1/')
+          # prima versione già uscita: quelle con dal: "aaaa-mm-gg" nel futuro (data italiana) si saltano
+          VERSIONE=$(OGGI=$(TZ=Europe/Rome date +%F) python3 -c 'import os,re;q=chr(34);t=open("sito/novita.js",encoding="utf-8").read();b=re.findall("versione: *"+q+"([^"+q+"\n]+)"+q+"(?:[,\n ]*data: *"+q+"[^"+q+"\n]*"+q+")?(?:[,\n ]*dal: *"+q+"([^"+q+"\n]+)"+q+")?",t);print(next((v for v,d in b if not d or d<=os.environ["OGGI"]),""))')
           printf '{"versione":"%s","commit":"%s","ramo":"%s","pubblicata":"%s"}\n' \
             "${VERSIONE:-$(git log -1 --format=%cd --date=format:%Y.%m.%d)}" "$(git rev-parse --short HEAD)" \
             "$GITHUB_REF_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > _sito/versione.json
