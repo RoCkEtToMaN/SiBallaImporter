@@ -3163,6 +3163,26 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "ryb night": {
+        "organizer": null,
+        "city": "Perugia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-18",
+        "stili": [
+          "Blues",
+          "Lindy"
+        ]
       }
     }
   },
@@ -6373,7 +6393,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "cafe rossetti swing fall of the log night": {
@@ -6388,6 +6411,24 @@
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "cafe rossetti swing a touch of elegance": {
+        "organizer": null,
+        "city": "Trieste",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
         "verifiedOn": null,
         "notes": null,
         "stili": [
@@ -16697,7 +16738,11 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa"
+      ]
     },
     "events": {
       "we dance we drink we have fun": {
@@ -16717,6 +16762,25 @@
         "geminiNonTrovato": "2026-11-09",
         "stili": [
           "Balboa",
+          "Lindy"
+        ]
+      },
+      "great swing evening": {
+        "organizer": null,
+        "city": "Reggio Emilia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-18",
+        "stili": [
           "Lindy"
         ]
       }
@@ -22860,6 +22924,80 @@
         "notes": null,
         "stili": [
           "Blues"
+        ]
+      }
+    }
+  },
+  "college 66 e fabrizio anto giuliani|ancona": {
+    "default": {
+      "organizer": "College 66 e Fabrizio Anto Giuliani",
+      "city": "Ancona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing aperidance senigallia an college": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "mr barini music designer e dj raffo the twist|novara": {
+    "default": {
+      "organizer": "Mr Barini  - music designer e DJ Raffo The Twist",
+      "city": "Novara",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "roots": {
+        "organizer": null,
+        "city": "Novara",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
         ]
       }
     }
