@@ -33,40 +33,63 @@ GIA' FATTI
     a ogni rilascio visibile si aggiunge una versione in cima a NOVITA in sito/novita.js
 [x] Condividi (13/11/2026): il link porta la data (/?q=nome&d=AAAAMMGG) e mostra solo
     quell'evento, con "Mostra tutte le date" (i link mandati prima mostrano tutte le date)
-[x] Video how-to (17/11/2026, versione di prova): pulsante "▶ Come funziona" su ogni pagina
+[x] Video how-to (17/11/2026): pulsante "▶ Come funziona" su ogni pagina
     (tranne Artisti, vuota) con un video verticale, didascalie e niente audio (sito/howto.js,
     sito/video/). Fatti anche 3 Reel per Instagram in sito/video/social/ (home, Bacheca,
     Community). Tutto spiegato nella guida Word, capitolo "Video how-to".
+    Pubblicati sul sito pubblico insieme alla Community (versione 1.2.0.0, voce in NOVITA fatta).
+[x] Community WhatsApp pubblica (1.2.0.0): pagina /community con ricerca per citta' (pillole),
+    griglia per regione, gruppo siBalla in evidenza, legenda dei tipi, eventi della settimana,
+    QR code da computer, "Segnala un gruppo" / "Fondala tu" con modale e email di notifica,
+    approvazione e gestione in /community-admin (anche da /statistiche e /bacheca-admin).
+    Elenco in sito/elenchi/community.csv (per ora 1 gruppo: siBalla Genova e dintorni).
+[x] Storia del ballo: testo fatto (5 capitoli, dagli anni '20 a "La scena italiana" oggi)
+    + glossario degli stili. Ancora solo sulla versione di prova (vedi DA FARE).
+[x] Scuole: elenco di 98 scuole in sito/elenchi/scuole.csv (nome, citta', regione, stili,
+    sito/Instagram/Facebook). Pagina ancora solo sulla versione di prova (vedi DA FARE).
 
 DA FARE
 -------
 [ ] Video how-to, cosa resta (dettagli nella guida Word, capitolo "Video how-to"):
-    - contare i tocchi su "Come funziona" nelle statistiche; dopo un mese decidere se tenerlo
+    - FATTO (18/11/2026, su anteprima): i tocchi su "Come funziona" si contano. In /statistiche
+      tabella "Video «Come funziona»": aperture per pagina, quanti visti fino in fondo, % delle
+      visite alla pagina. Insieme, conta.js e' stato aggiunto a TUTTE le pagine (prima era solo
+      sulla home: Bacheca, Community e Novita' non venivano contate) -> dal rilascio le visite
+      totali salgono perche' contano anche le altre pagine.
+      Resta: dopo un mese di dati (meta' dicembre se pubblicato ora) decidere se tenerlo
       ovunque o solo su Bacheca, Clandestini e Community
     - rifare i video di Rubriche (oggi testo di prova) e Community (un solo gruppo), fare quello
       di Artisti quando ci sono le prime righe
     - Reel "2026 in numeri" a dicembre, con i numeri veri
     - pubblicare i Reel su Instagram (musica scelta dalla libreria di Instagram)
     - app: niente video, ma schermate di benvenuto e suggerimenti al primo uso
-    - al passaggio su master: voce in NOVITA (sito/novita.js)
 [ ] Bacheca (pubblica dal 12/11/2026), cosa resta:
     - accendere Turnstile (anti-bot Cloudflare) su clandestini, annunci e messaggi: e' pronto,
       basta mettere TURNSTILE_SITEKEY (variabile) + TURNSTILE_SECRET (secret) nel progetto Pages
+      (dal repo non si vede se e' gia' acceso: controllare in Cloudflare -> Pages -> siballa ->
+      Settings -> Variables; finche' manca una delle due chiavi l'anti-bot resta spento)
     - da valutare categorie DJ / band / sale
     Dettagli nel documento Word, capitolo "Bacheca degli annunci".
 [ ] Community WhatsApp aperta a tutti, da ogni parte del mondo (con calma, da decidere):
-    oggi c'e' solo la community siBalla (link chat.whatsapp.com, zona "Tutta Italia").
+    la pagina e' pubblica (vedi GIA' FATTI) ma c'e' un solo gruppo (siBalla, Genova e dintorni):
+    il primo passo e' riempire community.csv con i gruppi delle altre citta'.
     Da pensare: come farla trovare e usare anche a chi sta all'estero; zone/paesi oltre
     alle regioni italiane; testi anche in inglese; come limitare lo spam con un link
     pubblico (approvazione dei nuovi membri, oppure un Canale WhatsApp per gli annunci).
-[ ] Riempire le sezioni del menu (oggi "In arrivo"):
-    - Storia del ballo: testo a capitoli con foto/video d'epoca, glossario degli stili
-    - Scuole: nuova scheda nello Sheet -> esporta_sheet.py; filtro per regione, logo, link
-    - Artisti: nuova scheda nello Sheet; insegnanti/band/DJ; foto e contatti solo con consenso
-    - Community WhatsApp: nuova scheda nello Sheet, per citta'; meglio canali/community
-      con approvazione dell'amministratore (link pubblici = spam)
-    - App mobile: pulsanti degli store; sito installabile sul telefono (PWA)
-    Quando una sezione e' pronta: pronta: true in sito/menu.js e togliere il "noindex".
+[~] Riempire le sezioni del menu (stato al 18/11/2026; riservate = riservata.js nel <head>):
+    - Storia del ballo: testo e glossario FATTI; mancano foto/video d'epoca. Quasi pronta da
+      pubblicare.
+    - Scuole: 98 scuole in elenchi/scuole.csv, quasi pronta da pubblicare; poi spostare
+      l'elenco in una scheda dello Sheet (esporta_sheet.py le legge gia'), logo, filtro per regione.
+      Nota: le schede Scuole/Artisti/Community/Contenuti sul pubblico partono solo con
+      NOVITA_PUBBLICHE = True in esporta_sheet.py (oggi False).
+    - Artisti: ancora vuota (artisti.csv ha solo le intestazioni); insegnanti/band/DJ;
+      foto e contatti solo con consenso
+    - Community WhatsApp: FATTA e pubblica (vedi GIA' FATTI)
+    - App mobile: pulsanti degli store; sito installabile sul telefono (PWA: oggi non c'e'
+      nessun manifest ne' service worker)
+    Quando una sezione e' pronta: togliere riservata.js, pubblica: true in sito/menu.js,
+    togliere il "noindex", voce in NOVITA.
 [ ] Link all'app SiBalla (se e' sugli store): voce "App mobile" nel menu, piu' magari
     un pulsante "Scarica l'app" sempre visibile.
 [ ] Dominio vostro, es. eventi.siballa.it al posto di siballa.pages.dev
@@ -80,7 +103,7 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
     Scheda "Contenuti" nello Sheet (riga 2 intestazioni): Data, Rubrica, Titolo, Testo,
     Immagine (link), Video (link YouTube -> video nella pagina; Instagram/altro -> pulsante),
     Autore. Una riga compare dal giorno in "Data" in poi: si programmano in anticipo.
-    Finche' la scheda non c'e': bozza sito/elenchi/contenuti.csv (3 esempi). Ogni contenuto
+    Finche' la scheda non c'e': bozza sito/elenchi/contenuti.csv (5 esempi). Ogni contenuto
     ha "Condividi" e un link suo (/rubriche?id=...). Da fare: riga in home "La mossa della
     settimana: ... ->", banner automatico nelle giornate speciali.
     Ordine: 1) Wrapped 2026 (dicembre) 2) Quiz (gennaio) 3) Mossa della settimana con 3-4
@@ -97,13 +120,19 @@ PIANO (12/11/2026): le idee qui sotto diventano RUBRICHE, come una rivista, scri
     NUMERI DI ESEMPIO nell'oggetto DATI in cima allo script. 8 schermate a scorrimento,
     "📸 Salva per le storie" su ognuna (immagine 1080x1920; dal telefono si apre la
     condivisione verso Instagram), anteprima WhatsApp og-2026.png, Condividi in fondo.
+    18/11/2026: ancora numeri di esempio (esempio: true in sito/2026.html). SCADENZA VICINA.
+    ATTENZIONE: lo Sheet ha dati affidabili solo da agosto 2026 (storico rimesso il 14/11);
+    prima poche righe a mano e alcune con l'anno sbagliato. O la pagina dice "da agosto a
+    oggi", o si recuperano i mesi prima dal backup-sheet-*.json del PC di casa.
     Resta: script che calcola DATI dallo Sheet (controllare che gli eventi passati del 2026
     ci siano ancora) e da /statistiche; pubblicarla verso il 10 dicembre (togliere
     riservata.js, pubblica: true nel menu, avviso in home); storie una al giorno con lo
     sticker Link verso siballa.pages.dev/2026?utm_source=instagram.
 [~] Playlist per BPM: FATTA in prova la pagina /musica (scheda Musica dello Sheet: selezioni con
     BPM, lettore YouTube continuo, Ascolta tutto in ordine casuale, Proponi un brano, pulsante
-    Ascolta su Spotify con le playlist del proprio account). Resta: riempire le selezioni,
+    Ascolta su Spotify con le playlist del proprio account). Oggi (18/11/2026) in musica.csv:
+    4 selezioni (Con calma, In pista, A tutto swing, Swing italiano dal vivo) con 1-2 brani
+    ciascuna e BPM vuoti. Resta: riempire le selezioni e i BPM,
     playlist Spotify pubbliche, poi Radio siBalla con licenze.
     Idea iniziale: playlist Spotify divise per velocita' (lente per principianti,
     medie per social dance, veloci per Balboa/jam). Utili per allenarsi e ai DJ.
@@ -150,12 +179,29 @@ PICCOLE COSE IN SOSPESO
 [~] Attribuzione dell'icona dell'app: viene da Flaticon, autore Magnific (gruppo Freepik),
     licenza gratuita (14/11/2026). Riga "Icona di Magnific da Flaticon" nel piede di tutte le
     pagine (ICONA in cima a sito/piede.js), per ora sulla versione di prova. Resta: mettere in
-    "pagina" il link dell'icona su Flaticon e portarla sul sito pubblico.
+    "pagina" il link dell'icona su Flaticon (ICONA.pagina e' ancora vuoto) e portarla sul
+    sito pubblico.
 [ ] Cancellare il vecchio salvataggio automatico di git: git stash drop stash@{0}
+    (18/11/2026: lo stash "autostash" c'e' ancora)
 
-ORDINE CONSIGLIATO (aggiornato il 13/11/2026)
+ALTRE IDEE (18/11/2026)
+-----------------------
+[ ] Dati strutturati schema.org/Event nelle pagine degli eventi: Google puo' mostrare le
+    serate nei risultati "eventi vicino a me". Poco lavoro, visite da Google oltre che da Instagram.
+[ ] Pagine per citta' (es. /milano, /genova) indicizzabili, con il filtro gia' applicato:
+    utili per Google e da condividere nei gruppi della Community.
+[ ] Calendario abbonabile per regione (link .ics che si aggiorna da solo): oggi si salva
+    un evento alla volta con "📅 Calendario".
+[ ] PWA (manifest + icona): sito installabile sul telefono, copre il buco finche' l'app
+    non e' sugli store.
+[ ] "Segnala un evento" per gli organizzatori (modulo + approvazione come i clandestini):
+    rende l'importer meno dipendente dalla ricerca automatica.
+
+ORDINE CONSIGLIATO (aggiornato il 18/11/2026)
 ------------------------------------------------
-1. "siBalla 2026 in numeri" (scadenza naturale: dicembre)
-2. Accendere Turnstile sul sito pubblico (ora che Bacheca e Clandestini sono aperti a tutti)
-3. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle
-4. Il resto quando serve
+1. Script dei numeri per "siBalla 2026 in numeri" (pubblicazione verso il 10 dicembre)
+2. Controllare/accendere Turnstile sul sito pubblico (Bacheca, Clandestini e Community aperti a tutti)
+3. Portare su master il conteggio di "Come funziona" (fatto su anteprima, serve un mese di dati)
+4. Pubblicare Storia e Scuole (quasi pronte)
+5. Riempire Rubriche e Musica (versione di prova) e poi pubblicarle
+6. Il resto quando serve

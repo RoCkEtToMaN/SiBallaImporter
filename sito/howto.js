@@ -30,12 +30,20 @@
   document.body.appendChild(btn);
   document.body.appendChild(dlg);
 
+  // statistiche (tabella "Come funziona" in /statistiche): aperture del video e visioni fino in fondo.
+  // window.siballaConta esiste solo dove conta.js conta (non su anteprima né con ?noconta).
+  function conta(cosa) { if (window.siballaConta) window.siballaConta({ t: "howto", pagina: pagina, cosa: cosa }); }
+  var finito = false;
+
   var v = dlg.querySelector("video");
   btn.addEventListener("click", function () {
     dlg.showModal();
     v.currentTime = 0;
     v.play().catch(function () {});
+    finito = false;
+    conta("aperto");
   });
+  v.addEventListener("ended", function () { if (!finito) { finito = true; conta("finito"); } });
   dlg.querySelector(".chiudi-hw").addEventListener("click", function () { dlg.close(); });
   dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
   dlg.addEventListener("close", function () { v.pause(); });
