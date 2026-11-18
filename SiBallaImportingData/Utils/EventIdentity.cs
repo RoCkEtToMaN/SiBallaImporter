@@ -22,8 +22,7 @@ public static class EventIdentity
     public static bool Same(Event a, Event b)
     {
         if (a.DateStart.Date != b.DateStart.Date) return false;
-        var city = Normalize(a.City ?? a.EventDetail?.City);
-        if (city.Length == 0 || city != Normalize(b.City ?? b.EventDetail?.City)) return false;
+        if (!SamePlace(a, b)) return false;
         var title = Normalize(a.PartyName);
         if (title.Length == 0) return false;
 
@@ -41,6 +40,31 @@ public static class EventIdentity
         // Almeno tre parole e un titolo contenuto nell'altro, tolte le date.
         return Math.Min(first.Count, second.Count) >= 3
             && (first.IsSubsetOf(second) || second.IsSubsetOf(first));
+    }
+
+    // Stessa città, anche se nello Sheet è stata riscritta: "Montreal" = "Montreal (administrative region)",
+    // "Ipswich" = "Ipswich, Massachusetts", "Sherbrooke" = "Estrie" con le stesse coordinate.
+    // Prima del 18/11/2026 bastava che la città cambiasse per far riaggiungere la riga a ogni giro.
+    private static bool SamePlace(Event a, Event b)
+    {
+        var first = Normalize(a.City ?? a.EventDetail?.City);
+        var second = Normalize(b.City ?? b.EventDetail?.City);
+        if (first.Length > 0 && second.Length > 0
+            && (first == second || first.StartsWith(second + " ") || second.StartsWith(first + " ")))
+            return true;
+        return DistanceKm(a.EventDetail, b.EventDetail) is <= 5;
+    }
+
+    private static double? DistanceKm(EventDetail? a, EventDetail? b)
+    {
+        if (a?.Latitude is not double lat1 || a.Longitude is not double lng1
+            || b?.Latitude is not double lat2 || b.Longitude is not double lng2) return null;
+        // 0;0 = coordinate mancanti, non un luogo
+        if ((lat1 == 0 && lng1 == 0) || (lat2 == 0 && lng2 == 0)) return null;
+        double Rad(double x) => x * Math.PI / 180;
+        var h = Math.Pow(Math.Sin(Rad(lat2 - lat1) / 2), 2)
+            + Math.Cos(Rad(lat1)) * Math.Cos(Rad(lat2)) * Math.Pow(Math.Sin(Rad(lng2 - lng1) / 2), 2);
+        return 2 * 6371 * Math.Asin(Math.Sqrt(h));
     }
 
     public static List<Event> CompleteEmailTiming(IEnumerable<Event> curated, IEnumerable<Event> online)
