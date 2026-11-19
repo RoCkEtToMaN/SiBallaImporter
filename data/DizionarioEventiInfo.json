@@ -23145,5 +23145,176 @@
         ]
       }
     }
+  },
+  "tempo swing|metropolitan france": {
+    "default": {
+      "organizer": "Tempo Swing",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "balbo ateliers": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "festival cap a l west": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-19",
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "west in odz przemek heja e michal lis|odz": {
+    "default": {
+      "organizer": "West in Łódź, Przemek Heja e Michal Lis",
+      "city": "Łódź",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hollywoodz swing save the date maja": {
+        "organizer": null,
+        "city": "Łódź",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "rags 2 rhythm|yolo county": {
+    "default": {
+      "organizer": "Rags 2 Rhythm",
+      "city": "Yolo County",
+      "country": "Stati Uniti d'America",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "the delta breeze shagboa weekend": {
+        "organizer": null,
+        "city": "Yolo County",
+        "country": "Stati Uniti d'America",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "cross flow festival|berlin": {
+    "default": {
+      "organizer": "Cross Flow Festival",
+      "city": "Berlin",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "cross flow festival": {
+        "organizer": null,
+        "city": "Berlin",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
   }
 }
