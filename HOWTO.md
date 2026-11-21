@@ -71,13 +71,33 @@ Valori di **Luogo verificato**, in sintesi:
 | vuoto | tu | sì | sì |
 | `ok` | tu, dopo il controllo | sì | sì (e non viene più sovrascritto) |
 | `auto` | il programma, indirizzo copiato dal dizionario | sì | no |
-| `nuovo` | il programma, evento swing per Gemini | sì | no, finché non scrivi `ok` |
+| `nuovo` | il programma, evento swing per Gemini (o per la memoria delle serie, nota "Memoria: …") | sì | no, finché non scrivi `ok` |
 | `gemini` | il programma, indirizzo trovato da Gemini (vedi sotto) | sì | no, finché non scrivi `ok` |
 | `da verificare` | il programma, evento da controllare | **no** | no |
-| `no` | tu, evento scartato (niente app, sito né email) | **no** | no |
+| `no` | tu, evento scartato (niente app, sito né email); oppure la memoria delle serie, con la nota "Memoria: …" | **no** | no |
 
 Una riga `nuovo` senza indirizzo può prendere quello del dizionario (se lo stesso evento in un'altra
 riga ha un indirizzo verificato): in quel caso diventa `auto`.
+
+#### Memoria delle serie: il programma impara dalle tue decisioni
+
+Le date di un evento che si ripete (stesso organizzatore, città e titolo, a parte anni e numeri)
+vengono decise come hai deciso tu per le altre date, senza chiedere a Gemini:
+
+- se hai scartato (`no`) **almeno 2 date** e non ne hai confermata nessuna, le date nuove arrivano
+  già `no`, e anche le righe future ancora `da verificare`, `nuovo` o `gemini` diventano `no`;
+- se la serie è stata confermata e mai scartata, le date nuove arrivano `nuovo` (e le righe future
+  `da verificare` diventano `nuovo`). Conta come conferma piena `ok`/cella vuota (o un altro valore
+  scritto da te), come mezza conferma una riga `nuovo`/`gemini` arrivata alla sua data senza che tu
+  l'abbia scartata: servono almeno 2 conferme piene, o 4 mezze;
+- storia mista (date confermate e date scartate) o troppo corta: decide Gemini come prima.
+
+Le righe decise così hanno la nota **"Memoria: …"** con il motivo. Se la memoria sbaglia, correggi
+la riga: scrivere `ok` su una data di una serie scartata la rende "mista" e la memoria smette di
+decidere da sola. I `no` scritti da Gemini (righe storico) o dalla memoria stessa non contano: impara
+solo da te. Se nello stesso giorno della stessa serie c'è una riga `no` e un'altra che non lo è, la riga `no` è
+un doppione tolto, non uno scarto.
+Per vedere cosa cambierebbe sulle righe già nello Sheet: `--memoria-serie` (vedi `appsettings.json`).
 
 Gemini viene chiamato una volta sola per evento: la classificazione fatta per lo Sheet viene riusata
 per l'email. Al primo giro con lo Sheet vuoto deve classificare tutti gli eventi trovati online (a

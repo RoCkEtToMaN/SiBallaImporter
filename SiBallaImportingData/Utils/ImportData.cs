@@ -511,17 +511,19 @@ namespace SiBallaImportingData.Utils
             for (int i = 0; i < events.Count; i++)
             {
                 var ev = events[i];
-                if (verifiedCol is null || (ev.StatoNuovaRiga ?? VerifiedPending) != VerifiedPending) continue;
+                if (verifiedCol is null) continue;
 
-                requests.Add(new Request
-                {
-                    RepeatCell = new RepeatCellRequest
+                // arancione solo le "da verificare"; la nota anche alle righe decise dalla memoria delle serie ("nuovo" o "no")
+                if ((ev.StatoNuovaRiga ?? VerifiedPending) == VerifiedPending)
+                    requests.Add(new Request
                     {
-                        Range = new GridRange { SheetId = sheetId, StartRowIndex = primaRiga + i, EndRowIndex = primaRiga + i + 1, StartColumnIndex = 0, EndColumnIndex = colonne },
-                        Cell = new CellData { UserEnteredFormat = new CellFormat { BackgroundColor = ColoreDaVerificare } },
-                        Fields = "userEnteredFormat.backgroundColor"
-                    }
-                });
+                        RepeatCell = new RepeatCellRequest
+                        {
+                            Range = new GridRange { SheetId = sheetId, StartRowIndex = primaRiga + i, EndRowIndex = primaRiga + i + 1, StartColumnIndex = 0, EndColumnIndex = colonne },
+                            Cell = new CellData { UserEnteredFormat = new CellFormat { BackgroundColor = ColoreDaVerificare } },
+                            Fields = "userEnteredFormat.backgroundColor"
+                        }
+                    });
                 if (!string.IsNullOrWhiteSpace(ev.MotivoVerifica))
                     requests.Add(new Request
                     {
@@ -951,6 +953,113 @@ namespace SiBallaImportingData.Utils
                 await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
 
             Console.WriteLine($"[sheet] riclassificate {righe.Count} righe: {nuove.Count} '{VerifiedNew}', {righe.Count - nuove.Count} '{VerifiedPending}' colorate con il motivo");
+        }
+
+        // ---------- Memoria delle serie (MemoriaSerie) ----------
+
+        /// <summary>
+        /// Legge nota e colore della colonna "Luogo verificato" di tutte le righe (NotaVerifica, RigaArancione): la memoria
+        /// delle serie impara solo dalle tue decisioni, non dai "no" scritti da Gemini o da lei stessa (nota "Gemini: ..."
+        /// o "Memoria: ..."). Restituisce false se la lettura non riesce: in quel caso la memoria non va usata in questo giro
+        /// </summary>
+        public static async Task<bool> LeggiNoteVerificaAsync(IEnumerable<Event> sheetEvents)
+        {
+            var righe = sheetEvents.Where(e => e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null).ToList();
+            if (righe.Count == 0) return true;
+            try
+            {
+                const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+                var service = ServizioSheet();
+                var perFoglio = righe.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.ToDictionary(e => e.SheetRow!.Value));
+                var colonne = righe.GroupBy(e => e.SheetName!).ToDictionary(g => g.Key, g => g.First().SheetVerifiedColumn!.Value);
+                var get = service.Spreadsheets.Get(spreadsheetId);
+                get.Ranges = perFoglio.Select(f => $"'{f.Key}'!{(char)('A' + colonne[f.Key])}3:{(char)('A' + colonne[f.Key])}{f.Value.Keys.Max()}").ToList();
+                get.IncludeGridData = true;
+                get.Fields = "sheets(properties(title),data(startRow,rowData(values(note,userEnteredFormat(backgroundColor)))))";
+                var spreadsheet = await get.ExecuteAsync();
+
+                foreach (var sheet in spreadsheet.Sheets)
+                {
+                    if (!perFoglio.TryGetValue(sheet.Properties.Title, out var perRiga)) continue;
+                    foreach (var data in sheet.Data ?? new List<GridData>())
+                    {
+                        int start = data.StartRow ?? 0;
+                        for (int i = 0; i < (data.RowData?.Count ?? 0); i++)
+                        {
+                            if (!perRiga.TryGetValue(start + i + 1, out var ev)) continue;
+                            var cella = data.RowData![i].Values?.FirstOrDefault();
+                            ev.NotaVerifica = string.IsNullOrWhiteSpace(cella?.Note) ? null : cella.Note.Trim();
+                            ev.RigaArancione = IsColoreDaVerificare(cella?.UserEnteredFormat?.BackgroundColor);
+                        }
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[sheet] ⚠️ note di \"{VerifiedHeader}\" non lette ({ex.Message}): in questo giro niente memoria delle serie");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Scrive le decisioni della memoria delle serie su righe già nello Sheet (StatoNuovaRiga, MotivoVerifica):
+        /// valore in "Luogo verificato", motivo nella nota e via l'arancione (la cella H lilla dello stile dedotto resta).
+        /// Togliendo il colore, TogliEvidenziazioniAsync non cancella la nota "Memoria: ...", che serve a non reimpararla
+        /// </summary>
+        public static async Task ScriviMemoriaAsync(List<Event> righe)
+        {
+            righe = righe.Where(e => e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null && e.StatoNuovaRiga is not null).ToList();
+            if (righe.Count == 0) return;
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+
+            await service.Spreadsheets.Values.BatchUpdate(new BatchUpdateValuesRequest
+            {
+                ValueInputOption = "RAW",
+                Data = righe.Select(e => new ValueRange
+                {
+                    Range = $"'{e.SheetName}'!{(char)('A' + e.SheetVerifiedColumn!.Value)}{e.SheetRow}",
+                    Values = new List<IList<object>> { new List<object> { e.StatoNuovaRiga! } }
+                }).ToList()
+            }, spreadsheetId).ExecuteAsync();
+
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+            var requests = new List<Request>();
+            foreach (var e in righe.Where(e => sheetIds.ContainsKey(e.SheetName!)))
+            {
+                var sheetId = sheetIds[e.SheetName!];
+                int r = e.SheetRow!.Value - 1;   // l'API conta da 0
+                if (e.RigaArancione)
+                {
+                    var tratti = e.StileDedotto ? new[] { (0, ColonnaStili), (ColonnaStili + 1, 26) } : new[] { (0, 26) };
+                    foreach (var (da, a) in tratti)
+                        requests.Add(new Request
+                        {
+                            RepeatCell = new RepeatCellRequest
+                            {
+                                Range = new GridRange { SheetId = sheetId, StartRowIndex = r, EndRowIndex = r + 1, StartColumnIndex = da, EndColumnIndex = a },
+                                Cell = new CellData { UserEnteredFormat = new CellFormat() },
+                                Fields = "userEnteredFormat.backgroundColor"
+                            }
+                        });
+                }
+                requests.Add(new Request
+                {
+                    UpdateCells = new UpdateCellsRequest
+                    {
+                        Start = new GridCoordinate { SheetId = sheetId, RowIndex = r, ColumnIndex = e.SheetVerifiedColumn },
+                        Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = e.MotivoVerifica } } } },
+                        Fields = "note"
+                    }
+                });
+            }
+            for (int i = 0; i < requests.Count; i += 500)
+                await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests.Skip(i).Take(500).ToList() }, spreadsheetId).ExecuteAsync();
+
+            Console.WriteLine($"[sheet] memoria delle serie: {righe.Count(e => e.StatoNuovaRiga == VerifiedNew)} righe '{VerifiedNew}', " +
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedNo)} righe '{VerifiedNo}'");
         }
 
         /// <summary>

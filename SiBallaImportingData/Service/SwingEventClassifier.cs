@@ -66,13 +66,27 @@ namespace SiBallaImportingData.Service
 
         /// <summary>
         /// Per le righe nuove dello Sheet: swing -> "nuovo" (va sul DB), non swing o non classificato -> "da verificare"
-        /// con il motivo (riga colorata, non va sul DB). Al contrario dell'email, nel dubbio la riga aspetta il tuo controllo
+        /// con il motivo (riga colorata, non va sul DB). Al contrario dell'email, nel dubbio la riga aspetta il tuo controllo.
+        /// Con la memoria delle serie, le date di serie che hai già deciso prendono la stessa decisione senza chiedere a Gemini
         /// </summary>
-        public static async Task SegnaPerSheetAsync(List<Event> eventi, GeminiOptions gemini)
+        public static async Task SegnaPerSheetAsync(List<Event> eventi, GeminiOptions gemini, MemoriaSerie? memoria = null)
         {
-            await ClassificaAsync(eventi, gemini);
-
+            var daGemini = new List<Event>();
             foreach (var ev in eventi)
+            {
+                if (memoria?.Decidi(ev) is { } decisione)
+                {
+                    ev.StatoNuovaRiga = decisione.Stato;
+                    ev.MotivoVerifica = decisione.Motivo;
+                    Console.WriteLine($"[memoria] {ev.DateStart:yyyy-MM-dd} {ev.PartyName?.Trim()} -> '{decisione.Stato}'");
+                }
+                else
+                    daGemini.Add(ev);
+            }
+
+            await ClassificaAsync(daGemini, gemini);
+
+            foreach (var ev in daGemini)
             {
                 if (_esiti.TryGetValue(ev, out var esito))
                 {
@@ -87,7 +101,10 @@ namespace SiBallaImportingData.Service
             }
 
             int nuovi = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNew);
-            Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), {eventi.Count - nuovi} '{ImportData.VerifiedPending}' (colorate)");
+            int scartati = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNo);
+            Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), " +
+                              $"{eventi.Count - nuovi - scartati} '{ImportData.VerifiedPending}' (colorate), {scartati} '{ImportData.VerifiedNo}' (memoria delle serie); " +
+                              $"decise dalla memoria: {eventi.Count - daGemini.Count}");
         }
 
         // classifica con Gemini gli eventi che in questo giro non lo sono ancora; quelli di un gruppo fallito restano senza esito

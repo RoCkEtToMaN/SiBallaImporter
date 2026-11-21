@@ -72,6 +72,15 @@ internal static class ImportRunner
             return;
         }
 
+        // MEMORIA DELLE SERIE: le tue decisioni sulle altre date dello stesso evento applicate alle righe future
+        // --memoria-serie mostra soltanto, --memoria-serie-scrivi scrive nello Sheet. Poi il programma si ferma
+        if (opzioni.MemoriaSerie || opzioni.MemoriaSerieScrivi)
+        {
+            if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
+                await ImportCommands.ApplicaMemoriaAsync(sheetEvents, MemoriaSerie.Da(sheetEvents), opzioni.MemoriaSerieScrivi);
+            return;
+        }
+
         // formule dell'intestazione bloccate da valori scritti sotto (#REF!): li svuoto, solo nei giri che scrivono sullo Sheet
         if (opzioni.EnableImportingOnExcel)
         {
@@ -90,6 +99,15 @@ internal static class ImportRunner
         //    colonna H -> stili di eventi e organizzatori (escluse le celle con lo stile dedotto non ancora confermato)
         if (await ImportData.LeggiStiliDedottiAsync(sheetEvents))
             store.ImparaStili(sheetEvents);
+        //    "Luogo verificato" -> memoria delle serie (swing o scartate), applicata alle righe future già nello Sheet
+        //    nei giri che scrivono sullo Sheet, e più sotto alle righe nuove trovate online
+        MemoriaSerie? memoria = null;
+        if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
+        {
+            memoria = MemoriaSerie.Da(sheetEvents);
+            if (opzioni.EnableImportingOnExcel)
+                await ImportCommands.ApplicaMemoriaAsync(sheetEvents, memoria, scrivi: true);
+        }
 
         // 2. righe future senza indirizzo e senza luogo noto -> voci da compilare
         var daCompilare = sheetEvents
@@ -148,7 +166,8 @@ internal static class ImportRunner
         {
             // Gemini decide lo stato delle righe: swing -> "nuovo" (va sul DB), gli altri -> "da verificare" colorati.
             // La classificazione resta in memoria e l'email più sotto la riusa
-            await SwingEventClassifier.SegnaPerSheetAsync(nuoviEventi, settings.Gemini);
+            // (prima la memoria delle serie: le date di serie che hai già deciso non passano da Gemini)
+            await SwingEventClassifier.SegnaPerSheetAsync(nuoviEventi, settings.Gemini, memoria);
             // senza stile dalla fonte: dizionario, Gemini (stessa risposta di sopra) o parole chiave -> cella H lilla da confermare
             StiliEvento.Completa(nuoviEventi, store);
             // immagine su Storage prima di scrivere la riga: il link online (es. Facebook) scade, la copia no

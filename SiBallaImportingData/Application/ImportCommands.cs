@@ -125,6 +125,52 @@ internal static class ImportCommands
             Console.WriteLine("\nAnteprima: niente scritto nello Sheet. Per scriverlo: --riclassifica-sheet-scrivi");
     }
 
+    // memoria delle serie sulle righe future già nello Sheet: "da verificare" di serie sempre confermate -> "nuovo",
+    // "da verificare"/"nuovo"/"gemini" di serie che hai sempre scartato -> "no". Le righe decise da te non si toccano.
+    // Da --memoria-serie (anteprima) / --memoria-serie-scrivi, e da sola in ogni giro con --excel (scrivi = true)
+    public static async Task ApplicaMemoriaAsync(List<Event> sheetEvents, MemoriaSerie memoria, bool scrivi)
+    {
+        var cambi = new List<Event>();
+        foreach (var e in sheetEvents.Where(e => e.DateStart.Date >= DateTime.Today && e.SheetRow is not null && e.SheetVerifiedColumn is not null)
+                                     .OrderBy(e => e.SheetName).ThenBy(e => e.SheetRow))
+        {
+            if (e.LuogoVerificato is not (ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini)) continue;
+            if (memoria.Decidi(e) is not { } d) continue;
+            // "nuovo" e "gemini" vanno già sul DB: la memoria le cambia solo per scartarle
+            if (d.Stato == ImportData.VerifiedNew && e.LuogoVerificato != ImportData.VerifiedPending) continue;
+            e.StatoNuovaRiga = d.Stato;
+            e.MotivoVerifica = d.Motivo;
+            cambi.Add(e);
+        }
+
+        Console.WriteLine($"\n===== Memoria delle serie: {cambi.Count} righe future da cambiare =====");
+        foreach (var e in cambi)
+            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
+                              $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}  ({e.MotivoVerifica})");
+        if (cambi.Count == 0) return;
+
+        if (!scrivi)
+        {
+            Console.WriteLine("\nAnteprima: niente scritto nello Sheet. Per scriverlo: --memoria-serie-scrivi (lo fa da solo anche ogni giro con --excel)");
+            return;
+        }
+        try
+        {
+            await ImportData.ScriviMemoriaAsync(cambi);
+            // anche in memoria, così DB ed email di questo giro le vedono già cambiate
+            foreach (var e in cambi)
+            {
+                e.LuogoVerificato = e.StatoNuovaRiga;
+                e.NotaVerifica = e.MotivoVerifica;
+                e.RigaArancione = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[sheet] ⚠️ memoria delle serie non scritta nello Sheet: {ex.Message}");
+        }
+    }
+
     // righe "storico" (eventi passati recuperati dalle vecchie versioni) mai controllate: le classifica Gemini.
     // --riclassifica-storico mostra soltanto l'esito, --riclassifica-storico-scrivi lo scrive nello Sheet
     public static async Task RiclassificaStoricoAsync(AppSettings settings, List<Event> sheetEvents)
