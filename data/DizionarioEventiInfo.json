@@ -2211,7 +2211,8 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Balboa"
+        "Balboa",
+        "Lindy"
       ]
     },
     "events": {
@@ -2297,6 +2298,24 @@
         "notes": null,
         "stili": [
           "Balboa"
+        ]
+      },
+      "lindy mood terme tettuccio live": {
+        "organizer": null,
+        "city": "Pistoia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
         ]
       }
     }
@@ -2563,6 +2582,26 @@
         "stili": [
           "Lindy",
           "SoloJazz"
+        ]
+      },
+      "swing a live xmas party with the 1000streets": {
+        "organizer": null,
+        "city": "Trieste",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag"
         ]
       }
     }
@@ -7826,12 +7865,8 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Balboa",
         "Blues",
-        "Charleston",
-        "Shag",
-        "Lindy",
-        "SoloJazz"
+        "Lindy"
       ]
     },
     "events": {
@@ -7873,6 +7908,42 @@
           "Blues",
           "Charleston",
           "Shag"
+        ]
+      },
+      "blues get together claudio bertolin trio": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
+        ]
+      },
+      "harlem guglielmo pagnozzi and the jazz dogs christmas party": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
         ]
       }
     }
@@ -13281,7 +13352,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "christmas party save the date": {
@@ -13296,6 +13370,24 @@
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "sleepy swingmas": {
+        "organizer": null,
+        "city": "Vicenza",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
         "verifiedOn": null,
         "notes": null,
         "stili": [
@@ -19079,7 +19171,10 @@
       "verified": false,
       "source": null,
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "swing dance with the seth kibel band with special guests daryl davis and mitch woods": {
@@ -22072,10 +22167,31 @@
       "verified": false,
       "source": null,
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "swing dream factory 10th anniversary": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "swing dream factory la festa": {
         "organizer": null,
         "city": "Roma",
         "country": "Italia",
@@ -24201,6 +24317,479 @@
         "geminiNonTrovato": "2026-11-21",
         "stili": [
           "Lindy"
+        ]
+      }
+    }
+  },
+  "swing toronto brady lang e altri 6|toronto": {
+    "default": {
+      "organizer": "Swing Toronto, Brady Lang e altri 6",
+      "city": "Toronto",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hogtown stomp lindy hop weekend ft alyssa beard nicholas tran": {
+        "organizer": null,
+        "city": "Toronto",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing dance society|rimini": {
+    "default": {
+      "organizer": "Swing Dance Society",
+      "city": "Rimini",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "mami swing dj set night": {
+        "organizer": null,
+        "city": "Rimini",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing dance society|parma": {
+    "default": {
+      "organizer": "Swing Dance Society",
+      "city": "Parma",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Lindy"
+      ]
+    },
+    "events": {
+      "shuffling balboa mood": {
+        "organizer": null,
+        "city": "Parma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      },
+      "stardust christmas night party": {
+        "organizer": null,
+        "city": "Parma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swingin folks|milano": {
+    "default": {
+      "organizer": "Swingin'Folks",
+      "city": "Milano",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swingin the theatre": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "step by step hannover e revuepalast hannover|region hannover": {
+    "default": {
+      "organizer": "STEP BY STEP - Hannover e RevuePalast Hannover",
+      "city": "Region Hannover",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "christmas hop": {
+        "organizer": null,
+        "city": "Region Hannover",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing dance society|cremona": {
+    "default": {
+      "organizer": "Swing Dance Society",
+      "city": "Cremona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing party night xmas": {
+        "organizer": null,
+        "city": "Cremona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "dusty jazz|torino": {
+    "default": {
+      "organizer": "Dusty Jazz",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "swing it dusty swing night": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "asso k danses e laurence k danses|brittany": {
+    "default": {
+      "organizer": "Asso K'Danses e Laurence K'Danses",
+      "city": "Brittany",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "k danses rock n christmas concert glenn gibson band show danse damien tamari": {
+        "organizer": null,
+        "city": "Brittany",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Charleston"
+        ]
+      }
+    }
+  },
+  "slidin shoes swing dancers davide serini youngblood e lidia la tessa|savona": {
+    "default": {
+      "organizer": "Slidin' Shoes Swing Dancers, Davide Serini Youngblood e Lidia La Tessa",
+      "city": "Savona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lindy hop balboa party": {
+        "organizer": null,
+        "city": "Savona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "national jazz festival tauranga e port of tauranga ltd|undefined": {
+    "default": {
+      "organizer": "National Jazz Festival Tauranga e Port of Tauranga Ltd",
+      "city": "undefined",
+      "country": "undefined",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "port of tauranga 64th national jazz festival": {
+        "organizer": null,
+        "city": "undefined",
+        "country": "undefined",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "douai pour le swing|undefined": {
+    "default": {
+      "organizer": "Douai pour le Swing",
+      "city": "undefined",
+      "country": "undefined",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bal swing": {
+        "organizer": null,
+        "city": "undefined",
+        "country": "undefined",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "back to jitterbug e fred caputo|metropolitan france": {
+    "default": {
+      "organizer": "Back To Jitterbug e Fred Caputo",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "back to jitterbug": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Charleston",
+          "Lindy",
+          "SoloJazz"
         ]
       }
     }
