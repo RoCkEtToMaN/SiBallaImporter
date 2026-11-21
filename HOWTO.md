@@ -99,6 +99,12 @@ solo da te. Se nello stesso giorno della stessa serie c'è una riga `no` e un'al
 un doppione tolto, non uno scarto.
 Per vedere cosa cambierebbe sulle righe già nello Sheet: `--memoria-serie` (vedi `appsettings.json`).
 
+Per gli eventi che la memoria non decide, Gemini riceve come **indizio** la storia dell'organizzatore
+(in tutte le città): quante sue date hai confermato, quante sono passate senza obiezioni, quante hai
+scartato, con fino a 3 titoli d'esempio di serie confermate e scartate. Non è una regola: Gemini
+decide comunque guardando l'evento, e se la storia ha pesato lo scrive nel motivo. L'anteprima
+`--memoria-serie` mostra anche cosa riceverebbe Gemini per le righe `da verificare`.
+
 Gemini viene chiamato una volta sola per evento: la classificazione fatta per lo Sheet viene riusata
 per l'email. Al primo giro con lo Sheet vuoto deve classificare tutti gli eventi trovati online (a
 gruppi di 20), quindi il giro dura di più; dai giri successivi solo quelli nuovi.

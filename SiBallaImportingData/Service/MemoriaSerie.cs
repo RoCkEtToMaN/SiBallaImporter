@@ -31,7 +31,20 @@ namespace SiBallaImportingData.Service
 
         private enum Voto { Nessuno, SiTuo, SiTacito, No }
 
+        // somma delle serie di un organizzatore (in tutte le città), con qualche titolo d'esempio: non decide niente,
+        // va a Gemini come indizio per gli eventi che la memoria non decide (StoriaOrganizzatore)
+        private sealed class Organizzatore
+        {
+            public int SiTuoi, SiTaciti, No;
+            public List<string> TitoliSi = new(), TitoliNo = new();
+        }
+        private const int MaxTitoliEsempio = 3;
+
         private readonly Dictionary<string, Storia> _serie = new();
+        private readonly Dictionary<string, Organizzatore> _organizzatori = new();
+
+        private static string? ChiaveOrganizzatore(Event e) =>
+            string.IsNullOrWhiteSpace(e.Organizer) ? null : KnownVenueStore.MakeKey(e.Organizer, "");
 
         private MemoriaSerie() { }
 
@@ -78,8 +91,21 @@ namespace SiBallaImportingData.Service
                     else if (voti.Contains(Voto.SiTacito)) storia.SiTaciti++;
                     else if (voti.All(v => v == Voto.No)) storia.No++;
                 }
-                if (storia.Si > 0 || storia.No > 0)
-                    memoria._serie[serie.Key] = storia;
+                if (storia.Si == 0 && storia.No == 0) continue;
+                memoria._serie[serie.Key] = storia;
+
+                var primo = serie.First().Evento;
+                if (ChiaveOrganizzatore(primo) is not string chiaveOrg) continue;
+                if (!memoria._organizzatori.TryGetValue(chiaveOrg, out var org))
+                    memoria._organizzatori[chiaveOrg] = org = new Organizzatore();
+                org.SiTuoi += storia.SiTuoi;
+                org.SiTaciti += storia.SiTaciti;
+                org.No += storia.No;
+                var titolo = primo.PartyName?.Trim() ?? "";
+                if (titolo.Length > 60) titolo = titolo[..60];
+                var titoli = storia.No > 0 && storia.Si == 0 ? org.TitoliNo : storia.Si > 0 && storia.No == 0 ? org.TitoliSi : null;
+                if (titoli is not null && titoli.Count < MaxTitoliEsempio && !titoli.Contains(titolo))
+                    titoli.Add(titolo);
             }
 
             int swing = memoria._serie.Values.Count(s => s.Si >= MinConferme && s.No == 0);
@@ -87,6 +113,24 @@ namespace SiBallaImportingData.Service
             Console.WriteLine($"[memoria] serie con una storia: {memoria._serie.Count}; decise: {swing} swing, {scartate} scartate " +
                               $"(le altre: storia mista o troppo corta, decide Gemini)");
             return memoria;
+        }
+
+        /// <summary>
+        /// Le tue decisioni sugli altri eventi dello stesso organizzatore, in una riga per Gemini
+        /// (es. "4 date confermate dal curatore, 2 scartate; scartati: \"Corso Lindy\""), null se non ce ne sono
+        /// </summary>
+        public string? StoriaOrganizzatore(Event e)
+        {
+            if (ChiaveOrganizzatore(e) is not string chiave || !_organizzatori.TryGetValue(chiave, out var o)) return null;
+            var parti = new List<string>();
+            static string Date(int n, string participio) => n == 1 ? $"1 data {participio}a" : $"{n} date {participio}e";
+            if (o.SiTuoi > 0) parti.Add(Date(o.SiTuoi, "confermat") + " dal curatore");
+            if (o.SiTaciti > 0) parti.Add(Date(o.SiTaciti, "pubblicat") + " senza obiezioni");
+            if (o.No > 0) parti.Add(Date(o.No, "scartat") + " dal curatore");
+            var testo = string.Join(", ", parti);
+            if (o.TitoliSi.Count > 0) testo += "; confermati: " + string.Join(", ", o.TitoliSi.Select(t => $"\"{t}\""));
+            if (o.TitoliNo.Count > 0) testo += "; scartati: " + string.Join(", ", o.TitoliNo.Select(t => $"\"{t}\""));
+            return testo;
         }
 
         /// <summary>

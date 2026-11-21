@@ -147,6 +147,20 @@ internal static class ImportCommands
         foreach (var e in cambi)
             Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
                               $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}  ({e.MotivoVerifica})");
+        if (!scrivi)
+        {
+            // anteprima: cosa riceverebbe Gemini per le righe "da verificare" che la memoria non decide
+            var indizi = sheetEvents
+                .Where(e => e.DateStart.Date >= DateTime.Today && e.LuogoVerificato == ImportData.VerifiedPending && !cambi.Contains(e))
+                .Select(e => (Evento: e, Storia: memoria.StoriaOrganizzatore(e)))
+                .Where(x => x.Storia is not null)
+                .GroupBy(x => x.Evento.Organizer?.Trim())
+                .ToList();
+            Console.WriteLine($"\n===== Storia dell'organizzatore per Gemini: {indizi.Sum(g => g.Count())} righe future '{ImportData.VerifiedPending}' " +
+                              $"di {indizi.Count} organizzatori =====");
+            foreach (var g in indizi)
+                Console.WriteLine($"   {g.Key} ({g.Count()} righe, es. {g.First().Evento.PartyName?.Trim()}): {g.First().Storia}");
+        }
         if (cambi.Count == 0) return;
 
         if (!scrivi)
