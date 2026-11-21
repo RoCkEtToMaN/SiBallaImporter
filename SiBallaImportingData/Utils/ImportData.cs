@@ -1059,7 +1059,8 @@ namespace SiBallaImportingData.Utils
                 await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests.Skip(i).Take(500).ToList() }, spreadsheetId).ExecuteAsync();
 
             Console.WriteLine($"[sheet] memoria delle serie: {righe.Count(e => e.StatoNuovaRiga == VerifiedNew)} righe '{VerifiedNew}', " +
-                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedNo)} righe '{VerifiedNo}'");
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedNo)} righe '{VerifiedNo}', " +
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedMercatino)} righe '{VerifiedMercatino}'");
         }
 
         /// <summary>
