@@ -230,7 +230,7 @@ programma non riesce a prenderla. Nello Sheet non va cambiato niente.
      **Add file → Upload files** → trascina le immagini (anche più insieme) → **Commit changes**;
    - oppure dal PC in `C:\Iroi\Fork\SiBallaImportingData\data\immagini\` (la cartella principale del
      repo, **non** `SiBallaImportingData\SiBallaImportingData\data`), poi commit e push.
-4. **Nello Sheet: menu SiBalla → Carica immagini e aggiorna sito.** Dopo 5-10 minuti nella colonna
+4. **Nello Sheet: menu SiBalla → Carica immagini e aggiorna excel e sito.** Dopo 5-10 minuti nella colonna
    **Immagine** c'è `sì` e il sito mostra l'immagine. Senza questo passo l'immagine arriva con il prossimo giro
    orario.
 
@@ -280,7 +280,7 @@ senza toccare il file del workflow.
 
 ### Lancio a mano
 
-**Dallo Sheet: menu SiBalla → Carica immagini e aggiorna sito.** Lancia il giro veloce ("solo
+**Dallo Sheet: menu SiBalla → Carica immagini e aggiorna excel e sito.** Lancia il giro veloce ("solo
 immagini", vedi sotto) senza entrare su GitHub: è il modo normale dopo aver aggiunto immagini in
 `data/immagini` o modificato lo Sheet. Ci mette 5-10 minuti; un avviso in basso a destra conferma
 l'avvio.

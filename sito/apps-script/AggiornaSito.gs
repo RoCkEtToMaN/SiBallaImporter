@@ -8,9 +8,10 @@
  * - Menu SiBalla > Aggiorna versione di prova: pubblica il ramo "anteprima" (https://anteprima.siballa.pages.dev),
  *   dove si vedono le novità non ancora pubbliche (es. le Rubriche della scheda "Contenuti").
  *   Anche l'aggiornamento automatico, se RAMO_PROVA non è vuoto, aggiorna pure la versione di prova.
- * - Menu SiBalla > Carica immagini e aggiorna sito: giro veloce dell'importatore ("solo immagini": carica
+ * - Menu SiBalla > Carica immagini e aggiorna excel e sito: giro veloce dell'importatore ("solo immagini": carica
  *   su Storage le immagini di data/immagini, dei siti e i loghi, scrive "sì" nella colonna Immagine e
- *   aggiorna il DB dell'app), poi aggiorna il sito. Ci mette 5-10 minuti.
+ *   aggiorna il DB dell'app; applica anche la memoria delle serie, che segna i mercatini), poi aggiorna il sito.
+ *   Ci mette 5-10 minuti.
  * - Menu SiBalla > Eventi passati: controllo con Gemini delle righe "storico" (workflow "Riclassifica storico"):
  *   "anteprima" manda l'esito per email (elenco dei non swing); "controlla e scrivi" mette la nota (swing) oppure "no" + motivo.
  *   Le righe già controllate hanno la nota e vengono saltate. Ci mette 5-15 minuti.
@@ -36,7 +37,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('SiBalla')
     .addItem('Aggiorna sito ora', 'aggiornaSitoOra')
-    .addItem('Carica immagini e aggiorna sito', 'caricaImmagini')
+    .addItem('Carica immagini e aggiorna excel e sito', 'caricaImmagini')
     .addSeparator()
     .addItem('Aggiorna versione di prova', 'aggiornaProva')
     .addSeparator()
@@ -77,7 +78,7 @@ function caricaImmagini() {
   const esito = avviaWorkflow_(WORKFLOW_IMPORTATORE, { solo_immagini: 'true' });
   SpreadsheetApp.getActive().toast(
     esito.ok
-      ? 'Caricamento avviato: tra 5-10 minuti la colonna Immagine e il sito saranno aggiornati.'
+      ? 'Caricamento avviato: tra 5-10 minuti lo Sheet (Immagine, Luogo verificato) e il sito saranno aggiornati.'
       : 'Errore: ' + esito.messaggio,
     'SiBalla', 10);
 }
