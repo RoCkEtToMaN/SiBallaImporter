@@ -23867,5 +23867,40 @@
         ]
       }
     }
+  },
+  "mat laboratorio urbano|bari": {
+    "default": {
+      "organizer": "MAT laboratorio urbano",
+      "city": "Bari",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "jingle jive luau second": {
+        "organizer": null,
+        "city": "Bari",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-21"
+      }
+    }
   }
 }
