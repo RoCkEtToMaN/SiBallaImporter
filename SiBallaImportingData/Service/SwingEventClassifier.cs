@@ -18,6 +18,10 @@ namespace SiBallaImportingData.Service
             "NON sono swing: liscio, balli di gruppo, rock'n'roll acrobatico sportivo, West Coast Swing se è l'unico stile, " +
             "fiere o mercatini vintage senza una parte di ballo, concerti rockabilly senza riferimenti al ballo swing, " +
             "eventi non legati al ballo. Se l'evento è misto ma include una parte swing, consideralo swing. " +
+            "Indica anche 'mercatino': true se l'evento è un mercatino, mercato o fiera di vintage, handmade, artigianato, " +
+            "usato, abbigliamento o dischi (es. 'Mercatino del vintage', 'Flea market', 'Vintage market'), anche con musica " +
+            "o DJ di sottofondo; false per tutto il resto, comprese le serate di ballo che si tengono in un mercato " +
+            "(es. 'Swing al Mercato Centrale'). Un mercatino con una vera parte di ballo swing è swing e anche mercatino. " +
             "Lezioni, lezioni di prova, corsi, classi a livelli (es. 'Livello aperto', 'Principianti') e open class " +
             "NON sono eventi: considerali non swing anche se sono di Lindy Hop, Charleston o altri stili swing. " +
             "Sono eventi solo serate sociali, feste, festival, stage/workshop weekend e serate con musica dal vivo o DJ. " +
@@ -32,7 +36,7 @@ namespace SiBallaImportingData.Service
             "ha influito sulla decisione dillo nel motivo.";
 
         // esiti di Gemini di questo giro, per evento: lo Sheet e l'email usano la stessa classificazione senza richiederla due volte
-        private static readonly Dictionary<Event, (bool IsSwing, string Motivo)> _esiti = new(ReferenceEqualityComparer.Instance);
+        private static readonly Dictionary<Event, (bool IsSwing, bool Mercatino, string Motivo)> _esiti = new(ReferenceEqualityComparer.Instance);
         // stili indicati da Gemini nella stessa risposta (solo nomi di StiliEvento.Nomi), per gli eventi senza stile dalla fonte
         private static readonly Dictionary<Event, List<string>> _stili = new(ReferenceEqualityComparer.Instance);
 
@@ -43,7 +47,7 @@ namespace SiBallaImportingData.Service
         public static Task ClassificaSoloAsync(List<Event> eventi, GeminiOptions gemini) => ClassificaAsync(eventi, gemini);
 
         /// <summary>Esito di Gemini per l'evento (dopo SegnaPerSheetAsync o ClassifyAsync), null se non classificato</summary>
-        public static (bool IsSwing, string Motivo)? Esito(Event e) => _esiti.TryGetValue(e, out var x) ? x : null;
+        public static (bool IsSwing, string Motivo)? Esito(Event e) => _esiti.TryGetValue(e, out var x) ? (x.IsSwing, x.Motivo) : null;
 
         /// <summary>
         /// Per l'email: separa gli eventi swing dagli altri. Se Gemini non risponde l'evento resta tra gli swing (l'email parte comunque)
@@ -96,8 +100,18 @@ namespace SiBallaImportingData.Service
             {
                 if (_esiti.TryGetValue(ev, out var esito))
                 {
-                    ev.StatoNuovaRiga = esito.IsSwing ? ImportData.VerifiedNew : ImportData.VerifiedPending;
-                    ev.MotivoVerifica = esito.IsSwing ? null : $"Gemini: {esito.Motivo}";
+                    // mercatino senza ballo swing: va in Bacheca (sito) invece che in calendario
+                    if (esito.Mercatino && !esito.IsSwing)
+                    {
+                        ev.StatoNuovaRiga = ImportData.VerifiedMercatino;
+                        ev.MotivoVerifica = $"Gemini: mercatino, va in Bacheca. {esito.Motivo}";
+                        Console.WriteLine($"[AI] Mercatino: {ev.DateStart:yyyy-MM-dd} {ev.PartyName?.Trim()} -> Bacheca");
+                    }
+                    else
+                    {
+                        ev.StatoNuovaRiga = esito.IsSwing ? ImportData.VerifiedNew : ImportData.VerifiedPending;
+                        ev.MotivoVerifica = esito.IsSwing ? null : $"Gemini: {esito.Motivo}";
+                    }
                 }
                 else
                 {
@@ -108,8 +122,10 @@ namespace SiBallaImportingData.Service
 
             int nuovi = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNew);
             int scartati = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNo);
+            int mercatini = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedMercatino);
             Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), " +
-                              $"{eventi.Count - nuovi - scartati} '{ImportData.VerifiedPending}' (colorate), {scartati} '{ImportData.VerifiedNo}' (memoria delle serie); " +
+                              $"{eventi.Count - nuovi - scartati - mercatini} '{ImportData.VerifiedPending}' (colorate), {scartati} '{ImportData.VerifiedNo}' (memoria delle serie), " +
+                              $"{mercatini} '{ImportData.VerifiedMercatino}' (Bacheca); " +
                               $"decise dalla memoria: {eventi.Count - daGemini.Count}");
         }
 
@@ -142,7 +158,7 @@ namespace SiBallaImportingData.Service
                 {
                     foreach (var (id, esito) in await ClassifyGroupAsync(daFare, inizio, quanti, apiKey, model, memoria))
                     {
-                        _esiti[daFare[id]] = (esito.IsSwing, esito.Motivo);
+                        _esiti[daFare[id]] = (esito.IsSwing, esito.Mercatino, esito.Motivo);
                         _stili[daFare[id]] = esito.Stili;
                     }
                     Console.WriteLine($"[AI] Gruppo {g + 1}/{gruppi}: {quanti} eventi in {cronometro.Elapsed.TotalSeconds:F1} s");
@@ -155,7 +171,7 @@ namespace SiBallaImportingData.Service
         }
 
         // classifica gli eventi [inizio, inizio + quanti) e restituisce l'esito di quelli a cui il modello ha risposto (id = indice nella lista)
-        private static async Task<Dictionary<int, (bool IsSwing, string Motivo, List<string> Stili)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model, MemoriaSerie? memoria)
+        private static async Task<Dictionary<int, (bool IsSwing, bool Mercatino, string Motivo, List<string> Stili)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model, MemoriaSerie? memoria)
         {
             var elenco = new StringBuilder();
             for (int i = inizio; i < inizio + quanti; i++)
@@ -193,10 +209,11 @@ namespace SiBallaImportingData.Service
                             {
                                 id = new { type = "INTEGER" },
                                 isSwing = new { type = "BOOLEAN" },
+                                mercatino = new { type = "BOOLEAN" },
                                 motivo = new { type = "STRING" },
                                 stili = new { type = "ARRAY", items = new { type = "STRING", format = "enum", @enum = StiliEvento.Nomi } }
                             },
-                            required = new[] { "id", "isSwing", "motivo", "stili" }
+                            required = new[] { "id", "isSwing", "mercatino", "motivo", "stili" }
                         }
                     }
                 }
@@ -211,7 +228,7 @@ namespace SiBallaImportingData.Service
                 .GetProperty("text").GetString();
 
             using var risultati = JsonDocument.Parse(text ?? "[]");
-            var esiti = new Dictionary<int, (bool, string, List<string>)>();
+            var esiti = new Dictionary<int, (bool, bool, string, List<string>)>();
             foreach (var r in risultati.RootElement.EnumerateArray())
             {
                 int id = r.GetProperty("id").GetInt32();
@@ -223,7 +240,8 @@ namespace SiBallaImportingData.Service
                         ? st.EnumerateArray().Select(x => x.GetString()).OfType<string>()
                             .Where(x => StiliEvento.Nomi.Contains(x)).Distinct().ToList()
                         : new List<string>();
-                    esiti[id] = (r.GetProperty("isSwing").GetBoolean(), r.GetProperty("motivo").GetString() ?? string.Empty, stili);
+                    bool mercatino = r.TryGetProperty("mercatino", out var m) && m.ValueKind == JsonValueKind.True;
+                    esiti[id] = (r.GetProperty("isSwing").GetBoolean(), mercatino, r.GetProperty("motivo").GetString() ?? string.Empty, stili);
                 }
             }
 

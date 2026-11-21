@@ -38,7 +38,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 ## Google Sheet
 - ID `1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo`, schede `Serate` e `Workshop`: riga 2 = intestazioni, dati dalla 3.
 - Colonna "Luogo verificato": vuoto/`ok` = confermato, `nuovo` = aggiunto e swing per Gemini, `gemini` = indirizzo
-  trovato da Gemini, `da verificare` = non va su sito/DB (riga arancione), `no` = scartato.
+  trovato da Gemini, `da verificare` = non va su sito/DB (riga arancione), `no` = scartato,
+  `mercatino` = mercatino vintage: fuori da DB/calendario/email, il sito lo mette in Bacheca (`mercatini.json`). Lo scrive
+  Gemini sulle righe nuove; a ogni giro con `--excel` diventano `mercatino` anche le "da verificare" con nota "Gemini: Mercatino...".
 - Le intestazioni di C, D e degli stili (Serate I–L, Workshop I–P) sono `ARRAYFORMULA`: un valore scritto sotto
   le blocca (`#REF!`). Non incollare righe intere da una scheda all'altra (vedi `HOWTO.md`); i giri con `--excel`
   svuotano da soli i valori fissi (max 20 per colonna).

@@ -39,6 +39,9 @@
     border-radius: 9px; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; }
   .condividi-pannello a.wa { background: #25D366; border-color: #25D366; color: #0b2814; }
   .esito-copia { overflow-wrap: anywhere; }
+  /* mercatini trovati dall'importatore (righe "mercatino" dello Sheet, mercatini.json): non sono annunci degli utenti */
+  .annuncio .cosa.mercatino-ev { color: #FF9EC7; }
+  .foto-merc { display: block; width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-top: 10px; background: var(--surface-2); }
 
   dialog.modulo { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 1px solid var(--border); border-radius: 18px;
     background: var(--surface); color: var(--text); padding: 0; }
@@ -116,7 +119,7 @@
   </header>
   <main>
     <h2 class="titolo-sez">Bacheca</h2>
-    <p class="intro">Passaggi per serate e festival, partner per corsi e competizioni, alloggio per i festival e mercatino (scarpe, abiti vintage, biglietti). Ogni annuncio viene controllato prima di comparire e sparisce da solo dopo la data indicata.</p>
+    <p class="intro">Passaggi per serate e festival, partner per corsi e competizioni, alloggio per i festival e mercatino (scarpe, abiti vintage, biglietti, e i mercatini vintage che troviamo in giro). Ogni annuncio viene controllato prima di comparire e sparisce da solo dopo la data indicata.</p>
     <div class="testa-bacheca">
       <div class="chips" id="categorie" role="group" aria-label="Tipo di annuncio" style="margin:0"></div>
       <button type="button" class="btn" id="apri">+ Scrivi un annuncio</button>
@@ -193,6 +196,8 @@
     mercatino: { nome: "Mercatino", cerco: "Cerco", offro: "Vendo o regalo" }
   };
   var annunci = [], categoria = "tutti";
+  // mercatini vintage trovati dall'importatore (mercatini.json, righe "mercatino" dello Sheet): categoria Mercatino
+  var mercatini = [];
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -213,8 +218,34 @@
     return esc(c);
   }
 
+  // giorni di un mercatino: "dom 29 novembre" oppure "6, 7, 8, 12 e 13 dicembre"
+  var MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  function giorniMercatino(giorni) {
+    if (giorni.length === 1) return data(giorni[0]);
+    var mesi = [];
+    giorni.forEach(function (g) {
+      var m = MESI[+g.slice(5, 7) - 1], ultimo = mesi[mesi.length - 1];
+      if (!ultimo || ultimo.m !== m) mesi.push(ultimo = { m: m, g: [] });
+      ultimo.g.push(+g.slice(8, 10));
+    });
+    return mesi.map(function (x) {
+      return (x.g.length > 1 ? x.g.slice(0, -1).join(", ") + " e " + x.g[x.g.length - 1] : x.g[0]) + " " + x.m;
+    }).join(", ");
+  }
+  function schedaMercatino(m) {
+    return '<article class="card annuncio"><div class="testa-ann"><div class="cosa mercatino-ev">🛍️ Mercatino vintage' +
+      '<span class="tuo" title="Trovato da siBalla tra gli eventi online, non è un annuncio di un utente">segnalato da siBalla</span></div></div>' +
+      "<h3>" + esc(m.citta) + (m.citta ? " · " : "") + esc(m.titolo) + "</h3>" +
+      '<div class="data-ann">' + esc(giorniMercatino(m.giorni)) + "</div>" +
+      (m.img ? '<img class="foto-merc" src="' + esc(m.img) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
+      (m.organizzatore ? '<div class="testo">Organizza: ' + esc(m.organizzatore) + "</div>" : "") +
+      '<div class="firma">' + [m.link && /^https?:\/\//i.test(m.link) ? '<a href="' + esc(m.link) + '" target="_blank" rel="noopener nofollow">Sito dell\'evento ↗</a>' : "",
+        m.mappa ? '<a href="' + esc(m.mappa) + '" target="_blank" rel="noopener">📍 Mappa</a>' : ""].filter(Boolean).join(" · ") + "</div>" +
+      "</article>";
+  }
+
   function disegna() {
-    var conta = { tutti: annunci.length, passaggio: 0, partner: 0, alloggio: 0, mercatino: 0 };
+    var conta = { tutti: annunci.length + mercatini.length, passaggio: 0, partner: 0, alloggio: 0, mercatino: mercatini.length };
     annunci.forEach(function (a) { conta[a.categoria] = (conta[a.categoria] || 0) + 1; });
     $("categorie").innerHTML = [["tutti", "Tutti"], ["passaggio", "Passaggi"], ["partner", "Cerco partner"], ["alloggio", "Alloggio"], ["mercatino", "Mercatino"]].map(function (c) {
       return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (c[0] === categoria) + '">' + c[1] + '<span class="n">' + conta[c[0]] + "</span></button>";
@@ -223,13 +254,20 @@
     var lista = annunci.filter(function (a) {
       return (categoria === "tutti" || a.categoria === categoria) &&
         (!q || norm([a.citta, a.arrivo, a.evento, a.stile, a.ruolo, a.testo, a.nome].join(" ")).indexOf(q) >= 0);
+    }).map(function (a) { return { k: a.giorno || a.scade || "", a: a }; });
+    // mercatini in mezzo agli annunci, in ordine di data (gli annunci arrivano già ordinati per giorno o scadenza)
+    if (categoria === "tutti" || categoria === "mercatino") mercatini.forEach(function (m) {
+      if (!q || norm([m.citta, m.titolo, m.organizzatore, m.regione, "mercatino vintage"].join(" ")).indexOf(q) >= 0)
+        lista.push({ k: m.giorni[0], m: m });
     });
-    if (!annunci.length) {
+    lista.sort(function (x, y) { return x.k < y.k ? -1 : x.k > y.k ? 1 : 0; });
+    if (!annunci.length && !mercatini.length) {
       $("lista").innerHTML = '<p class="box"><b>Ancora nessun annuncio.</b> Cerchi un passaggio per un festival o un partner per un corso? Scrivi il primo annuncio.</p>';
       return;
     }
-    $("lista").innerHTML = lista.length ? '<div class="griglia">' + lista.map(function (a) {
-      var c = CAT[a.categoria] || CAT.passaggio;
+    $("lista").innerHTML = lista.length ? '<div class="griglia">' + lista.map(function (x) {
+      if (x.m) return schedaMercatino(x.m);
+      var a = x.a, c = CAT[a.categoria] || CAT.passaggio;
       var dove = a.categoria === "passaggio" ? esc(a.citta) + (a.arrivo ? " → " + esc(a.arrivo) : "") : esc(a.citta);
       var extra = [a.ruolo && a.ruolo.charAt(0).toUpperCase() + a.ruolo.slice(1), a.stile].filter(Boolean).join(" · ");
       var mioAnn = mio && a.a === mio;
@@ -477,10 +515,24 @@
   try { var q0 = new URLSearchParams(location.search).get("q"); if (q0) $("filtro").value = q0; } catch (e) {}
 
   function carica() {
-    return fetch("/api/bacheca", { cache: "no-cache" })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (d) { annunci = d.annunci || []; disegna(); apriDaLink(); })
-      .catch(function () { $("lista").innerHTML = '<p class="vuoto">Impossibile caricare la bacheca, riprova più tardi.</p>'; });
+    // i mercatini sono facoltativi: se il file manca o non si legge, la bacheca resta quella degli annunci
+    var merc = fetch("mercatini.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (d) {
+        var oggi = oggiIso();
+        mercatini = (d.mercatini || []).map(function (m) {
+          m.giorni = (m.giorni || []).filter(function (g) { return g >= oggi; });
+          return m;
+        }).filter(function (m) { return m.giorni.length && m.titolo; });
+      })
+      .catch(function () { mercatini = []; });
+    return Promise.all([fetch("/api/bacheca", { cache: "no-cache" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), merc])
+      .then(function (x) { annunci = x[0].annunci || []; disegna(); apriDaLink(); })
+      .catch(function () {
+        if (mercatini.length) { disegna(); $("lista").insertAdjacentHTML("afterbegin", '<p class="vuoto">Annunci non caricati, riprova più tardi.</p>'); }
+        else $("lista").innerHTML = '<p class="vuoto">Impossibile caricare la bacheca, riprova più tardi.</p>';
+      });
   }
   // /bacheca?annuncio=ID (link delle email): apre la discussione di quell'annuncio e ci porta lì
   function apriDaLink() {

@@ -1059,7 +1059,8 @@ namespace SiBallaImportingData.Utils
                 await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests.Skip(i).Take(500).ToList() }, spreadsheetId).ExecuteAsync();
 
             Console.WriteLine($"[sheet] memoria delle serie: {righe.Count(e => e.StatoNuovaRiga == VerifiedNew)} righe '{VerifiedNew}', " +
-                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedNo)} righe '{VerifiedNo}'");
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedNo)} righe '{VerifiedNo}', " +
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedMercatino)} righe '{VerifiedMercatino}'");
         }
 
         /// <summary>
@@ -1260,7 +1261,12 @@ namespace SiBallaImportingData.Utils
         // evento passato recuperato dalle vecchie versioni dello Sheet (storico per il riepilogo dell'anno), mai controllato:
         // non insegna niente al dizionario (luoghi e stili). Essendo passato non va comunque su DB, sito o email
         public const string VerifiedStorico = "storico";
-        public static bool Scartato(Event e) => e.LuogoVerificato == VerifiedNo;
+        // mercatino (vintage, handmade, usato) senza una parte di ballo: non è una serata né un workshop, quindi come "no"
+        // non va su DB, calendario del sito ed email e non insegna niente al dizionario, ma il sito lo mette in Bacheca
+        // (categoria Mercatino, vedi sito/esporta_sheet.py). Lo scrive Gemini sulle righe nuove, o tu a mano
+        public const string VerifiedMercatino = "mercatino";
+        /// <summary>Fuori dal calendario: scartato da te ("no") o mercatino (va solo in Bacheca)</summary>
+        public static bool Scartato(Event e) => e.LuogoVerificato is VerifiedNo or VerifiedMercatino;
 
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";

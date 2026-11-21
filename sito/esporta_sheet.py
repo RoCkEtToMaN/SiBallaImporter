@@ -7,7 +7,8 @@ lo stesso secret usato dall'importatore).
 Per ogni foglio dello Sheet:
 - riga 2 = intestazioni, dati dalla riga 3 (come legge l'importatore);
 - solo eventi futuri o in corso (data fine, o data inizio se manca, >= oggi in Italia);
-- esclude le righe "da verificare" nella colonna "Luogo verificato" (come per il DB);
+- esclude le righe "da verificare" e "no" nella colonna "Luogo verificato" (come per il DB); le righe "mercatino"
+  vanno in mercatini.json, per la categoria Mercatino della Bacheca;
 - pubblica solo le colonne scelte (COLONNE_PER_FOGLIO / COLONNE_DEFAULT, meno COLONNE_ESCLUSE): le altre
   servono al massimo per il filtro e non finiscono nel JSON;
 - aggiunge le coordinate (per "Vicino a me") e il link dell'immagine su Appwrite Storage se la colonna
@@ -45,6 +46,8 @@ COLONNE_ESCLUSE = {"lindy", "blues", "boogie", "balboa"}
 VERIFIED_HEADER = "luogo verificato"
 VERIFIED_PENDING = "da verificare"
 VERIFIED_NO = "no"  # evento scartato a mano: resta nello Sheet ma non si pubblica
+# mercatino (vintage, handmade...): non va nel calendario ma in Bacheca, categoria Mercatino (mercatini.json)
+VERIFIED_MERCATINO = "mercatino"
 COORDINATE = re.compile(r"\(\s*(-?\d+(?:[.,]\d+)?)\s*;\s*(-?\d+(?:[.,]\d+)?)\s*\)")
 EPOCA_SHEETS = date(1899, 12, 30)
 IMAGE_HEADER = "immagine"
@@ -111,6 +114,61 @@ def url_immagine(valore: str, inizio: date | None, titolo: str, organizzatore: s
         slug = (norm(organizzatore) + "|" + norm(citta)).replace(" ", "-").replace("|", "_")
         return APPWRITE_VIEW.format("lg" + sha32(slug))
     return None
+
+
+def aggiungi_mercatino(mercatini: dict, foglio: str, intestazione: list, rf: list,
+                       inizio: date | None, fine: date, oggi: date, col_immagine: int | None) -> None:
+    """Riga "mercatino" -> mercatini.json per la Bacheca. Le date della stessa serie (titolo + città) diventano
+    un solo annuncio con tutti i giorni; una serata vale il giorno d'inizio (la fine è il giorno dopo),
+    una riga di Workshop tutti i giorni da inizio a fine."""
+    col = {str(h).strip().lower(): i for i, h in enumerate(intestazione)}
+    titolo = pulisci_nome(html.unescape(cella(rf, 4)))
+    if not titolo:
+        return
+    primo = inizio or fine
+    ultimo = fine if foglio.strip().lower() == "workshop" else primo
+    giorni = [primo + timedelta(days=k) for k in range(min((ultimo - primo).days, 31) + 1)]
+    giorni = [g for g in giorni if g >= oggi]
+    if not giorni:
+        return
+    luogo = html.unescape(cella(rf, COL_LUOGO))
+    m = COORDINATE.search(luogo)
+    testo_luogo = (luogo[: m.start()] if m else luogo).strip().rstrip(",").strip()
+    parti = [x.strip() for x in testo_luogo.split(",") if x.strip()]
+    citta = parti[1] if len(parti) > 1 else (parti[0] if parti else "")
+    chiave = normalizza_titolo(titolo) + "|" + norm(citta)
+    v = mercatini.get(chiave)
+    if v is None:
+        v = mercatini[chiave] = {"titolo": titolo, "citta": citta, "organizzatore": pulisci_nome(html.unescape(cella(rf, 6))), "giorni": set()}
+        if m:
+            lat, lng = (float(x.replace(",", ".")) for x in m.groups())
+            if lat or lng:
+                v["mappa"] = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
+        elif testo_luogo:
+            v["mappa"] = "https://www.google.com/maps/search/?api=1&query=" + quote(testo_luogo)
+        reg = regione_di(testo_luogo)
+        if reg:
+            v["regione"] = reg
+    v["giorni"].update(g.isoformat() for g in giorni)
+    link = cella(rf, col["riferimento"]) if "riferimento" in col else ""
+    if link.startswith("http") and not v.get("link"):
+        v["link"] = link
+    if col_immagine is not None and not v.get("img"):
+        img = url_immagine(cella(rf, col_immagine), inizio, cella(rf, 4), cella(rf, 6), cella(rf, COL_LUOGO))
+        if img:
+            v["img"] = img
+
+
+def scrivi_mercatini(cartella: str, mercatini: dict) -> None:
+    righe = []
+    for v in mercatini.values():
+        v["giorni"] = sorted(v["giorni"])
+        righe.append(v)
+    righe.sort(key=lambda v: (v["giorni"][0], v["titolo"]))
+    with open(os.path.join(cartella, "mercatini.json"), "w", encoding="utf-8") as f:
+        json.dump({"aggiornato": datetime.now(ZoneInfo("Europe/Rome")).isoformat(timespec="minutes"),
+                   "mercatini": righe}, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"- mercatini per la Bacheca: {len(righe)} (da {sum(len(v['giorni']) for v in righe)} giorni)")
 
 
 def lettera(i: int) -> str:
@@ -334,6 +392,7 @@ def main() -> None:
     cartella = os.path.dirname(os.path.abspath(sys.argv[1]))
     os.makedirs(cartella, exist_ok=True)
     elenchi_fatti = set()
+    mercatini = {}
 
     for nome, vf, vg in zip(fogli, formattati, grezzi):
         righe_f = vf.get("values", [])
@@ -379,7 +438,11 @@ def main() -> None:
             if fine is None or fine < oggi:
                 scartate_passate += 1
                 continue
-            if col_verificato is not None and cella(rf, col_verificato).lower() in (VERIFIED_PENDING, VERIFIED_NO):
+            stato = cella(rf, col_verificato).lower() if col_verificato is not None else ""
+            if stato == VERIFIED_MERCATINO:
+                aggiungi_mercatino(mercatini, nome, intestazione, rf, inizio, fine, oggi, col_immagine)
+                continue
+            if stato in (VERIFIED_PENDING, VERIFIED_NO):
                 scartate_verifica += 1
                 continue
 
@@ -438,6 +501,8 @@ def main() -> None:
             scrivi_elenco(cartella, elenco, righe_elenco(elenco, tutte[0], tutte[1:]) if tutte else [], "bozza")
         else:
             scrivi_elenco(cartella, elenco, [], "nessuna")
+
+    scrivi_mercatini(cartella, mercatini)
 
     with open(sys.argv[1], "w", encoding="utf-8") as f:
         json.dump(uscita, f, ensure_ascii=False, separators=(",", ":"))

@@ -127,7 +127,25 @@ internal static class ImportCommands
 
     // memoria delle serie sulle righe future già nello Sheet: "da verificare" di serie sempre confermate -> "nuovo",
     // "da verificare"/"nuovo"/"gemini" di serie che hai sempre scartato -> "no". Le righe decise da te non si toccano.
+    // Anche: "da verificare" che Gemini ha scartato come mercatino (righe aggiunte prima dello stato "mercatino") -> "mercatino".
     // Da --memoria-serie (anteprima) / --memoria-serie-scrivi, e da sola in ogni giro con --excel (scrivi = true)
+    // riga "da verificare" scartata da Gemini come mercatino: la nota comincia con "Gemini: Mercatino ..." (o simili)
+    // oppure il titolo è da mercatino. Le righe con la nota della memoria o senza nota di Gemini non si toccano
+    private static readonly System.Text.RegularExpressions.Regex NotaMercatino = new(
+        @"^Gemini:\s*(si tratta di\s+)?(un[oa']?\s*)?(mercatin|flea market|vintage market|mercato (vintage|dell'usato|dell'antiquariato))",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    private static readonly System.Text.RegularExpressions.Regex TitoloMercatino = new(
+        @"mercatin|flea market|vintage market|mercato vintage", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+    private static string? MercatinoDaNota(Event e)
+    {
+        if (e.LuogoVerificato != ImportData.VerifiedPending) return null;
+        var nota = e.NotaVerifica?.Trim() ?? "";
+        if (!nota.StartsWith("Gemini:", StringComparison.OrdinalIgnoreCase)) return null;
+        if (!NotaMercatino.IsMatch(nota) && !TitoloMercatino.IsMatch(e.PartyName ?? "")) return null;
+        return $"Gemini: mercatino, va in Bacheca. {nota["Gemini:".Length..].Trim()}";
+    }
+
     public static async Task ApplicaMemoriaAsync(List<Event> sheetEvents, MemoriaSerie memoria, bool scrivi)
     {
         var cambi = new List<Event>();
@@ -135,6 +153,13 @@ internal static class ImportCommands
                                      .OrderBy(e => e.SheetName).ThenBy(e => e.SheetRow))
         {
             if (e.LuogoVerificato is not (ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini)) continue;
+            if (MercatinoDaNota(e) is string motivo)
+            {
+                e.StatoNuovaRiga = ImportData.VerifiedMercatino;
+                e.MotivoVerifica = motivo;
+                cambi.Add(e);
+                continue;
+            }
             if (memoria.Decidi(e) is not { } d) continue;
             // "nuovo" e "gemini" vanno già sul DB: la memoria le cambia solo per scartarle
             if (d.Stato == ImportData.VerifiedNew && e.LuogoVerificato != ImportData.VerifiedPending) continue;
@@ -145,7 +170,7 @@ internal static class ImportCommands
 
         Console.WriteLine($"\n===== Memoria delle serie: {cambi.Count} righe future da cambiare =====");
         foreach (var e in cambi)
-            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
+            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : e.StatoNuovaRiga == ImportData.VerifiedMercatino ? "🛍️" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
                               $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}  ({e.MotivoVerifica})");
         if (!scrivi)
         {
