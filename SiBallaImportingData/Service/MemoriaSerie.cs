@@ -9,6 +9,7 @@ namespace SiBallaImportingData.Service
     /// senza chiedere a Gemini.
     ///  - almeno 2 date scartate da te ("no") e nessuna confermata -> "no"
     ///  - conferme che pesano almeno 2 e nessuna data scartata -> "nuovo" (va sul DB)
+    ///  - almeno 1 data segnata da te "mercatino" e nessun'altra decisione -> "mercatino" (va in Bacheca)
     ///  - storia mista o troppo corta -> decide Gemini come prima
     /// Conferma tua = "ok", cella vuota, "auto" o un altro valore scritto da te (peso 1); conferma tacita = riga
     /// "nuovo"/"gemini" arrivata alla sua data senza che tu l'abbia scartata (peso 0,5: non è detto che tu l'abbia guardata).
@@ -25,11 +26,11 @@ namespace SiBallaImportingData.Service
 
         private sealed class Storia
         {
-            public int SiTuoi, SiTaciti, No;
+            public int SiTuoi, SiTaciti, No, Mercatini;
             public double Si => SiTuoi + SiTaciti * PesoTacito;
         }
 
-        private enum Voto { Nessuno, SiTuo, SiTacito, No }
+        private enum Voto { Nessuno, SiTuo, SiTacito, No, Mercatino }
 
         // somma delle serie di un organizzatore (in tutte le città), con qualche titolo d'esempio: non decide niente,
         // va a Gemini come indizio per gli eventi che la memoria non decide (StoriaOrganizzatore)
@@ -66,6 +67,9 @@ namespace SiBallaImportingData.Service
                 // riga ancora arancione = l'hai appena cambiata da "da verificare" (colore e nota di Gemini spariscono al giro dopo)
                 case ImportData.VerifiedNo:
                     return e.RigaArancione || !notaDelProgramma ? Voto.No : Voto.Nessuno;
+                // come per "no": vale solo se l'hai scritto tu (quelli di Gemini e della memoria hanno la nota del programma)
+                case ImportData.VerifiedMercatino:
+                    return e.RigaArancione || !notaDelProgramma ? Voto.Mercatino : Voto.Nessuno;
                 case ImportData.VerifiedNew:
                 case ImportData.VerifiedGemini:
                     return e.DateStart.Date < DateTime.Today ? Voto.SiTacito : Voto.Nessuno;
@@ -90,9 +94,11 @@ namespace SiBallaImportingData.Service
                     if (voti.Contains(Voto.SiTuo)) storia.SiTuoi++;
                     else if (voti.Contains(Voto.SiTacito)) storia.SiTaciti++;
                     else if (voti.All(v => v == Voto.No)) storia.No++;
+                    else if (voti.Contains(Voto.Mercatino)) storia.Mercatini++;
                 }
-                if (storia.Si == 0 && storia.No == 0) continue;
+                if (storia.Si == 0 && storia.No == 0 && storia.Mercatini == 0) continue;
                 memoria._serie[serie.Key] = storia;
+                if (storia.Si == 0 && storia.No == 0) continue;   // solo mercatini: niente da dire a Gemini sull'organizzatore
 
                 var primo = serie.First().Evento;
                 if (ChiaveOrganizzatore(primo) is not string chiaveOrg) continue;
@@ -109,8 +115,9 @@ namespace SiBallaImportingData.Service
             }
 
             int swing = memoria._serie.Values.Count(s => s.Si >= MinConferme && s.No == 0);
-            int scartate = memoria._serie.Values.Count(s => s.No >= MinScarti && s.Si == 0);
-            Console.WriteLine($"[memoria] serie con una storia: {memoria._serie.Count}; decise: {swing} swing, {scartate} scartate " +
+            int scartate = memoria._serie.Values.Count(s => s.No >= MinScarti && s.Si == 0 && s.Mercatini == 0);
+            int mercatini = memoria._serie.Values.Count(s => s.Mercatini > 0 && s.Si == 0 && s.No == 0);
+            Console.WriteLine($"[memoria] serie con una storia: {memoria._serie.Count}; decise: {swing} swing, {scartate} scartate, {mercatini} mercatini " +
                               $"(le altre: storia mista o troppo corta, decide Gemini)");
             return memoria;
         }
@@ -134,11 +141,15 @@ namespace SiBallaImportingData.Service
         }
 
         /// <summary>
-        /// Stato da dare a una data nuova della serie ("nuovo" o "no") con il motivo per la nota, null se la memoria non decide
+        /// Stato da dare a una data nuova della serie ("nuovo", "no" o "mercatino") con il motivo per la nota, null se la memoria non decide
         /// </summary>
         public (string Stato, string Motivo)? Decidi(Event e)
         {
             if (Chiave(e) is not string chiave || !_serie.TryGetValue(chiave, out var s)) return null;
+            if (s.Mercatini > 0)
+                return s.Si == 0 && s.No == 0
+                    ? (ImportData.VerifiedMercatino, $"{PrefissoNota} mercatino come le altre date ({s.Mercatini} segnate da te), va in Bacheca")
+                    : null;
             if (s.No >= MinScarti && s.Si == 0)
                 return (ImportData.VerifiedNo, $"{PrefissoNota} {s.No} date di questa serie scartate da te, nessuna confermata");
             if (s.Si >= MinConferme && s.No == 0)

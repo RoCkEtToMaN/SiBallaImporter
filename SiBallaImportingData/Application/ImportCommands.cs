@@ -145,7 +145,7 @@ internal static class ImportCommands
 
         Console.WriteLine($"\n===== Memoria delle serie: {cambi.Count} righe future da cambiare =====");
         foreach (var e in cambi)
-            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
+            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : e.StatoNuovaRiga == ImportData.VerifiedMercatino ? "🛍️" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
                               $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}  ({e.MotivoVerifica})");
         if (!scrivi)
         {

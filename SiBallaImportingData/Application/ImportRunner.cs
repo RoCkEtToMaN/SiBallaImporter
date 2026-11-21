@@ -291,7 +291,7 @@ internal static class ImportRunner
             if (inAttesa > 0)
                 Console.WriteLine($"⏳ {inAttesa} righe '{ImportData.VerifiedPending}' non vanno sul DB");
             if (scartati > 0)
-                Console.WriteLine($"🚫 {scartati} righe '{ImportData.VerifiedNo}' (scartate) non vanno sul DB");
+                Console.WriteLine($"🚫 {scartati} righe '{ImportData.VerifiedNo}' (scartate) o '{ImportData.VerifiedMercatino}' (in Bacheca) non vanno sul DB");
             return ok;
         }
         if (eventiSheet.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)
