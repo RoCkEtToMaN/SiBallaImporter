@@ -27,6 +27,21 @@
       ]
     },
     {
+      versione: "1.2.1.0",
+      data: "Novembre 2026",
+      titolo: "Mercatini vintage in Bacheca",
+      intro: "I mercatini vintage che troviamo in giro ora compaiono da soli in Bacheca.",
+      voci: [
+        {
+          tipo: "Nuovo", titolo: "Mercatini vintage", link: "/bacheca",
+          punti: [
+            "Nella categoria <b>Mercatino</b> della Bacheca trovi anche i mercatini vintage e handmade segnalati da siBalla, con le date, il sito e la mappa.",
+            "Spariscono da soli dopo l'ultima data."
+          ]
+        }
+      ]
+    },
+    {
       versione: "1.2.0.0",
       data: "Novembre 2026",
       titolo: "Community e video guide",
