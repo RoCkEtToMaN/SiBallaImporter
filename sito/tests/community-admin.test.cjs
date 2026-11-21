@@ -3,12 +3,13 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm');
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const source=fs.readFileSync('sito/functions/community-admin.js','utf8').replace(/^import .*;\r?\n/gm,'').replace(/export /g,'');
-const context=vm.createContext({Response,URL,Date,console,esc,uguali:(a,b)=>a===b,preparaCommunity:async()=>{},REGIONI:['Liguria'],pulisci:(s,n)=>s.trim().slice(0,n)});
+const inviate=[];
+const context=vm.createContext({Response,URL,Date,console,esc,uguali:(a,b)=>a===b,preparaCommunity:async()=>{},REGIONI:['Liguria'],pulisci:(s,n)=>s.trim().slice(0,n),inviaEmail:async(env,oggetto,html,testo,a)=>{inviate.push({oggetto,testo,a});return 'inviata a '+a;},prefissoProva:()=>''});
 vm.runInContext(source,context);
-function db(){const writes=[];return{writes,prepare(sql){let args=[];return{bind(...a){args=a;return this;},async run(){writes.push({sql,args});},async all(){return{results:sql.includes('community_escluse')?[]:[{id:7,titolo:'<script>bad</script>',regione:'Liguria',citta:'Genova',descrizione:'Swing',link:'https://example.com',email:'private@example.com',creato:'2026-11-16T12:00:00Z',notifica:'inviata',stato:'da valutare'}]};}};}};}
-async function post(fields,key='secret'){
- const database=db(),f=new FormData();Object.entries({chiave:key,id:'7',...fields}).forEach(([k,v])=>f.set(k,v));
- const response=await context.onRequestPost({request:{formData:async()=>f},env:{STATS_KEY:'secret',VISITE:database}});
+function db(riga={}){const writes=[];return{writes,prepare(sql){let args=[];return{bind(...a){args=a;return this;},async run(){writes.push({sql,args});},async first(){return{id:7,titolo:'Swing Genova',regione:'Liguria',citta:'Genova',email:'private@example.com',notifica:'inviata',stato:'da valutare',...riga};},async all(){return{results:sql.includes('community_escluse')?[]:[{id:7,titolo:'<script>bad</script>',regione:'Liguria',citta:'Genova',descrizione:'Swing',link:'https://example.com',email:'private@example.com',creato:'2026-11-16T12:00:00Z',notifica:'inviata',stato:'da valutare'}]};}};}};}
+async function post(fields,key='secret',riga){
+ const database=db(riga),f=new FormData();Object.entries({chiave:key,id:'7',...fields}).forEach(([k,v])=>f.set(k,v));
+ const response=await context.onRequestPost({request:{url:'https://siballa.pages.dev/community-admin',formData:async()=>f},env:{STATS_KEY:'secret',VISITE:database}});
  return{response,database};
 }
 test('pagina e azioni protette dalla chiave',async()=>{
@@ -75,4 +76,15 @@ test('inserimento amministrativo pubblica e torna alla Bacheca',async()=>{
  const html=await context.pannelloCommunity(db(),'secret','/bacheca-admin');
  assert.match(html,/Aggiungi una community WhatsApp/);
  assert.match(html,/name="ritorno" value="\/bacheca-admin"/);
+});
+test('approvando una proposta arriva un email a chi l ha segnalata, una volta sola',async()=>{
+ inviate.length=0;
+ const {database}=await post({azione:'approva'});
+ assert.equal(inviate.length,1);assert.equal(inviate[0].a,'private@example.com');assert.match(inviate[0].testo,/Swing Genova/);assert.match(inviate[0].testo,/siballa\.pages\.dev\/community/);
+ assert.match(database.writes[1].sql,/SET notifica/);assert.match(database.writes[1].args[0],/approvazione: inviata a private@example.com/);
+ inviate.length=0;
+ await post({azione:'approva'},'secret',{notifica:'inviata · approvazione: inviata a private@example.com'});
+ await post({azione:'approva'},'secret',{stato:'no'});
+ await post({azione:'togli'});
+ assert.equal(inviate.length,0);
 });

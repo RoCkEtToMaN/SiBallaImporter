@@ -24,7 +24,12 @@ namespace SiBallaImportingData.Service
             "Per ogni evento rispondi con id, isSwing e un motivo breve in italiano (max 15 parole). " +
             "Indica anche gli stili di ballo dell'evento in 'stili', usando solo questi nomi: " + string.Join(", ", StiliEvento.Nomi) + ". " +
             "Metti uno stile solo se è citato o evidente da titolo, organizzatore, stili o descrizione (rock'n'roll e jive -> Boogie Woogie); " +
-            "se non si capisce lascia la lista vuota, non indovinare.";
+            "se non si capisce lascia la lista vuota, non indovinare. " +
+            "Alcuni eventi hanno 'storia organizzatore': le decisioni del curatore del calendario sugli altri eventi dello " +
+            "stesso organizzatore (date confermate, pubblicate senza obiezioni o scartate, con qualche titolo d'esempio). " +
+            "Usala come indizio, non come regola: un evento simile ai titoli scartati (spesso lezioni o corsi) va probabilmente " +
+            "scartato, uno simile ai confermati probabilmente no; ma decidi sempre guardando l'evento stesso, e se la storia " +
+            "ha influito sulla decisione dillo nel motivo.";
 
         // esiti di Gemini di questo giro, per evento: lo Sheet e l'email usano la stessa classificazione senza richiederla due volte
         private static readonly Dictionary<Event, (bool IsSwing, string Motivo)> _esiti = new(ReferenceEqualityComparer.Instance);
@@ -66,13 +71,28 @@ namespace SiBallaImportingData.Service
 
         /// <summary>
         /// Per le righe nuove dello Sheet: swing -> "nuovo" (va sul DB), non swing o non classificato -> "da verificare"
-        /// con il motivo (riga colorata, non va sul DB). Al contrario dell'email, nel dubbio la riga aspetta il tuo controllo
+        /// con il motivo (riga colorata, non va sul DB). Al contrario dell'email, nel dubbio la riga aspetta il tuo controllo.
+        /// Con la memoria delle serie, le date di serie che hai già deciso prendono la stessa decisione senza chiedere a Gemini
         /// </summary>
-        public static async Task SegnaPerSheetAsync(List<Event> eventi, GeminiOptions gemini)
+        public static async Task SegnaPerSheetAsync(List<Event> eventi, GeminiOptions gemini, MemoriaSerie? memoria = null)
         {
-            await ClassificaAsync(eventi, gemini);
-
+            var daGemini = new List<Event>();
             foreach (var ev in eventi)
+            {
+                if (memoria?.Decidi(ev) is { } decisione)
+                {
+                    ev.StatoNuovaRiga = decisione.Stato;
+                    ev.MotivoVerifica = decisione.Motivo;
+                    Console.WriteLine($"[memoria] {ev.DateStart:yyyy-MM-dd} {ev.PartyName?.Trim()} -> '{decisione.Stato}'");
+                }
+                else
+                    daGemini.Add(ev);
+            }
+
+            // a Gemini anche le tue decisioni sugli altri eventi dello stesso organizzatore, come indizio
+            await ClassificaAsync(daGemini, gemini, memoria);
+
+            foreach (var ev in daGemini)
             {
                 if (_esiti.TryGetValue(ev, out var esito))
                 {
@@ -87,11 +107,14 @@ namespace SiBallaImportingData.Service
             }
 
             int nuovi = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNew);
-            Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), {eventi.Count - nuovi} '{ImportData.VerifiedPending}' (colorate)");
+            int scartati = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNo);
+            Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), " +
+                              $"{eventi.Count - nuovi - scartati} '{ImportData.VerifiedPending}' (colorate), {scartati} '{ImportData.VerifiedNo}' (memoria delle serie); " +
+                              $"decise dalla memoria: {eventi.Count - daGemini.Count}");
         }
 
         // classifica con Gemini gli eventi che in questo giro non lo sono ancora; quelli di un gruppo fallito restano senza esito
-        private static async Task ClassificaAsync(List<Event> eventi, GeminiOptions gemini)
+        private static async Task ClassificaAsync(List<Event> eventi, GeminiOptions gemini, MemoriaSerie? memoria = null)
         {
             var daFare = eventi.Where(e => !_esiti.ContainsKey(e)).Distinct(ReferenceEqualityComparer.Instance).Cast<Event>().ToList();
             if (daFare.Count == 0)
@@ -105,6 +128,9 @@ namespace SiBallaImportingData.Service
                 return;
             }
 
+            if (memoria is not null)
+                Console.WriteLine($"[AI] storia dell'organizzatore passata a Gemini per {daFare.Count(e => memoria.StoriaOrganizzatore(e) is not null)}/{daFare.Count} eventi");
+
             // a gruppi: richieste brevi, e se un gruppo fallisce gli altri vanno avanti
             int gruppi = (daFare.Count + DimensioneGruppo - 1) / DimensioneGruppo;
             for (int g = 0; g < gruppi; g++)
@@ -114,7 +140,7 @@ namespace SiBallaImportingData.Service
                 var cronometro = System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
-                    foreach (var (id, esito) in await ClassifyGroupAsync(daFare, inizio, quanti, apiKey, model))
+                    foreach (var (id, esito) in await ClassifyGroupAsync(daFare, inizio, quanti, apiKey, model, memoria))
                     {
                         _esiti[daFare[id]] = (esito.IsSwing, esito.Motivo);
                         _stili[daFare[id]] = esito.Stili;
@@ -129,7 +155,7 @@ namespace SiBallaImportingData.Service
         }
 
         // classifica gli eventi [inizio, inizio + quanti) e restituisce l'esito di quelli a cui il modello ha risposto (id = indice nella lista)
-        private static async Task<Dictionary<int, (bool IsSwing, string Motivo, List<string> Stili)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model)
+        private static async Task<Dictionary<int, (bool IsSwing, string Motivo, List<string> Stili)>> ClassifyGroupAsync(List<Event> eventi, int inizio, int quanti, string apiKey, string model, MemoriaSerie? memoria)
         {
             var elenco = new StringBuilder();
             for (int i = inizio; i < inizio + quanti; i++)
@@ -145,6 +171,8 @@ namespace SiBallaImportingData.Service
                 elenco.AppendLine($"organizzatore: {ev.Organizer}");
                 elenco.AppendLine($"sito: {ev.EventDetail?.WebSite}");
                 elenco.AppendLine($"descrizione: {descrizione.Replace('\n', ' ')}");
+                if (memoria?.StoriaOrganizzatore(ev) is string storia)
+                    elenco.AppendLine($"storia organizzatore: {storia}");
                 elenco.AppendLine("---");
             }
 

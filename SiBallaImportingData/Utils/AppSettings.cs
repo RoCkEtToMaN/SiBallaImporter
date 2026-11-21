@@ -34,6 +34,8 @@ namespace SiBallaImportingData.Utils
             ["--riclassifica-sheet-scrivi"] = "Import:RiclassificaSheetScrivi",
             ["--riclassifica-storico"] = "Import:RiclassificaStorico",
             ["--riclassifica-storico-scrivi"] = "Import:RiclassificaStoricoScrivi",
+            ["--memoria-serie"] = "Import:MemoriaSerie",
+            ["--memoria-serie-scrivi"] = "Import:MemoriaSerieScrivi",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -133,6 +135,11 @@ namespace SiBallaImportingData.Utils
         public bool RiclassificaStorico { get; set; }
         // come RiclassificaStorico, ma scrive nello Sheet (swing: nota + stile; non swing: "no" + motivo)
         public bool RiclassificaStoricoScrivi { get; set; }
+        // memoria delle serie sulle righe future già nello Sheet (MemoriaSerie): mostra cosa cambierebbe
+        // ("da verificare" -> "nuovo" se la serie è sempre confermata, -> "no" se l'hai sempre scartata)
+        public bool MemoriaSerie { get; set; }
+        // come MemoriaSerie, ma scrive nello Sheet (ogni giro con --excel lo fa già da solo)
+        public bool MemoriaSerieScrivi { get; set; }
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }

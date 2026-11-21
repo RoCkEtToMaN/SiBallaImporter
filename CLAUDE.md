@@ -57,6 +57,10 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Su questo PC mancano le chiavi di Gemini e Appwrite (ci sono sul PC di casa e su GitHub).
 - `--no-push`: il dizionario dei luoghi torna nel repo senza commit né push. Senza, il push automatico del dizionario
   parte solo da `master` e solo se non ci sono altri commit non pubblicati.
+- Memoria delle serie (`Service/MemoriaSerie.cs`): le decisioni dell'utente in "Luogo verificato" sulle altre date
+  della stessa serie decidono le date nuove al posto di Gemini; impara solo dai valori scritti da lui (non dai `no`
+  con nota "Gemini:"/"Memoria:"). Ogni giro con `--excel` la applica anche alle righe future; anteprima `--memoria-serie`.
+  Per gli eventi che non decide, passa a Gemini la "storia organizzatore" (conteggi + titoli d'esempio) come indizio.
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

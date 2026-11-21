@@ -1,9 +1,24 @@
 import { esc, uguali, pulisci } from '../lib/clandestini.js';
 import { preparaCommunity, REGIONI } from './api/community.js';
+import { inviaEmail, prefissoProva } from '../lib/bacheca.js';
 
 const headers = { 'Content-Type':'text/html; charset=utf-8', 'Cache-Control':'no-store', 'X-Robots-Tag':'noindex, nofollow', 'Referrer-Policy':'no-referrer' };
 const nonTrovata = () => new Response('Not found', {status:404, headers:{'Cache-Control':'no-store'}});
 const autorizzato = (env, chiave) => !!env.STATS_KEY && uguali(chiave, env.STATS_KEY);
+
+// email a chi ha proposto la community, quando viene approvata (una volta sola)
+export async function avvisaApprovazione(env, origine, r) {
+  const link = `${origine}/community`, oggetto = 'La tua community è su siBalla';
+  const righe = [`La community "${r.titolo}" (${r.citta}, ${r.regione}) è stata approvata ed è ora visibile su siBalla.`,
+    'Grazie per aver contribuito a far crescere la scena swing!'];
+  const html = `<div style="font-family:system-ui,Segoe UI,Roboto,sans-serif;font-size:15px;color:#111">
+    <h2 style="margin:0 0 12px">${esc(oggetto)}</h2>${righe.map(x => `<p style="margin:0 0 8px">${esc(x)}</p>`).join('')}
+    <p style="margin:18px 0"><a href="${esc(link)}" style="background:#FFD400;color:#0E0E12;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:10px;display:inline-block">Vedi le community</a></p>
+    <p style="margin:0;color:#888;font-size:12px">Ricevi questa email perché hai segnalato una community su siBalla. Il tuo indirizzo non è pubblicato.</p></div>`;
+  const testo = `${oggetto}\n\n${righe.join('\n')}\n\nVedi le community: ${link}\n\n` +
+    'Ricevi questa email perché hai segnalato una community su siBalla. Il tuo indirizzo non è pubblicato.';
+  return inviaEmail(env, prefissoProva(origine) + oggetto, html, testo, r.email);
+}
 
 export async function onRequestPost({request, env}) {
   const f = await request.formData(), chiave = String(f.get('chiave') || '');
@@ -31,7 +46,16 @@ export async function onRequestPost({request, env}) {
       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'ok', 'Inserita dall amministratore')`)
       .bind(new Date().toISOString(), titolo, descrizione, dati.link, dati.regione, citta, dati.email).run();
   } else if (stati[azione] && Number.isSafeInteger(id) && id > 0) {
+    const prima = azione === 'approva' ? await env.VISITE.prepare('SELECT * FROM community_proposte WHERE id = ?1').bind(id).first() : null;
     await env.VISITE.prepare('UPDATE community_proposte SET stato = ?1 WHERE id = ?2').bind(stati[azione], id).run();
+    // appena approvata una proposta arrivata dal sito: avviso a chi l'ha segnalata (una volta sola)
+    if (prima && prima.stato === 'da valutare' && !/approvazione: inviata/.test(prima.notifica || '')) {
+      try {
+        const esito = await avvisaApprovazione(env, new URL(request.url).origin, prima);
+        await env.VISITE.prepare('UPDATE community_proposte SET notifica = ?1 WHERE id = ?2')
+          .bind(`${prima.notifica || ''} · approvazione: ${esito}`.slice(0, 500), id).run();
+      } catch (e) { console.log('avviso approvazione community non inviato: ' + e); }
+    }
   } else if (azione === 'elimina' && Number.isSafeInteger(id) && id > 0) {
     await env.VISITE.prepare('DELETE FROM community_proposte WHERE id = ?1').bind(id).run();
   } else if (azione === 'nascondi') {
@@ -69,7 +93,7 @@ export async function pannelloCommunity(db, chiave, ritorno = '/community-admin'
     ${r.stato === 'da valutare' ? pulsante(r,'rifiuta','Rifiuta') : pulsante(r,'riapri','Rimetti in attesa')}${pulsante(r,'elimina','Elimina definitivamente')}</div></article>`;
   const gruppo = (titolo, stato) => { const righe = richieste.filter(r=>r.stato===stato); return `<section><h2>${titolo} (${righe.length})</h2>${righe.map(scheda).join('') || '<p>Nessuna community.</p>'}</section>`; };
   return `    <style>.community-aggiungi label{display:block;margin:10px 0}.community-aggiungi input,.community-aggiungi textarea,.community-aggiungi select{display:block;box-sizing:border-box;width:100%;font:inherit;background:#0E0E12;color:#fff;border:1px solid #555;border-radius:8px;padding:9px;margin-top:5px}.community-aggiungi button{margin-top:10px}</style><h1>Gestione community WhatsApp</h1><nav><a href="/statistiche?chiave=${encodeURIComponent(chiave)}">Statistiche</a> &middot; <a href="/bacheca-admin?chiave=${encodeURIComponent(chiave)}">Bacheca</a> &middot; <a href="/clandestini-admin?chiave=${encodeURIComponent(chiave)}">Clandestini</a> &middot; <a href="/community">Pagina pubblica</a></nav>
-    <p>Le proposte compaiono sul sito solo dopo l'approvazione. Togli dal sito le nasconde; Elimina definitivamente cancella anche la richiesta e il contatto privato. Gli aggiornamenti si vedono ricaricando la pagina pubblica.</p>
+    <p>Le proposte compaiono sul sito solo dopo l'approvazione; approvandole, chi le ha segnalate riceve un'email. Togli dal sito le nasconde; Elimina definitivamente cancella anche la richiesta e il contatto privato. Gli aggiornamenti si vedono ricaricando la pagina pubblica.</p>
     <section class="community-aggiungi"><h2>Aggiungi una community WhatsApp</h2><p>La community inserita da qui viene pubblicata direttamente. L'email di contatto resta privata.</p>
     <form method="post" action="/community-admin">${chiaveInput}<input type="hidden" name="azione" value="aggiungi">
     <label>Titolo community<input name="titolo" required maxlength="120"></label>
