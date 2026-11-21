@@ -2483,7 +2483,12 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag"
+        ]
       }
     }
   },
@@ -3980,7 +3985,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "jazz routine": {
@@ -3999,6 +4007,24 @@
         "notes": null
       },
       "friday dance night": {
+        "organizer": null,
+        "city": "Rimini",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "follower style": {
         "organizer": null,
         "city": "Rimini",
         "country": "Italia",
@@ -6370,7 +6396,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Balboa"
+      ]
     },
     "events": {
       "laboratori di balboa": {
@@ -8779,7 +8808,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Balboa"
+      ]
     },
     "events": {
       "weekend intensivi balboa torino": {
@@ -23760,6 +23792,77 @@
         "notes": null,
         "stili": [
           "Lindy"
+        ]
+      }
+    }
+  },
+  "temple du swing|ile de france": {
+    "default": {
+      "organizer": "Temple du Swing",
+      "city": "Ile-de-France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Boulevard de Vaugirard 32",
+      "lat": 48.8414306640625,
+      "lng": 2.3175299167633057,
+      "geocodedAddress": "Boulevard de Vaugirard 32",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "week end west coast swing special the open": {
+        "organizer": null,
+        "city": "Ile-de-France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 48.8414306640625,
+        "lng": 2.3175299167633057,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "la swingheria liguria|genova": {
+    "default": {
+      "organizer": "La Swingheria Liguria",
+      "city": "Genova",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "slow balboa": {
+        "organizer": null,
+        "city": "Genova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
         ]
       }
     }
