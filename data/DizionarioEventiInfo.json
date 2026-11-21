@@ -1788,6 +1788,24 @@
         "stili": [
           "Lindy"
         ]
+      },
+      "gemma club burnin moon live rockin eddie and the dynamites dj henry": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -3393,7 +3411,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
       }
     }
   },
@@ -14773,6 +14794,25 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "soiree swing lindy hop balboa": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
       }
     }
   },
@@ -23900,6 +23940,268 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-21"
+      }
+    }
+  },
+  "tempo danse e caroline danse|metropolitan france": {
+    "default": {
+      "organizer": "Tempo Danse e Caroline Danse",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "so swing balboa lindy rock west coast swing": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "maguy yvi|bourgogne franche comte": {
+    "default": {
+      "organizer": "Maguy Yvi",
+      "city": "Bourgogne – Franche-Comté",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "happy bal initiation balboa de 18h a 19h": {
+        "organizer": null,
+        "city": "Bourgogne – Franche-Comté",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "joy barnard|albany county": {
+    "default": {
+      "organizer": "Joy Barnard",
+      "city": "Albany County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "j r dance spectacular christmas party": {
+        "organizer": null,
+        "city": "Albany County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "les chatons swingueurs e david polarski|ile de france": {
+    "default": {
+      "organizer": "Les Chatons Swingueurs e David Polarski",
+      "city": "Ile-de-France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bal swing chantier": {
+        "organizer": null,
+        "city": "Ile-de-France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-21",
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "lisa do e fred fayard|metropolitan france": {
+    "default": {
+      "organizer": "Lisa Do e Fred Fayard",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "bresse swing festival": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "warsaw collegiate shag festival|warsaw": {
+    "default": {
+      "organizer": "Warsaw Collegiate Shag Festival",
+      "city": "Warsaw",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "warsaw collegiate shag festival may": {
+        "organizer": null,
+        "city": "Warsaw",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Shag"
+        ]
+      }
+    }
+  },
+  "international swing dance championships|harris county": {
+    "default": {
+      "organizer": "International Swing Dance Championships",
+      "city": "Harris County",
+      "country": "United States",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "international swing dance championship": {
+        "organizer": null,
+        "city": "Harris County",
+        "country": "United States",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-21",
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   }
