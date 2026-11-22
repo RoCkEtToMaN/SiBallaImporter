@@ -4811,7 +4811,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "la stanza dello swing": {
@@ -4827,7 +4830,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       },
       "florida fifties": {
         "organizer": null,
@@ -10712,7 +10718,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "the backbeat social": {
@@ -10730,6 +10739,24 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-09",
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "the backbeat social season greetings": {
+        "organizer": null,
+        "city": "Reggio Emilia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
         "stili": [
           "Lindy"
         ]
@@ -24849,6 +24876,221 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-22"
+      }
+    }
+  },
+  "the crazybop boogie rhythm n blues|ravenna": {
+    "default": {
+      "organizer": "The CrazyBop Boogie Rhythm'n' Blues ",
+      "city": "Ravenna",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Giuseppe Verdi 6",
+      "lat": 44.514549255371094,
+      "lng": 11.832850456237793,
+      "geocodedAddress": "Via Giuseppe Verdi 6",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "vintage party social dance": {
+        "organizer": null,
+        "city": "Ravenna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 44.514549255371094,
+        "lng": 11.832850456237793,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
+      }
+    }
+  },
+  "hops bari lindy hop community|bari": {
+    "default": {
+      "organizer": "HOPS Bari - Lindy hop community",
+      "city": "Bari",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing night social dance con strictly di priscio": {
+        "organizer": null,
+        "city": "Bari",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "moonshine swing dance|reggio emilia": {
+    "default": {
+      "organizer": "Moonshine Swing Dance",
+      "city": "Reggio Emilia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "orti swing speak easy": {
+        "organizer": null,
+        "city": "Reggio Emilia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "simona francia|bologna": {
+    "default": {
+      "organizer": "Simona Francia",
+      "city": "Bologna",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "serata boogie woogie rock n roll villa torchi": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "jazzy feet|ile de france": {
+    "default": {
+      "organizer": "Jazzy Feet",
+      "city": "Ile-de-France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "paris stops routine": {
+        "organizer": null,
+        "city": "Ile-de-France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-23"
+      }
+    }
+  },
+  "swingin in the rennes|brittany": {
+    "default": {
+      "organizer": "Swingin' in the Rennes",
+      "city": "Brittany",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rennes bow swing festival": {
+        "organizer": null,
+        "city": "Brittany",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-23"
       }
     }
   }
