@@ -53,6 +53,9 @@ namespace SiBallaImportingData.Service
         /// <summary>Esito di Gemini per l'evento (dopo SegnaPerSheetAsync o ClassifyAsync), null se non classificato</summary>
         public static (bool IsSwing, string Motivo)? Esito(Event e) => _esiti.TryGetValue(e, out var x) ? (x.IsSwing, x.Motivo) : null;
 
+        /// <summary>Esito completo (anche mercatino e workshop), null se non classificato</summary>
+        public static (bool IsSwing, bool Mercatino, bool Workshop, string Motivo)? EsitoCompleto(Event e) => _esiti.TryGetValue(e, out var x) ? x : null;
+
         /// <summary>
         /// Per l'email: separa gli eventi swing dagli altri. Se Gemini non risponde l'evento resta tra gli swing (l'email parte comunque)
         /// </summary>

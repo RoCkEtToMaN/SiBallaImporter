@@ -36,6 +36,7 @@ namespace SiBallaImportingData.Utils
             ["--riclassifica-storico-scrivi"] = "Import:RiclassificaStoricoScrivi",
             ["--memoria-serie"] = "Import:MemoriaSerie",
             ["--memoria-serie-scrivi"] = "Import:MemoriaSerieScrivi",
+            ["--test-gemini-sheet"] = "Import:TestGeminiSheet",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -140,6 +141,10 @@ namespace SiBallaImportingData.Utils
         public bool MemoriaSerie { get; set; }
         // come MemoriaSerie, ma scrive nello Sheet (ogni giro con --excel lo fa già da solo)
         public bool MemoriaSerieScrivi { get; set; }
+        // prova di Gemini sulle righe che hai già deciso tu (workshop, mercatini, no, serate confermate): confronta e basta
+        public bool TestGeminiSheet { get; set; }
+        // righe per tipo nella prova (le più recenti)
+        public int TestGeminiSheetMax { get; set; } = 40;
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }

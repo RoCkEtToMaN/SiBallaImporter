@@ -213,6 +213,59 @@ internal static class ImportCommands
     }
 
     /// <summary>
+    /// Prova di Gemini: classifica le righe che hai già deciso tu (workshop, mercatino, no, confermate) senza memoria né storia
+    /// dell'organizzatore (gli suggerirebbero la risposta) e confronta con la tua decisione. Non scrive niente.
+    /// Le righe dello Sheet non hanno la descrizione dell'evento: gli eventi online, che ce l'hanno, sono più facili
+    /// </summary>
+    public static async Task TestGeminiSheetAsync(AppSettings settings, List<Event> sheetEvents)
+    {
+        int max = Math.Max(1, settings.Import.TestGeminiSheetMax);
+        static bool DelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
+            && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
+                || n.StartsWith(ImportData.NotaSpostatoDaSerate, StringComparison.OrdinalIgnoreCase));
+        // la tua decisione: workshop, mercatino, no (scartato) o swing (confermato), null se non l'hai decisa tu
+        static string? Tua(Event e) => e.LuogoVerificato switch
+        {
+            ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => DelProgramma(e) && !e.RigaArancione ? null : e.LuogoVerificato,
+            ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedStorico => null,
+            _ => "swing",
+        };
+        // stessa serie e stesso giorno contano una volta; per tipo le date più recenti
+        var campione = sheetEvents
+            .Select(e => (Evento: e, Tua: Tua(e)))
+            .Where(x => x.Tua is not null && !string.IsNullOrWhiteSpace(x.Evento.PartyName))
+            .GroupBy(x => (x.Tua, Titolo: MemoriaSerie.TitoloSerie(x.Evento.PartyName), x.Evento.DateStart.Date)).Select(g => g.First())
+            .GroupBy(x => x.Tua)
+            .SelectMany(g => g.OrderByDescending(x => x.Evento.DateStart).Take(max))
+            .ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Prova Gemini sullo Sheet: {campione.Count} righe decise da te (max {max} per tipo) =====");
+        foreach (var g in campione.GroupBy(x => x.Tua)) Console.WriteLine($"   {g.Key}: {g.Count()}");
+
+        await SwingEventClassifier.ClassificaSoloAsync(campione.Select(x => x.Evento).ToList(), settings.Gemini);
+
+        static string Risposta(Event e) => SwingEventClassifier.EsitoCompleto(e) is not { } r ? "nessuna risposta"
+            : r.IsSwing ? "swing" : r.Mercatino ? ImportData.VerifiedMercatino : r.Workshop ? ImportData.VerifiedWorkshop : ImportData.VerifiedNo;
+        var esiti = campione.Select(x => (x.Evento, x.Tua, Gemini: Risposta(x.Evento))).ToList();
+        int giusti = esiti.Count(x => x.Tua == x.Gemini);
+        Console.WriteLine();
+        Console.WriteLine($"===== Risultato: Gemini d'accordo con te su {giusti}/{esiti.Count} righe =====");
+        Console.WriteLine("   (riga = tua decisione, colonne = risposta di Gemini; 'no' = per lo Sheet diventerebbe 'da verificare')");
+        var colonne = new[] { "swing", ImportData.VerifiedWorkshop, ImportData.VerifiedMercatino, ImportData.VerifiedNo, "nessuna risposta" };
+        Console.WriteLine($"   {"tua / Gemini",-12}" + string.Concat(colonne.Select(c => $"{c,18}")));
+        foreach (var g in esiti.GroupBy(x => x.Tua))
+            Console.WriteLine($"   {g.Key,-12}" + string.Concat(colonne.Select(c => $"{g.Count(x => x.Gemini == c),18}")));
+
+        Console.WriteLine();
+        Console.WriteLine("===== Dove Gemini non è d'accordo =====");
+        foreach (var x in esiti.Where(x => x.Tua != x.Gemini).OrderBy(x => x.Tua).ThenBy(x => x.Evento.DateStart))
+            Console.WriteLine($"   ❌ tu: {x.Tua,-9} Gemini: {x.Gemini,-9} | {x.Evento.SheetName} riga {x.Evento.SheetRow} | {x.Evento.DateStart:yyyy-MM-dd} | " +
+                              $"{x.Evento.Organizer?.Trim()} | {x.Evento.PartyName?.Trim()} -> {SwingEventClassifier.EsitoCompleto(x.Evento)?.Motivo}");
+        Console.WriteLine();
+        Console.WriteLine("Prova: niente scritto nello Sheet.");
+    }
+
+    /// <summary>
     /// Righe future di Serate segnate "workshop" (da te o dalla memoria) che non hanno ancora la copia nella scheda Workshop:
     /// le copia là come "nuovo" con la nota "Spostato da Serate ...". In Serate restano come traccia (fuori da DB, sito ed email).
     /// In anteprima (scrivi = false) conta anche le righe che la memoria segnerebbe "workshop" (StatoNuovaRiga)

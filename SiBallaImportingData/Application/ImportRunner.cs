@@ -84,6 +84,14 @@ internal static class ImportRunner
             return;
         }
 
+        // PROVA GEMINI: classifica le righe che hai già deciso tu e confronta le risposte con le tue, senza scrivere niente
+        if (opzioni.TestGeminiSheet)
+        {
+            if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
+                await ImportCommands.TestGeminiSheetAsync(settings, sheetEvents);
+            return;
+        }
+
         // formule dell'intestazione bloccate da valori scritti sotto (#REF!): li svuoto, solo nei giri che scrivono sullo Sheet
         if (opzioni.EnableImportingOnExcel)
         {

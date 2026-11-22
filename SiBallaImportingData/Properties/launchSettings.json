@@ -7,6 +7,11 @@
       "commandName": "Project",
       "commandLineArgs": "--search true --send true --excel false --db false --coords false --Email:PreviewFile=email-anteprima.html",
       "workingDirectory": "$(ProjectDir)"
+    },
+    "Prova Gemini sullo Sheet": {
+      "commandName": "Project",
+      "commandLineArgs": "--test-gemini-sheet --no-push",
+      "workingDirectory": "$(ProjectDir)"
     }
   }
 }
