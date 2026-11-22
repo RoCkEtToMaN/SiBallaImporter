@@ -4,8 +4,11 @@
 #   modo = verifica: righe future "da verificare" / "nuovo" / "gemini", le più vicine per prime
 #   modo = prova:    righe che hai già deciso tu, senza fargli vedere la tua decisione: confronto e percentuali
 #   modo = indirizzi: righe con luogo controllato da te, senza fargli vedere l'indirizzo: quanto si avvicina (km)
-#   ricerca_google = true: strumento cerca_web (ricerca Google di Gemini, serve la fatturazione attiva su Gemini)
-# Usa gli stessi secrets dell'importatore (GOOGLE_SERVICE_ACCOUNT_JSON, GEMINI_API_KEY).
+#   modo = dizionario: cerca il luogo degli eventi futuri senza indirizzo; scrivi = true lo salva nel dizionario dei luoghi
+#              (non verificato, commit in data/) e nello Sheet come "gemini" (come --indirizzi); scrivi = false mostra soltanto
+#   ricerca web: con il secret TAVILY_API_KEY (tavily.com, gratis senza carta) usa Tavily; altrimenti ricerca_google = true
+#              (ricerca Google di Gemini: senza fatturazione attiva non costa nulla, al massimo risponde 429)
+# Usa gli stessi secrets dell'importatore (GOOGLE_SERVICE_ACCOUNT_JSON, GEMINI_API_KEY), più TAVILY_API_KEY se c'è.
 
 name: Agente verifica
 
@@ -13,15 +16,20 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: verifica (righe in attesa), prova (righe già decise, confronto) o indirizzi (ritrova i luoghi che conosci)
+        description: verifica (righe in attesa), prova (confronto), indirizzi (ritrova i luoghi noti), dizionario (cerca i luoghi mancanti)
         type: choice
-        options: ["prova", "verifica", "indirizzi"]
+        options: ["prova", "verifica", "indirizzi", "dizionario"]
         default: "prova"
       max:
         description: Righe da controllare (nella prova, righe per tipo)
         default: "8"
+      scrivi:
+        description: Solo modo dizionario - salva i luoghi trovati nel dizionario e nello Sheet (false = solo anteprima)
+        type: choice
+        options: ["false", "true"]
+        default: "false"
       ricerca_google:
-        description: Ricerca Google per l'agente (serve la fatturazione attiva su Gemini)
+        description: Ricerca Google di Gemini per l'agente (senza fatturazione non costa nulla, al massimo risponde 429)
         type: choice
         options: ["false", "true"]
         default: "false"
@@ -36,6 +44,9 @@ concurrency:
 
 jobs:
   agente:
+    # contents: commit del dizionario dei luoghi (modo dizionario con scrivi = true)
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -85,6 +96,9 @@ jobs:
           Import__AgenteProva: ${{ inputs.modo == 'prova' }}
           Import__AgenteIndirizziProva: ${{ inputs.modo == 'indirizzi' }}
           Gemini__UseGoogleSearch: ${{ inputs.ricerca_google }}
+          Import__AgenteDizionario: ${{ inputs.modo == 'dizionario' }}
+          Import__AgenteDizionarioScrivi: ${{ inputs.modo == 'dizionario' && inputs.scrivi == 'true' }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           Import__AgenteMax: ${{ inputs.max }}
         run: dotnet SiBallaImportingData.dll 2>&1 | tee agente.log
 
@@ -98,7 +112,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Agente verifica (${{ inputs.modo }})
-          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 "
+          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ "
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log
@@ -108,3 +122,18 @@ jobs:
           name: agente-verifica-${{ github.run_number }}
           path: out/agente.log
           retention-days: 30
+
+      # modo dizionario con scrivi = true: il programma ha aggiornato out/DizionarioEventiInfo.json, qui il commit (come l'importatore)
+      - name: Commit dizionario luoghi
+        if: always() && inputs.modo == 'dizionario' && inputs.scrivi == 'true'
+        run: |
+          [ -f out/DizionarioEventiInfo.json ] || exit 0
+          mkdir -p data
+          cp out/DizionarioEventiInfo.json data/
+          git add data/DizionarioEventiInfo.json
+          if git diff --cached --quiet; then echo "Dizionario invariato"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Dizionario luoghi: indirizzi trovati dall'agente (run #${{ github.run_number }})"
+          git pull --rebase
+          git push

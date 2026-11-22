@@ -423,7 +423,7 @@ internal static class ImportCommands
     }
 
     private static AgenteVerifica.Opzioni Opzioni(ImportOptions o) =>
-        new(Math.Max(2, o.AgentePassi), o.AgentePagine, o.AgenteRicerche);
+        new(Math.Max(2, o.AgentePassi), o.AgentePagine, o.AgenteRicerche, TavilyApiKey: o.TavilyApiKey);
 
     /// <summary>
     /// Prova dell'agente sugli indirizzi: righe con indirizzo e coordinate controllati da te ("Luogo verificato" vuoto o "ok"),
@@ -490,6 +490,109 @@ internal static class ImportCommands
                           $"sbagliati {esiti.Count(x => x.Esito == "sbagliato")}, trovati ma non confermati da Photon {esiti.Count(x => x.Esito == "non confermato")}, " +
                           $"non trovati {esiti.Count(x => x.Esito == "non trovato")} (su {esiti.Count}) =====");
         Console.WriteLine("Prova: niente scritto nello Sheet.");
+    }
+
+    /// <summary>
+    /// Dizionario dei luoghi: per gli eventi futuri senza indirizzo (e senza luogo verificato nel dizionario) l'agente cerca
+    /// locale e indirizzo (pagine, mappa, ricerca web se c'è). Una ricerca per evento (organizzatore + città + titolo), le date
+    /// più vicine per prime; quelli non trovati si riprovano dopo 30 giorni.
+    /// scrivi = false: mostra soltanto. scrivi = true: voce dell'evento nel dizionario (non verificata, Source "agente", fonte
+    /// nelle note) e righe dello Sheet con l'indirizzo e "gemini" in "Luogo verificato", come --indirizzi.
+    /// Quando scrivi "ok" su una di quelle righe il luogo diventa verificato e vale per tutte le date future dell'evento
+    /// </summary>
+    public static async Task AgenteDizionarioAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver,
+                                                   string dizionarioPath)
+    {
+        var o = settings.Import;
+        bool scrivi = o.AgenteDizionarioScrivi;
+        var gruppi = sheetEvents
+            .Where(e => e.DateStart.Date >= DateTime.Today)
+            .Where(e => string.IsNullOrWhiteSpace(e.EventDetail?.Address))
+            .Where(e => e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null)
+            .Where(e => e.LuogoVerificato != ImportData.VerifiedPending && !ImportData.Scartato(e))
+            .Where(e => !string.IsNullOrWhiteSpace(e.Organizer) && !string.IsNullOrWhiteSpace(e.City) && !string.IsNullOrWhiteSpace(e.PartyName))
+            .Where(e => store.Find(e) is null)
+            .GroupBy(e => KnownVenueStore.MakeKey(e.Organizer!, e.City!) + "|" + KnownVenueStore.NormalizeTitle(e.PartyName))
+            .Select(g => g.OrderBy(e => e.DateStart).ToList())
+            .Where(g => store.GeminiNonTrovato(g[0]) is not DateTime d || d.AddDays(30) <= DateTime.Today)
+            .OrderBy(g => g[0].DateStart)
+            .ToList();
+        var daFare = gruppi.Take(Math.Max(1, o.AgenteMax)).ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Dizionario luoghi con l'agente: {daFare.Count} eventi (su {gruppi.Count} futuri senza indirizzo; " +
+                          $"ricerca web: {(!string.IsNullOrWhiteSpace(o.TavilyApiKey) ? "Tavily" : settings.Gemini.UseGoogleSearch ? "Google" : "no, solo pagine e mappa")}; " +
+                          $"{(scrivi ? "SCRIVE dizionario e Sheet" : "anteprima")}) =====");
+        if (!GeminiPronto(settings))
+        {
+            foreach (var g in daFare)
+                Console.WriteLine($"   {g[0].DateStart:yyyy-MM-dd} | {g[0].City?.Trim()} | {g[0].Organizer?.Trim()} | {g[0].PartyName?.Trim()} ({g.Count} date)");
+            return;
+        }
+
+        var scritte = new List<(Event, string)>();
+        int trovati = 0, nonConfermati = 0, nonTrovati = 0, errori = 0;
+        foreach (var gruppo in daFare)
+        {
+            var ev = gruppo[0];
+            var p = await AgenteVerifica.VerificaAsync(ev, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { SoloIndirizzo = true });
+            var titolo = $"{ev.DateStart:yyyy-MM-dd} | {ev.City?.Trim()} | {ev.Organizer?.Trim()} | {ev.PartyName?.Trim()} ({gruppo.Count} date)";
+            Console.WriteLine();
+            if (p is null)
+            {
+                errori++;   // Gemini non ha risposto: non lo segno, si riprova al giro dopo
+                Console.WriteLine($"❗ nessuna risposta | {titolo}");
+                continue;
+            }
+            if (p.Luogo is { Lat: { } lat, Lng: { } lng } l)
+            {
+                trovati++;
+                var indirizzo = l.Indirizzo ?? l.Locale!;
+                var luogo = string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
+                Console.WriteLine($"📍 {luogo} ({l.Come}{(l.Fonte is null ? "" : $", fonte: {l.Fonte}")}) | {titolo}");
+                if (scrivi)
+                {
+                    store.RegistraDaAgente(ev, l.Locale, indirizzo, lat, lng, l.Come, l.Fonte);
+                    var nota = $"Indirizzo trovato dall'agente il {DateTime.Today:dd/MM/yyyy}: {luogo}\n{l.Come}\n" +
+                               $"Fonte: {l.Fonte ?? "-"}\nControllato? Scrivi '{ImportData.VerifiedOk}' in '{ImportData.VerifiedHeader}'";
+                    foreach (var riga in gruppo)
+                    {
+                        riga.EventDetail.Address = indirizzo;
+                        riga.EventDetail.Location = luogo;
+                        riga.EventDetail.Latitude = lat;
+                        riga.EventDetail.Longitude = lng;
+                        riga.LuogoVerificato = ImportData.VerifiedGemini;
+                        scritte.Add((riga, nota));
+                    }
+                }
+            }
+            else
+            {
+                if (p.Luogo is { } nc) { nonConfermati++; Console.WriteLine($"➖ trovato ma non confermato dalla mappa: {nc.Locale} {nc.Indirizzo} | {titolo}"); }
+                else { nonTrovati++; Console.WriteLine($"➖ non trovato | {titolo}"); }
+                if (scrivi) store.SegnaGeminiNonTrovato(ev);
+            }
+            Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine($"===== Risultato dizionario: trovati {trovati}, trovati ma non confermati dalla mappa {nonConfermati}, " +
+                          $"non trovati {nonTrovati} (si riprova tra 30 giorni), errori {errori} =====");
+        if (!scrivi)
+        {
+            Console.WriteLine("Anteprima: niente scritto. Per salvarli: --agente-dizionario-scrivi");
+            return;
+        }
+        try
+        {
+            await ImportData.ScriviIndirizziGeminiAsync(scritte);
+            Console.WriteLine($"[sheet] {scritte.Count} righe con l'indirizzo trovato dall'agente (stato '{ImportData.VerifiedGemini}')");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[sheet] ⚠️ indirizzi dell'agente non scritti sullo Sheet: {ex.Message}");
+        }
+        store.Save();
+        DictionaryRepoSync.PushFromBin(dizionarioPath, o.NoPush);
     }
 
     /// <summary>

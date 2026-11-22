@@ -76,7 +76,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   proponi), con un tetto di passi e di pagine per riga. Propone lo stato di "Luogo verificato" e non scrive mai nello Sheet.
   `--agente-verifica` = righe future in attesa, `--agente-prova` = confronto con le righe già decise, `--agente-indirizzi-prova` =
   ritrova i luoghi già noti (km). Cerca anche l'indirizzo (verifica_indirizzo con Photon; cerca_web = ricerca Google di Gemini, solo con
-  `Gemini:UseGoogleSearch`). DuckDuckGo e simili bloccano i bot: non usarli. Workflow "Agente verifica".
+  `Gemini:UseGoogleSearch`, oppure Tavily con `TAVILY_API_KEY`). DuckDuckGo e simili bloccano i bot: non usarli. `--agente-dizionario[-scrivi]`:
+  luoghi mancanti -> voce dell'evento nel dizionario (non verificata, Source "agente") + Sheet "gemini"; con "ok" diventa verificata.
+  Workflow "Agente verifica" (modo dizionario + scrivi: da lanciare su master, perché fa il commit del dizionario).
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

@@ -285,6 +285,38 @@ public class KnownVenueStore
         return DateTime.TryParseExact(v.GeminiNonTrovato, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
     }
 
+    public const string SourceAgente = "agente";
+
+    /// <summary>
+    /// Luogo trovato dall'agente di verifica (confermato da Photon): va nella voce dell'evento (organizzatore + città + titolo),
+    /// NON verificato, con la fonte nelle note. Diventa verificato quando scrivi "ok" sulla riga dello Sheet (ImportFromSheet).
+    /// Le voci che hai già verificato non si toccano. True se ha scritto qualcosa
+    /// </summary>
+    public bool RegistraDaAgente(Event e, string? locale, string indirizzo, double lat, double lng, string come, string? fonte)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return false;
+        var t = NormalizeTitle(e.PartyName);
+        if (t.Length == 0) return false;
+
+        var key = MakeKey(e.Organizer, e.City);
+        if (!_data.TryGetValue(key, out var org))
+            _data[key] = org = new OrganizerVenues { Default = new VenueInfo { Organizer = e.Organizer, City = e.City, Country = e.Country } };
+        if (!org.Events.TryGetValue(t, out var v))
+            org.Events[t] = v = new VenueInfo { City = e.City, Country = e.Country };
+        if (v.Verified) return false;
+
+        v.VenueName = string.IsNullOrWhiteSpace(locale) ? v.VenueName : locale.Trim();
+        v.Address = indirizzo.Trim();
+        v.GeocodedAddress = indirizzo.Trim();
+        v.Lat = lat;
+        v.Lng = lng;
+        v.Source = SourceAgente;
+        v.Notes = $"{DateTime.Today:yyyy-MM-dd} {come}" + (string.IsNullOrWhiteSpace(fonte) ? "" : $"; fonte: {fonte}");
+        v.GeminiNonTrovato = null;
+        _dirty = true;
+        return true;
+    }
+
     /// <summary>Ricerca con Gemini senza risultato: lo segno nella voce dell'evento (creata se manca) per non ripeterla ogni giro</summary>
     public void SegnaGeminiNonTrovato(Event e)
     {

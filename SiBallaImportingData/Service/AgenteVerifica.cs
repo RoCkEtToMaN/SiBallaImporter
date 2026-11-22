@@ -33,7 +33,8 @@ namespace SiBallaImportingData.Service
         /// Tetti per riga e cosa nascondere nelle prove: NascondiDecisione = stato e nota della riga (prova sulle righe decise),
         /// NascondiIndirizzo = indirizzo della riga e luogo del dizionario (prova sugli indirizzi che conosci già)
         /// </summary>
-        public sealed record Opzioni(int MaxPassi, int MaxPagine, int MaxRicerche, bool NascondiDecisione = false, bool NascondiIndirizzo = false);
+        public sealed record Opzioni(int MaxPassi, int MaxPagine, int MaxRicerche, bool NascondiDecisione = false, bool NascondiIndirizzo = false,
+                                     string? TavilyApiKey = null, bool SoloIndirizzo = false);
 
         private static readonly HttpClient _web = CreaClient();
 
@@ -174,7 +175,8 @@ namespace SiBallaImportingData.Service
                 new JsonObject
                 {
                     ["role"] = "user",
-                    ["parts"] = new JsonArray { new JsonObject { ["text"] = Contesto(riga, sheet, store, nascondiDecisione, nascoste, o.NascondiIndirizzo) } }
+                    ["parts"] = new JsonArray { new JsonObject { ["text"] = Contesto(riga, sheet, store, nascondiDecisione, nascoste, o.NascondiIndirizzo) +
+                        (o.SoloIndirizzo ? "\nCOMPITO PRINCIPALE: trova il locale e l'indirizzo di questo evento (per lo stato proponi lo stato attuale, se non vedi problemi evidenti)." : "") } }
                 }
             };
             var traccia = new List<string>();
@@ -189,7 +191,7 @@ namespace SiBallaImportingData.Service
                 {
                     permessi.AddRange(new[] { "cerca_nello_sheet", "verifica_indirizzo" });
                     if (pagine < o.MaxPagine) permessi.Add("leggi_pagina");
-                    if (gemini.UseGoogleSearch && ricerche < o.MaxRicerche) permessi.Add("cerca_web");
+                    if ((gemini.UseGoogleSearch || !string.IsNullOrWhiteSpace(o.TavilyApiKey)) && ricerche < o.MaxRicerche) permessi.Add("cerca_web");
                 }
                 var body = new JsonObject
                 {
@@ -274,7 +276,7 @@ namespace SiBallaImportingData.Service
                     {
                         var query = Testo(args, "query");
                         ricerche++;
-                        esito = await CercaWebAsync(query, gemini);
+                        esito = string.IsNullOrWhiteSpace(o.TavilyApiKey) ? await CercaWebAsync(query, gemini) : await CercaTavilyAsync(query, o.TavilyApiKey);
                         traccia.Add($"cerca_web({query}) -> {(esito.StartsWith("ERRORE") ? esito : $"{esito.Split('\n').Count(l => l.StartsWith("- "))} risultati")}");
                     }
                     else if (nome == "verifica_indirizzo")
@@ -328,6 +330,36 @@ namespace SiBallaImportingData.Service
                 Console.WriteLine($"[agente] Photon: {ex.Message}");
             }
             return null;
+        }
+
+        private static readonly HttpClient _tavily = new() { Timeout = TimeSpan.FromSeconds(30) };
+
+        /// <summary>
+        /// Ricerca web con Tavily (tavily.com, API ufficiale con piano gratuito): titolo, URL e testo dei primi risultati
+        /// </summary>
+        public static async Task<string> CercaTavilyAsync(string query, string apiKey)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return "ERRORE: ricerca vuota";
+            try
+            {
+                using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.tavily.com/search");
+                req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+                req.Content = new StringContent(new JsonObject { ["query"] = query, ["max_results"] = 6, ["search_depth"] = "basic" }.ToJsonString(),
+                                                Encoding.UTF8, "application/json");
+                using var risposta = await _tavily.SendAsync(req);
+                var testo = await risposta.Content.ReadAsStringAsync();
+                if (!risposta.IsSuccessStatusCode) return $"ERRORE: Tavily HTTP {(int)risposta.StatusCode} {Accorcia(testo, 120)}";
+                var risultati = JsonNode.Parse(testo)?["results"]?.AsArray();
+                if (risultati is null || risultati.Count == 0) return "nessun risultato";
+                var sb = new StringBuilder();
+                foreach (var r in risultati)
+                    sb.AppendLine($"- {r?["title"]?.GetValue<string>()} | {r?["url"]?.GetValue<string>()}\n  {Accorcia(Pulisci(r?["content"]?.GetValue<string>() ?? ""), 400)}");
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                return $"ERRORE: ricerca non riuscita ({Accorcia(ex.Message, 120)})";
+            }
         }
 
         /// <summary>
