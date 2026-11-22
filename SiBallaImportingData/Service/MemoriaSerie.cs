@@ -57,10 +57,28 @@ namespace SiBallaImportingData.Service
 
         private MemoriaSerie() { }
 
-        /// <summary>Organizzatore + città + titolo normalizzato, null se manca l'organizzatore o il titolo</summary>
+        // mesi (it, en, fr, de, es) e ordinali ("4th", "3a"): "Brescia Balboa Series 4TH Edition February" e "... March" sono
+        // la stessa serie. Solo qui: NormalizeTitle serve anche agli id delle immagini e al dizionario, che non devono cambiare
+        private static readonly System.Text.RegularExpressions.Regex MesiEOrdinali = new(
+            @"\b(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre" +
+            @"|january|february|march|april|may|june|july|august|september|october|november|december" +
+            @"|janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|decembre" +
+            @"|januar|februar|marz|maerz|juni|juli|oktober|dezember" +
+            @"|enero|febrero|abril|mayo|junio|julio|septiembre|octubre|noviembre|diciembre" +
+            @"|\d+(st|nd|rd|th|a|o|e|er|eme|ème))\b");
+
+        /// <summary>Titolo della serie: NormalizeTitle senza mesi né ordinali (se resta qualcosa)</summary>
+        public static string TitoloSerie(string? titolo)
+        {
+            var t = KnownVenueStore.NormalizeTitle(titolo);
+            var senza = System.Text.RegularExpressions.Regex.Replace(MesiEOrdinali.Replace(t, " "), @"\s+", " ").Trim();
+            return senza.Length > 0 ? senza : t;
+        }
+
+        /// <summary>Organizzatore + città + titolo della serie, null se manca l'organizzatore o il titolo</summary>
         public static string? Chiave(Event e)
         {
-            var titolo = KnownVenueStore.NormalizeTitle(e.PartyName);
+            var titolo = TitoloSerie(e.PartyName);
             if (string.IsNullOrWhiteSpace(e.Organizer) || titolo.Length == 0) return null;
             return KnownVenueStore.MakeKey(e.Organizer, e.City ?? "") + "|" + titolo;
         }

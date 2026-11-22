@@ -83,7 +83,8 @@ riga ha un indirizzo verificato): in quel caso diventa `auto`.
 
 #### Memoria delle serie: il programma impara dalle tue decisioni
 
-Le date di un evento che si ripete (stesso organizzatore, città e titolo, a parte anni e numeri)
+Le date di un evento che si ripete (stesso organizzatore, città e titolo, a parte anni, numeri, ordinali
+come "4th" e nomi dei mesi)
 vengono decise come hai deciso tu per le altre date, senza chiedere a Gemini:
 
 - se hai scartato (`no`) **almeno 2 date** e non ne hai confermata nessuna, le date nuove arrivano
@@ -112,7 +113,9 @@ Per vedere cosa cambierebbe sulle righe già nello Sheet: `--memoria-serie` (ved
 Per gli eventi che la memoria non decide, Gemini riceve come **indizio** la storia dell'organizzatore
 (in tutte le città): quante sue date hai confermato, quante sono passate senza obiezioni, quante hai
 scartato, con fino a 3 titoli d'esempio di serie confermate e scartate. Non è una regola: Gemini
-decide comunque guardando l'evento, e se la storia ha pesato lo scrive nel motivo. L'anteprima
+decide comunque guardando l'evento, e se la storia ha pesato lo scrive nel motivo.
+Lezioni, corsi, laboratori e workshop di un giorno di stili swing Gemini li segna `workshop` (vanno nella
+scheda Workshop); quelli con "corso" o "lezione" nel titolo sono già esclusi dalla ricerca. L'anteprima
 `--memoria-serie` mostra anche cosa riceverebbe Gemini per le righe `da verificare`.
 
 Gemini viene chiamato una volta sola per evento: la classificazione fatta per lo Sheet viene riusata

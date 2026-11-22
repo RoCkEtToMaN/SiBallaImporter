@@ -250,7 +250,7 @@ namespace SiBallaImportingData.Utils
                 //    eventsToAppend.Add(ev);
                 //}
 
-                // memoria delle serie: workshop/corso. Lungo più di un giorno va già in Workshop (come swing, "nuovo");
+                // workshop/corso (memoria delle serie o Gemini). Lungo più di un giorno va già in Workshop (come swing, "nuovo");
                 // di un giorno resta anche in Serate come "workshop" (traccia per la memoria) e una copia va in Workshop
                 if (ev.StatoNuovaRiga == VerifiedWorkshop)
                 {
@@ -262,7 +262,7 @@ namespace SiBallaImportingData.Utils
                         continue;
                     }
                     if (!giaPresenteInSerate) { e++; eventsToAppend.Add(ev); }
-                    if (!giaPresenteInWorkshop) { w++; workshopsToAppend.Add(CopiaPerWorkshop(ev, $"{NotaSpostatoDaSerate} dalla memoria delle serie. {motivo}")); }
+                    if (!giaPresenteInWorkshop) { w++; workshopsToAppend.Add(CopiaPerWorkshop(ev, $"{NotaSpostatoDaSerate}: {motivo}")); }
                     continue;
                 }
 

@@ -161,6 +161,8 @@ internal static class ImportCommands
                 continue;
             }
             if (memoria.Decidi(e) is not { } d) continue;
+            // "workshop" sposta le righe di Serate: quelle già nella scheda Workshop sono a posto
+            if (d.Stato == ImportData.VerifiedWorkshop && e.SheetName != TipoEvento.Serate.ToString()) continue;
             // "nuovo" e "gemini" vanno già sul DB: la memoria le cambia solo per scartarle
             if (d.Stato == ImportData.VerifiedNew && e.LuogoVerificato != ImportData.VerifiedPending) continue;
             e.StatoNuovaRiga = d.Stato;
