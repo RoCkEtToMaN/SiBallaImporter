@@ -88,8 +88,15 @@ namespace SiBallaImportingData.Service
             "INDIRIZZO: se la riga non ha l'indirizzo e il dizionario non conosce il luogo, cercalo: se disponibile usa cerca_web (es. " +
             "'<titolo> <organizzatore> <città>' oppure '<organizzatore> <città> indirizzo'); spesso il frammento dei risultati contiene " +
             "già il locale e la via, altrimenti leggi la pagina più promettente (link della riga, sito dell'organizzatore, pagine dell'evento); " +
-            "senza cerca_web leggi il link della riga e il sito dell'organizzatore. Poi controlla con verifica_indirizzo. In proponi metti 'locale' e 'indirizzo' (via e civico, senza città) " +
-            "SOLO se li hai letti in una fonte, con 'fonte_indirizzo' = URL; non inventarli e non dedurli dal nome della città. " +
+            "senza cerca_web leggi il link della riga e il sito dell'organizzatore. " +
+            "Usa verifica_indirizzo anche come ricerca sulla mappa (OpenStreetMap, gratis): prova come 'locale' il nome del locale se " +
+            "compare nel titolo o nella descrizione (es. 'SWING PARTY (Officina della Birra)' -> 'Officina della Birra'), poi il nome " +
+            "dell'organizzatore (molte scuole di ballo e associazioni hanno la sede sulla mappa); se trova qualcosa ti dice la via. " +
+            "Se conosci tu il locale abituale di quell'organizzatore in quella città puoi provarlo con verifica_indirizzo. " +
+            "In proponi metti 'locale' e 'indirizzo' (via e civico, senza città) solo se vengono da una fonte o dalla mappa: " +
+            "'fonte_indirizzo' = URL letto, oppure 'mappa' (trovato con verifica_indirizzo dal nome del locale/organizzatore), " +
+            "oppure 'conoscenza del modello' (lo sapevi tu e la mappa lo conferma); in questi due ultimi casi sicurezza al massimo media. " +
+            "Non inventare e non dedurre l'indirizzo dal nome della città. " +
             "Nei problemi non scrivere 'indirizzo mancante' né 'orario non indicato': segnala solo un indirizzo o un orario " +
             "diverso da quello trovato in una fonte.";
 
