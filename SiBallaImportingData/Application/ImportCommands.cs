@@ -500,6 +500,11 @@ internal static class ImportCommands
     /// nelle note) e righe dello Sheet con l'indirizzo e "gemini" in "Luogo verificato", come --indirizzi.
     /// Quando scrivi "ok" su una di quelle righe il luogo diventa verificato e vale per tutte le date future dell'evento
     /// </summary>
+    // il controllo del curatore è facoltativo: l'indirizzo è già pubblicato e le date future lo riusano dal dizionario
+    private static readonly string NotaFacoltativa =
+        $"Non serve fare niente. Se è sbagliato: correggi la via nella colonna F e svuota '{ImportData.VerifiedHeader}' " +
+        $"(le coordinate si ricalcolano e da lì vale la tua via per tutte le date). Se è giusto e vuoi bloccarlo: scrivi '{ImportData.VerifiedOk}'.";
+
     public static async Task AgenteDizionarioAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver,
                                                    bool scrivi, int max, string? dizionarioPath)
     {
@@ -527,7 +532,7 @@ internal static class ImportCommands
             Console.WriteLine($"♻️ {luogo} (dal dizionario, trovato dall'agente) | {gruppo[0].DateStart:yyyy-MM-dd} | {gruppo[0].City?.Trim()} | {gruppo[0].PartyName?.Trim()} ({gruppo.Count} date)");
             if (!scrivi) continue;
             var nota = $"Indirizzo dal dizionario dei luoghi (trovato dall'agente, non ancora verificato): {luogo}\n{v.Notes}\n" +
-                       $"Controllato? Scrivi '{ImportData.VerifiedOk}' in '{ImportData.VerifiedHeader}'";
+                       NotaFacoltativa;
             foreach (var riga in gruppo)
             {
                 riga.EventDetail.Address = v.Address;
@@ -579,7 +584,7 @@ internal static class ImportCommands
                 {
                     store.RegistraDaAgente(ev, l.Locale, indirizzo, lat, lng, l.Come, l.Fonte);
                     var nota = $"Indirizzo trovato dall'agente il {DateTime.Today:dd/MM/yyyy}: {luogo}\n{l.Come}\n" +
-                               $"Fonte: {l.Fonte ?? "-"}\nControllato? Scrivi '{ImportData.VerifiedOk}' in '{ImportData.VerifiedHeader}'";
+                               $"Fonte: {l.Fonte ?? "-"}\n" + NotaFacoltativa;
                     foreach (var riga in gruppo)
                     {
                         riga.EventDetail.Address = indirizzo;
