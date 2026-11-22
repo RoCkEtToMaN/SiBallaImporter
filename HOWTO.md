@@ -94,7 +94,8 @@ vengono decise come hai deciso tu per le altre date, senza chiedere a Gemini:
   scritto da te), come mezza conferma una riga `nuovo`/`gemini` arrivata alla sua data senza che tu
   l'abbia scartata: servono almeno 2 conferme piene, o 4 mezze;
 - se hai segnato `mercatino` o `workshop` **almeno 1 data** e nient'altro, le date nuove arrivano
-  già così (`workshop` = copiate nella scheda Workshop);
+  già così (`workshop` = copiate nella scheda Workshop). Per la serie, una data confermata nella
+  **scheda Workshop** vale come `workshop` (per l'organizzatore invece resta una conferma);
 - storia mista (date confermate e date scartate) o troppo corta: si guarda l'organizzatore (sotto),
   altrimenti decide Gemini come prima.
 
@@ -114,8 +115,12 @@ Per gli eventi che la memoria non decide, Gemini riceve come **indizio** la stor
 (in tutte le città): quante sue date hai confermato, quante sono passate senza obiezioni, quante hai
 scartato, con fino a 3 titoli d'esempio di serie confermate e scartate. Non è una regola: Gemini
 decide comunque guardando l'evento, e se la storia ha pesato lo scrive nel motivo.
-Lezioni, corsi, laboratori e workshop di un giorno di stili swing Gemini li segna `workshop` (vanno nella
-scheda Workshop); quelli con "corso" o "lezione" nel titolo sono già esclusi dalla ricerca. L'anteprima
+Gemini sceglie per ogni evento **un solo tipo**: `serata` (anche pratiche e social practice) → `nuovo`;
+`workshop` (lezioni, corsi, laboratori, stage, e anche weekend, festival ed exchange di stili swing) →
+scheda Workshop; `mercatino` → Bacheca; `altro` (non swing, e concerti/festival rockabilly o
+rock'n'roll senza social dance swing esplicita) → `da verificare`. Gli eventi con "corso" o "lezione"
+nel titolo sono già esclusi dalla ricerca. Per misurare quanto Gemini è d'accordo con te:
+profilo "Prova Gemini sullo Sheet" (`--test-gemini-sheet`). L'anteprima
 `--memoria-serie` mostra anche cosa riceverebbe Gemini per le righe `da verificare`.
 
 Gemini viene chiamato una volta sola per evento: la classificazione fatta per lo Sheet viene riusata

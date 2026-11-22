@@ -120,15 +120,16 @@ namespace SiBallaImportingData.Service
             var memoria = new MemoriaSerie();
             foreach (var serie in sheetEvents.Select(e => (Chiave: Chiave(e), Evento: e)).Where(x => x.Chiave is not null).GroupBy(x => x.Chiave!))
             {
+                // per la serie una conferma nella scheda Workshop vale "workshop" (le date nuove vanno là);
+                // per l'organizzatore resta una conferma, così chi fa anche festival non vede finire in Workshop le sue serate
                 var storia = new Storia();
+                var perOrganizzatore = new Storia();
                 foreach (var giorno in serie.GroupBy(x => x.Evento.DateStart.Date))
                 {
-                    var voti = giorno.Select(x => VotoDi(x.Evento)).ToList();
-                    if (voti.Contains(Voto.SiTuo)) storia.SiTuoi++;
-                    else if (voti.Contains(Voto.SiTacito)) storia.SiTaciti++;
-                    else if (voti.All(v => v == Voto.No)) storia.No++;
-                    else if (voti.Contains(Voto.Mercatino)) storia.Mercatini++;
-                    else if (voti.Contains(Voto.Workshop)) storia.Workshop++;
+                    var voti = giorno.Select(x => (x.Evento, Voto: VotoDi(x.Evento))).ToList();
+                    Conta(perOrganizzatore, voti.Select(x => x.Voto).ToList());
+                    Conta(storia, voti.Select(x => x.Voto is Voto.SiTuo or Voto.SiTacito && x.Evento.SheetName == TipoEvento.Workshop.ToString()
+                        ? Voto.Workshop : x.Voto).ToList());
                 }
                 if (storia.Si == 0 && storia.No == 0 && storia.Mercatini == 0 && storia.Workshop == 0) continue;
                 memoria._serie[serie.Key] = storia;
@@ -137,14 +138,15 @@ namespace SiBallaImportingData.Service
                 if (ChiaveOrganizzatore(primo) is not string chiaveOrg) continue;
                 if (!memoria._organizzatori.TryGetValue(chiaveOrg, out var org))
                     memoria._organizzatori[chiaveOrg] = org = new Organizzatore();
-                org.SiTuoi += storia.SiTuoi;
-                org.SiTaciti += storia.SiTaciti;
-                org.No += storia.No;
-                org.Mercatini += storia.Mercatini;
-                org.Workshop += storia.Workshop;
+                org.SiTuoi += perOrganizzatore.SiTuoi;
+                org.SiTaciti += perOrganizzatore.SiTaciti;
+                org.No += perOrganizzatore.No;
+                org.Mercatini += perOrganizzatore.Mercatini;
+                org.Workshop += perOrganizzatore.Workshop;
                 var titolo = primo.PartyName?.Trim() ?? "";
                 if (titolo.Length > 60) titolo = titolo[..60];
-                var titoli = storia.No > 0 && storia.Si == 0 ? org.TitoliNo : storia.Si > 0 && storia.No == 0 ? org.TitoliSi : null;
+                var titoli = perOrganizzatore.No > 0 && perOrganizzatore.Si == 0 ? org.TitoliNo
+                           : perOrganizzatore.Si > 0 && perOrganizzatore.No == 0 ? org.TitoliSi : null;
                 if (titoli is not null && titoli.Count < MaxTitoliEsempio && !titoli.Contains(titolo))
                     titoli.Add(titolo);
             }
@@ -159,6 +161,16 @@ namespace SiBallaImportingData.Service
                               $"{perOrg.GetValueOrDefault(ImportData.VerifiedNo)} scartati, {perOrg.GetValueOrDefault(ImportData.VerifiedMercatino)} mercatini, " +
                               $"{perOrg.GetValueOrDefault(ImportData.VerifiedWorkshop)} workshop (su {memoria._organizzatori.Count} con una storia)");
             return memoria;
+        }
+
+        // un giorno della serie conta una volta: vince la conferma, poi lo scarto (solo se tutte le righe sono "no"), mercatino, workshop
+        private static void Conta(Storia storia, List<Voto> voti)
+        {
+            if (voti.Contains(Voto.SiTuo)) storia.SiTuoi++;
+            else if (voti.Contains(Voto.SiTacito)) storia.SiTaciti++;
+            else if (voti.All(v => v == Voto.No)) storia.No++;
+            else if (voti.Contains(Voto.Mercatino)) storia.Mercatini++;
+            else if (voti.Contains(Voto.Workshop)) storia.Workshop++;
         }
 
         /// <summary>
@@ -217,7 +229,7 @@ namespace SiBallaImportingData.Service
                 if (stato == ImportData.VerifiedMercatino)
                     return (stato, $"{PrefissoNota} mercatino come le altre date ({s.Mercatini} segnate da te), va in Bacheca");
                 if (stato == ImportData.VerifiedWorkshop)
-                    return (stato, $"{PrefissoNota} workshop/corso come le altre date ({s.Workshop} segnate da te), va nella scheda Workshop");
+                    return (stato, $"{PrefissoNota} workshop/corso come le altre date ({s.Workshop} segnate workshop o confermate nella scheda Workshop), va nella scheda Workshop");
                 if (stato == ImportData.VerifiedNo)
                     return (stato, $"{PrefissoNota} {s.No} date di questa serie scartate da te, nessuna confermata");
                 if (stato == ImportData.VerifiedNew)

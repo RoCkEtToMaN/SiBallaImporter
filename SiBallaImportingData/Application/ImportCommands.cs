@@ -223,11 +223,13 @@ internal static class ImportCommands
         static bool DelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
             && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
                 || n.StartsWith(ImportData.NotaSpostatoDaSerate, StringComparison.OrdinalIgnoreCase));
-        // la tua decisione: workshop, mercatino, no (scartato) o swing (confermato), null se non l'hai decisa tu
+        // la tua decisione: workshop, mercatino, no (scartato) o swing (confermato), null se non l'hai decisa tu.
+        // Confermata nella scheda Workshop = workshop (corso, weekend, festival)
         static string? Tua(Event e) => e.LuogoVerificato switch
         {
             ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => DelProgramma(e) && !e.RigaArancione ? null : e.LuogoVerificato,
             ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedStorico => null,
+            _ when e.SheetName == TipoEvento.Workshop.ToString() => DelProgramma(e) ? null : ImportData.VerifiedWorkshop,
             _ => "swing",
         };
         // stessa serie e stesso giorno contano una volta; per tipo le date più recenti
@@ -244,13 +246,19 @@ internal static class ImportCommands
 
         await SwingEventClassifier.ClassificaSoloAsync(campione.Select(x => x.Evento).ToList(), settings.Gemini);
 
-        static string Risposta(Event e) => SwingEventClassifier.EsitoCompleto(e) is not { } r ? "nessuna risposta"
-            : r.IsSwing ? "swing" : r.Mercatino ? ImportData.VerifiedMercatino : r.Workshop ? ImportData.VerifiedWorkshop : ImportData.VerifiedNo;
+        static string Risposta(Event e) => SwingEventClassifier.EsitoCompleto(e) is not { } r ? "nessuna risposta" : r.Tipo switch
+        {
+            SwingEventClassifier.TipoSerata => "swing",
+            SwingEventClassifier.TipoWorkshop => ImportData.VerifiedWorkshop,
+            SwingEventClassifier.TipoMercatino => ImportData.VerifiedMercatino,
+            _ => ImportData.VerifiedNo,
+        };
         var esiti = campione.Select(x => (x.Evento, x.Tua, Gemini: Risposta(x.Evento))).ToList();
         int giusti = esiti.Count(x => x.Tua == x.Gemini);
         Console.WriteLine();
         Console.WriteLine($"===== Risultato: Gemini d'accordo con te su {giusti}/{esiti.Count} righe =====");
-        Console.WriteLine("   (riga = tua decisione, colonne = risposta di Gemini; 'no' = per lo Sheet diventerebbe 'da verificare')");
+        Console.WriteLine("   (riga = tua decisione, colonne = risposta di Gemini; 'no' = tipo 'altro', per lo Sheet diventerebbe 'da verificare';");
+        Console.WriteLine("    workshop = segnata workshop o confermata nella scheda Workshop)");
         var colonne = new[] { "swing", ImportData.VerifiedWorkshop, ImportData.VerifiedMercatino, ImportData.VerifiedNo, "nessuna risposta" };
         Console.WriteLine($"   {"tua / Gemini",-12}" + string.Concat(colonne.Select(c => $"{c,18}")));
         foreach (var g in esiti.GroupBy(x => x.Tua))
