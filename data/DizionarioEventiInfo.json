@@ -220,6 +220,26 @@
         "stili": [
           "Lindy"
         ]
+      },
+      "swingin the new year w giuseppe ricciardo 4tet": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-22",
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
       }
     }
   },
@@ -16439,7 +16459,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "geminiNonTrovato": "2026-11-22"
       }
     }
   },
@@ -24793,6 +24814,41 @@
           "Lindy",
           "SoloJazz"
         ]
+      }
+    }
+  },
+  "nicholas tangel e vicent boned|uusimaa": {
+    "default": {
+      "organizer": "Nicholas Tangel e Vicent Boned",
+      "city": "Uusimaa",
+      "country": "Finland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "jazz lab with cati gentili": {
+        "organizer": null,
+        "city": "Uusimaa",
+        "country": "Finland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "geminiNonTrovato": "2026-11-22"
       }
     }
   }
