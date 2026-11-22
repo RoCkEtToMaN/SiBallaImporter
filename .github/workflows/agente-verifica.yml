@@ -89,7 +89,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Agente verifica (${{ inputs.modo }})
-          ELENCO: "🤖 |❌ |===== Risultato agente|sicurezza (alta|media|bassa): "
+          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto"
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log

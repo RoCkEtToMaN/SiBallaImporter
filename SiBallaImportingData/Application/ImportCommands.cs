@@ -378,6 +378,22 @@ internal static class ImportCommands
         Console.WriteLine($"   {"tua / agente",-16}" + string.Concat(colonne.Select(c => $"{c,17}")));
         foreach (var g in esiti.GroupBy(x => x.Tua))
             Console.WriteLine($"   {g.Key,-16}" + string.Concat(colonne.Select(c => $"{g.Count(x => x.Agente == c),17}")));
+        // quello che conta per il sito: pubblicato (serata, serata+workshop, workshop), Bacheca o scartato.
+        // Il caso peggiore è un evento che hai pubblicato e che l'agente avrebbe nascosto
+        static string? Sito(string s) => s switch
+        {
+            "swing" or ImportData.VerifiedSerataWorkshop or ImportData.VerifiedWorkshop => "pubblicato",
+            ImportData.VerifiedMercatino => "Bacheca",
+            ImportData.VerifiedNo => "scartato",
+            _ => null,
+        };
+        var conEsito = esiti.Where(x => Sito(x.Agente) is not null).ToList();
+        Console.WriteLine($"   stesso esito sul sito (pubblicato / Bacheca / scartato): {conEsito.Count(x => Sito(x.Tua) == Sito(x.Agente))}/{conEsito.Count}");
+        var nascosti = esiti.Where(x => Sito(x.Tua) == "pubblicato" && Sito(x.Agente) is "scartato" or "Bacheca").ToList();
+        Console.WriteLine($"   eventi pubblicati da te che avrebbe nascosto (il caso peggiore): {nascosti.Count}" +
+                          (nascosti.Count > 0 ? $", di cui con sicurezza alta: {nascosti.Count(x => x.P?.Sicurezza == "alta")}" : ""));
+        foreach (var x in nascosti)
+            Console.WriteLine($"      🙈 {x.Evento.SheetName} riga {x.Evento.SheetRow} | {x.Evento.DateStart:yyyy-MM-dd} | {x.Evento.PartyName?.Trim()} -> {x.Agente} ({x.P?.Sicurezza})");
         Console.WriteLine($"   passi medi per riga: {esiti.Where(x => x.P is not null).Select(x => x.P!.Passi).DefaultIfEmpty().Average():F1}, " +
                           $"pagine lette: {esiti.Sum(x => x.P?.Pagine ?? 0)}");
         Console.WriteLine("Prova: niente scritto nello Sheet.");
