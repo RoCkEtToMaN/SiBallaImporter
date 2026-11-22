@@ -170,7 +170,7 @@ internal static class ImportCommands
 
         Console.WriteLine($"\n===== Memoria delle serie: {cambi.Count} righe future da cambiare =====");
         foreach (var e in cambi)
-            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : e.StatoNuovaRiga == ImportData.VerifiedMercatino ? "🛍️" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
+            Console.WriteLine($"   {(e.StatoNuovaRiga == ImportData.VerifiedNo ? "🚫" : e.StatoNuovaRiga == ImportData.VerifiedMercatino ? "🛍️" : e.StatoNuovaRiga == ImportData.VerifiedWorkshop ? "🎓" : "✅")} {e.LuogoVerificato} -> {e.StatoNuovaRiga} | " +
                               $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}  ({e.MotivoVerifica})");
         if (!scrivi)
         {
@@ -207,6 +207,53 @@ internal static class ImportCommands
         catch (Exception ex)
         {
             Console.WriteLine($"[sheet] ⚠️ memoria delle serie non scritta nello Sheet: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Righe future di Serate segnate "workshop" (da te o dalla memoria) che non hanno ancora la copia nella scheda Workshop:
+    /// le copia là come "nuovo" con la nota "Spostato da Serate ...". In Serate restano come traccia (fuori da DB, sito ed email).
+    /// In anteprima (scrivi = false) conta anche le righe che la memoria segnerebbe "workshop" (StatoNuovaRiga)
+    /// </summary>
+    public static async Task SpostaInWorkshopAsync(Dictionary<TipoEvento, List<Event>> eventiSheet, bool scrivi)
+    {
+        if (!eventiSheet.TryGetValue(TipoEvento.Serate, out var serate)) return;
+        if (!eventiSheet.TryGetValue(TipoEvento.Workshop, out var workshop))
+            eventiSheet[TipoEvento.Workshop] = workshop = new List<Event>();
+
+        var daCopiare = serate
+            .Where(e => e.LuogoVerificato == ImportData.VerifiedWorkshop || (!scrivi && e.StatoNuovaRiga == ImportData.VerifiedWorkshop))
+            .Where(e => (e.DateFinish ?? e.DateStart).Date >= DateTime.Today)
+            .Where(e => !workshop.Any(x => EventIdentity.Same(x, e)))
+            .OrderBy(e => e.DateStart)
+            .ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Workshop: {daCopiare.Count} righe di Serate da copiare nella scheda Workshop =====");
+        foreach (var e in daCopiare)
+            Console.WriteLine($"   🎓 Serate riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}");
+        if (daCopiare.Count == 0) return;
+        if (!scrivi)
+        {
+            Console.WriteLine("Anteprima: niente scritto nello Sheet (ogni giro con --excel lo fa da solo, oppure --memoria-serie-scrivi)");
+            return;
+        }
+
+        var copie = daCopiare.Select(e =>
+        {
+            var chi = (e.NotaVerifica ?? e.MotivoVerifica ?? "").StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
+                ? "segnata 'workshop' dalla memoria delle serie" : "segnata 'workshop' da te";
+            return ImportData.CopiaPerWorkshop(e, $"{ImportData.NotaSpostatoDaSerate} (riga {e.SheetRow}): {chi}");
+        }).ToList();
+        try
+        {
+            await ImportData.AppendToGoogleSheet(copie, TipoEvento.Workshop.ToString());
+            // anche in memoria, così DB ed email di questo giro le vedono già
+            workshop.AddRange(copie);
+            Console.WriteLine($"[sheet] {copie.Count} righe copiate da Serate a Workshop");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[sheet] ⚠️ righe 'workshop' non copiate nella scheda Workshop: {ex.Message}");
         }
     }
 

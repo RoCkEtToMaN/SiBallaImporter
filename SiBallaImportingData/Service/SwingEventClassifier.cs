@@ -123,9 +123,10 @@ namespace SiBallaImportingData.Service
             int nuovi = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNew);
             int scartati = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNo);
             int mercatini = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedMercatino);
+            int workshop = eventi.Count(x => x.StatoNuovaRiga == ImportData.VerifiedWorkshop);
             Console.WriteLine($"[AI] Righe nuove per lo Sheet: {nuovi} '{ImportData.VerifiedNew}' (vanno sul DB), " +
-                              $"{eventi.Count - nuovi - scartati - mercatini} '{ImportData.VerifiedPending}' (colorate), {scartati} '{ImportData.VerifiedNo}' (memoria delle serie), " +
-                              $"{mercatini} '{ImportData.VerifiedMercatino}' (Bacheca); " +
+                              $"{eventi.Count - nuovi - scartati - mercatini - workshop} '{ImportData.VerifiedPending}' (colorate), {scartati} '{ImportData.VerifiedNo}' (memoria delle serie), " +
+                              $"{mercatini} '{ImportData.VerifiedMercatino}' (Bacheca), {workshop} '{ImportData.VerifiedWorkshop}' (scheda Workshop); " +
                               $"decise dalla memoria: {eventi.Count - daGemini.Count}");
         }
 

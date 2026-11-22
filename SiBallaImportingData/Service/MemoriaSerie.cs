@@ -9,12 +9,16 @@ namespace SiBallaImportingData.Service
     /// senza chiedere a Gemini.
     ///  - almeno 2 date scartate da te ("no") e nessuna confermata -> "no"
     ///  - conferme che pesano almeno 2 e nessuna data scartata -> "nuovo" (va sul DB)
-    ///  - almeno 1 data segnata da te "mercatino" e nessun'altra decisione -> "mercatino" (va in Bacheca)
-    ///  - storia mista o troppo corta -> decide Gemini come prima
+    ///  - almeno 1 data segnata da te "mercatino" (o "workshop") e nessun'altra decisione -> "mercatino" (Bacheca)
+    ///    o "workshop" (la riga va nella scheda Workshop)
+    ///  - storia mista o troppo corta -> si guarda l'organizzatore (sotto), altrimenti decide Gemini come prima
+    /// Organizzatore (tutte le sue serie, in tutte le città): se le tue decisioni sono almeno 2 date e tutte dello stesso
+    /// tipo ("no", "mercatino" o "workshop"), senza nessuna conferma, anche i suoi eventi nuovi prendono quel valore.
     /// Conferma tua = "ok", cella vuota, "auto" o un altro valore scritto da te (peso 1); conferma tacita = riga
     /// "nuovo"/"gemini" arrivata alla sua data senza che tu l'abbia scartata (peso 0,5: non è detto che tu l'abbia guardata).
-    /// Non conta: "da verificare", "storico", i "no" con la nota di Gemini (--riclassifica-storico) e quelli scritti dalla
-    /// memoria stessa (nota "Memoria: ..."), altrimenti il programma si darebbe ragione da solo.
+    /// Non conta: "da verificare", "storico", i valori con la nota di Gemini (--riclassifica-storico) o della memoria stessa
+    /// (nota "Memoria: ..."), altrimenti il programma si darebbe ragione da solo, e le copie in Workshop delle righe di Serate
+    /// segnate "workshop" (nota "Spostato da Serate ...": la decisione è già contata nella riga di Serate).
     /// Le date doppie (stessa serie, stesso giorno, una riga "no" e un'altra no) sono duplicati tolti, non scarti
     /// </summary>
     public sealed class MemoriaSerie
@@ -23,20 +27,24 @@ namespace SiBallaImportingData.Service
         private const int MinScarti = 2;
         private const double MinConferme = 2;
         private const double PesoTacito = 0.5;
+        // date decise da te (tutte dello stesso tipo) perché valga la regola dell'organizzatore: con 1 sola data
+        // sullo Sheet del 22/11/2026 gli organizzatori "solo no" sarebbero 103, con 2 sono 15
+        private const int MinOrganizzatore = 2;
 
         private sealed class Storia
         {
-            public int SiTuoi, SiTaciti, No, Mercatini;
+            public int SiTuoi, SiTaciti, No, Mercatini, Workshop;
             public double Si => SiTuoi + SiTaciti * PesoTacito;
         }
 
-        private enum Voto { Nessuno, SiTuo, SiTacito, No, Mercatino }
+        private enum Voto { Nessuno, SiTuo, SiTacito, No, Mercatino, Workshop }
 
-        // somma delle serie di un organizzatore (in tutte le città), con qualche titolo d'esempio: non decide niente,
-        // va a Gemini come indizio per gli eventi che la memoria non decide (StoriaOrganizzatore)
+        // somma delle serie di un organizzatore (in tutte le città), con qualche titolo d'esempio: decide da solo solo se
+        // le tue decisioni sono tutte dello stesso tipo (OrganizzatoreDecide), altrimenti va a Gemini come indizio
         private sealed class Organizzatore
         {
-            public int SiTuoi, SiTaciti, No;
+            public int SiTuoi, SiTaciti, No, Mercatini, Workshop;
+            public double Si => SiTuoi + SiTaciti * PesoTacito;
             public List<string> TitoliSi = new(), TitoliNo = new();
         }
         private const int MaxTitoliEsempio = 3;
@@ -60,16 +68,23 @@ namespace SiBallaImportingData.Service
         private static Voto VotoDi(Event e)
         {
             var nota = e.NotaVerifica ?? "";
+            // copia in Workshop di una riga di Serate: la decisione è già contata là
+            if (nota.StartsWith(ImportData.NotaSpostatoDaSerate, StringComparison.OrdinalIgnoreCase)) return Voto.Nessuno;
+            // riga di Workshop messa lì dalla memoria (workshop lungo più di un giorno): idem, non è una tua conferma
+            if (e.SheetName == TipoEvento.Workshop.ToString() && nota.StartsWith(PrefissoNota, StringComparison.OrdinalIgnoreCase)) return Voto.Nessuno;
             bool notaDelProgramma = nota.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase)
                                     || nota.StartsWith(PrefissoNota, StringComparison.OrdinalIgnoreCase);
+            // riga ancora arancione = l'hai appena cambiata da "da verificare" (colore e nota di Gemini spariscono al giro dopo)
+            bool tuo = e.RigaArancione || !notaDelProgramma;
             switch (e.LuogoVerificato ?? "")
             {
-                // riga ancora arancione = l'hai appena cambiata da "da verificare" (colore e nota di Gemini spariscono al giro dopo)
                 case ImportData.VerifiedNo:
-                    return e.RigaArancione || !notaDelProgramma ? Voto.No : Voto.Nessuno;
+                    return tuo ? Voto.No : Voto.Nessuno;
                 // come per "no": vale solo se l'hai scritto tu (quelli di Gemini e della memoria hanno la nota del programma)
                 case ImportData.VerifiedMercatino:
-                    return e.RigaArancione || !notaDelProgramma ? Voto.Mercatino : Voto.Nessuno;
+                    return tuo ? Voto.Mercatino : Voto.Nessuno;
+                case ImportData.VerifiedWorkshop:
+                    return tuo ? Voto.Workshop : Voto.Nessuno;
                 case ImportData.VerifiedNew:
                 case ImportData.VerifiedGemini:
                     return e.DateStart.Date < DateTime.Today ? Voto.SiTacito : Voto.Nessuno;
@@ -95,10 +110,10 @@ namespace SiBallaImportingData.Service
                     else if (voti.Contains(Voto.SiTacito)) storia.SiTaciti++;
                     else if (voti.All(v => v == Voto.No)) storia.No++;
                     else if (voti.Contains(Voto.Mercatino)) storia.Mercatini++;
+                    else if (voti.Contains(Voto.Workshop)) storia.Workshop++;
                 }
-                if (storia.Si == 0 && storia.No == 0 && storia.Mercatini == 0) continue;
+                if (storia.Si == 0 && storia.No == 0 && storia.Mercatini == 0 && storia.Workshop == 0) continue;
                 memoria._serie[serie.Key] = storia;
-                if (storia.Si == 0 && storia.No == 0) continue;   // solo mercatini: niente da dire a Gemini sull'organizzatore
 
                 var primo = serie.First().Evento;
                 if (ChiaveOrganizzatore(primo) is not string chiaveOrg) continue;
@@ -107,6 +122,8 @@ namespace SiBallaImportingData.Service
                 org.SiTuoi += storia.SiTuoi;
                 org.SiTaciti += storia.SiTaciti;
                 org.No += storia.No;
+                org.Mercatini += storia.Mercatini;
+                org.Workshop += storia.Workshop;
                 var titolo = primo.PartyName?.Trim() ?? "";
                 if (titolo.Length > 60) titolo = titolo[..60];
                 var titoli = storia.No > 0 && storia.Si == 0 ? org.TitoliNo : storia.Si > 0 && storia.No == 0 ? org.TitoliSi : null;
@@ -114,11 +131,15 @@ namespace SiBallaImportingData.Service
                     titoli.Add(titolo);
             }
 
-            int swing = memoria._serie.Values.Count(s => s.Si >= MinConferme && s.No == 0);
-            int scartate = memoria._serie.Values.Count(s => s.No >= MinScarti && s.Si == 0 && s.Mercatini == 0);
-            int mercatini = memoria._serie.Values.Count(s => s.Mercatini > 0 && s.Si == 0 && s.No == 0);
-            Console.WriteLine($"[memoria] serie con una storia: {memoria._serie.Count}; decise: {swing} swing, {scartate} scartate, {mercatini} mercatini " +
-                              $"(le altre: storia mista o troppo corta, decide Gemini)");
+            int Serie(string stato) => memoria._serie.Values.Count(s => SerieDecide(s) == stato);
+            var perOrg = memoria._organizzatori.Values.Select(OrganizzatoreDecide).Where(x => x is not null)
+                .GroupBy(x => x!.Value.Stato).ToDictionary(g => g.Key, g => g.Count());
+            Console.WriteLine($"[memoria] serie con una storia: {memoria._serie.Count}; decise: {Serie(ImportData.VerifiedNew)} swing, " +
+                              $"{Serie(ImportData.VerifiedNo)} scartate, {Serie(ImportData.VerifiedMercatino)} mercatini, " +
+                              $"{Serie(ImportData.VerifiedWorkshop)} workshop (le altre: storia mista o troppo corta)");
+            Console.WriteLine($"[memoria] organizzatori decisi per tutti i loro eventi: " +
+                              $"{perOrg.GetValueOrDefault(ImportData.VerifiedNo)} scartati, {perOrg.GetValueOrDefault(ImportData.VerifiedMercatino)} mercatini, " +
+                              $"{perOrg.GetValueOrDefault(ImportData.VerifiedWorkshop)} workshop (su {memoria._organizzatori.Count} con una storia)");
             return memoria;
         }
 
@@ -134,27 +155,65 @@ namespace SiBallaImportingData.Service
             if (o.SiTuoi > 0) parti.Add(Date(o.SiTuoi, "confermat") + " dal curatore");
             if (o.SiTaciti > 0) parti.Add(Date(o.SiTaciti, "pubblicat") + " senza obiezioni");
             if (o.No > 0) parti.Add(Date(o.No, "scartat") + " dal curatore");
+            if (o.Workshop > 0) parti.Add(Date(o.Workshop, "segnat") + " come workshop/corso dal curatore");
+            if (o.Mercatini > 0) parti.Add(Date(o.Mercatini, "segnat") + " come mercatino dal curatore");
+            if (parti.Count == 0) return null;
             var testo = string.Join(", ", parti);
             if (o.TitoliSi.Count > 0) testo += "; confermati: " + string.Join(", ", o.TitoliSi.Select(t => $"\"{t}\""));
             if (o.TitoliNo.Count > 0) testo += "; scartati: " + string.Join(", ", o.TitoliNo.Select(t => $"\"{t}\""));
             return testo;
         }
 
+        // stato deciso dalla storia della serie, null se mista o troppo corta
+        private static string? SerieDecide(Storia s)
+        {
+            if (s.Mercatini > 0 || s.Workshop > 0)
+            {
+                if (s.Si > 0 || s.No > 0 || (s.Mercatini > 0 && s.Workshop > 0)) return null;
+                return s.Mercatini > 0 ? ImportData.VerifiedMercatino : ImportData.VerifiedWorkshop;
+            }
+            if (s.No >= MinScarti && s.Si == 0) return ImportData.VerifiedNo;
+            if (s.Si >= MinConferme && s.No == 0) return ImportData.VerifiedNew;
+            return null;
+        }
+
+        // stato deciso dalla storia dell'organizzatore: tutte le tue decisioni dello stesso tipo, nessuna conferma
+        private static (string Stato, int Date)? OrganizzatoreDecide(Organizzatore o)
+        {
+            if (o.Si > 0) return null;
+            var tipi = new[] { (Stato: ImportData.VerifiedNo, Date: o.No), (Stato: ImportData.VerifiedMercatino, Date: o.Mercatini), (Stato: ImportData.VerifiedWorkshop, Date: o.Workshop) }
+                .Where(x => x.Date > 0).ToList();
+            if (tipi.Count != 1 || tipi[0].Date < MinOrganizzatore) return null;
+            return tipi[0];
+        }
+
         /// <summary>
-        /// Stato da dare a una data nuova della serie ("nuovo", "no" o "mercatino") con il motivo per la nota, null se la memoria non decide
+        /// Stato da dare a una data nuova ("nuovo", "no", "mercatino" o "workshop") con il motivo per la nota, null se la
+        /// memoria non decide. Prima la serie, poi l'organizzatore
         /// </summary>
         public (string Stato, string Motivo)? Decidi(Event e)
         {
-            if (Chiave(e) is not string chiave || !_serie.TryGetValue(chiave, out var s)) return null;
-            if (s.Mercatini > 0)
-                return s.Si == 0 && s.No == 0
-                    ? (ImportData.VerifiedMercatino, $"{PrefissoNota} mercatino come le altre date ({s.Mercatini} segnate da te), va in Bacheca")
-                    : null;
-            if (s.No >= MinScarti && s.Si == 0)
-                return (ImportData.VerifiedNo, $"{PrefissoNota} {s.No} date di questa serie scartate da te, nessuna confermata");
-            if (s.Si >= MinConferme && s.No == 0)
-                return (ImportData.VerifiedNew, $"{PrefissoNota} swing come le altre date " +
-                                                $"({s.SiTuoi} confermate da te, {s.SiTaciti} passate senza obiezioni)");
+            if (Chiave(e) is string chiave && _serie.TryGetValue(chiave, out var s))
+            {
+                var stato = SerieDecide(s);
+                if (stato == ImportData.VerifiedMercatino)
+                    return (stato, $"{PrefissoNota} mercatino come le altre date ({s.Mercatini} segnate da te), va in Bacheca");
+                if (stato == ImportData.VerifiedWorkshop)
+                    return (stato, $"{PrefissoNota} workshop/corso come le altre date ({s.Workshop} segnate da te), va nella scheda Workshop");
+                if (stato == ImportData.VerifiedNo)
+                    return (stato, $"{PrefissoNota} {s.No} date di questa serie scartate da te, nessuna confermata");
+                if (stato == ImportData.VerifiedNew)
+                    return (stato, $"{PrefissoNota} swing come le altre date ({s.SiTuoi} confermate da te, {s.SiTaciti} passate senza obiezioni)");
+            }
+
+            if (ChiaveOrganizzatore(e) is string chiaveOrg && _organizzatori.TryGetValue(chiaveOrg, out var o)
+                && OrganizzatoreDecide(o) is { } d)
+            {
+                var cosa = d.Stato == ImportData.VerifiedNo ? "scartate da te"
+                         : d.Stato == ImportData.VerifiedMercatino ? "segnate mercatino da te (va in Bacheca)"
+                         : "segnate workshop/corso da te (va nella scheda Workshop)";
+                return (d.Stato, $"{PrefissoNota} organizzatore con {d.Date} date {cosa}, nessuna confermata");
+            }
             return null;
         }
     }

@@ -7,7 +7,8 @@ lo stesso secret usato dall'importatore).
 Per ogni foglio dello Sheet:
 - riga 2 = intestazioni, dati dalla riga 3 (come legge l'importatore);
 - solo eventi futuri o in corso (data fine, o data inizio se manca, >= oggi in Italia);
-- esclude le righe "da verificare" e "no" nella colonna "Luogo verificato" (come per il DB); le righe "mercatino"
+- esclude le righe "da verificare", "no" e "workshop" (copiate dall'importatore nella scheda Workshop) nella colonna
+  "Luogo verificato" (come per il DB); le righe "mercatino"
   vanno in mercatini.json, per la categoria Mercatino della Bacheca;
 - pubblica solo le colonne scelte (COLONNE_PER_FOGLIO / COLONNE_DEFAULT, meno COLONNE_ESCLUSE): le altre
   servono al massimo per il filtro e non finiscono nel JSON;
@@ -48,6 +49,8 @@ VERIFIED_PENDING = "da verificare"
 VERIFIED_NO = "no"  # evento scartato a mano: resta nello Sheet ma non si pubblica
 # mercatino (vintage, handmade...): non va nel calendario ma in Bacheca, categoria Mercatino (mercatini.json)
 VERIFIED_MERCATINO = "mercatino"
+# workshop/corso finito in Serate: l'importatore lo copia nella scheda Workshop, la riga in Serate resta solo come traccia
+VERIFIED_WORKSHOP = "workshop"
 COORDINATE = re.compile(r"\(\s*(-?\d+(?:[.,]\d+)?)\s*;\s*(-?\d+(?:[.,]\d+)?)\s*\)")
 EPOCA_SHEETS = date(1899, 12, 30)
 IMAGE_HEADER = "immagine"
@@ -442,7 +445,7 @@ def main() -> None:
             if stato == VERIFIED_MERCATINO:
                 aggiungi_mercatino(mercatini, nome, intestazione, rf, inizio, fine, oggi, col_immagine)
                 continue
-            if stato in (VERIFIED_PENDING, VERIFIED_NO):
+            if stato in (VERIFIED_PENDING, VERIFIED_NO, VERIFIED_WORKSHOP):
                 scartate_verifica += 1
                 continue
 
