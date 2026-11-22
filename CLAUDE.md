@@ -79,6 +79,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   `Gemini:UseGoogleSearch`, oppure Tavily con `TAVILY_API_KEY`). DuckDuckGo e simili bloccano i bot: non usarli. `--agente-dizionario[-scrivi]`:
   luoghi mancanti -> voce dell'evento nel dizionario (non verificata, Source "agente") + Sheet "gemini"; con "ok" diventa verificata.
   Workflow "Agente verifica" (modo dizionario + scrivi: da lanciare su master, perché fa il commit del dizionario).
+  Nel giro orario: variabile del repo `INDIRIZZI_AGENTE=true` -> l'agente sostituisce la ricerca semplice di `--indirizzi`
+  (max `INDIRIZZI_AGENTE_MAX`, default 5, eventi per giro); i luoghi già trovati dall'agente (`FindAgente`) si riusano senza Gemini.
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

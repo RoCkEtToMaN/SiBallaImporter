@@ -103,7 +103,7 @@ internal static class ImportRunner
                 if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteIndirizziProva) await ImportCommands.AgenteIndirizziProvaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi)
-                    await ImportCommands.AgenteDizionarioAsync(settings, sheetEvents, store, resolver, dizionarioPath);
+                    await ImportCommands.AgenteDizionarioAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDizionarioScrivi, opzioni.AgenteMax, dizionarioPath);
             }
             return;
         }
@@ -409,7 +409,10 @@ internal static class ImportRunner
 
         // righe dello sheet senza immagine: la cerco sul sito della riga (così arriva sul DB già in questo giro)
         // righe future senza indirizzo: locale cercato da Gemini e confermato da Photon, scritto nello Sheet come "gemini"
-        if (opzioni.CercaIndirizzi)
+        //    con IndirizziConAgente (--indirizzi-agente) li cerca l'agente (pagine, mappa, ricerca web se c'è) e li salva anche nel dizionario
+        if (opzioni.CercaIndirizzi && opzioni.IndirizziConAgente)
+            await ImportCommands.AgenteDizionarioAsync(settings, sheetEvents, store, resolver, scrivi: true, opzioni.AgenteDizionarioMax, dizionarioPath: null);
+        else if (opzioni.CercaIndirizzi)
             await IndirizziGemini.CercaAsync(sheetEvents, store, resolver, settings.Gemini, opzioni.CercaIndirizziMax);
 
         if (opzioni.CercaImmaginiSheet)

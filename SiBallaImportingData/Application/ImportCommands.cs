@@ -501,11 +501,10 @@ internal static class ImportCommands
     /// Quando scrivi "ok" su una di quelle righe il luogo diventa verificato e vale per tutte le date future dell'evento
     /// </summary>
     public static async Task AgenteDizionarioAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver,
-                                                   string dizionarioPath)
+                                                   bool scrivi, int max, string? dizionarioPath)
     {
         var o = settings.Import;
-        bool scrivi = o.AgenteDizionarioScrivi;
-        var gruppi = sheetEvents
+        var tutti = sheetEvents
             .Where(e => e.DateStart.Date >= DateTime.Today)
             .Where(e => string.IsNullOrWhiteSpace(e.EventDetail?.Address))
             .Where(e => e.SheetName is not null && e.SheetRow is not null && e.SheetVerifiedColumn is not null)
@@ -514,22 +513,49 @@ internal static class ImportCommands
             .Where(e => store.Find(e) is null)
             .GroupBy(e => KnownVenueStore.MakeKey(e.Organizer!, e.City!) + "|" + KnownVenueStore.NormalizeTitle(e.PartyName))
             .Select(g => g.OrderBy(e => e.DateStart).ToList())
-            .Where(g => store.GeminiNonTrovato(g[0]) is not DateTime d || d.AddDays(30) <= DateTime.Today)
             .OrderBy(g => g[0].DateStart)
             .ToList();
-        var daFare = gruppi.Take(Math.Max(1, o.AgenteMax)).ToList();
+        var scritte = new List<(Event, string)>();
+
+        // 1. luogo già trovato dall'agente per lo stesso evento (date nuove): lo riuso dal dizionario, senza Gemini
+        int riusati = 0;
+        foreach (var gruppo in tutti.Where(g => store.FindAgente(g[0]) is not null))
+        {
+            var v = store.FindAgente(gruppo[0])!;
+            var luogo = string.Join(", ", new[] { v.VenueName, v.Address }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
+            riusati++;
+            Console.WriteLine($"♻️ {luogo} (dal dizionario, trovato dall'agente) | {gruppo[0].DateStart:yyyy-MM-dd} | {gruppo[0].City?.Trim()} | {gruppo[0].PartyName?.Trim()} ({gruppo.Count} date)");
+            if (!scrivi) continue;
+            var nota = $"Indirizzo dal dizionario dei luoghi (trovato dall'agente, non ancora verificato): {luogo}\n{v.Notes}\n" +
+                       $"Controllato? Scrivi '{ImportData.VerifiedOk}' in '{ImportData.VerifiedHeader}'";
+            foreach (var riga in gruppo)
+            {
+                riga.EventDetail.Address = v.Address;
+                riga.EventDetail.Location = luogo;
+                riga.EventDetail.Latitude = v.Lat;
+                riga.EventDetail.Longitude = v.Lng;
+                riga.LuogoVerificato = ImportData.VerifiedGemini;
+                scritte.Add((riga, nota));
+            }
+        }
+
+        // 2. gli altri: ricerca con l'agente, le date più vicine per prime; i non trovati si riprovano dopo 30 giorni
+        var gruppi = tutti
+            .Where(g => store.FindAgente(g[0]) is null)
+            .Where(g => store.GeminiNonTrovato(g[0]) is not DateTime d || d.AddDays(30) <= DateTime.Today)
+            .ToList();
+        var daFare = gruppi.Take(Math.Max(1, max)).ToList();
         Console.WriteLine();
-        Console.WriteLine($"===== Dizionario luoghi con l'agente: {daFare.Count} eventi (su {gruppi.Count} futuri senza indirizzo; " +
+        Console.WriteLine($"===== Dizionario luoghi con l'agente: {riusati} eventi dal dizionario, {daFare.Count} da cercare (su {gruppi.Count} senza indirizzo; " +
                           $"ricerca web: {(!string.IsNullOrWhiteSpace(o.TavilyApiKey) ? "Tavily" : settings.Gemini.UseGoogleSearch ? "Google" : "no, solo pagine e mappa")}; " +
                           $"{(scrivi ? "SCRIVE dizionario e Sheet" : "anteprima")}) =====");
         if (!GeminiPronto(settings))
         {
             foreach (var g in daFare)
                 Console.WriteLine($"   {g[0].DateStart:yyyy-MM-dd} | {g[0].City?.Trim()} | {g[0].Organizer?.Trim()} | {g[0].PartyName?.Trim()} ({g.Count} date)");
-            return;
+            daFare = new();   // senza chiave niente ricerche, ma i luoghi riusati dal dizionario si scrivono lo stesso
         }
 
-        var scritte = new List<(Event, string)>();
         int trovati = 0, nonConfermati = 0, nonTrovati = 0, errori = 0;
         foreach (var gruppo in daFare)
         {
@@ -591,8 +617,12 @@ internal static class ImportCommands
         {
             Console.WriteLine($"[sheet] ⚠️ indirizzi dell'agente non scritti sullo Sheet: {ex.Message}");
         }
-        store.Save();
-        DictionaryRepoSync.PushFromBin(dizionarioPath, o.NoPush);
+        // dal giro dell'importatore (dizionarioPath null) il dizionario lo salva e lo pubblica il giro stesso, alla fine
+        if (dizionarioPath is not null)
+        {
+            store.Save();
+            DictionaryRepoSync.PushFromBin(dizionarioPath, o.NoPush);
+        }
     }
 
     /// <summary>

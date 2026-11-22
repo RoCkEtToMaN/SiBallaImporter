@@ -43,6 +43,7 @@ namespace SiBallaImportingData.Utils
             ["--agente-indirizzi-prova"] = "Import:AgenteIndirizziProva",
             ["--agente-dizionario"] = "Import:AgenteDizionario",
             ["--agente-dizionario-scrivi"] = "Import:AgenteDizionarioScrivi",
+            ["--indirizzi-agente"] = "Import:IndirizziConAgente",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -171,6 +172,10 @@ namespace SiBallaImportingData.Utils
         // con AgenteDizionarioScrivi li salva nel dizionario (non verificati, Source "agente") e nello Sheet come "gemini"
         public bool AgenteDizionario { get; set; }
         public bool AgenteDizionarioScrivi { get; set; }
+        // giro dell'importatore: con CercaIndirizzi (--indirizzi) cerca i luoghi con l'agente invece che con la ricerca semplice di
+        // Gemini, al massimo AgenteDizionarioMax eventi per giro (i luoghi già trovati dall'agente si riusano senza contarli)
+        public bool IndirizziConAgente { get; set; }
+        public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.

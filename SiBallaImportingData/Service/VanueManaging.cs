@@ -317,6 +317,15 @@ public class KnownVenueStore
         return true;
     }
 
+    /// <summary>Luogo trovato in passato dall'agente per questo evento (non ancora verificato da te), null se non c'è</summary>
+    public VenueInfo? FindAgente(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return null;
+        if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) return null;
+        return org.Events.TryGetValue(NormalizeTitle(e.PartyName), out var v) && v.Source == SourceAgente
+               && !string.IsNullOrWhiteSpace(v.Address) && HasCoords(v) ? v : null;
+    }
+
     /// <summary>Ricerca con Gemini senza risultato: lo segno nella voce dell'evento (creata se manca) per non ripeterla ogni giro</summary>
     public void SegnaGeminiNonTrovato(Event e)
     {
