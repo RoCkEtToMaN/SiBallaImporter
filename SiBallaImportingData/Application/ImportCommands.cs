@@ -626,7 +626,7 @@ internal static class ImportCommands
             daFare = new();   // senza chiave niente ricerche, ma i luoghi riusati dal dizionario si scrivono lo stesso
         }
 
-        int trovati = 0, nonConfermati = 0, nonTrovati = 0, errori = 0;
+        int trovati = 0, nonConfermati = 0, nonTrovati = 0, errori = 0, erroriDiFila = 0;
         foreach (var gruppo in daFare)
         {
             var ev = gruppo[0];
@@ -637,8 +637,15 @@ internal static class ImportCommands
             {
                 errori++;   // Gemini non ha risposto: non lo segno, si riprova al giro dopo
                 Console.WriteLine($"❗ nessuna risposta | {titolo}");
+                // due di fila = quota del giorno finita o Gemini giù: mi fermo, ogni altra chiamata aspetterebbe i nuovi tentativi per niente
+                if (++erroriDiFila >= 2)
+                {
+                    Console.WriteLine("⏸️ Gemini non risponde due volte di fila (quota finita o servizio giù): l'agente si ferma, riprende al prossimo giro");
+                    break;
+                }
                 continue;
             }
+            erroriDiFila = 0;
             if (p.Luogo is { Lat: { } lat, Lng: { } lng } l)
             {
                 trovati++;
