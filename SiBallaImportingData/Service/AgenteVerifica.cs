@@ -263,6 +263,8 @@ namespace SiBallaImportingData.Service
                         {
                             var fonteInd = Testo(args, "fonte_indirizzo");
                             var c = await ConfermaLuogoAsync(riga, resolver, indirizzo, locale);
+                            // solo il locale: la via è quella che restituisce la mappa (va in colonna F dopo "paese, città, ")
+                            if (indirizzo.Length == 0 && c?.Via is { Length: > 0 } via) indirizzo = via;
                             luogo = new LuogoTrovato(locale.Length > 0 ? locale : null, indirizzo.Length > 0 ? indirizzo : null,
                                                      c?.Lat, c?.Lng, c?.Come ?? "non confermato da Photon",
                                                      fonteInd.Length > 0 ? fonteInd : null);
@@ -316,14 +318,14 @@ namespace SiBallaImportingData.Service
         }
 
         // indirizzo con Photon entro 10 km dalla città; se non c'è (o non si trova) il locale per nome
-        private static async Task<(double Lat, double Lng, string Come)?> ConfermaLuogoAsync(Event riga, AddressResolver resolver, string indirizzo, string locale)
+        private static async Task<(double Lat, double Lng, string Come, string? Via)?> ConfermaLuogoAsync(Event riga, AddressResolver resolver, string indirizzo, string locale)
         {
             try
             {
                 if (indirizzo.Length > 0 && await resolver.GeocodeAsync(indirizzo, riga.City, riga.Country) is { } c)
-                    return (c.Lat, c.Lng, "indirizzo confermato da Photon");
+                    return (c.Lat, c.Lng, "indirizzo confermato da Photon", null);
                 if (locale.Length > 0 && await resolver.CercaLocaleAsync(locale, riga.City, riga.Country) is { } l)
-                    return (l.Lat, l.Lng, $"locale '{l.Nome}' trovato da Photon" + (l.Via is null ? "" : $" in {l.Via}"));
+                    return (l.Lat, l.Lng, $"locale '{l.Nome}' trovato da Photon" + (l.Via is null ? "" : $" in {l.Via}"), l.Via);
             }
             catch (Exception ex)
             {

@@ -1119,7 +1119,7 @@ namespace SiBallaImportingData.Utils
                 valori.Add(new ValueRange
                 {
                     Range = $"'{ev.SheetName}'!F{ev.SheetRow}",
-                    Values = new List<IList<object>> { new List<object> { $"{loc.Country ?? ev.Country}, {loc.City ?? ev.City}, {ev.EventDetail.Address}({lat};{lng})" } }
+                    Values = new List<IList<object>> { new List<object> { $"{loc.Country ?? ev.Country}, {loc.City ?? ev.City}, {ev.EventDetail.Address} ({lat};{lng})" } }
                 });
                 if (ev.SheetVerifiedColumn is int vc)
                     valori.Add(new ValueRange
