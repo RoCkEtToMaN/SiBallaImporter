@@ -266,6 +266,13 @@ namespace SiBallaImportingData.Utils
                     continue;
                 }
 
+                // serata che è anche workshop (Gemini o memoria): la riga va in Serate come le altre, più una copia in Workshop
+                if (ev.AncheWorkshop && date.Value.TotalDays <= 1 && !giaPresenteInWorkshop)
+                {
+                    w++;
+                    workshopsToAppend.Add(CopiaPerWorkshop(ev, $"{NotaCopiataDaSerate}: {ev.MotivoVerifica ?? "serata e anche workshop"}"));
+                }
+
                 // Aggiungi solo se NON è già presente nel rispettivo foglio
                 if (date.Value.TotalDays > 1 && !giaPresenteInWorkshop)
                 {
@@ -1289,6 +1296,10 @@ namespace SiBallaImportingData.Utils
         // "Spostato da Serate ...") e qui resta come traccia, fuori da DB, sito ed email delle serate. Serve anche alla
         // memoria delle serie: le date nuove della stessa serie vanno direttamente in Workshop
         public const string VerifiedWorkshop = "workshop";
+        // serata che è anche un workshop (pratica, ripasso, lezione + serata): scritto da te. In Serate vale come conferma
+        // (va su DB, sito ed email) e il programma ne mette una copia nella scheda Workshop (nota "Copiata da Serate ...").
+        // Il programma (Gemini, memoria) non lo scrive mai: mette "nuovo" in Serate e fa la copia
+        public const string VerifiedSerataWorkshop = "serata+workshop";
 
         /// <summary>
         /// Copia per la scheda Workshop di una riga di Serate (o di un evento online) segnata "workshop": stato "nuovo"
@@ -1320,6 +1331,10 @@ namespace SiBallaImportingData.Utils
         }
         // inizio della nota delle copie in Workshop: la memoria non le conta (la decisione è già nella riga di Serate)
         public const string NotaSpostatoDaSerate = "Spostato da Serate";
+        public const string NotaCopiataDaSerate = "Copiata da Serate";
+        /// <summary>Nota di una copia in Workshop fatta dal programma da una riga di Serate ("Spostato/Copiata da Serate ...")</summary>
+        public static bool NotaCopiaDaSerate(string? nota) => (nota ?? "").TrimStart() is var n
+            && (n.StartsWith(NotaSpostatoDaSerate, StringComparison.OrdinalIgnoreCase) || n.StartsWith(NotaCopiataDaSerate, StringComparison.OrdinalIgnoreCase));
         /// <summary>Fuori dal calendario: scartato da te ("no"), mercatino (va solo in Bacheca) o workshop rimasto in Serate (la copia è in Workshop)</summary>
         public static bool Scartato(Event e) => e.LuogoVerificato is VerifiedNo or VerifiedMercatino or VerifiedWorkshop;
 

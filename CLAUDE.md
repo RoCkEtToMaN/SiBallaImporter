@@ -63,12 +63,15 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   della stessa serie decidono le date nuove al posto di Gemini; impara solo dai valori scritti da lui (non dai `no`
   con nota "Gemini:"/"Memoria:"). Ogni giro con `--excel` la applica anche alle righe future; anteprima `--memoria-serie`.
   Chiave della serie: `MemoriaSerie.TitoloSerie` = NormalizeTitle senza mesi né ordinali (NormalizeTitle non va cambiato:
-  serve agli id delle immagini e al dizionario). Gemini risponde con un solo `tipo`: serata / workshop (corsi e anche weekend) / mercatino / altro.
+  serve agli id delle immagini e al dizionario). Gemini risponde con un solo `tipo`: serata / serata_e_workshop / workshop (corsi e anche weekend) / mercatino / altro.
   Per la serie (non per l'organizzatore) una conferma nella scheda Workshop vale come voto `workshop`.
   Per organizzatore: >= 2 date decise da lui tutte uguali (`no`/`mercatino`/`workshop`) e nessuna conferma -> vale per i suoi eventi nuovi.
   Per gli eventi che non decide, passa a Gemini la "storia organizzatore" (conteggi + titoli d'esempio) come indizio.
 - Stato `workshop` (solo Serate): workshop/corso finito in Serate. Ogni giro con `--excel` lo copia in Workshop (`nuovo`, nota
   "Spostato da Serate (riga N)", che la memoria ignora); la riga in Serate resta come traccia, fuori da DB/sito/email.
+- Stato `serata+workshop` (solo Serate, lo scrive solo l'utente): pratica/ripasso/lezione + serata. Vale come conferma
+  (DB/sito/email) e la riga viene copiata in Workshop (nota "Copiata da Serate"). Gemini (tipo `serata_e_workshop`) e la
+  memoria non lo scrivono: mettono `nuovo` in Serate + copia (`Event.AncheWorkshop`).
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

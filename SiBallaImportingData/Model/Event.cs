@@ -28,6 +28,8 @@ namespace SiBallaImportingData.Model
         // ("nuovo" o "da verificare"; null = non classificato, la riga va "da verificare") e il motivo da mettere nella nota
         [JsonIgnore] public string? StatoNuovaRiga { get; set; }
         [JsonIgnore] public string? MotivoVerifica { get; set; }
+        // serata che è anche un workshop (pratica, ripasso, lezione + serata): resta in Serate e una copia va nella scheda Workshop
+        [JsonIgnore] public bool AncheWorkshop { get; set; }
         // per le righe dello sheet: nota della cella "Luogo verificato" e riga ancora arancione ("da verificare" colorata dal
         // programma). Servono alla memoria delle serie per distinguere le tue decisioni da quelle di Gemini (ImportData.LeggiNoteVerificaAsync)
         [JsonIgnore] public string? NotaVerifica { get; set; }

@@ -161,6 +161,17 @@ internal static class ImportCommands
                 continue;
             }
             if (memoria.Decidi(e) is not { } d) continue;
+            // "serata+workshop": la riga di Serate resta una serata ("nuovo" se era da verificare), la copia la fa SpostaInWorkshopAsync
+            if (d.Stato == ImportData.VerifiedSerataWorkshop)
+            {
+                if (e.SheetName != TipoEvento.Serate.ToString()) continue;
+                e.AncheWorkshop = true;
+                if (e.LuogoVerificato != ImportData.VerifiedPending) continue;
+                e.StatoNuovaRiga = ImportData.VerifiedNew;
+                e.MotivoVerifica = d.Motivo;
+                cambi.Add(e);
+                continue;
+            }
             // "workshop" sposta le righe di Serate: quelle già nella scheda Workshop sono a posto
             if (d.Stato == ImportData.VerifiedWorkshop && e.SheetName != TipoEvento.Serate.ToString()) continue;
             // "nuovo" e "gemini" vanno già sul DB: la memoria le cambia solo per scartarle
@@ -222,11 +233,12 @@ internal static class ImportCommands
         int max = Math.Max(1, settings.Import.TestGeminiSheetMax);
         static bool DelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
             && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
-                || n.StartsWith(ImportData.NotaSpostatoDaSerate, StringComparison.OrdinalIgnoreCase));
+                || ImportData.NotaCopiaDaSerate(n));
         // la tua decisione: workshop, mercatino, no (scartato) o swing (confermato), null se non l'hai decisa tu.
         // Confermata nella scheda Workshop = workshop (corso, weekend, festival)
         static string? Tua(Event e) => e.LuogoVerificato switch
         {
+            ImportData.VerifiedSerataWorkshop => ImportData.VerifiedSerataWorkshop,
             ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => DelProgramma(e) && !e.RigaArancione ? null : e.LuogoVerificato,
             ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedStorico => null,
             _ when e.SheetName == TipoEvento.Workshop.ToString() => DelProgramma(e) ? null : ImportData.VerifiedWorkshop,
@@ -249,6 +261,7 @@ internal static class ImportCommands
         static string Risposta(Event e) => SwingEventClassifier.EsitoCompleto(e) is not { } r ? "nessuna risposta" : r.Tipo switch
         {
             SwingEventClassifier.TipoSerata => "swing",
+            SwingEventClassifier.TipoSerataWorkshop => ImportData.VerifiedSerataWorkshop,
             SwingEventClassifier.TipoWorkshop => ImportData.VerifiedWorkshop,
             SwingEventClassifier.TipoMercatino => ImportData.VerifiedMercatino,
             _ => ImportData.VerifiedNo,
@@ -259,7 +272,7 @@ internal static class ImportCommands
         Console.WriteLine($"===== Risultato: Gemini d'accordo con te su {giusti}/{esiti.Count} righe =====");
         Console.WriteLine("   (riga = tua decisione, colonne = risposta di Gemini; 'no' = tipo 'altro', per lo Sheet diventerebbe 'da verificare';");
         Console.WriteLine("    workshop = segnata workshop o confermata nella scheda Workshop)");
-        var colonne = new[] { "swing", ImportData.VerifiedWorkshop, ImportData.VerifiedMercatino, ImportData.VerifiedNo, "nessuna risposta" };
+        var colonne = new[] { "swing", ImportData.VerifiedSerataWorkshop, ImportData.VerifiedWorkshop, ImportData.VerifiedMercatino, ImportData.VerifiedNo, "nessuna risposta" };
         Console.WriteLine($"   {"tua / Gemini",-12}" + string.Concat(colonne.Select(c => $"{c,18}")));
         foreach (var g in esiti.GroupBy(x => x.Tua))
             Console.WriteLine($"   {g.Key,-12}" + string.Concat(colonne.Select(c => $"{g.Count(x => x.Gemini == c),18}")));
@@ -285,7 +298,8 @@ internal static class ImportCommands
             eventiSheet[TipoEvento.Workshop] = workshop = new List<Event>();
 
         var daCopiare = serate
-            .Where(e => e.LuogoVerificato == ImportData.VerifiedWorkshop || (!scrivi && e.StatoNuovaRiga == ImportData.VerifiedWorkshop))
+            .Where(e => e.LuogoVerificato is ImportData.VerifiedWorkshop or ImportData.VerifiedSerataWorkshop || e.AncheWorkshop
+                        || (!scrivi && e.StatoNuovaRiga == ImportData.VerifiedWorkshop))
             .Where(e => (e.DateFinish ?? e.DateStart).Date >= DateTime.Today)
             .Where(e => !workshop.Any(x => EventIdentity.Same(x, e)))
             .OrderBy(e => e.DateStart)
@@ -303,9 +317,12 @@ internal static class ImportCommands
 
         var copie = daCopiare.Select(e =>
         {
-            var chi = (e.NotaVerifica ?? e.MotivoVerifica ?? "").StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
-                ? "segnata 'workshop' dalla memoria delle serie" : "segnata 'workshop' da te";
-            return ImportData.CopiaPerWorkshop(e, $"{ImportData.NotaSpostatoDaSerate} (riga {e.SheetRow}): {chi}");
+            bool anche = e.AncheWorkshop || e.LuogoVerificato == ImportData.VerifiedSerataWorkshop;
+            var valore = anche ? "serata+workshop" : "workshop";
+            var chi = e.LuogoVerificato == ImportData.VerifiedSerataWorkshop ? $"segnata '{valore}' da te"
+                : e.AncheWorkshop || (e.NotaVerifica ?? e.MotivoVerifica ?? "").StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
+                ? $"segnata '{valore}' dalla memoria delle serie" : $"segnata '{valore}' da te";
+            return ImportData.CopiaPerWorkshop(e, $"{(anche ? ImportData.NotaCopiataDaSerate : ImportData.NotaSpostatoDaSerate)} (riga {e.SheetRow}): {chi}");
         }).ToList();
         try
         {
