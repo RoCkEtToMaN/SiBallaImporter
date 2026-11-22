@@ -23,8 +23,17 @@ namespace SiBallaImportingData.Service
         private const int MaxTestoPagina = 5000;
         private const int MaxRisultatiRicerca = 15;
 
+        /// <summary>Luogo trovato dall'agente: Lat/Lng solo se Photon l'ha confermato entro 10 km dalla città</summary>
+        public sealed record LuogoTrovato(string? Locale, string? Indirizzo, double? Lat, double? Lng, string Come, string? Fonte);
+
         public sealed record Proposta(string Stato, string Motivo, string Sicurezza, List<string> Problemi, List<string> Fonti,
-                                      int Passi, int Pagine, List<string> Traccia);
+                                      int Passi, int Pagine, List<string> Traccia, LuogoTrovato? Luogo = null);
+
+        /// <summary>
+        /// Tetti per riga e cosa nascondere nelle prove: NascondiDecisione = stato e nota della riga (prova sulle righe decise),
+        /// NascondiIndirizzo = indirizzo della riga e luogo del dizionario (prova sugli indirizzi che conosci già)
+        /// </summary>
+        public sealed record Opzioni(int MaxPassi, int MaxPagine, int MaxRicerche, bool NascondiDecisione = false, bool NascondiIndirizzo = false);
 
         private static readonly HttpClient _web = CreaClient();
 
@@ -75,7 +84,14 @@ namespace SiBallaImportingData.Service
             "Se le pagine non si leggono (accesso negato, Facebook/Instagram senza contenuto) basati sul contesto e dillo nel motivo. " +
             "L'indirizzo mancante o una pagina generica dell'organizzatore NON sono motivi per 'da verificare': se l'evento è chiaramente " +
             "swing (serie confermata, stili del calendario) proponi lo stato giusto e metti la mancanza nei problemi. " +
-            "Un mercatino/flea market resta 'mercatino' anche se l'organizzatore o il locale sono della scena rockabilly.";
+            "Un mercatino/flea market resta 'mercatino' anche se l'organizzatore o il locale sono della scena rockabilly. " +
+            "INDIRIZZO: se la riga non ha l'indirizzo e il dizionario non conosce il luogo, cercalo: se disponibile usa cerca_web (es. " +
+            "'<titolo> <organizzatore> <città>' oppure '<organizzatore> <città> indirizzo'); spesso il frammento dei risultati contiene " +
+            "già il locale e la via, altrimenti leggi la pagina più promettente (link della riga, sito dell'organizzatore, pagine dell'evento); " +
+            "senza cerca_web leggi il link della riga e il sito dell'organizzatore. Poi controlla con verifica_indirizzo. In proponi metti 'locale' e 'indirizzo' (via e civico, senza città) " +
+            "SOLO se li hai letti in una fonte, con 'fonte_indirizzo' = URL; non inventarli e non dedurli dal nome della città. " +
+            "Nei problemi non scrivere 'indirizzo mancante' né 'orario non indicato': segnala solo un indirizzo o un orario " +
+            "diverso da quello trovato in una fonte.";
 
         private static JsonArray Strumenti()
         {
@@ -108,6 +124,14 @@ namespace SiBallaImportingData.Service
                             new JsonObject { ["url"] = Stringa("indirizzo completo della pagina") }, "url"),
                         Funzione("cerca_nello_sheet", "Cerca nel foglio del curatore (tutte le date, passate e future) le righe il cui titolo, organizzatore o città contiene il testo. Restituisce data, scheda, titolo, organizzatore, città, stato e nota.",
                             new JsonObject { ["testo"] = Stringa("parola o frase da cercare, es. il nome dell'organizzatore o del locale") }, "testo"),
+                        Funzione("cerca_web", "Cerca sul web (ricerca Google) e restituisce i fatti trovati (locale, indirizzo, date, orari) con gli URL delle fonti.",
+                            new JsonObject { ["query"] = Stringa("parole da cercare, es. 'Hop No Stop Jazz Road Pisa'") }, "query"),
+                        Funzione("verifica_indirizzo", "Controlla con la mappa (Photon/OpenStreetMap) che un indirizzo o un locale esistano nella città dell'evento (entro 10 km).",
+                            new JsonObject
+                            {
+                                ["indirizzo"] = Stringa("via e civico, senza città (vuoto se sai solo il nome del locale)"),
+                                ["locale"] = Stringa("nome del locale (vuoto se non lo sai)"),
+                            }),
                         Funzione("proponi", "Proposta finale per la riga: chiamala una sola volta, alla fine.",
                             new JsonObject
                             {
@@ -116,6 +140,9 @@ namespace SiBallaImportingData.Service
                                 ["sicurezza"] = Enum("quanto sei sicuro", Sicurezze),
                                 ["problemi"] = Elenco("discrepanze concrete trovate (vuoto se nessuna)"),
                                 ["fonti"] = Elenco("URL letti che sostengono la proposta"),
+                                ["locale"] = Stringa("nome del locale trovato in una fonte (vuoto se non trovato)"),
+                                ["indirizzo"] = Stringa("via e civico trovati in una fonte, senza città (vuoto se non trovato)"),
+                                ["fonte_indirizzo"] = Stringa("URL della fonte dell'indirizzo (vuoto se non trovato)"),
                             }, "stato", "motivo", "sicurezza", "problemi", "fonti"),
                     }
                 }
@@ -127,11 +154,12 @@ namespace SiBallaImportingData.Service
         /// già decise: dal contesto spariscono lo stato e la nota della riga e le altre righe della stessa serie nello stesso giorno.
         /// Null se Gemini non risponde
         /// </summary>
-        public static async Task<Proposta?> VerificaAsync(Event riga, IReadOnlyList<Event> sheet, KnownVenueStore store, GeminiOptions gemini,
-                                                         int maxPassi, int maxPagine, bool nascondiDecisione)
+        public static async Task<Proposta?> VerificaAsync(Event riga, IReadOnlyList<Event> sheet, KnownVenueStore store, AddressResolver resolver,
+                                                         GeminiOptions gemini, Opzioni o)
         {
             var model = string.IsNullOrWhiteSpace(gemini.AgenteModel) ? gemini.Model : gemini.AgenteModel;
             if (string.IsNullOrWhiteSpace(gemini.ApiKey) || string.IsNullOrWhiteSpace(model)) return null;
+            bool nascondiDecisione = o.NascondiDecisione;
 
             var nascoste = nascondiDecisione ? StessaSerieStessoGiorno(riga, sheet) : new HashSet<Event>(ReferenceEqualityComparer.Instance) { riga };
             var contents = new JsonArray
@@ -139,19 +167,23 @@ namespace SiBallaImportingData.Service
                 new JsonObject
                 {
                     ["role"] = "user",
-                    ["parts"] = new JsonArray { new JsonObject { ["text"] = Contesto(riga, sheet, store, nascondiDecisione, nascoste) } }
+                    ["parts"] = new JsonArray { new JsonObject { ["text"] = Contesto(riga, sheet, store, nascondiDecisione, nascoste, o.NascondiIndirizzo) } }
                 }
             };
             var traccia = new List<string>();
             var fonti = new List<string>();
-            int pagine = 0;
+            int pagine = 0, ricerche = 0;
 
-            for (int passo = 1; passo <= maxPassi; passo++)
+            for (int passo = 1; passo <= o.MaxPassi; passo++)
             {
-                // all'ultimo passo, o finite le pagine, gli strumenti si restringono: alla fine resta solo "proponi"
-                var permessi = passo == maxPassi ? new[] { "proponi" }
-                             : pagine >= maxPagine ? new[] { "cerca_nello_sheet", "proponi" }
-                             : new[] { "leggi_pagina", "cerca_nello_sheet", "proponi" };
+                // all'ultimo passo, o finite pagine e ricerche, gli strumenti si restringono: alla fine resta solo "proponi"
+                var permessi = new List<string> { "proponi" };
+                if (passo < o.MaxPassi)
+                {
+                    permessi.AddRange(new[] { "cerca_nello_sheet", "verifica_indirizzo" });
+                    if (pagine < o.MaxPagine) permessi.Add("leggi_pagina");
+                    if (gemini.UseGoogleSearch && ricerche < o.MaxRicerche) permessi.Add("cerca_web");
+                }
                 var body = new JsonObject
                 {
                     ["systemInstruction"] = new JsonObject { ["parts"] = new JsonArray { new JsonObject { ["text"] = Istruzioni } } },
@@ -214,11 +246,37 @@ namespace SiBallaImportingData.Service
                             motivo = $"(no → da verificare: {freno}) {motivo}";
                             traccia.Add($"freno: {freno}");
                         }
-                        return new Proposta(stato, motivo, sicurezza, problemi, fontiDichiarate, passo, pagine, traccia);
+                        // luogo: lo controllo io con Photon (Lat/Lng solo se confermato), qualunque cosa abbia detto verifica_indirizzo
+                        LuogoTrovato? luogo = null;
+                        var locale = Testo(args, "locale");
+                        var indirizzo = Testo(args, "indirizzo");
+                        if (locale.Length > 0 || indirizzo.Length > 0)
+                        {
+                            var fonteInd = Testo(args, "fonte_indirizzo");
+                            var c = await ConfermaLuogoAsync(riga, resolver, indirizzo, locale);
+                            luogo = new LuogoTrovato(locale.Length > 0 ? locale : null, indirizzo.Length > 0 ? indirizzo : null,
+                                                     c?.Lat, c?.Lng, c?.Come ?? "non confermato da Photon",
+                                                     fonteInd.Length > 0 ? fonteInd : null);
+                            traccia.Add($"luogo: {locale} {indirizzo} -> {luogo.Come}");
+                        }
+                        return new Proposta(stato, motivo, sicurezza, problemi, fontiDichiarate, passo, pagine, traccia, luogo);
                     }
 
                     string esito;
-                    if (nome == "leggi_pagina" && pagine < maxPagine)
+                    if (nome == "cerca_web" && ricerche < o.MaxRicerche)
+                    {
+                        var query = Testo(args, "query");
+                        ricerche++;
+                        esito = await CercaWebAsync(query, gemini);
+                        traccia.Add($"cerca_web({query}) -> {(esito.StartsWith("ERRORE") ? esito : $"{esito.Split('\n').Count(l => l.StartsWith("- "))} risultati")}");
+                    }
+                    else if (nome == "verifica_indirizzo")
+                    {
+                        var c = await ConfermaLuogoAsync(riga, resolver, Testo(args, "indirizzo"), Testo(args, "locale"));
+                        esito = c is null ? $"non trovato entro 10 km da {riga.City}" : $"trovato: {c.Value.Come} ({c.Value.Lat:F5};{c.Value.Lng:F5})";
+                        traccia.Add($"verifica_indirizzo({Testo(args, "locale")} {Testo(args, "indirizzo")}) -> {(c is null ? "no" : "sì")}");
+                    }
+                    else if (nome == "leggi_pagina" && pagine < o.MaxPagine)
                     {
                         var url = Testo(args, "url");
                         pagine++;
@@ -246,6 +304,55 @@ namespace SiBallaImportingData.Service
             }
             Console.WriteLine("[agente] passi finiti senza proposta");
             return null;
+        }
+
+        // indirizzo con Photon entro 10 km dalla città; se non c'è (o non si trova) il locale per nome
+        private static async Task<(double Lat, double Lng, string Come)?> ConfermaLuogoAsync(Event riga, AddressResolver resolver, string indirizzo, string locale)
+        {
+            try
+            {
+                if (indirizzo.Length > 0 && await resolver.GeocodeAsync(indirizzo, riga.City, riga.Country) is { } c)
+                    return (c.Lat, c.Lng, "indirizzo confermato da Photon");
+                if (locale.Length > 0 && await resolver.CercaLocaleAsync(locale, riga.City, riga.Country) is { } l)
+                    return (l.Lat, l.Lng, $"locale '{l.Nome}' trovato da Photon" + (l.Via is null ? "" : $" in {l.Via}"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[agente] Photon: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Ricerca web con la ricerca Google integrata in Gemini (strumento google_search: serve la fatturazione attiva,
+        /// si accende con Gemini:UseGoogleSearch). Restituisce i fatti trovati e gli URL delle fonti
+        /// </summary>
+        public static async Task<string> CercaWebAsync(string query, GeminiOptions gemini)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return "ERRORE: ricerca vuota";
+            var body = new JsonObject
+            {
+                ["contents"] = new JsonArray { new JsonObject { ["role"] = "user", ["parts"] = new JsonArray { new JsonObject { ["text"] =
+                    $"Cerca sul web: {query}\nRiporta in italiano, in poche righe, solo i fatti trovati nelle fonti su questo evento o " +
+                    "locale: nome del locale, indirizzo (via e civico), città, date, orari, stili di ballo. Non inventare nulla." } } } },
+                ["tools"] = new JsonArray { new JsonObject { ["google_search"] = new JsonObject() } },
+                ["generationConfig"] = new JsonObject { ["temperature"] = 0.0 }
+            };
+            try
+            {
+                var risposta = JsonNode.Parse(await GeminiHttp.GenerateContentAsync(gemini.Model, gemini.ApiKey!, body.ToJsonString()));
+                var candidato = risposta?["candidates"]?[0];
+                var testo = string.Concat(candidato?["content"]?["parts"]?.AsArray().Select(p => p?["text"]?.GetValue<string>()) ?? []);
+                var fonti = candidato?["groundingMetadata"]?["groundingChunks"]?.AsArray()
+                    .Select(c => c?["web"]).Where(w => w is not null)
+                    .Select(w => $"- {w!["title"]?.GetValue<string>()} | {w["uri"]?.GetValue<string>()}").Take(8).ToList() ?? new List<string>();
+                return string.IsNullOrWhiteSpace(testo) ? "nessun risultato"
+                    : Accorcia(testo, 1500) + (fonti.Count > 0 ? "\nfonti:\n" + string.Join("\n", fonti) : "");
+            }
+            catch (Exception ex)
+            {
+                return $"ERRORE: ricerca non riuscita ({Accorcia(ex.Message, 120)})";
+            }
         }
 
         // stili del calendario nel titolo o nella colonna Stile (non "swing" da solo: c'è anche nel West Coast Swing)
@@ -313,7 +420,7 @@ namespace SiBallaImportingData.Service
         public static string ContestoPerProva(Event riga, IReadOnlyList<Event> sheet, KnownVenueStore store) =>
             Contesto(riga, sheet, store, false, new HashSet<Event>(ReferenceEqualityComparer.Instance) { riga });
 
-        private static string Contesto(Event riga, IReadOnlyList<Event> sheet, KnownVenueStore store, bool nascondiDecisione, HashSet<Event> nascoste)
+        private static string Contesto(Event riga, IReadOnlyList<Event> sheet, KnownVenueStore store, bool nascondiDecisione, HashSet<Event> nascoste, bool nascondiIndirizzo = false)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Oggi è {Quando(DateTime.Today, lungo: true).Replace(" (orario non indicato)", "")}.");
@@ -326,7 +433,7 @@ namespace SiBallaImportingData.Service
             if (riga.DateFinish is { } fine && fine.Date > riga.DateStart.Date.AddDays(1)) sb.AppendLine($"fine: {Quando(fine, lungo: true)}");
             sb.AppendLine($"organizzatore: {riga.Organizer?.Trim()}");
             sb.AppendLine($"città: {riga.City?.Trim()} ({riga.Country?.Trim()})");
-            sb.AppendLine($"luogo/indirizzo: {riga.EventDetail?.Address?.Trim() ?? riga.EventDetail?.Location?.Trim() ?? "(mancante)"}");
+            sb.AppendLine($"luogo/indirizzo: {(nascondiIndirizzo ? null : riga.EventDetail?.Address?.Trim() ?? riga.EventDetail?.Location?.Trim()) ?? "(mancante)"}");
             sb.AppendLine($"stili: {riga.SheetStiliRaw ?? riga.EventDetail?.StylesToString}");
             sb.AppendLine($"link: {riga.EventDetail?.WebSite?.Trim() ?? "(nessuno)"}");
             if (!string.IsNullOrWhiteSpace(riga.EventDetail?.Description))
@@ -337,7 +444,7 @@ namespace SiBallaImportingData.Service
                 if (!string.IsNullOrWhiteSpace(riga.NotaVerifica)) sb.AppendLine($"nota attuale: {Accorcia(riga.NotaVerifica, 300)}");
             }
 
-            if (store.Find(riga) is { } luogo)
+            if (!nascondiIndirizzo && store.Find(riga) is { } luogo)
                 sb.AppendLine($"luogo noto nel dizionario per questo organizzatore e città: {luogo.VenueName} - {luogo.Address}");
 
             // altre date della stessa serie (stesso organizzatore, città e titolo senza mesi né ordinali)

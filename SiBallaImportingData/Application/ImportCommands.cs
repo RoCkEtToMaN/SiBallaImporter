@@ -298,7 +298,7 @@ internal static class ImportCommands
     /// Agente di verifica sulle righe future in attesa del tuo controllo ("da verificare", "nuovo", "gemini"), le più vicine
     /// per prime: per ognuna stampa la proposta con motivo, sicurezza, problemi e fonti. Non scrive niente nello Sheet
     /// </summary>
-    public static async Task AgenteVerificaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store)
+    public static async Task AgenteVerificaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver)
     {
         var o = settings.Import;
         var righe = sheetEvents
@@ -326,7 +326,7 @@ internal static class ImportCommands
         var proposte = new List<(Event Evento, AgenteVerifica.Proposta? P)>();
         foreach (var e in righe)
         {
-            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, settings.Gemini, o.AgentePassi, o.AgentePagine, nascondiDecisione: false);
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o));
             proposte.Add((e, p));
             StampaProposta(e, e.LuogoVerificato ?? "", p);
         }
@@ -344,7 +344,7 @@ internal static class ImportCommands
     /// Prova dell'agente sulle righe che hai già deciso tu, senza fargli vedere la tua decisione (né le righe della stessa
     /// serie nello stesso giorno): confronta le proposte con le tue decisioni, anche per livello di sicurezza. Non scrive niente
     /// </summary>
-    public static async Task AgenteProvaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store)
+    public static async Task AgenteProvaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver)
     {
         var o = settings.Import;
         if (!GeminiPronto(settings)) return;
@@ -359,7 +359,7 @@ internal static class ImportCommands
         var esiti = new List<(Event Evento, string Tua, string Agente, AgenteVerifica.Proposta? P)>();
         foreach (var (e, tua) in campione)
         {
-            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, settings.Gemini, o.AgentePassi, o.AgentePagine, nascondiDecisione: true);
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiDecisione = true });
             esiti.Add((e, tua, Come(p), p));
             StampaProposta(e, $"tua: {tua}", p, giusto: Come(p) == tua);
         }
@@ -415,8 +415,81 @@ internal static class ImportCommands
         Console.WriteLine($"{segno} {prima} -> {proposta} | {e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}");
         if (p is null) return;
         foreach (var problema in p.Problemi) Console.WriteLine($"   ⚠️ {problema}");
+        if (p.Luogo is { } l)
+            Console.WriteLine($"   📍 luogo trovato: {string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => s is not null))} ({e.City?.Trim()}) - {l.Come}" +
+                              (l.Fonte is null ? "" : $" - fonte: {l.Fonte}"));
         if (p.Fonti.Count > 0) Console.WriteLine($"   fonti: {string.Join(" ", p.Fonti)}");
         Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
+    }
+
+    private static AgenteVerifica.Opzioni Opzioni(ImportOptions o) =>
+        new(Math.Max(2, o.AgentePassi), o.AgentePagine, o.AgenteRicerche);
+
+    /// <summary>
+    /// Prova dell'agente sugli indirizzi: righe con indirizzo e coordinate controllati da te ("Luogo verificato" vuoto o "ok"),
+    /// una per serie, le più recenti. L'agente non vede l'indirizzo né il dizionario dei luoghi: deve trovarlo da solo (web + Photon).
+    /// Confronto: distanza tra il punto trovato e le tue coordinate. Non scrive niente
+    /// </summary>
+    public static async Task AgenteIndirizziProvaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver)
+    {
+        var o = settings.Import;
+        // il luogo "vero": indirizzo e coordinate della riga controllati da te, oppure il luogo verificato da te nel dizionario
+        (string Indirizzo, double Lat, double Lng)? Vero(Event e)
+        {
+            if ((string.IsNullOrWhiteSpace(e.LuogoVerificato) || e.LuogoVerificato == ImportData.VerifiedOk)
+                && !string.IsNullOrWhiteSpace(e.EventDetail?.Address) && e.EventDetail.Latitude is { } la and not 0 && e.EventDetail.Longitude is { } ln and not 0)
+                return (e.EventDetail.Address.Trim(), la, ln);
+            if (store.Find(e) is { Lat: { } vl, Lng: { } vg } v)
+                return ($"{v.VenueName} {v.Address}".Trim() + " (dizionario)", vl, vg);
+            return null;
+        }
+        var campione = sheetEvents
+            .Where(e => !string.IsNullOrWhiteSpace(e.PartyName) && !string.IsNullOrWhiteSpace(e.City) && e.LuogoVerificato != ImportData.VerifiedNo)
+            .Select(e => (Evento: e, Vero: Vero(e)))
+            .Where(x => x.Vero is not null)
+            .GroupBy(x => MemoriaSerie.Chiave(x.Evento) ?? $"{x.Evento.SheetName}{x.Evento.SheetRow}")
+            .Select(g => g.OrderByDescending(x => x.Evento.DateStart).First())
+            .OrderByDescending(x => x.Evento.DateStart)
+            .Take(Math.Max(1, o.AgenteMax))
+            .Select(x => (x.Evento, Vero: x.Vero!.Value))
+            .ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Prova indirizzi dell'agente: {campione.Count} righe con luogo controllato da te (una per serie; " +
+                          $"ricerca Google {(settings.Gemini.UseGoogleSearch ? "attiva" : "SPENTA: Gemini:UseGoogleSearch=false")}) =====");
+        // senza chiave: elenco delle righe e basta
+        if (!GeminiPronto(settings))
+        {
+            foreach (var (e, vero) in campione)
+                Console.WriteLine($"   {e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.PartyName?.Trim()} -> {vero.Indirizzo}");
+            return;
+        }
+
+        var esiti = new List<(Event Evento, string Esito, double? Km)>();
+        foreach (var (e, vero) in campione)
+        {
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiIndirizzo = true });
+            string esito; double? km = null;
+            if (p?.Luogo is { Lat: { } lat, Lng: { } lng })
+            {
+                km = PhotonVenueGeocoder.HaversineKm(lat, lng, vero.Lat, vero.Lng);
+                esito = km <= 0.3 ? "giusto" : km <= 2 ? "vicino" : "sbagliato";
+            }
+            else esito = p?.Luogo is null ? "non trovato" : "non confermato";
+            esiti.Add((e, esito, km));
+            var segno = esito switch { "giusto" => "✅", "vicino" => "🟡", "sbagliato" => "❌", _ => "➖" };
+            Console.WriteLine();
+            Console.WriteLine($"{segno} {esito}{(km is null ? "" : $" ({km:F2} km)")} | tuo: {vero.Indirizzo} | agente: " +
+                              $"{(p?.Luogo is { } l ? string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => s is not null)) : "-")} | " +
+                              $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.PartyName?.Trim()}");
+            if (p?.Luogo is { } lt) Console.WriteLine($"   {lt.Come}{(lt.Fonte is null ? "" : $" - fonte: {lt.Fonte}")}");
+            if (p is not null) Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine($"===== Risultato indirizzi: giusti (entro 300 m) {esiti.Count(x => x.Esito == "giusto")}, vicini (entro 2 km) {esiti.Count(x => x.Esito == "vicino")}, " +
+                          $"sbagliati {esiti.Count(x => x.Esito == "sbagliato")}, trovati ma non confermati da Photon {esiti.Count(x => x.Esito == "non confermato")}, " +
+                          $"non trovati {esiti.Count(x => x.Esito == "non trovato")} (su {esiti.Count}) =====");
+        Console.WriteLine("Prova: niente scritto nello Sheet.");
     }
 
     /// <summary>

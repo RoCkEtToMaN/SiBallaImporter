@@ -40,6 +40,7 @@ namespace SiBallaImportingData.Utils
             ["--agente-verifica"] = "Import:AgenteVerifica",
             ["--agente-prova"] = "Import:AgenteProva",
             ["--agente-max"] = "Import:AgenteMax",
+            ["--agente-indirizzi-prova"] = "Import:AgenteIndirizziProva",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -156,8 +157,12 @@ namespace SiBallaImportingData.Utils
         // righe da controllare (verifica) o righe per tipo (prova)
         public int AgenteMax { get; set; } = 15;
         // tetto per riga: chiamate a Gemini e pagine web lette
-        public int AgentePassi { get; set; } = 6;
+        public int AgentePassi { get; set; } = 8;
         public int AgentePagine { get; set; } = 3;
+        // ricerche web (DuckDuckGo) per riga, servono soprattutto a trovare l'indirizzo
+        public int AgenteRicerche { get; set; } = 2;
+        // prova sugli indirizzi: righe con indirizzo controllato da te, l'agente deve ritrovarlo senza vederlo (confronto in km)
+        public bool AgenteIndirizziProva { get; set; }
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }

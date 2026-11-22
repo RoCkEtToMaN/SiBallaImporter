@@ -95,12 +95,13 @@ internal static class ImportRunner
         // AGENTE DI VERIFICA: legge la pagina dell'evento, cerca nello Sheet e propone lo stato delle righe in attesa.
         // --agente-verifica sulle righe future "da verificare"/"nuovo"/"gemini", --agente-prova sulle righe che hai già deciso tu
         // (confronto). Non scrive niente nello Sheet. Poi il programma si ferma
-        if (opzioni.AgenteVerifica || opzioni.AgenteProva)
+        if (opzioni.AgenteVerifica || opzioni.AgenteProva || opzioni.AgenteIndirizziProva)
         {
             if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
             {
-                if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store);
-                if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store);
+                if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
+                if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);
+                if (opzioni.AgenteIndirizziProva) await ImportCommands.AgenteIndirizziProvaAsync(settings, sheetEvents, store, resolver);
             }
             return;
         }

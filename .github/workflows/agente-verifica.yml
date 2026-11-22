@@ -3,6 +3,8 @@
 # Si lancia a mano: GitHub -> Actions -> "Agente verifica" -> Run workflow (scegliendo il ramo).
 #   modo = verifica: righe future "da verificare" / "nuovo" / "gemini", le più vicine per prime
 #   modo = prova:    righe che hai già deciso tu, senza fargli vedere la tua decisione: confronto e percentuali
+#   modo = indirizzi: righe con luogo controllato da te, senza fargli vedere l'indirizzo: quanto si avvicina (km)
+#   ricerca_google = true: strumento cerca_web (ricerca Google di Gemini, serve la fatturazione attiva su Gemini)
 # Usa gli stessi secrets dell'importatore (GOOGLE_SERVICE_ACCOUNT_JSON, GEMINI_API_KEY).
 
 name: Agente verifica
@@ -11,13 +13,18 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: verifica (righe in attesa) o prova (righe già decise, confronto)
+        description: verifica (righe in attesa), prova (righe già decise, confronto) o indirizzi (ritrova i luoghi che conosci)
         type: choice
-        options: ["prova", "verifica"]
+        options: ["prova", "verifica", "indirizzi"]
         default: "prova"
       max:
         description: Righe da controllare (nella prova, righe per tipo)
         default: "8"
+      ricerca_google:
+        description: Ricerca Google per l'agente (serve la fatturazione attiva su Gemini)
+        type: choice
+        options: ["false", "true"]
+        default: "false"
       modello:
         description: Modello Gemini dell'agente (vuoto = quello dell'importatore)
         default: ""
@@ -76,6 +83,8 @@ jobs:
           Import__NoPush: "true"
           Import__AgenteVerifica: ${{ inputs.modo == 'verifica' }}
           Import__AgenteProva: ${{ inputs.modo == 'prova' }}
+          Import__AgenteIndirizziProva: ${{ inputs.modo == 'indirizzi' }}
+          Gemini__UseGoogleSearch: ${{ inputs.ricerca_google }}
           Import__AgenteMax: ${{ inputs.max }}
         run: dotnet SiBallaImportingData.dll 2>&1 | tee agente.log
 
@@ -89,7 +98,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Agente verifica (${{ inputs.modo }})
-          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto"
+          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 "
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log
