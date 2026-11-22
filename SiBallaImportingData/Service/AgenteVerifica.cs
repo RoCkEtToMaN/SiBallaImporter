@@ -72,7 +72,10 @@ namespace SiBallaImportingData.Service
             "dell'evento lo conferma oppure tutte le date della serie decise dal curatore sono d'accordo; se le decisioni sulla serie " +
             "sono miste, o hai solo la pagina generica dell'organizzatore, al massimo 'media'; problemi = discrepanze concrete trovate (es. 'la pagina dice 23/11 non 22/11', " +
             "'indirizzo diverso: Via X 3'), fonti = gli URL che hai letto e che sostengono la proposta. " +
-            "Se le pagine non si leggono (accesso negato, Facebook/Instagram senza contenuto) basati sul contesto e dillo nel motivo.";
+            "Se le pagine non si leggono (accesso negato, Facebook/Instagram senza contenuto) basati sul contesto e dillo nel motivo. " +
+            "L'indirizzo mancante o una pagina generica dell'organizzatore NON sono motivi per 'da verificare': se l'evento è chiaramente " +
+            "swing (serie confermata, stili del calendario) proponi lo stato giusto e metti la mancanza nei problemi. " +
+            "Un mercatino/flea market resta 'mercatino' anche se l'organizzatore o il locale sono della scena rockabilly.";
 
         private static JsonArray Strumenti()
         {
@@ -200,9 +203,18 @@ namespace SiBallaImportingData.Service
                         var sicurezza = Testo(args, "sicurezza");
                         if (!Sicurezze.Contains(sicurezza)) sicurezza = "bassa";
                         var fontiDichiarate = Lista(args, "fonti").Where(f => fonti.Contains(f)).ToList();
+                        var motivo = Testo(args, "motivo");
+                        var problemi = Lista(args, "problemi");
                         traccia.Add($"proponi({stato}, {sicurezza})");
-                        return new Proposta(stato, Testo(args, "motivo"), sicurezza, Lista(args, "problemi"),
-                                            fontiDichiarate, passo, pagine, traccia);
+                        // un evento vero nascosto è il caso peggiore: "no" solo se non c'è niente che faccia pensare a uno swing vero
+                        if (stato == ImportData.VerifiedNo && FrenoSulNo(riga, motivo, problemi) is { } freno)
+                        {
+                            stato = StatoIncerto;
+                            sicurezza = "media";
+                            motivo = $"(no → da verificare: {freno}) {motivo}";
+                            traccia.Add($"freno: {freno}");
+                        }
+                        return new Proposta(stato, motivo, sicurezza, problemi, fontiDichiarate, passo, pagine, traccia);
                     }
 
                     string esito;
@@ -233,6 +245,24 @@ namespace SiBallaImportingData.Service
                     : new JsonObject { ["role"] = "user", ["parts"] = new JsonArray { new JsonObject { ["text"] = "Chiama proponi con la tua proposta." } } });
             }
             Console.WriteLine("[agente] passi finiti senza proposta");
+            return null;
+        }
+
+        // stili del calendario nel titolo o nella colonna Stile (non "swing" da solo: c'è anche nel West Coast Swing)
+        private static readonly System.Text.RegularExpressions.Regex StileDelCalendario = new(
+            @"lindy|balboa|boogie|\bshag\b|charleston|solo ?jazz|\bblues\b|\btap\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        // doppioni e annullamenti: li decide il curatore (magari la riga scartata è quella giusta)
+        private static readonly System.Text.RegularExpressions.Regex DoppioneOAnnullato = new(
+            @"doppion|duplicat|annullat|rinviat|save the date|stesso evento", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        /// <summary>Motivo per cui un "no" dell'agente diventa "da verificare", null se il "no" può restare</summary>
+        private static string? FrenoSulNo(Event riga, string motivo, List<string> problemi)
+        {
+            if (DoppioneOAnnullato.IsMatch(motivo + " " + string.Join(" ", problemi)))
+                return "doppione o annullamento, decide il curatore";
+            var titoloEStili = $"{riga.PartyName} {riga.SheetStiliRaw ?? riga.EventDetail?.StylesToString}";
+            if (!titoloEStili.Contains("west coast", StringComparison.OrdinalIgnoreCase) && StileDelCalendario.IsMatch(titoloEStili))
+                return "il titolo o lo stile nominano uno stile del calendario";
             return null;
         }
 
