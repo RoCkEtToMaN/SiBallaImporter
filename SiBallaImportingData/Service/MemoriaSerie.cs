@@ -33,11 +33,11 @@ namespace SiBallaImportingData.Service
 
         private sealed class Storia
         {
-            public int SiTuoi, SiTaciti, No, Mercatini, Workshop;
+            public int SiTuoi, SiTaciti, No, Mercatini, Workshop, SerataWorkshop;
             public double Si => SiTuoi + SiTaciti * PesoTacito;
         }
 
-        private enum Voto { Nessuno, SiTuo, SiTacito, No, Mercatino, Workshop }
+        private enum Voto { Nessuno, SiTuo, SiTacito, No, Mercatino, Workshop, SerataWorkshop }
 
         // somma delle serie di un organizzatore (in tutte le città), con qualche titolo d'esempio: decide da solo solo se
         // le tue decisioni sono tutte dello stesso tipo (OrganizzatoreDecide), altrimenti va a Gemini come indizio
@@ -87,7 +87,7 @@ namespace SiBallaImportingData.Service
         {
             var nota = e.NotaVerifica ?? "";
             // copia in Workshop di una riga di Serate: la decisione è già contata là
-            if (nota.StartsWith(ImportData.NotaSpostatoDaSerate, StringComparison.OrdinalIgnoreCase)) return Voto.Nessuno;
+            if (ImportData.NotaCopiaDaSerate(nota)) return Voto.Nessuno;
             // riga di Workshop messa lì dalla memoria (workshop lungo più di un giorno): idem, non è una tua conferma
             if (e.SheetName == TipoEvento.Workshop.ToString() && nota.StartsWith(PrefissoNota, StringComparison.OrdinalIgnoreCase)) return Voto.Nessuno;
             bool notaDelProgramma = nota.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase)
@@ -103,6 +103,8 @@ namespace SiBallaImportingData.Service
                     return tuo ? Voto.Mercatino : Voto.Nessuno;
                 case ImportData.VerifiedWorkshop:
                     return tuo ? Voto.Workshop : Voto.Nessuno;
+                case ImportData.VerifiedSerataWorkshop:
+                    return tuo ? Voto.SerataWorkshop : Voto.Nessuno;
                 case ImportData.VerifiedNew:
                 case ImportData.VerifiedGemini:
                     return e.DateStart.Date < DateTime.Today ? Voto.SiTacito : Voto.Nessuno;
@@ -127,11 +129,12 @@ namespace SiBallaImportingData.Service
                 foreach (var giorno in serie.GroupBy(x => x.Evento.DateStart.Date))
                 {
                     var voti = giorno.Select(x => (x.Evento, Voto: VotoDi(x.Evento))).ToList();
-                    Conta(perOrganizzatore, voti.Select(x => x.Voto).ToList());
+                    // per l'organizzatore "serata+workshop" è una conferma
+                    Conta(perOrganizzatore, voti.Select(x => x.Voto == Voto.SerataWorkshop ? Voto.SiTuo : x.Voto).ToList());
                     Conta(storia, voti.Select(x => x.Voto is Voto.SiTuo or Voto.SiTacito && x.Evento.SheetName == TipoEvento.Workshop.ToString()
                         ? Voto.Workshop : x.Voto).ToList());
                 }
-                if (storia.Si == 0 && storia.No == 0 && storia.Mercatini == 0 && storia.Workshop == 0) continue;
+                if (storia.Si == 0 && storia.No == 0 && storia.Mercatini == 0 && storia.Workshop == 0 && storia.SerataWorkshop == 0) continue;
                 memoria._serie[serie.Key] = storia;
 
                 var primo = serie.First().Evento;
@@ -156,7 +159,7 @@ namespace SiBallaImportingData.Service
                 .GroupBy(x => x!.Value.Stato).ToDictionary(g => g.Key, g => g.Count());
             Console.WriteLine($"[memoria] serie con una storia: {memoria._serie.Count}; decise: {Serie(ImportData.VerifiedNew)} swing, " +
                               $"{Serie(ImportData.VerifiedNo)} scartate, {Serie(ImportData.VerifiedMercatino)} mercatini, " +
-                              $"{Serie(ImportData.VerifiedWorkshop)} workshop (le altre: storia mista o troppo corta)");
+                              $"{Serie(ImportData.VerifiedWorkshop)} workshop, {Serie(ImportData.VerifiedSerataWorkshop)} serata+workshop (le altre: storia mista o troppo corta)");
             Console.WriteLine($"[memoria] organizzatori decisi per tutti i loro eventi: " +
                               $"{perOrg.GetValueOrDefault(ImportData.VerifiedNo)} scartati, {perOrg.GetValueOrDefault(ImportData.VerifiedMercatino)} mercatini, " +
                               $"{perOrg.GetValueOrDefault(ImportData.VerifiedWorkshop)} workshop (su {memoria._organizzatori.Count} con una storia)");
@@ -166,7 +169,8 @@ namespace SiBallaImportingData.Service
         // un giorno della serie conta una volta: vince la conferma, poi lo scarto (solo se tutte le righe sono "no"), mercatino, workshop
         private static void Conta(Storia storia, List<Voto> voti)
         {
-            if (voti.Contains(Voto.SiTuo)) storia.SiTuoi++;
+            if (voti.Contains(Voto.SerataWorkshop)) storia.SerataWorkshop++;
+            else if (voti.Contains(Voto.SiTuo)) storia.SiTuoi++;
             else if (voti.Contains(Voto.SiTacito)) storia.SiTaciti++;
             else if (voti.All(v => v == Voto.No)) storia.No++;
             else if (voti.Contains(Voto.Mercatino)) storia.Mercatini++;
@@ -197,6 +201,9 @@ namespace SiBallaImportingData.Service
         // stato deciso dalla storia della serie, null se mista o troppo corta
         private static string? SerieDecide(Storia s)
         {
+            // "serata+workshop" da te, eventualmente con date passate senza obiezioni, e nient'altro
+            if (s.SerataWorkshop > 0)
+                return s.SiTuoi == 0 && s.No == 0 && s.Mercatini == 0 && s.Workshop == 0 ? ImportData.VerifiedSerataWorkshop : null;
             if (s.Mercatini > 0 || s.Workshop > 0)
             {
                 if (s.Si > 0 || s.No > 0 || (s.Mercatini > 0 && s.Workshop > 0)) return null;
@@ -230,6 +237,8 @@ namespace SiBallaImportingData.Service
                     return (stato, $"{PrefissoNota} mercatino come le altre date ({s.Mercatini} segnate da te), va in Bacheca");
                 if (stato == ImportData.VerifiedWorkshop)
                     return (stato, $"{PrefissoNota} workshop/corso come le altre date ({s.Workshop} segnate workshop o confermate nella scheda Workshop), va nella scheda Workshop");
+                if (stato == ImportData.VerifiedSerataWorkshop)
+                    return (stato, $"{PrefissoNota} serata e anche workshop come le altre date ({s.SerataWorkshop} segnate da te), una copia va nella scheda Workshop");
                 if (stato == ImportData.VerifiedNo)
                     return (stato, $"{PrefissoNota} {s.No} date di questa serie scartate da te, nessuna confermata");
                 if (stato == ImportData.VerifiedNew)

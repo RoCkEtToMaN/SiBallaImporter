@@ -15,8 +15,10 @@ namespace SiBallaImportingData.Service
             "Sei un esperto di balli swing e curi un calendario di eventi swing. Ti passo una lista di eventi trovati online. " +
             "Per ognuno scegli UN SOLO 'tipo' tra questi: " +
             "'serata' = serata o festa di social dance swing (Lindy Hop, Balboa, Boogie Woogie, Collegiate Shag, St. Louis Shag, " +
-            "Charleston, Solo Jazz, Blues dance, Tap), con DJ o musica dal vivo; sono serate anche le pratiche, le social practice " +
-            "e le serate con una breve lezione introduttiva prima del ballo. " +
+            "Charleston, Solo Jazz, Blues dance, Tap), con DJ o musica dal vivo, senza parte didattica. " +
+            "'serata_e_workshop' = serata swing che è anche didattica: pratiche, social practice, practice night, ripassi, " +
+            "serate con lezione o corso nel programma (es. 'Initiation/cours & soirée dansante', 'lezione + social', " +
+            "'La Social Dance di Pratica', 'Serata di ripassi'). " +
             "'workshop' = evento didattico o di più giorni di stili swing: lezioni, lezioni di prova, corsi, classi a livelli " +
             "(es. 'Livello aperto', 'Principianti', 'Primi passi'), open class, laboratori, atelier, intensivi, stage, workshop, " +
             "bootcamp, 'school', 'challenge' didattiche, e anche weekend, festival, exchange e camp di più giorni " +
@@ -40,8 +42,10 @@ namespace SiBallaImportingData.Service
             "ma decidi sempre guardando l'evento stesso, e se la storia " +
             "ha influito sulla decisione dillo nel motivo.";
 
-        public const string TipoSerata = "serata", TipoWorkshop = "workshop", TipoMercatino = "mercatino", TipoAltro = "altro";
-        private static readonly string[] Tipi = { TipoSerata, TipoWorkshop, TipoMercatino, TipoAltro };
+        public const string TipoSerata = "serata", TipoSerataWorkshop = "serata_e_workshop", TipoWorkshop = "workshop",
+                            TipoMercatino = "mercatino", TipoAltro = "altro";
+        private static readonly string[] Tipi = { TipoSerata, TipoSerataWorkshop, TipoWorkshop, TipoMercatino, TipoAltro };
+        private static bool Ballo(string tipo) => tipo is TipoSerata or TipoSerataWorkshop or TipoWorkshop;
 
         // esiti di Gemini di questo giro, per evento: lo Sheet e l'email usano la stessa classificazione senza richiederla due volte
         private static readonly Dictionary<Event, (string Tipo, string Motivo)> _esiti = new(ReferenceEqualityComparer.Instance);
@@ -56,7 +60,7 @@ namespace SiBallaImportingData.Service
 
         /// <summary>Esito di Gemini per l'evento (dopo SegnaPerSheetAsync o ClassifyAsync), null se non classificato.
         /// IsSwing = ballo swing: serata o workshop/weekend</summary>
-        public static (bool IsSwing, string Motivo)? Esito(Event e) => _esiti.TryGetValue(e, out var x) ? (x.Tipo is TipoSerata or TipoWorkshop, x.Motivo) : null;
+        public static (bool IsSwing, string Motivo)? Esito(Event e) => _esiti.TryGetValue(e, out var x) ? (Ballo(x.Tipo), x.Motivo) : null;
 
         /// <summary>Esito completo: tipo (serata, workshop, mercatino, altro) e motivo, null se non classificato</summary>
         public static (string Tipo, string Motivo)? EsitoCompleto(Event e) => _esiti.TryGetValue(e, out var x) ? x : null;
@@ -72,7 +76,7 @@ namespace SiBallaImportingData.Service
             var altri = new List<(Event, string)>();
             foreach (var ev in eventi)
             {
-                if (_esiti.TryGetValue(ev, out var esito) && esito.Tipo is not (TipoSerata or TipoWorkshop))
+                if (_esiti.TryGetValue(ev, out var esito) && !Ballo(esito.Tipo))
                 {
                     altri.Add((ev, esito.Motivo));
                     Console.WriteLine($"[AI] Non swing: {ev.PartyName} -> {esito.Motivo}");
@@ -97,7 +101,9 @@ namespace SiBallaImportingData.Service
             {
                 if (memoria?.Decidi(ev) is { } decisione)
                 {
-                    ev.StatoNuovaRiga = decisione.Stato;
+                    // "serata+workshop": in Serate come swing ("nuovo") più una copia in Workshop
+                    ev.AncheWorkshop = decisione.Stato == ImportData.VerifiedSerataWorkshop;
+                    ev.StatoNuovaRiga = ev.AncheWorkshop ? ImportData.VerifiedNew : decisione.Stato;
                     ev.MotivoVerifica = decisione.Motivo;
                     Console.WriteLine($"[memoria] {ev.DateStart:yyyy-MM-dd} {ev.PartyName?.Trim()} -> '{decisione.Stato}'");
                 }
@@ -129,9 +135,15 @@ namespace SiBallaImportingData.Service
                     }
                     else
                     {
-                        bool serata = esito.Tipo == TipoSerata;
+                        bool serata = esito.Tipo is TipoSerata or TipoSerataWorkshop;
                         ev.StatoNuovaRiga = serata ? ImportData.VerifiedNew : ImportData.VerifiedPending;
                         ev.MotivoVerifica = serata ? null : $"Gemini: {esito.Motivo}";
+                        // pratica, ripasso, lezione + serata: anche una copia nella scheda Workshop
+                        if (esito.Tipo == TipoSerataWorkshop)
+                        {
+                            ev.AncheWorkshop = true;
+                            ev.MotivoVerifica = $"Gemini: serata e anche workshop. {esito.Motivo}";
+                        }
                     }
                 }
                 else

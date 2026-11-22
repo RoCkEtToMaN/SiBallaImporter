@@ -77,6 +77,7 @@ Valori di **Luogo verificato**, in sintesi:
 | `no` | tu, evento scartato (niente app, sito né email); oppure la memoria delle serie, con la nota "Memoria: …" | **no** | no |
 | `mercatino` | tu o Gemini: mercatino vintage senza ballo, va solo nella Bacheca del sito | **no** | no |
 | `workshop` | tu (scheda Serate): è un workshop o un corso. Il programma lo copia nella scheda Workshop come `nuovo` (nota "Spostato da Serate (riga N)…"); in Serate resta come traccia | **no** (va la copia in Workshop) | no |
+| `serata+workshop` | tu (scheda Serate): serata che è anche didattica (pratica, ripasso, lezione + serata). Vale come conferma e il programma ne mette una copia nella scheda Workshop (nota "Copiata da Serate (riga N)…") | **sì** (e la copia in Workshop) | sì, come `ok` |
 
 Una riga `nuovo` senza indirizzo può prendere quello del dizionario (se lo stesso evento in un'altra
 riga ha un indirizzo verificato): in quel caso diventa `auto`.
@@ -93,6 +94,8 @@ vengono decise come hai deciso tu per le altre date, senza chiedere a Gemini:
   `da verificare` diventano `nuovo`). Conta come conferma piena `ok`/cella vuota (o un altro valore
   scritto da te), come mezza conferma una riga `nuovo`/`gemini` arrivata alla sua data senza che tu
   l'abbia scartata: servono almeno 2 conferme piene, o 4 mezze;
+- se hai segnato `serata+workshop` almeno 1 data (con al più date passate senza obiezioni), le date
+  nuove arrivano `nuovo` in Serate con una copia nella scheda Workshop;
 - se hai segnato `mercatino` o `workshop` **almeno 1 data** e nient'altro, le date nuove arrivano
   già così (`workshop` = copiate nella scheda Workshop). Per la serie, una data confermata nella
   **scheda Workshop** vale come `workshop` (per l'organizzatore invece resta una conferma);
@@ -115,7 +118,8 @@ Per gli eventi che la memoria non decide, Gemini riceve come **indizio** la stor
 (in tutte le città): quante sue date hai confermato, quante sono passate senza obiezioni, quante hai
 scartato, con fino a 3 titoli d'esempio di serie confermate e scartate. Non è una regola: Gemini
 decide comunque guardando l'evento, e se la storia ha pesato lo scrive nel motivo.
-Gemini sceglie per ogni evento **un solo tipo**: `serata` (anche pratiche e social practice) → `nuovo`;
+Gemini sceglie per ogni evento **un solo tipo**: `serata` → `nuovo`; `serata_e_workshop` (pratiche,
+social practice, ripassi, lezione + serata) → `nuovo` in Serate più una copia nella scheda Workshop;
 `workshop` (lezioni, corsi, laboratori, stage, e anche weekend, festival ed exchange di stili swing) →
 scheda Workshop; `mercatino` → Bacheca; `altro` (non swing, e concerti/festival rockabilly o
 rock'n'roll senza social dance swing esplicita) → `da verificare`. Gli eventi con "corso" o "lezione"
