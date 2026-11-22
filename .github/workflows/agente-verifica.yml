@@ -1,0 +1,101 @@
+# Agente di verifica (SiBallaImportingData/Service/AgenteVerifica.cs): Gemini a più passi legge la pagina dell'evento,
+# guarda le altre date della serie e cerca nello Sheet, poi PROPONE lo stato di "Luogo verificato". Non scrive mai nello Sheet.
+# Si lancia a mano: GitHub -> Actions -> "Agente verifica" -> Run workflow (scegliendo il ramo).
+#   modo = verifica: righe future "da verificare" / "nuovo" / "gemini", le più vicine per prime
+#   modo = prova:    righe che hai già deciso tu, senza fargli vedere la tua decisione: confronto e percentuali
+# Usa gli stessi secrets dell'importatore (GOOGLE_SERVICE_ACCOUNT_JSON, GEMINI_API_KEY).
+
+name: Agente verifica
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: verifica (righe in attesa) o prova (righe già decise, confronto)
+        type: choice
+        options: ["prova", "verifica"]
+        default: "prova"
+      max:
+        description: Righe da controllare (nella prova, righe per tipo)
+        default: "8"
+      modello:
+        description: Modello Gemini dell'agente (vuoto = quello dell'importatore)
+        default: ""
+
+# stesso gruppo dell'importatore: non leggono/scrivono lo Sheet nello stesso momento
+concurrency:
+  group: importatore
+  cancel-in-progress: false
+
+jobs:
+  agente:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TZ: Europe/Rome
+      PROJECT: SiBallaImportingData/SiBallaImportingData.csproj
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Service account Google
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        shell: pwsh
+        run: |
+          if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) { throw "Secret GOOGLE_SERVICE_ACCOUNT_JSON mancante" }
+          Set-Content -Path SiBallaImportingData/Resources/siballa-8c6d48649c13.json -Value $env:GOOGLE_SERVICE_ACCOUNT_JSON -Encoding utf8NoBOM
+
+      - name: Build
+        run: dotnet publish "$PROJECT" -c Release -o "$OUT"
+
+      - name: Cache dati GeoNames
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            out/allCountries.txt
+            out/cities15000.txt
+          key: geonames-v1
+
+      - name: Agente
+        working-directory: out
+        shell: bash
+        env:
+          Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
+          Gemini__AgenteModel: ${{ inputs.modello }}
+          Import__EnableSearching: "false"
+          Import__EnableSending: "false"
+          Import__EnableImportingOnExcel: "false"
+          Import__EnableImportingOnDB: "false"
+          Import__ResetExcel: "false"
+          Import__ResetDb: "false"
+          Import__NoPush: "true"
+          Import__AgenteVerifica: ${{ inputs.modo == 'verifica' }}
+          Import__AgenteProva: ${{ inputs.modo == 'prova' }}
+          Import__AgenteMax: ${{ inputs.max }}
+        run: dotnet SiBallaImportingData.dll 2>&1 | tee agente.log
+
+      # proposte per email (stessi destinatari dell'email degli eventi), log completo in allegato. Non fa mai fallire il run
+      - name: Email con le proposte
+        if: always()
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
+          ESITO: ${{ job.status }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITOLO: Agente verifica (${{ inputs.modo }})
+          ELENCO: "🤖 |❌ |===== Risultato agente|sicurezza (alta|media|bassa): "
+        run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
+
+      - name: Allega il log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agente-verifica-${{ github.run_number }}
+          path: out/agente.log
+          retention-days: 30

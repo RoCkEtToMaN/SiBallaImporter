@@ -228,30 +228,38 @@ internal static class ImportCommands
     /// dell'organizzatore (gli suggerirebbero la risposta) e confronta con la tua decisione. Non scrive niente.
     /// Le righe dello Sheet non hanno la descrizione dell'evento: gli eventi online, che ce l'hanno, sono più facili
     /// </summary>
+    // nota scritta dal programma (Gemini, memoria, copia da Serate): il valore della cella non è una tua decisione
+    private static bool NotaDelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
+        && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
+            || ImportData.NotaCopiaDaSerate(n));
+
+    /// <summary>
+    /// La tua decisione sulla riga: workshop, mercatino, serata+workshop, no (scartato) o "swing" (confermato), null se non
+    /// l'hai decisa tu. Confermata nella scheda Workshop = workshop (corso, weekend, festival)
+    /// </summary>
+    private static string? DecisioneTua(Event e) => e.LuogoVerificato switch
+    {
+        ImportData.VerifiedSerataWorkshop => ImportData.VerifiedSerataWorkshop,
+        ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => NotaDelProgramma(e) && !e.RigaArancione ? null : e.LuogoVerificato,
+        ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedStorico => null,
+        _ when e.SheetName == TipoEvento.Workshop.ToString() => NotaDelProgramma(e) ? null : ImportData.VerifiedWorkshop,
+        _ => "swing",
+    };
+
+    // righe decise da te: stessa serie e stesso giorno contano una volta; per tipo le date più recenti
+    private static List<(Event Evento, string Tua)> CampioneDecise(List<Event> sheetEvents, int maxPerTipo) => sheetEvents
+        .Select(e => (Evento: e, Tua: DecisioneTua(e)))
+        .Where(x => x.Tua is not null && !string.IsNullOrWhiteSpace(x.Evento.PartyName))
+        .GroupBy(x => (x.Tua, Titolo: MemoriaSerie.TitoloSerie(x.Evento.PartyName), x.Evento.DateStart.Date)).Select(g => g.First())
+        .GroupBy(x => x.Tua)
+        .SelectMany(g => g.OrderByDescending(x => x.Evento.DateStart).Take(maxPerTipo))
+        .Select(x => (x.Evento, x.Tua!))
+        .ToList();
+
     public static async Task TestGeminiSheetAsync(AppSettings settings, List<Event> sheetEvents)
     {
         int max = Math.Max(1, settings.Import.TestGeminiSheetMax);
-        static bool DelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
-            && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
-                || ImportData.NotaCopiaDaSerate(n));
-        // la tua decisione: workshop, mercatino, no (scartato) o swing (confermato), null se non l'hai decisa tu.
-        // Confermata nella scheda Workshop = workshop (corso, weekend, festival)
-        static string? Tua(Event e) => e.LuogoVerificato switch
-        {
-            ImportData.VerifiedSerataWorkshop => ImportData.VerifiedSerataWorkshop,
-            ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => DelProgramma(e) && !e.RigaArancione ? null : e.LuogoVerificato,
-            ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedStorico => null,
-            _ when e.SheetName == TipoEvento.Workshop.ToString() => DelProgramma(e) ? null : ImportData.VerifiedWorkshop,
-            _ => "swing",
-        };
-        // stessa serie e stesso giorno contano una volta; per tipo le date più recenti
-        var campione = sheetEvents
-            .Select(e => (Evento: e, Tua: Tua(e)))
-            .Where(x => x.Tua is not null && !string.IsNullOrWhiteSpace(x.Evento.PartyName))
-            .GroupBy(x => (x.Tua, Titolo: MemoriaSerie.TitoloSerie(x.Evento.PartyName), x.Evento.DateStart.Date)).Select(g => g.First())
-            .GroupBy(x => x.Tua)
-            .SelectMany(g => g.OrderByDescending(x => x.Evento.DateStart).Take(max))
-            .ToList();
+        var campione = CampioneDecise(sheetEvents, max);
         Console.WriteLine();
         Console.WriteLine($"===== Prova Gemini sullo Sheet: {campione.Count} righe decise da te (max {max} per tipo) =====");
         foreach (var g in campione.GroupBy(x => x.Tua)) Console.WriteLine($"   {g.Key}: {g.Count()}");
@@ -284,6 +292,115 @@ internal static class ImportCommands
                               $"{x.Evento.Organizer?.Trim()} | {x.Evento.PartyName?.Trim()} -> {SwingEventClassifier.EsitoCompleto(x.Evento)?.Motivo}");
         Console.WriteLine();
         Console.WriteLine("Prova: niente scritto nello Sheet.");
+    }
+
+    /// <summary>
+    /// Agente di verifica sulle righe future in attesa del tuo controllo ("da verificare", "nuovo", "gemini"), le più vicine
+    /// per prime: per ognuna stampa la proposta con motivo, sicurezza, problemi e fonti. Non scrive niente nello Sheet
+    /// </summary>
+    public static async Task AgenteVerificaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store)
+    {
+        var o = settings.Import;
+        var righe = sheetEvents
+            .Where(e => e.DateStart.Date >= DateTime.Today)
+            .Where(e => e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini)
+            .Where(e => !ImportData.NotaCopiaDaSerate(e.NotaVerifica))
+            .OrderBy(e => e.DateStart).Take(Math.Max(1, o.AgenteMax)).ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Agente di verifica: {righe.Count} righe future da controllare (max {o.AgenteMax}; " +
+                          $"per riga max {o.AgentePassi} passi e {o.AgentePagine} pagine) =====");
+
+        // senza chiave (es. dal PC dell'ufficio): prova a secco, mostra cosa riceverebbe Gemini e la pagina letta per le prime 2 righe
+        if (!GeminiPronto(settings))
+        {
+            foreach (var e in righe.Take(2))
+            {
+                Console.WriteLine($"\n----- contesto per {e.SheetName} riga {e.SheetRow} -----");
+                Console.WriteLine(AgenteVerifica.ContestoPerProva(e, sheetEvents, store));
+                if (e.EventDetail?.WebSite is { Length: > 0 } url)
+                    Console.WriteLine($"----- leggi_pagina({url}) -----\n{await AgenteVerifica.LeggiPaginaAsync(url)}");
+            }
+            return;
+        }
+
+        var proposte = new List<(Event Evento, AgenteVerifica.Proposta? P)>();
+        foreach (var e in righe)
+        {
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, settings.Gemini, o.AgentePassi, o.AgentePagine, nascondiDecisione: false);
+            proposte.Add((e, p));
+            StampaProposta(e, e.LuogoVerificato ?? "", p);
+        }
+
+        Console.WriteLine();
+        Console.WriteLine($"===== Riepilogo agente: {proposte.Count(x => x.P is not null)}/{proposte.Count} righe con una proposta =====");
+        foreach (var g in proposte.Where(x => x.P is not null).GroupBy(x => x.P!.Stato).OrderByDescending(g => g.Count()))
+            Console.WriteLine($"   {g.Key}: {g.Count()} (sicurezza alta: {g.Count(x => x.P!.Sicurezza == "alta")})");
+        int conProblemi = proposte.Count(x => x.P?.Problemi.Count > 0);
+        Console.WriteLine($"   righe con problemi segnalati (data, orario, luogo...): {conProblemi}");
+        Console.WriteLine("Anteprima: niente scritto nello Sheet (le proposte le applichi tu in \"Luogo verificato\").");
+    }
+
+    /// <summary>
+    /// Prova dell'agente sulle righe che hai già deciso tu, senza fargli vedere la tua decisione (né le righe della stessa
+    /// serie nello stesso giorno): confronta le proposte con le tue decisioni, anche per livello di sicurezza. Non scrive niente
+    /// </summary>
+    public static async Task AgenteProvaAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store)
+    {
+        var o = settings.Import;
+        if (!GeminiPronto(settings)) return;
+        var campione = CampioneDecise(sheetEvents, Math.Max(1, o.AgenteMax));
+        Console.WriteLine();
+        Console.WriteLine($"===== Prova dell'agente: {campione.Count} righe decise da te (max {o.AgenteMax} per tipo) =====");
+        foreach (var g in campione.GroupBy(x => x.Tua)) Console.WriteLine($"   {g.Key}: {g.Count()}");
+
+        // "ok" dell'agente = "swing" (confermata); "da verificare" = non ha deciso
+        static string Come(AgenteVerifica.Proposta? p) => p is null ? "nessuna risposta"
+            : p.Stato == AgenteVerifica.StatoOk ? "swing" : p.Stato == AgenteVerifica.StatoIncerto ? "incerto" : p.Stato;
+        var esiti = new List<(Event Evento, string Tua, string Agente, AgenteVerifica.Proposta? P)>();
+        foreach (var (e, tua) in campione)
+        {
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, settings.Gemini, o.AgentePassi, o.AgentePagine, nascondiDecisione: true);
+            esiti.Add((e, tua, Come(p), p));
+            StampaProposta(e, $"tua: {tua}", p, giusto: Come(p) == tua);
+        }
+
+        var decise = esiti.Where(x => x.Agente is not ("incerto" or "nessuna risposta")).ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Risultato agente: d'accordo con te su {esiti.Count(x => x.Tua == x.Agente)}/{esiti.Count} righe; " +
+                          $"sulle {decise.Count} in cui ha deciso: {decise.Count(x => x.Tua == x.Agente)} giuste =====");
+        foreach (var s in new[] { "alta", "media", "bassa" })
+        {
+            var conS = decise.Where(x => x.P!.Sicurezza == s).ToList();
+            if (conS.Count > 0) Console.WriteLine($"   sicurezza {s}: {conS.Count(x => x.Tua == x.Agente)}/{conS.Count} giuste");
+        }
+        var colonne = new[] { "swing", ImportData.VerifiedSerataWorkshop, ImportData.VerifiedWorkshop, ImportData.VerifiedMercatino, ImportData.VerifiedNo, "incerto", "nessuna risposta" };
+        Console.WriteLine("   (riga = tua decisione, colonne = proposta dell'agente)");
+        Console.WriteLine($"   {"tua / agente",-16}" + string.Concat(colonne.Select(c => $"{c,17}")));
+        foreach (var g in esiti.GroupBy(x => x.Tua))
+            Console.WriteLine($"   {g.Key,-16}" + string.Concat(colonne.Select(c => $"{g.Count(x => x.Agente == c),17}")));
+        Console.WriteLine($"   passi medi per riga: {esiti.Where(x => x.P is not null).Select(x => x.P!.Passi).DefaultIfEmpty().Average():F1}, " +
+                          $"pagine lette: {esiti.Sum(x => x.P?.Pagine ?? 0)}");
+        Console.WriteLine("Prova: niente scritto nello Sheet.");
+    }
+
+    private static bool GeminiPronto(AppSettings settings)
+    {
+        if (!string.IsNullOrWhiteSpace(settings.Gemini.ApiKey)) return true;
+        Console.WriteLine("⚠️ Chiave Gemini (Gemini:ApiKey o GEMINI_API_KEY) non impostata: agente non avviato");
+        return false;
+    }
+
+    private static void StampaProposta(Event e, string prima, AgenteVerifica.Proposta? p, bool? giusto = null)
+    {
+        var segno = giusto switch { true => "✅", false => "❌", null => "🤖" };
+        // una riga completa (finisce nell'elenco dell'email del workflow "Agente verifica"), poi i dettagli
+        var proposta = p is null ? "nessuna proposta (Gemini non ha risposto)" : $"{p.Stato} ({p.Sicurezza}) - {p.Motivo}";
+        Console.WriteLine();
+        Console.WriteLine($"{segno} {prima} -> {proposta} | {e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()}");
+        if (p is null) return;
+        foreach (var problema in p.Problemi) Console.WriteLine($"   ⚠️ {problema}");
+        if (p.Fonti.Count > 0) Console.WriteLine($"   fonti: {string.Join(" ", p.Fonti)}");
+        Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
     }
 
     /// <summary>

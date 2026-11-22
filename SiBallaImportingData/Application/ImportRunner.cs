@@ -92,6 +92,19 @@ internal static class ImportRunner
             return;
         }
 
+        // AGENTE DI VERIFICA: legge la pagina dell'evento, cerca nello Sheet e propone lo stato delle righe in attesa.
+        // --agente-verifica sulle righe future "da verificare"/"nuovo"/"gemini", --agente-prova sulle righe che hai già deciso tu
+        // (confronto). Non scrive niente nello Sheet. Poi il programma si ferma
+        if (opzioni.AgenteVerifica || opzioni.AgenteProva)
+        {
+            if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
+            {
+                if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store);
+                if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store);
+            }
+            return;
+        }
+
         // formule dell'intestazione bloccate da valori scritti sotto (#REF!): li svuoto, solo nei giri che scrivono sullo Sheet
         if (opzioni.EnableImportingOnExcel)
         {

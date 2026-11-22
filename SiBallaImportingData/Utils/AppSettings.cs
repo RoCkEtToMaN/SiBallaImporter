@@ -37,6 +37,9 @@ namespace SiBallaImportingData.Utils
             ["--memoria-serie"] = "Import:MemoriaSerie",
             ["--memoria-serie-scrivi"] = "Import:MemoriaSerieScrivi",
             ["--test-gemini-sheet"] = "Import:TestGeminiSheet",
+            ["--agente-verifica"] = "Import:AgenteVerifica",
+            ["--agente-prova"] = "Import:AgenteProva",
+            ["--agente-max"] = "Import:AgenteMax",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -145,6 +148,16 @@ namespace SiBallaImportingData.Utils
         public bool TestGeminiSheet { get; set; }
         // righe per tipo nella prova (le più recenti)
         public int TestGeminiSheetMax { get; set; } = 40;
+        // agente di verifica (Service/AgenteVerifica.cs): sulle righe future "nuovo", "gemini" e "da verificare" legge la pagina
+        // dell'evento, cerca nello Sheet e PROPONE lo stato con il motivo. Non scrive niente nello Sheet
+        public bool AgenteVerifica { get; set; }
+        // prova dell'agente sulle righe che hai già deciso tu (senza fargli vedere la tua decisione): confronta e basta
+        public bool AgenteProva { get; set; }
+        // righe da controllare (verifica) o righe per tipo (prova)
+        public int AgenteMax { get; set; } = 15;
+        // tetto per riga: chiamate a Gemini e pagine web lette
+        public int AgentePassi { get; set; } = 6;
+        public int AgentePagine { get; set; } = 3;
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }
@@ -183,6 +196,8 @@ namespace SiBallaImportingData.Utils
     {
         // i Flash "pieni" più recenti sul piano gratuito possono impiegare minuti: il lite risponde in pochi secondi
         public string Model { get; set; } = "gemini-flash-lite-latest";
+        // modello dell'agente di verifica (vuoto = Model): lavora a più passi, un modello più capace sbaglia meno
+        public string? AgenteModel { get; set; }
         public string? ApiKey { get; set; }
         // ricerca Google per trovare gli indirizzi: sul piano gratuito risponde 429, serve la fatturazione attiva
         public bool UseGoogleSearch { get; set; }

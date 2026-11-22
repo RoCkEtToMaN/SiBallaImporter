@@ -72,6 +72,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Stato `serata+workshop` (solo Serate, lo scrive solo l'utente): pratica/ripasso/lezione + serata. Vale come conferma
   (DB/sito/email) e la riga viene copiata in Workshop (nota "Copiata da Serate"). Gemini (tipo `serata_e_workshop`) e la
   memoria non lo scrivono: mettono `nuovo` in Serate + copia (`Event.AncheWorkshop`).
+- Agente di verifica (`Service/AgenteVerifica.cs`, ricetta 13): Gemini con function calling (leggi_pagina, cerca_nello_sheet,
+  proponi), con un tetto di passi e di pagine per riga. Propone lo stato di "Luogo verificato" e non scrive mai nello Sheet.
+  `--agente-verifica` = righe future in attesa, `--agente-prova` = confronto con le righe già decise. Workflow "Agente verifica".
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 
