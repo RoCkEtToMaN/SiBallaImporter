@@ -205,7 +205,11 @@ anche se l'aggiunta dei nuovi eventi (`ENABLE_IMPORTING_ON_EXCEL`) è spenta.
 Al posto della ricerca qui sopra lavora l'**agente** (`Service/AgenteVerifica.cs`): legge le pagine, cerca sulla
 mappa il nome del locale (anche quello scritto nel titolo) e dell'organizzatore, usa la ricerca web se c'è
 (secret `TAVILY_API_KEY`, gratis) e accetta un luogo solo se Photon lo trova entro 10 km dalla città.
-Al massimo `INDIRIZZI_AGENTE_MAX` eventi per giro (default 5). Quando lo trova:
+Al massimo `INDIRIZZI_AGENTE_MAX` eventi per giro (default 5). Prima dell'agente, gratis e senza Gemini: i luoghi già
+trovati per lo stesso evento si riusano, e il locale scritto nel titolo ("… @ Nelson Tavern", "(Officina della Birra)",
+"presso …") si cerca direttamente sulla mappa. L'agente riceve anche i luoghi già usati dallo stesso organizzatore in quella
+città. Con la Variable `AGENTE_MODELLO` (es. `gemini-flash-latest`) l'agente usa un altro modello, con la sua quota gratuita,
+e non toglie richieste alla classificazione degli eventi nuovi. Quando lo trova:
 
 - colonna F `Paese, Città, Via (coordinate della via)`, `gemini` in **Luogo verificato**, nota con la fonte;
 - nel dizionario la voce dell'evento, **non verificata** (`"source": "agente"`), riusata per le date nuove

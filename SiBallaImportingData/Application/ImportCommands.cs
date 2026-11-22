@@ -505,6 +505,35 @@ internal static class ImportCommands
         $"Non serve fare niente. Se è sbagliato: correggi la via nella colonna F e svuota '{ImportData.VerifiedHeader}' " +
         $"(le coordinate si ricalcolano e da lì vale la tua via per tutte le date). Se è giusto e vuoi bloccarlo: scrivi '{ImportData.VerifiedOk}'.";
 
+    private const int MaxRicercheTitolo = 20;
+
+    // nomi di locale scritti nel titolo: dopo "@", tra parentesi, dopo "presso" / "c/o". Niente date, numeri o stili da soli
+    private static readonly System.Text.RegularExpressions.Regex LocaleNelTitolo = new(
+        @"@\s*(?<n>[^|@(\[\-–—•]+)|\((?<n>[^)]{3,60})\)|\b(?:presso|c/o)\s+(?<n>[^|,(\-–—•]+)",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    private static readonly System.Text.RegularExpressions.Regex NonELocale = new(
+        @"^\s*[\d\s/.:\-]+\s*$|^(lindy|balboa|boogie|blues|shag|swing|social|dj|live|free|gratis|ingresso|ore|h)\b",
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+    // senza Gemini serve più prudenza della ricerca normale: il nome trovato deve avere almeno 2/3 delle parole cercate,
+    // non deve essere una via o una piazza, e il nome nel titolo non deve essere una città ("College 66 (Ancona)")
+    private static bool LocaleGiusto(string cercato, string? trovato, Event ev)
+    {
+        var cercate = AddressResolver.ParoleSignificative(cercato);
+        var trovate = AddressResolver.ParoleSignificative(trovato);
+        if (cercate.Count == 0 || cercate.Intersect(trovate).Count() < Math.Max(1, (int)Math.Ceiling(cercate.Count * 2 / 3.0))) return false;
+        if (System.Text.RegularExpressions.Regex.IsMatch(trovato ?? "", @"^\s*(via|viale|piazza|piazzale|corso|largo|strada|rue|avenue|place|calle|street|straße|strasse)\b",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase)) return false;
+        if (string.Equals(cercato.Trim(), ev.City?.Trim(), StringComparison.OrdinalIgnoreCase)) return false;
+        return OfflineGeocoder.GetCoordinates(cercato.Trim()) == (0, 0);
+    }
+
+    private static IEnumerable<string> LocaliNelTitolo(string? titolo) =>
+        LocaleNelTitolo.Matches(titolo ?? "")
+            .Select(m => System.Text.RegularExpressions.Regex.Replace(m.Groups["n"].Value, @"\s+", " ").Trim(' ', '.', '!', '☆', '⭐'))
+            .Where(n => n.Length is >= 3 and <= 60 && !NonELocale.IsMatch(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
     public static async Task AgenteDizionarioAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver,
                                                    bool scrivi, int max, string? dizionarioPath)
     {
@@ -544,14 +573,50 @@ internal static class ImportCommands
             }
         }
 
-        // 2. gli altri: ricerca con l'agente, le date più vicine per prime; i non trovati si riprovano dopo 30 giorni
+        // 2. locale scritto nel titolo ("... @ La Locanda del Fornaio", "SWING PARTY (Officina Della Birra)", "presso ..."):
+        //    cercato direttamente sulla mappa, senza Gemini. Al massimo MaxRicercheTitolo nomi per giro (Photon: 1 richiesta al secondo)
+        var dalTitolo = new HashSet<List<Event>>(ReferenceEqualityComparer.Instance);
+        int ricercheTitolo = 0;
+        foreach (var gruppo in tutti.Where(g => store.FindAgente(g[0]) is null))
+        {
+            if (ricercheTitolo >= MaxRicercheTitolo) break;
+            var ev = gruppo[0];
+            foreach (var nome in LocaliNelTitolo(ev.PartyName))
+            {
+                if (ricercheTitolo >= MaxRicercheTitolo) break;
+                ricercheTitolo++;
+                if (await resolver.CercaLocaleAsync(nome, ev.City, ev.Country) is not { } l || !LocaleGiusto(nome, l.Nome, ev)) continue;
+                dalTitolo.Add(gruppo);
+                var indirizzo = l.Via ?? l.Nome ?? nome;
+                var luogo = string.Join(", ", new[] { l.Nome ?? nome, l.Via }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
+                var come = $"locale '{nome}' scritto nel titolo, trovato sulla mappa come '{l.Nome}'";
+                Console.WriteLine($"🏷️ {luogo} ({come}) | {ev.DateStart:yyyy-MM-dd} | {ev.City?.Trim()} | {ev.PartyName?.Trim()} ({gruppo.Count} date)");
+                if (scrivi)
+                {
+                    store.RegistraDaAgente(ev, l.Nome ?? nome, indirizzo, l.Lat, l.Lng, come, "titolo dell'evento + mappa");
+                    var nota = $"Indirizzo trovato il {DateTime.Today:dd/MM/yyyy}: {luogo}\n{come} (senza Gemini)\n" + NotaFacoltativa;
+                    foreach (var riga in gruppo)
+                    {
+                        riga.EventDetail.Address = indirizzo;
+                        riga.EventDetail.Location = luogo;
+                        riga.EventDetail.Latitude = l.Lat;
+                        riga.EventDetail.Longitude = l.Lng;
+                        riga.LuogoVerificato = ImportData.VerifiedGemini;
+                        scritte.Add((riga, nota));
+                    }
+                }
+                break;
+            }
+        }
+
+        // 3. gli altri: ricerca con l'agente, le date più vicine per prime; i non trovati si riprovano dopo 30 giorni
         var gruppi = tutti
-            .Where(g => store.FindAgente(g[0]) is null)
+            .Where(g => store.FindAgente(g[0]) is null && !dalTitolo.Contains(g))
             .Where(g => store.GeminiNonTrovato(g[0]) is not DateTime d || d.AddDays(30) <= DateTime.Today)
             .ToList();
         var daFare = gruppi.Take(Math.Max(1, max)).ToList();
         Console.WriteLine();
-        Console.WriteLine($"===== Dizionario luoghi con l'agente: {riusati} eventi dal dizionario, {daFare.Count} da cercare (su {gruppi.Count} senza indirizzo; " +
+        Console.WriteLine($"===== Dizionario luoghi con l'agente: {riusati} eventi dal dizionario, {dalTitolo.Count} dal titolo senza Gemini ({ricercheTitolo} nomi cercati sulla mappa), {daFare.Count} da cercare con l'agente (su {gruppi.Count} senza indirizzo; " +
                           $"ricerca web: {(!string.IsNullOrWhiteSpace(o.TavilyApiKey) ? "Tavily" : settings.Gemini.UseGoogleSearch ? "Google" : "no, solo pagine e mappa")}; " +
                           $"{(scrivi ? "SCRIVE dizionario e Sheet" : "anteprima")}) =====");
         if (!GeminiPronto(settings))

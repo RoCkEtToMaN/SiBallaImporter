@@ -317,6 +317,23 @@ public class KnownVenueStore
         return true;
     }
 
+    /// <summary>
+    /// Luoghi già noti dello stesso organizzatore nella stessa città (verificati da te o trovati dall'agente, con l'indirizzo):
+    /// indizio per l'agente, le scuole ballano quasi sempre negli stessi posti. Il default con le coordinate iniziali non conta
+    /// </summary>
+    public List<(string Luogo, bool Verificato, int Eventi)> LuoghiOrganizzatore(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return new();
+        if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) return new();
+        return new[] { org.Default }.Concat(org.Events.Values)
+            .Where(v => !string.IsNullOrWhiteSpace(v.Address) && HasCoords(v) && (v.Verified || v.Source == SourceAgente))
+            .GroupBy(v => Norm(v.Address!))
+            .Select(g => (Luogo: string.Join(", ", new[] { g.First().VenueName, g.First().Address }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct()),
+                          Verificato: g.Any(v => v.Verified), Eventi: g.Count()))
+            .OrderByDescending(x => x.Verificato).ThenByDescending(x => x.Eventi)
+            .Take(5).ToList();
+    }
+
     /// <summary>Luogo trovato in passato dall'agente per questo evento (non ancora verificato da te), null se non c'è</summary>
     public VenueInfo? FindAgente(Event e)
     {

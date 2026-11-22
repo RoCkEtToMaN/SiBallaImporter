@@ -158,7 +158,7 @@ public class AddressResolver
         "jazz", "swing", "dance", "ballo", "scuola", "studio", "live", "music", "musica", "arci", "asd", "aps"
     };
 
-    private static List<string> ParoleSignificative(string? s)
+    public static List<string> ParoleSignificative(string? s)
     {
         if (string.IsNullOrWhiteSpace(s)) return new();
         var senzaAccenti = new string(s.Normalize(System.Text.NormalizationForm.FormD)

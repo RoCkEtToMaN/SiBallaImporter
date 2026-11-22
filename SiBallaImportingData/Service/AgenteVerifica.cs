@@ -97,6 +97,9 @@ namespace SiBallaImportingData.Service
             "In proponi metti 'locale' e 'indirizzo' (via e civico, senza città) solo se vengono da una fonte o dalla mappa: " +
             "'fonte_indirizzo' = URL letto, oppure 'mappa' (trovato con verifica_indirizzo dal nome del locale/organizzatore), " +
             "oppure 'conoscenza del modello' (lo sapevi tu e la mappa lo conferma); in questi due ultimi casi sicurezza al massimo media. " +
+            "Se il contesto elenca i 'luoghi già usati da questo organizzatore', parti da lì: se l'evento è dello stesso tipo " +
+            "(stessa scuola, stessa serie, serata abituale) e una pagina non dice altro, proponi quel luogo con fonte_indirizzo = " +
+            "'dizionario organizzatore' e sicurezza al massimo media; con più luoghi scegli solo se il titolo o la pagina lo indicano. " +
             "Non inventare e non dedurre l'indirizzo dal nome della città. " +
             "Nei problemi non scrivere 'indirizzo mancante' né 'orario non indicato': segnala solo un indirizzo o un orario " +
             "diverso da quello trovato in una fonte.";
@@ -487,6 +490,10 @@ namespace SiBallaImportingData.Service
 
             if (!nascondiIndirizzo && store.Find(riga) is { } luogo)
                 sb.AppendLine($"luogo noto nel dizionario per questo organizzatore e città: {luogo.VenueName} - {luogo.Address}");
+            // nella prova sugli indirizzi no: sarebbe la risposta
+            if (!nascondiIndirizzo && store.LuoghiOrganizzatore(riga) is { Count: > 0 } luoghi)
+                sb.AppendLine("luoghi già usati da questo organizzatore in questa città (dizionario): " +
+                              string.Join("; ", luoghi.Select(x => $"{x.Luogo} ({(x.Verificato ? "verificato dal curatore" : "trovato dall'agente")}, {x.Eventi} eventi)")));
 
             // altre date della stessa serie (stesso organizzatore, città e titolo senza mesi né ordinali)
             var chiave = MemoriaSerie.Chiave(riga);
