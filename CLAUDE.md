@@ -74,7 +74,13 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   memoria non lo scrivono: mettono `nuovo` in Serate + copia (`Event.AncheWorkshop`).
 - Agente di verifica (`Service/AgenteVerifica.cs`, ricetta 13): Gemini con function calling (leggi_pagina, cerca_nello_sheet,
   proponi), con un tetto di passi e di pagine per riga. Propone lo stato di "Luogo verificato" e non scrive mai nello Sheet.
-  `--agente-verifica` = righe future in attesa, `--agente-prova` = confronto con le righe già decise. Workflow "Agente verifica".
+  `--agente-verifica` = righe future in attesa, `--agente-prova` = confronto con le righe già decise, `--agente-indirizzi-prova` =
+  ritrova i luoghi già noti (km). Cerca anche l'indirizzo (verifica_indirizzo con Photon; cerca_web = ricerca Google di Gemini, solo con
+  `Gemini:UseGoogleSearch`, oppure Tavily con `TAVILY_API_KEY`). DuckDuckGo e simili bloccano i bot: non usarli. `--agente-dizionario[-scrivi]`:
+  luoghi mancanti -> voce dell'evento nel dizionario (non verificata, Source "agente") + Sheet "gemini"; con "ok" diventa verificata.
+  Workflow "Agente verifica" (modo dizionario + scrivi: da lanciare su master, perché fa il commit del dizionario).
+  Nel giro orario: variabile del repo `INDIRIZZI_AGENTE=true` -> l'agente sostituisce la ricerca semplice di `--indirizzi`
+  (max `INDIRIZZI_AGENTE_MAX`, default 5, eventi per giro); i luoghi già trovati dall'agente (`FindAgente`) si riusano senza Gemini.
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

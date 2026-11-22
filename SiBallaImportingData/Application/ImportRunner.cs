@@ -95,12 +95,15 @@ internal static class ImportRunner
         // AGENTE DI VERIFICA: legge la pagina dell'evento, cerca nello Sheet e propone lo stato delle righe in attesa.
         // --agente-verifica sulle righe future "da verificare"/"nuovo"/"gemini", --agente-prova sulle righe che hai già deciso tu
         // (confronto). Non scrive niente nello Sheet. Poi il programma si ferma
-        if (opzioni.AgenteVerifica || opzioni.AgenteProva)
+        if (opzioni.AgenteVerifica || opzioni.AgenteProva || opzioni.AgenteIndirizziProva || opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi)
         {
             if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
             {
-                if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store);
-                if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store);
+                if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
+                if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);
+                if (opzioni.AgenteIndirizziProva) await ImportCommands.AgenteIndirizziProvaAsync(settings, sheetEvents, store, resolver);
+                if (opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi)
+                    await ImportCommands.AgenteDizionarioAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDizionarioScrivi, opzioni.AgenteMax, dizionarioPath);
             }
             return;
         }
@@ -406,7 +409,10 @@ internal static class ImportRunner
 
         // righe dello sheet senza immagine: la cerco sul sito della riga (così arriva sul DB già in questo giro)
         // righe future senza indirizzo: locale cercato da Gemini e confermato da Photon, scritto nello Sheet come "gemini"
-        if (opzioni.CercaIndirizzi)
+        //    con IndirizziConAgente (--indirizzi-agente) li cerca l'agente (pagine, mappa, ricerca web se c'è) e li salva anche nel dizionario
+        if (opzioni.CercaIndirizzi && opzioni.IndirizziConAgente)
+            await ImportCommands.AgenteDizionarioAsync(settings, sheetEvents, store, resolver, scrivi: true, opzioni.AgenteDizionarioMax, dizionarioPath: null);
+        else if (opzioni.CercaIndirizzi)
             await IndirizziGemini.CercaAsync(sheetEvents, store, resolver, settings.Gemini, opzioni.CercaIndirizziMax);
 
         if (opzioni.CercaImmaginiSheet)

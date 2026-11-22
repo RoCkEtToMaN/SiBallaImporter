@@ -200,6 +200,25 @@ anche se l'aggiunta dei nuovi eventi (`ENABLE_IMPORTING_ON_EXCEL`) è spenta.
 
 `--test-indirizzi` resta per provare: stampa cosa troverebbe, senza scrivere niente.
 
+#### Con l'agente (Variable `INDIRIZZI_AGENTE` = `true`)
+
+Al posto della ricerca qui sopra lavora l'**agente** (`Service/AgenteVerifica.cs`): legge le pagine, cerca sulla
+mappa il nome del locale (anche quello scritto nel titolo) e dell'organizzatore, usa la ricerca web se c'è
+(secret `TAVILY_API_KEY`, gratis) e accetta un luogo solo se Photon lo trova entro 10 km dalla città.
+Al massimo `INDIRIZZI_AGENTE_MAX` eventi per giro (default 5). Quando lo trova:
+
+- colonna F `Paese, Città, Via (coordinate della via)`, `gemini` in **Luogo verificato**, nota con la fonte;
+- nel dizionario la voce dell'evento, **non verificata** (`"source": "agente"`), riusata per le date nuove
+  dello stesso evento senza cercarlo di nuovo.
+
+**Non devi fare niente**: l'indirizzo è già pubblicato. Quando ti capita di guardarlo:
+- **sbagliato** → correggi la via nella colonna F e **svuota** Luogo verificato: le coordinate si
+  ricalcolano e da lì vale la tua via per tutte le date (con `ok` resterebbero le coordinate vecchie);
+- **giusto** e vuoi bloccarlo → `ok`. Facoltativo: l'agente non scrive mai `ok` al posto tuo.
+
+Per provarlo prima: workflow "Agente verifica", modo `indirizzi` (quanto ci azzecca sui luoghi che conosci)
+e modo `dizionario` con scrivi = `false` (cosa troverebbe).
+
 ### Gemini: errori temporanei
 
 Se Gemini risponde con un errore temporaneo (`429` troppe richieste, `503` "high demand" e gli altri

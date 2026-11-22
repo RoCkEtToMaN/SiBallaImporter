@@ -145,6 +145,10 @@ jobs:
           # righe future dello Sheet senza indirizzo: Gemini cerca il locale e lo scrive come "gemini" (max 20 per giro)
           Import__CercaIndirizzi: ${{ inputs.solo_immagini == 'true' && 'false' || (vars.CERCA_INDIRIZZI || 'true') }}
           Import__CercaIndirizziMax: ${{ vars.CERCA_INDIRIZZI_MAX || '20' }}
+          # luoghi cercati dall'agente invece che dalla ricerca semplice (variabile del repo INDIRIZZI_AGENTE = true), max eventi per giro
+          Import__IndirizziConAgente: ${{ vars.INDIRIZZI_AGENTE || 'false' }}
+          Import__AgenteDizionarioMax: ${{ vars.INDIRIZZI_AGENTE_MAX || '5' }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           Import__ResetDb: "false"
           Import__ResetExcel: "false"
           Import__PulisciLezioni: "false"

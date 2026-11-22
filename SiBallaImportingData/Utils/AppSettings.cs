@@ -40,6 +40,10 @@ namespace SiBallaImportingData.Utils
             ["--agente-verifica"] = "Import:AgenteVerifica",
             ["--agente-prova"] = "Import:AgenteProva",
             ["--agente-max"] = "Import:AgenteMax",
+            ["--agente-indirizzi-prova"] = "Import:AgenteIndirizziProva",
+            ["--agente-dizionario"] = "Import:AgenteDizionario",
+            ["--agente-dizionario-scrivi"] = "Import:AgenteDizionarioScrivi",
+            ["--indirizzi-agente"] = "Import:IndirizziConAgente",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -60,6 +64,8 @@ namespace SiBallaImportingData.Utils
             var settings = configuration.Get<AppSettings>() ?? new AppSettings();
 
             // compatibilità con la variabile d'ambiente usata finora
+            if (string.IsNullOrWhiteSpace(settings.Import.TavilyApiKey))
+                settings.Import.TavilyApiKey = Environment.GetEnvironmentVariable("TAVILY_API_KEY");
             if (string.IsNullOrWhiteSpace(settings.Gemini.ApiKey))
                 settings.Gemini.ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
 
@@ -156,8 +162,22 @@ namespace SiBallaImportingData.Utils
         // righe da controllare (verifica) o righe per tipo (prova)
         public int AgenteMax { get; set; } = 15;
         // tetto per riga: chiamate a Gemini e pagine web lette
-        public int AgentePassi { get; set; } = 6;
+        public int AgentePassi { get; set; } = 8;
         public int AgentePagine { get; set; } = 3;
+        // ricerche web (DuckDuckGo) per riga, servono soprattutto a trovare l'indirizzo
+        public int AgenteRicerche { get; set; } = 2;
+        // prova sugli indirizzi: righe con indirizzo controllato da te, l'agente deve ritrovarlo senza vederlo (confronto in km)
+        public bool AgenteIndirizziProva { get; set; }
+        // luoghi degli eventi futuri senza indirizzo: l'agente li cerca (pagine, mappa, ricerca web se c'è) e li mostra;
+        // con AgenteDizionarioScrivi li salva nel dizionario (non verificati, Source "agente") e nello Sheet come "gemini"
+        public bool AgenteDizionario { get; set; }
+        public bool AgenteDizionarioScrivi { get; set; }
+        // giro dell'importatore: con CercaIndirizzi (--indirizzi) cerca i luoghi con l'agente invece che con la ricerca semplice di
+        // Gemini, al massimo AgenteDizionarioMax eventi per giro (i luoghi già trovati dall'agente si riusano senza contarli)
+        public bool IndirizziConAgente { get; set; }
+        public int AgenteDizionarioMax { get; set; } = 5;
+        // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
+        public string? TavilyApiKey { get; set; }
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }
