@@ -75,6 +75,8 @@ Valori di **Luogo verificato**, in sintesi:
 | `gemini` | il programma, indirizzo trovato da Gemini (vedi sotto) | sì | no, finché non scrivi `ok` |
 | `da verificare` | il programma, evento da controllare | **no** | no |
 | `no` | tu, evento scartato (niente app, sito né email); oppure la memoria delle serie, con la nota "Memoria: …" | **no** | no |
+| `mercatino` | tu o Gemini: mercatino vintage senza ballo, va solo nella Bacheca del sito | **no** | no |
+| `workshop` | tu (scheda Serate): è un workshop o un corso. Il programma lo copia nella scheda Workshop come `nuovo` (nota "Spostato da Serate (riga N)…"); in Serate resta come traccia | **no** (va la copia in Workshop) | no |
 
 Una riga `nuovo` senza indirizzo può prendere quello del dizionario (se lo stesso evento in un'altra
 riga ha un indirizzo verificato): in quel caso diventa `auto`.
@@ -90,7 +92,15 @@ vengono decise come hai deciso tu per le altre date, senza chiedere a Gemini:
   `da verificare` diventano `nuovo`). Conta come conferma piena `ok`/cella vuota (o un altro valore
   scritto da te), come mezza conferma una riga `nuovo`/`gemini` arrivata alla sua data senza che tu
   l'abbia scartata: servono almeno 2 conferme piene, o 4 mezze;
-- storia mista (date confermate e date scartate) o troppo corta: decide Gemini come prima.
+- se hai segnato `mercatino` o `workshop` **almeno 1 data** e nient'altro, le date nuove arrivano
+  già così (`workshop` = copiate nella scheda Workshop);
+- storia mista (date confermate e date scartate) o troppo corta: si guarda l'organizzatore (sotto),
+  altrimenti decide Gemini come prima.
+
+**Organizzatore**: se di un organizzatore (in tutte le città e con tutti i titoli) hai deciso **almeno
+2 date** e tutte allo stesso modo (tutte `no`, tutte `mercatino` o tutte `workshop`) senza confermarne
+nessuna, anche i suoi eventi nuovi prendono quel valore (nota "Memoria: organizzatore con N date…").
+Basta confermare (`ok`) un suo evento per fermare la regola.
 
 Le righe decise così hanno la nota **"Memoria: …"** con il motivo. Se la memoria sbaglia, correggi
 la riga: scrivere `ok` su una data di una serie scartata la rende "mista" e la memoria smette di

@@ -77,7 +77,10 @@ internal static class ImportRunner
         if (opzioni.MemoriaSerie || opzioni.MemoriaSerieScrivi)
         {
             if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
+            {
                 await ImportCommands.ApplicaMemoriaAsync(sheetEvents, MemoriaSerie.Da(sheetEvents), opzioni.MemoriaSerieScrivi);
+                await ImportCommands.SpostaInWorkshopAsync(eventiSheet, opzioni.MemoriaSerieScrivi);
+            }
             return;
         }
 
@@ -106,7 +109,11 @@ internal static class ImportRunner
         {
             memoria = MemoriaSerie.Da(sheetEvents);
             if (opzioni.EnableImportingOnExcel)
+            {
                 await ImportCommands.ApplicaMemoriaAsync(sheetEvents, memoria, scrivi: true);
+                // righe di Serate segnate "workshop" (da te o dalla memoria qui sopra) -> copia nella scheda Workshop
+                await ImportCommands.SpostaInWorkshopAsync(eventiSheet, scrivi: true);
+            }
         }
 
         // 2. righe future senza indirizzo e senza luogo noto -> voci da compilare
@@ -291,7 +298,7 @@ internal static class ImportRunner
             if (inAttesa > 0)
                 Console.WriteLine($"⏳ {inAttesa} righe '{ImportData.VerifiedPending}' non vanno sul DB");
             if (scartati > 0)
-                Console.WriteLine($"🚫 {scartati} righe '{ImportData.VerifiedNo}' (scartate) o '{ImportData.VerifiedMercatino}' (in Bacheca) non vanno sul DB");
+                Console.WriteLine($"🚫 {scartati} righe '{ImportData.VerifiedNo}' (scartate), '{ImportData.VerifiedMercatino}' (in Bacheca) o '{ImportData.VerifiedWorkshop}' (copiate in Workshop) non vanno sul DB");
             return ok;
         }
         if (eventiSheet.TryGetValue(TipoEvento.Serate, out var serate) && serate.Count > 0)

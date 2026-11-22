@@ -39,7 +39,7 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - ID `1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo`, schede `Serate` e `Workshop`: riga 2 = intestazioni, dati dalla 3.
 - Colonna "Luogo verificato": vuoto/`ok` = confermato, `nuovo` = aggiunto e swing per Gemini, `gemini` = indirizzo
   trovato da Gemini, `da verificare` = non va su sito/DB (riga arancione), `no` = scartato,
-  `mercatino` = mercatino vintage: fuori da DB/calendario/email, il sito lo mette in Bacheca (`mercatini.json`). Lo scrive
+  `workshop` = workshop/corso copiato nella scheda Workshop, `mercatino` = mercatino vintage: fuori da DB/calendario/email, il sito lo mette in Bacheca (`mercatini.json`). Lo scrive
   Gemini sulle righe nuove; a ogni giro con `--excel` diventano `mercatino` anche le "da verificare" con nota "Gemini: Mercatino...".
 - Le intestazioni di C, D e degli stili (Serate I–L, Workshop I–P) sono `ARRAYFORMULA`: un valore scritto sotto
   le blocca (`#REF!`). Non incollare righe intere da una scheda all'altra (vedi `HOWTO.md`); i giri con `--excel`
@@ -62,7 +62,10 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Memoria delle serie (`Service/MemoriaSerie.cs`): le decisioni dell'utente in "Luogo verificato" sulle altre date
   della stessa serie decidono le date nuove al posto di Gemini; impara solo dai valori scritti da lui (non dai `no`
   con nota "Gemini:"/"Memoria:"). Ogni giro con `--excel` la applica anche alle righe future; anteprima `--memoria-serie`.
+  Per organizzatore: >= 2 date decise da lui tutte uguali (`no`/`mercatino`/`workshop`) e nessuna conferma -> vale per i suoi eventi nuovi.
   Per gli eventi che non decide, passa a Gemini la "storia organizzatore" (conteggi + titoli d'esempio) come indizio.
+- Stato `workshop` (solo Serate): workshop/corso finito in Serate. Ogni giro con `--excel` lo copia in Workshop (`nuovo`, nota
+  "Spostato da Serate (riga N)", che la memoria ignora); la riga in Serate resta come traccia, fuori da DB/sito/email.
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

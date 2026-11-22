@@ -250,6 +250,22 @@ namespace SiBallaImportingData.Utils
                 //    eventsToAppend.Add(ev);
                 //}
 
+                // memoria delle serie: workshop/corso. Lungo più di un giorno va già in Workshop (come swing, "nuovo");
+                // di un giorno resta anche in Serate come "workshop" (traccia per la memoria) e una copia va in Workshop
+                if (ev.StatoNuovaRiga == VerifiedWorkshop)
+                {
+                    var motivo = ev.MotivoVerifica;
+                    if (date.Value.TotalDays > 1)
+                    {
+                        ev.StatoNuovaRiga = VerifiedNew;
+                        if (!giaPresenteInWorkshop) { w++; workshopsToAppend.Add(ev); }
+                        continue;
+                    }
+                    if (!giaPresenteInSerate) { e++; eventsToAppend.Add(ev); }
+                    if (!giaPresenteInWorkshop) { w++; workshopsToAppend.Add(CopiaPerWorkshop(ev, $"{NotaSpostatoDaSerate} dalla memoria delle serie. {motivo}")); }
+                    continue;
+                }
+
                 // Aggiungi solo se NON è già presente nel rispettivo foglio
                 if (date.Value.TotalDays > 1 && !giaPresenteInWorkshop)
                 {
@@ -397,8 +413,11 @@ namespace SiBallaImportingData.Utils
                             row.Add("");
                         row[col] = value;
                     }
-                    if (imageCol is int ic && ev.EventDetail?.HasImage == true)
-                        Set(ic, ImageYes);
+                    // copia di una riga dello Sheet (Serate -> Workshop): il valore della colonna Immagine così com'è ("sì", "logo"...)
+                    if (imageCol is int ic && !string.IsNullOrWhiteSpace(ev.SheetImageRaw))
+                        Set(ic, ev.SheetImageRaw);
+                    else if (imageCol is int ic2 && ev.EventDetail?.HasImage == true)
+                        Set(ic2, ImageYes);
                     if (verifiedCol is int vc)
                         Set(vc, ev.StatoNuovaRiga ?? VerifiedPending);
                     return (IList<object>)row;
@@ -1060,7 +1079,8 @@ namespace SiBallaImportingData.Utils
 
             Console.WriteLine($"[sheet] memoria delle serie: {righe.Count(e => e.StatoNuovaRiga == VerifiedNew)} righe '{VerifiedNew}', " +
                               $"{righe.Count(e => e.StatoNuovaRiga == VerifiedNo)} righe '{VerifiedNo}', " +
-                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedMercatino)} righe '{VerifiedMercatino}'");
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedMercatino)} righe '{VerifiedMercatino}', " +
+                              $"{righe.Count(e => e.StatoNuovaRiga == VerifiedWorkshop)} righe '{VerifiedWorkshop}'");
         }
 
         /// <summary>
@@ -1265,8 +1285,43 @@ namespace SiBallaImportingData.Utils
         // non va su DB, calendario del sito ed email e non insegna niente al dizionario, ma il sito lo mette in Bacheca
         // (categoria Mercatino, vedi sito/esporta_sheet.py). Lo scrive Gemini sulle righe nuove, o tu a mano
         public const string VerifiedMercatino = "mercatino";
-        /// <summary>Fuori dal calendario: scartato da te ("no") o mercatino (va solo in Bacheca)</summary>
-        public static bool Scartato(Event e) => e.LuogoVerificato is VerifiedNo or VerifiedMercatino;
+        // riga di Serate che è un workshop/corso: il programma la copia nella scheda Workshop (stato "nuovo", nota
+        // "Spostato da Serate ...") e qui resta come traccia, fuori da DB, sito ed email delle serate. Serve anche alla
+        // memoria delle serie: le date nuove della stessa serie vanno direttamente in Workshop
+        public const string VerifiedWorkshop = "workshop";
+
+        /// <summary>
+        /// Copia per la scheda Workshop di una riga di Serate (o di un evento online) segnata "workshop": stato "nuovo"
+        /// (è swing, l'hai deciso tu o la memoria) e la nota che dice da dove viene. EventDetail è lo stesso oggetto (si legge e basta)
+        /// </summary>
+        public static Event CopiaPerWorkshop(Event e, string nota)
+        {
+            var inizio = e.DateStart;
+            var fine = e.DateFinish is DateTime f && f > inizio ? f : inizio.Date.AddDays(1);
+            return new Event
+            {
+                DateStart = inizio,
+                DateFinish = fine,
+                Duration = e.Duration,
+                PartyName = e.PartyName,
+                NameAndData = e.NameAndData,
+                Organizer = e.Organizer,
+                City = e.City,
+                Country = e.Country,
+                EventDetail = e.EventDetail,
+                SheetImageRaw = e.SheetImageRaw,
+                Type = Model.Type.Workshop,
+                SheetName = TipoEvento.Workshop.ToString(),
+                LuogoVerificato = VerifiedNew,
+                StatoNuovaRiga = VerifiedNew,
+                MotivoVerifica = nota,
+                NotaVerifica = nota,
+            };
+        }
+        // inizio della nota delle copie in Workshop: la memoria non le conta (la decisione è già nella riga di Serate)
+        public const string NotaSpostatoDaSerate = "Spostato da Serate";
+        /// <summary>Fuori dal calendario: scartato da te ("no"), mercatino (va solo in Bacheca) o workshop rimasto in Serate (la copia è in Workshop)</summary>
+        public static bool Scartato(Event e) => e.LuogoVerificato is VerifiedNo or VerifiedMercatino or VerifiedWorkshop;
 
         public const string ImageHeader = "Immagine";
         public const string ImageYes = "sì";

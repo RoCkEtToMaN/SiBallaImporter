@@ -113,7 +113,7 @@ public class KnownVenueStore
             // "no": evento scartato da te, non è una fonte nemmeno lui
             // "storico": evento passato recuperato dalle vecchie versioni, mai controllato
             if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNew or ImportData.VerifiedGemini or ImportData.VerifiedNo
-                or ImportData.VerifiedStorico or ImportData.VerifiedMercatino) continue;
+                or ImportData.VerifiedStorico or ImportData.VerifiedMercatino or ImportData.VerifiedWorkshop) continue;
 
             var t = NormalizeTitle(e.PartyName);
             if (t.Length == 0) continue;
@@ -389,7 +389,7 @@ public class KnownVenueStore
         {
             if (e.EventDetail is null || string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) continue;
             // non la tocco: riscrivendola diventerebbe "auto" e finirebbe sul DB senza che tu l'abbia controllata
-            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNo or ImportData.VerifiedMercatino) continue;
+            if (e.LuogoVerificato is ImportData.VerifiedPending or ImportData.VerifiedNo or ImportData.VerifiedMercatino or ImportData.VerifiedWorkshop) continue;
             if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) continue;
 
             var t = NormalizeTitle(e.PartyName);
