@@ -45,6 +45,7 @@ namespace SiBallaImportingData.Utils
             ["--agente-dizionario-scrivi"] = "Import:AgenteDizionarioScrivi",
             ["--indirizzi-agente"] = "Import:IndirizziConAgente",
             ["--agente-qualita"] = "Import:AgenteQualita",
+            ["--agente-qualita-scrivi"] = "Import:AgenteQualitaScrivi",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -180,6 +181,8 @@ namespace SiBallaImportingData.Utils
         // controllo qualità dello Sheet (Application/ControlloQualita.cs): doppioni, date sospette, serie contraddittorie,
         // dati mancanti, orari strani. Solo proposte, senza Gemini; di notte dal workflow "Agente verifica"
         public bool AgenteQualita { get; set; }
+        // come AgenteQualita, ma cancella dallo Sheet i doppioni sicuri (tiene una riga per evento); il resto resta una proposta
+        public bool AgenteQualitaScrivi { get; set; }
         public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }

@@ -24,6 +24,8 @@ namespace SiBallaImportingData.Service
     public sealed class MemoriaSerie
     {
         public const string PrefissoNota = "Memoria:";
+        // nota delle correzioni fatte dall'agente (es. "Agente: doppione della riga N"): come Gemini e la memoria, non è una tua decisione
+        public const string PrefissoAgente = "Agente:";
         private const int MinScarti = 2;
         private const double MinConferme = 2;
         private const double PesoTacito = 0.5;
@@ -91,7 +93,8 @@ namespace SiBallaImportingData.Service
             // riga di Workshop messa lì dalla memoria (workshop lungo più di un giorno): idem, non è una tua conferma
             if (e.SheetName == TipoEvento.Workshop.ToString() && nota.StartsWith(PrefissoNota, StringComparison.OrdinalIgnoreCase)) return Voto.Nessuno;
             bool notaDelProgramma = nota.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase)
-                                    || nota.StartsWith(PrefissoNota, StringComparison.OrdinalIgnoreCase);
+                                    || nota.StartsWith(PrefissoNota, StringComparison.OrdinalIgnoreCase)
+                                    || nota.StartsWith(PrefissoAgente, StringComparison.OrdinalIgnoreCase);
             // riga ancora arancione = l'hai appena cambiata da "da verificare" (colore e nota di Gemini spariscono al giro dopo)
             bool tuo = e.RigaArancione || !notaDelProgramma;
             switch (e.LuogoVerificato ?? "")

@@ -231,6 +231,7 @@ internal static class ImportCommands
     // nota scritta dal programma (Gemini, memoria, copia da Serate): il valore della cella non è una tua decisione
     internal static bool NotaDelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
         && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
+            || n.StartsWith(MemoriaSerie.PrefissoAgente, StringComparison.OrdinalIgnoreCase)
             || ImportData.NotaCopiaDaSerate(n));
 
     /// <summary>

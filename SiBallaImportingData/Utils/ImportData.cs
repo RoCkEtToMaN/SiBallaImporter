@@ -1453,7 +1453,7 @@ namespace SiBallaImportingData.Utils
         /// Cancella dallo Sheet le righe degli eventi indicati (intere righe, le successive salgono).
         /// Dal basso verso l'alto in un'unica richiesta, così i numeri di riga letti restano validi.
         /// </summary>
-        public static async Task DeleteSheetRowsAsync(IEnumerable<Event> events)
+        public static async Task DeleteSheetRowsAsync(IEnumerable<Event> events, string cosa = "di lezioni")
         {
             var righe = events
                 .Where(x => x.SheetName is not null && x.SheetRow is int r && r > 2)   // le prime due righe sono intestazioni
@@ -1494,7 +1494,7 @@ namespace SiBallaImportingData.Utils
                 }).ToList();
 
             await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
-            Console.WriteLine($"[sheet] 🗑️ cancellate {requests.Count} righe di lezioni");
+            Console.WriteLine($"[sheet] 🗑️ cancellate {requests.Count} righe {cosa}");
         }
 
         // indice (0 = A) della colonna con questa intestazione, null se manca

@@ -24,62 +24,126 @@ internal static class ControlloQualita
         $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd}{(e.DateStart.TimeOfDay == TimeSpan.Zero ? "" : e.DateStart.ToString(" HH:mm"))} | " +
         $"{e.City?.Trim()} | {e.Organizer?.Trim()} | {e.PartyName?.Trim()} [{(string.IsNullOrWhiteSpace(e.LuogoVerificato) ? "confermata" : e.LuogoVerificato)}]";
 
-    public static void Esegui(List<Event> sheetEvents)
+    public static async Task EseguiAsync(List<Event> sheetEvents, bool scrivi)
     {
         var oggi = DateTime.Today;
         var future = sheetEvents.Where(e => (e.DateFinish ?? e.DateStart).Date >= oggi && !string.IsNullOrWhiteSpace(e.PartyName)).ToList();
         var pubblicate = future.Where(Pubblicata).ToList();
         Console.WriteLine();
-        Console.WriteLine($"===== Controllo qualità dello Sheet: {future.Count} righe future, {pubblicate.Count} pubblicate =====");
+        Console.WriteLine($"===== Controllo qualità dello Sheet: {future.Count} righe future, {pubblicate.Count} pubblicate " +
+                          $"({(scrivi ? "cancella i doppioni sicuri" : "anteprima, non cancella niente")}) =====");
 
-        int doppioni = Doppioni(pubblicate);
+        var (sicuri, ambigui, daCancellare) = Doppioni(future);
         int date = DateSospette(future, sheetEvents);
         int serie = SerieContraddittorie(sheetEvents);
         int mancanti = DatiMancanti(pubblicate);
         int orari = OrariStrani(pubblicate);
 
         Console.WriteLine();
-        Console.WriteLine($"===== Risultato controllo qualità: {doppioni} probabili doppioni, {date} date sospette, {serie} serie contraddittorie, " +
+        Console.WriteLine($"===== Risultato controllo qualità: {daCancellare.Count} righe doppie {(scrivi ? "cancellate" : "da cancellare")} ({sicuri} eventi), " +
+                          $"{ambigui} possibili doppioni da decidere, {date} date sospette, {serie} serie contraddittorie, " +
                           $"{mancanti} righe pubblicate con dati mancanti, {orari} orari strani =====");
-        Console.WriteLine("Solo proposte: niente scritto nello Sheet.");
+        if (scrivi && daCancellare.Count > 0)
+        {
+            try
+            {
+                await ImportData.DeleteSheetRowsAsync(daCancellare, "doppie");
+                Console.WriteLine("I numeri di riga qui sopra sono quelli di prima della cancellazione: le righe sotto quelle cancellate sono salite.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[sheet] ⚠️ doppioni non cancellati: {ex.Message}");
+            }
+        }
+        else if (!scrivi) Console.WriteLine("Anteprima: niente cancellato. Per cancellare i doppioni sicuri: --agente-qualita-scrivi");
+        Console.WriteLine("Il resto sono proposte: decidi tu nello Sheet.");
     }
 
-    // 1. stesso giorno, stessa città, titolo molto simile, entrambe pubblicate (le copie Serate -> Workshop non contano).
-    //    Solo nella stessa scheda: Serate + Workshop è voluto (festival e weekend con serate stanno su entrambi i fogli)
-    private static int Doppioni(List<Event> pubblicate)
+    // 1. doppioni nella stessa scheda (Serate + Workshop è voluto: festival e weekend con serate stanno su entrambi i fogli).
+    //    Sicuro = stesso giorno di inizio e fine, stessa città, e titolo uguale (senza anni, numeri, emoji e simboli) oppure titolo
+    //    simile con lo stesso link o lo stesso organizzatore: si tiene una riga e le altre si cancellano. Il resto è da decidere
+    private static (int Sicuri, int Ambigui, List<Event> DaCancellare) Doppioni(List<Event> future)
     {
-        var coppie = new List<(Event A, Event B, double Sim)>();
-        foreach (var g in pubblicate.GroupBy(e => (e.DateStart.Date, Citta: KnownVenueStore.NormalizeTitle(e.City))).Where(g => g.Count() > 1))
+        var candidate = future.Where(e => e.LuogoVerificato != ImportData.VerifiedStorico).ToList();
+        var sicure = new List<(Event A, Event B)>();
+        var ambigue = new List<(Event A, Event B, double Sim)>();
+        foreach (var g in candidate.GroupBy(e => (e.SheetName, e.DateStart.Date, Citta: KnownVenueStore.NormalizeTitle(e.City))).Where(g => g.Count() > 1))
         {
             var lista = g.ToList();
             for (int i = 0; i < lista.Count; i++)
                 for (int j = i + 1; j < lista.Count; j++)
                 {
                     var (a, b) = (lista[i], lista[j]);
-                    // stesso evento su entrambi i fogli (festival con serate, serata+workshop, workshop spostato): è voluto
-                    if (a.SheetName != b.SheetName) continue;
-                    if (Simili(a.PartyName, b.PartyName) is double sim) coppie.Add((a, b, sim));
+                    if (Simili(a.PartyName, b.PartyName) is not double sim) continue;
+                    bool stessaFine = (a.DateFinish ?? a.DateStart).Date == (b.DateFinish ?? b.DateStart).Date;
+                    bool titoloUguale = TitoloBase(a.PartyName) == TitoloBase(b.PartyName);
+                    bool stessoLink = Link(a) is { Length: > 0 } l && l == Link(b);
+                    bool stessoOrg = KnownVenueStore.NormalizeTitle(a.Organizer) is { Length: > 0 } o && o == KnownVenueStore.NormalizeTitle(b.Organizer);
+                    if (stessaFine && (titoloUguale || stessoLink || stessoOrg)) sicure.Add((a, b));
+                    else if (Pubblicata(a) && Pubblicata(b)) ambigue.Add((a, b, sim));
                 }
         }
-        var stessaScheda = coppie.Where(x => x.A.SheetName == x.B.SheetName).ToList();
 
-        Console.WriteLine("\n----- 🔁 Probabili doppioni nella stessa scheda (stesso giorno e città, titolo simile, entrambi pubblicati) -----");
-        // le righe ripetute più volte (es. 6 copie dello stesso workshop) in un'unica voce
+        // gruppi di righe uguali (es. 22 copie dello stesso camp)
         var gruppi = new List<List<Event>>();
-        foreach (var (a, b, _) in stessaScheda.OrderByDescending(x => x.Sim))
+        foreach (var (a, b) in sicure)
         {
-            var esistente = gruppi.FirstOrDefault(gr => gr.Contains(a) || gr.Contains(b));
-            if (esistente is null) gruppi.Add(new List<Event> { a, b });
-            else { if (!esistente.Contains(a)) esistente.Add(a); if (!esistente.Contains(b)) esistente.Add(b); }
+            var ga = gruppi.FirstOrDefault(gr => gr.Contains(a)); var gb = gruppi.FirstOrDefault(gr => gr.Contains(b));
+            if (ga is null && gb is null) gruppi.Add(new List<Event> { a, b });
+            else if (ga is not null && gb is null) ga.Add(b);
+            else if (ga is null && gb is not null) gb.Add(a);
+            else if (ga != gb) { ga!.AddRange(gb!); gruppi.Remove(gb!); }
         }
-        foreach (var gr in gruppi.Take(MaxPerSezione))
+
+        Console.WriteLine("\n----- 🗑️ Doppioni sicuri (stesso giorno, stessa città, stesso titolo o stesso link/organizzatore): se ne tiene una riga -----");
+        var daCancellare = new List<Event>();
+        int ambiguiNascosti = 0;
+        foreach (var gr in gruppi.OrderBy(gr => gr.Min(e => e.DateStart)))
         {
-            Console.WriteLine($"🔁 {gr.Count} righe per lo stesso evento ({gr[0].SheetName}): tienine una, le altre 'no' con nota 'doppione'");
-            foreach (var e in gr.OrderBy(x => x.SheetRow)) Console.WriteLine($"   • {Riga(e)}");
+            // una tua "no" (non di doppione) insieme a una riga pubblicata: non so se l'evento lo vuoi o no, decidi tu
+            bool tuoNo = gr.Any(e => e.LuogoVerificato == ImportData.VerifiedNo && !ImportCommands.NotaDelProgramma(e) && !NotaDoppione(e));
+            if (tuoNo && gr.Any(Pubblicata))
+            {
+                ambiguiNascosti++;
+                Console.WriteLine($"❓ righe uguali, ma una l'hai scartata tu e un'altra è pubblicata: decidi tu");
+                foreach (var e in gr.OrderBy(x => x.SheetRow)) Console.WriteLine($"   • {Riga(e)}");
+                continue;
+            }
+            var tieni = gr.OrderByDescending(Priorita).ThenBy(e => e.SheetRow).First();
+            var via = gr.Where(e => e != tieni).OrderBy(e => e.SheetRow).ToList();
+            daCancellare.AddRange(via);
+            Console.WriteLine($"🗑️ tengo {tieni.SheetName} riga {tieni.SheetRow}, cancello {via.Count} " +
+                              $"{(via.Count == 1 ? "riga" : "righe")} ({string.Join(", ", via.Select(e => e.SheetRow))}) | {Riga(tieni)}");
         }
         if (gruppi.Count == 0) Console.WriteLine("   nessuno");
-        return gruppi.Count;
+
+        Console.WriteLine("\n----- ❓ Possibili doppioni da decidere tu (titolo simile, ma organizzatore e link diversi o date di fine diverse) -----");
+        foreach (var (a, b, sim) in ambigue.OrderByDescending(x => x.Sim).Take(MaxPerSezione))
+        {
+            Console.WriteLine($"❓ titoli simili al {sim:P0}:");
+            Console.WriteLine($"   • {Riga(a)}");
+            Console.WriteLine($"   • {Riga(b)}");
+        }
+        if (ambigue.Count == 0) Console.WriteLine("   nessuno");
+        return (gruppi.Count - ambiguiNascosti, ambigue.Count + ambiguiNascosti, daCancellare);
     }
+
+    // quale riga tenere: decisa da te > pubblicata > con più dati (indirizzo, stile, organizzatore); mai una segnata "doppione"
+    private static int Priorita(Event e) =>
+        (NotaDoppione(e) ? -1000 : 0)
+        + (ImportCommands.DecisioneTua(e) is string t && t != ImportData.VerifiedNo ? 100 : 0)
+        + (Pubblicata(e) ? 50 : 0)
+        + (!string.IsNullOrWhiteSpace(e.EventDetail?.Address) ? 4 : 0)
+        + (!string.IsNullOrWhiteSpace(e.SheetStiliRaw) ? 2 : 0)
+        + (!string.IsNullOrWhiteSpace(e.Organizer) ? 1 : 0);
+
+    private static bool NotaDoppione(Event e) => (e.NotaVerifica ?? "").Contains("doppione", StringComparison.OrdinalIgnoreCase);
+
+    // titolo senza anni, numeri, emoji e simboli: "New Year's Jam 2026/2027" = "New Year’s Jam"
+    private static string TitoloBase(string? s) => string.Join(' ', Parole(s).OrderBy(w => w));
+
+    private static string Link(Event e) =>
+        Regex.Replace((e.EventDetail?.WebSite ?? "").Trim().ToLowerInvariant(), @"^https?://(www\.)?", "").TrimEnd('/');
 
     // parole del titolo: le lettere "decorate" (𝗚𝗢𝗧𝗛𝗘𝗡𝗕𝗨𝗥𝗚, 𝘼𝙡𝙡) diventano normali (FormKC), apostrofi tipografici uniformati
     private static HashSet<string> Parole(string? s) =>

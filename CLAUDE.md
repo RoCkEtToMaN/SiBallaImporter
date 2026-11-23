@@ -95,7 +95,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Controllo qualità (`Application/ControlloQualita.cs`, `--agente-qualita`, workflow "Agente verifica" modo qualita, ogni notte alle 3:30
   da solo): doppioni nella stessa scheda (anche lettere "decorate"), date sospette, serie contraddittorie, dati mancanti.
   Festival e weekend CON serate stanno su entrambi i fogli (decisione del curatore): non sono doppioni, e per l'agente sono serata+workshop.
-  Solo controlli nel codice, niente Gemini, niente scritto nello Sheet. Lo Sheet non ha una colonna per l'orario.
+  Solo controlli nel codice, niente Gemini. Di notte CANCELLA i doppioni sicuri (stessa scheda, giorno, città e titolo uguale, o
+  titolo simile con stesso link/organizzatore; tiene la riga decisa dal curatore o con più dati); il resto sono proposte per email.
+  Note "Agente: …" = del programma, la memoria delle serie le ignora. Lo Sheet non ha una colonna per l'orario.
 - `EventIdentity.Same`: stesso giorno + stesso titolo + stesso link = stesso evento anche con città diversa (fino al 23/11/2026 il
   Gothenburg Rhythm Camp veniva riaggiunto a ogni giro perché la città nello Sheet era la regione).
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`

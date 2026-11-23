@@ -28,7 +28,7 @@ on:
         description: Righe da controllare (nella prova, righe per tipo)
         default: "8"
       scrivi:
-        description: Solo modo dizionario - salva i luoghi trovati nel dizionario e nello Sheet (false = solo anteprima)
+        description: Modi dizionario e qualita - salva i luoghi trovati / cancella i doppioni sicuri (false = solo anteprima)
         type: choice
         options: ["false", "true"]
         default: "false"
@@ -103,6 +103,8 @@ jobs:
           Gemini__UseGoogleSearch: ${{ inputs.ricerca_google || 'false' }}
           # di notte (schedule) parte solo il controllo qualità
           Import__AgenteQualita: ${{ github.event_name == 'schedule' || inputs.modo == 'qualita' }}
+          # di notte cancella da solo i doppioni sicuri; a mano solo con scrivi = true
+          Import__AgenteQualitaScrivi: ${{ github.event_name == 'schedule' || (inputs.modo == 'qualita' && inputs.scrivi == 'true') }}
           Import__AgenteDizionario: ${{ inputs.modo == 'dizionario' }}
           Import__AgenteDizionarioScrivi: ${{ inputs.modo == 'dizionario' && inputs.scrivi == 'true' }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
@@ -119,7 +121,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Agente verifica (${{ inputs.modo || 'qualita' }})
-          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ |^🔁 |^📅 |^⚖️ |===== Risultato controllo qualità|nei prossimi 14 giorni"
+          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ |^🗑️ |^❓ |^📅 |^⚖️ |===== Risultato controllo qualità|nei prossimi 14 giorni"
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log
