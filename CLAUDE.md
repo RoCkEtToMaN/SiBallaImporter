@@ -92,6 +92,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   Poi `Service/RicercaLuogo.cs` (dal 23/11/2026, al posto dell'agente a più passi): pagina del link + Tavily -> UNA chiamata Gemini con
   locale, via e citazione testuale -> il codice controlla che la citazione sia nei testi e contenga la via, poi Photon. Mai la sede
   dell'organizzatore senza una fonte su quell'evento (caso GheswingerS: sede a 5 km dalla festa).
+  Delle prime 2 pagine dei risultati Tavily (non social) legge tutto il testo, piè di pagina compreso, e la pagina "Contatti/Dove siamo"
+  dello stesso sito, tenendo i pezzi intorno alle parole da indirizzo (`LeggiPerIndirizzoAsync`): il riassunto di Tavily spesso non ha la via.
 - Controllo qualità (`Application/ControlloQualita.cs`, `--agente-qualita`, workflow "Agente verifica" modo qualita, ogni notte alle 3:30
   da solo): doppioni nella stessa scheda (anche lettere "decorate"), date sospette, serie contraddittorie, dati mancanti.
   Festival e weekend CON serate stanno su entrambi i fogli (decisione del curatore): non sono doppioni, e per l'agente sono serata+workshop.

@@ -2,6 +2,7 @@ using SiBallaImportingData.Model;
 using SiBallaImportingData.Utils;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace SiBallaImportingData.Service
 {
@@ -46,7 +47,13 @@ namespace SiBallaImportingData.Service
             }
             var query = $"{PerRicerca(ev.PartyName)} {PerRicerca(ev.Organizer)} {ev.City?.Trim()}";
             if (!string.IsNullOrWhiteSpace(tavilyKey) && AgenteVerifica.TavilyBudget.Usa(tavilyMaxGiorno, tavilyMaxMese))
-                fonti.AddRange(await TavilyAsync(query, tavilyKey));
+            {
+                var risultati = await TavilyAsync(query, tavilyKey);
+                fonti.AddRange(risultati);
+                // del riassunto di Tavily spesso manca la via (sta nel piè di pagina "Dove siamo"): le 2 pagine migliori lette per intero
+                foreach (var daLeggere in risultati.Select(r => r.Url).Where(u => !Social(u)).Distinct().Take(2))
+                    fonti.AddRange(await LeggiPerIndirizzoAsync(daLeggere));
+            }
             if (fonti.Count == 0)
                 return new(Esito.NonTrovato, null, "nessun testo da leggere (link non leggibile, ricerca web non disponibile)");
 
@@ -144,6 +151,69 @@ namespace SiBallaImportingData.Service
         // testo normalizzato per confrontare la citazione con i testi (spazi, maiuscole, apostrofi e virgolette tipografiche)
         private static string Norm(string s) =>
             System.Text.RegularExpressions.Regex.Replace(s.ToLowerInvariant().Replace('’', '\'').Replace('“', '"').Replace('”', '"'), @"\s+", " ").Trim();
+
+        // social senza login: non mostrano il contenuto, inutile leggerli per intero
+        private static bool Social(string url) =>
+            Regex.IsMatch(url, @"facebook\.com|fb\.me|instagram\.com|x\.com|twitter\.com|tiktok\.com|youtube\.com|linkedin\.com", RegexOptions.IgnoreCase);
+
+        // parole vicino alle quali di solito c'è un indirizzo (e i CAP a 5 cifre)
+        private static readonly Regex ParolaIndirizzo = new(
+            @"\b(via|viale|v\.le|piazza|p\.zza|piazzale|corso|largo|strada|vicolo|località|loc\.|rue|avenue|boulevard|place|chemin|street|road|" +
+            @"str\.|straße|strasse|platz|calle|avenida|plaza|carrer|ulica|dove siamo|indirizzo|address|adresse|location|venue|sede)\b|\b\d{5}\b",
+            RegexOptions.IgnoreCase);
+
+        private static readonly Regex LinkContatti = new(@"contatt|contact|dove.?siamo|come.?raggiungerci|location|where|venue|sede|chi.?siamo",
+            RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// Pagina letta per trovare un indirizzo: tutto il testo (anche il piè di pagina, che LeggiPaginaAsync toglie), poi solo i pezzi
+        /// intorno alle parole da indirizzo (testo vero, così la citazione si può controllare). Se c'è, anche la pagina "Contatti /
+        /// Dove siamo" dello stesso sito
+        /// </summary>
+        private static async Task<List<(string Url, string Testo)>> LeggiPerIndirizzoAsync(string url, bool seguiContatti = true)
+        {
+            var fonti = new List<(string, string)>();
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)) return fonti;
+            try
+            {
+                using var risposta = await AgenteVerifica._web.GetAsync(uri);
+                if (!risposta.IsSuccessStatusCode || !(risposta.Content.Headers.ContentType?.MediaType ?? "").Contains("html")) return fonti;
+                var html = await risposta.Content.ReadAsStringAsync();
+                if (html.Length > 2_000_000) html = html[..2_000_000];
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(html);
+
+                // link "Contatti / Dove siamo" dello stesso sito, prima di togliere script e stili
+                string? contatti = null;
+                if (seguiContatti)
+                    contatti = doc.DocumentNode.SelectNodes("//a[@href]")?
+                        .Select(a => (Testo: AgenteVerifica.Pulisci(a.InnerText), Href: a.GetAttributeValue("href", "")))
+                        .Where(a => LinkContatti.IsMatch(a.Testo) || LinkContatti.IsMatch(a.Href))
+                        .Select(a => Uri.TryCreate(uri, a.Href, out var u) ? u : null)
+                        .FirstOrDefault(u => u is not null && u.Host == uri.Host && u.AbsoluteUri != uri.AbsoluteUri)?.AbsoluteUri;
+
+                foreach (var n in doc.DocumentNode.SelectNodes("//script|//style|//noscript|//svg")?.ToList() ?? new()) n.Remove();
+                var testo = AgenteVerifica.Pulisci(doc.DocumentNode.InnerText);
+                // pezzi di ±200 caratteri intorno alle parole da indirizzo, uniti se si sovrappongono
+                var pezzi = new List<(int Da, int A)>();
+                foreach (Match m in ParolaIndirizzo.Matches(testo))
+                {
+                    int da = Math.Max(0, m.Index - 200), a = Math.Min(testo.Length, m.Index + m.Length + 200);
+                    if (pezzi.Count > 0 && da <= pezzi[^1].A) pezzi[^1] = (pezzi[^1].Da, Math.Max(pezzi[^1].A, a));
+                    else pezzi.Add((da, a));
+                }
+                var estratto = string.Join(" … ", pezzi.Select(p => testo[p.Da..p.A]));
+                if (estratto.Length > 0) fonti.Add((uri.AbsoluteUri, AgenteVerifica.Accorcia(estratto, 3000)));
+
+                if (contatti is not null)
+                    fonti.AddRange(await LeggiPerIndirizzoAsync(contatti, seguiContatti: false));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[luogo] pagina {AgenteVerifica.Accorcia(url, 60)} non letta: {AgenteVerifica.Accorcia(ex.Message, 80)}");
+            }
+            return fonti;
+        }
 
         private static async Task<List<(string Url, string Testo)>> TavilyAsync(string query, string apiKey)
         {
