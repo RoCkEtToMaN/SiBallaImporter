@@ -61,6 +61,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   `GeminiHttp` non riprova più e segna il modello come esaurito per il resto del giro (`QuotaFinita`); l'agente si ferma (⏸️).
   `AGENTE_MODELLO` (Variable) darebbe all'agente un'altra quota, ma il 23/11/2026 non c'era un modello adatto: gemini-flash-latest
   troppo lento/sovraccarico (503, timeout 90 s), gemini-2.5-flash-lite ritirato (404). Quindi niente AGENTE_MODELLO e INDIRIZZI_AGENTE_MAX=5.
+- Tavily (ricerca web dell'agente, secret `TAVILY_API_KEY`, piano gratuito 1000 crediti/mese senza carta): max 30 ricerche al giorno e
+  900 al mese (`Import:TavilyMaxGiorno/Mese`), contate in `out/tavily-uso.json` che il giro orario conserva con la cache (`DATA_FILES`).
 - `--no-push`: il dizionario dei luoghi torna nel repo senza commit né push. Senza, il push automatico del dizionario
   parte solo da `master` e solo se non ci sono altri commit non pubblicati.
 - Memoria delle serie (`Service/MemoriaSerie.cs`): le decisioni dell'utente in "Luogo verificato" sulle altre date

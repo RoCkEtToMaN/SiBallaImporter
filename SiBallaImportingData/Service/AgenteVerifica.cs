@@ -34,7 +34,7 @@ namespace SiBallaImportingData.Service
         /// NascondiIndirizzo = indirizzo della riga e luogo del dizionario (prova sugli indirizzi che conosci già)
         /// </summary>
         public sealed record Opzioni(int MaxPassi, int MaxPagine, int MaxRicerche, bool NascondiDecisione = false, bool NascondiIndirizzo = false,
-                                     string? TavilyApiKey = null, bool SoloIndirizzo = false);
+                                     string? TavilyApiKey = null, bool SoloIndirizzo = false, int TavilyMaxGiorno = 30, int TavilyMaxMese = 900);
 
         private static readonly HttpClient _web = CreaClient();
 
@@ -194,7 +194,8 @@ namespace SiBallaImportingData.Service
                 {
                     permessi.AddRange(new[] { "cerca_nello_sheet", "verifica_indirizzo" });
                     if (pagine < o.MaxPagine) permessi.Add("leggi_pagina");
-                    if ((gemini.UseGoogleSearch || !string.IsNullOrWhiteSpace(o.TavilyApiKey)) && ricerche < o.MaxRicerche) permessi.Add("cerca_web");
+                    bool tavily = !string.IsNullOrWhiteSpace(o.TavilyApiKey) && TavilyBudget.Disponibile(o.TavilyMaxGiorno, o.TavilyMaxMese);
+                    if ((gemini.UseGoogleSearch || tavily) && ricerche < o.MaxRicerche) permessi.Add("cerca_web");
                 }
                 var body = new JsonObject
                 {
@@ -281,7 +282,9 @@ namespace SiBallaImportingData.Service
                     {
                         var query = Testo(args, "query");
                         ricerche++;
-                        esito = string.IsNullOrWhiteSpace(o.TavilyApiKey) ? await CercaWebAsync(query, gemini) : await CercaTavilyAsync(query, o.TavilyApiKey);
+                        esito = string.IsNullOrWhiteSpace(o.TavilyApiKey) ? await CercaWebAsync(query, gemini)
+                              : TavilyBudget.Usa(o.TavilyMaxGiorno, o.TavilyMaxMese) ? await CercaTavilyAsync(query, o.TavilyApiKey)
+                              : "ERRORE: ricerche web di oggi finite, continua con pagine e mappa";
                         traccia.Add($"cerca_web({query}) -> {(esito.StartsWith("ERRORE") ? esito : $"{esito.Split('\n').Count(l => l.StartsWith("- "))} risultati")}");
                     }
                     else if (nome == "verifica_indirizzo")
@@ -338,6 +341,40 @@ namespace SiBallaImportingData.Service
         }
 
         private static readonly HttpClient _tavily = new() { Timeout = TimeSpan.FromSeconds(30) };
+
+        /// <summary>
+        /// Ricerche Tavily usate, per giorno e per mese, nel file tavily-uso.json della cartella dati (su GitHub il giro orario lo
+        /// conserva tra un giro e l'altro con la cache, come il dizionario): così il piano gratuito (~1000 al mese) dura tutto il mese
+        /// </summary>
+        private static class TavilyBudget
+        {
+            private sealed class Uso { public string Giorno { get; set; } = ""; public int Oggi { get; set; } public string Mese { get; set; } = ""; public int NelMese { get; set; } }
+            private static string File => DataPaths.Get("tavily-uso.json");
+
+            private static Uso Leggi()
+            {
+                Uso u;
+                try { u = System.IO.File.Exists(File) ? System.Text.Json.JsonSerializer.Deserialize<Uso>(System.IO.File.ReadAllText(File)) ?? new() : new(); }
+                catch { u = new(); }
+                var oggi = DateTime.Today.ToString("yyyy-MM-dd"); var mese = DateTime.Today.ToString("yyyy-MM");
+                if (u.Giorno != oggi) { u.Giorno = oggi; u.Oggi = 0; }
+                if (u.Mese != mese) { u.Mese = mese; u.NelMese = 0; }
+                return u;
+            }
+
+            public static bool Disponibile(int maxGiorno, int maxMese) { var u = Leggi(); return u.Oggi < maxGiorno && u.NelMese < maxMese; }
+
+            /// <summary>Conta una ricerca se c'è ancora spazio (true) oppure no (false)</summary>
+            public static bool Usa(int maxGiorno, int maxMese)
+            {
+                var u = Leggi();
+                if (u.Oggi >= maxGiorno || u.NelMese >= maxMese) return false;
+                u.Oggi++; u.NelMese++;
+                try { System.IO.File.WriteAllText(File, System.Text.Json.JsonSerializer.Serialize(u)); } catch { }
+                if (u.Oggi == maxGiorno) Console.WriteLine($"[agente] ricerche web di oggi finite ({maxGiorno}), domani si riparte");
+                return true;
+            }
+        }
 
         /// <summary>
         /// Ricerca web con Tavily (tavily.com, API ufficiale con piano gratuito): titolo, URL e testo dei primi risultati

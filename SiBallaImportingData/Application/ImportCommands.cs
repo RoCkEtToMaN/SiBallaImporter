@@ -429,7 +429,8 @@ internal static class ImportCommands
         GeminiHttp.QuotaFinita(string.IsNullOrWhiteSpace(s.Gemini.AgenteModel) ? s.Gemini.Model : s.Gemini.AgenteModel);
 
     private static AgenteVerifica.Opzioni Opzioni(ImportOptions o) =>
-        new(Math.Max(2, o.AgentePassi), o.AgentePagine, o.AgenteRicerche, TavilyApiKey: o.TavilyApiKey);
+        new(Math.Max(2, o.AgentePassi), o.AgentePagine, o.AgenteRicerche, TavilyApiKey: o.TavilyApiKey,
+            TavilyMaxGiorno: o.TavilyMaxGiorno, TavilyMaxMese: o.TavilyMaxMese);
 
     /// <summary>
     /// Prova dell'agente sugli indirizzi: righe con indirizzo e coordinate controllati da te ("Luogo verificato" vuoto o "ok"),

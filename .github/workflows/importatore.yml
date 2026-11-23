@@ -74,6 +74,7 @@ jobs:
         out/venues.json
         out/custom_locations.json
         out/ultima-email.json
+        out/tavily-uso.json
     steps:
       - uses: actions/checkout@v4
 

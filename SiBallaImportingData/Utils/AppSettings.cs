@@ -97,7 +97,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
             Console.WriteLine($"  CercaImmaginiSheet = {Import.CercaImmaginiSheet} (max {Import.CercaImmaginiSheetMax} righe)");
             Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
-            Console.WriteLine($"  IndirizziConAgente = {Import.IndirizziConAgente} (max {Import.AgenteDizionarioMax} eventi per giro), modello agente = {(string.IsNullOrWhiteSpace(Gemini.AgenteModel) ? Gemini.Model + " (lo stesso della classificazione)" : Gemini.AgenteModel)}, Tavily = {(string.IsNullOrWhiteSpace(Import.TavilyApiKey) ? "no" : "sì")}");
+            Console.WriteLine($"  IndirizziConAgente = {Import.IndirizziConAgente} (max {Import.AgenteDizionarioMax} eventi per giro), modello agente = {(string.IsNullOrWhiteSpace(Gemini.AgenteModel) ? Gemini.Model + " (lo stesso della classificazione)" : Gemini.AgenteModel)}, Tavily = {(string.IsNullOrWhiteSpace(Import.TavilyApiKey) ? "no" : $"sì (max {Import.TavilyMaxGiorno} ricerche al giorno, {Import.TavilyMaxMese} al mese)")}");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
             Console.WriteLine($"  NoPush = {Import.NoPush}, RiclassificaSheet = {Import.RiclassificaSheet}, RiclassificaSheetScrivi = {Import.RiclassificaSheetScrivi}");
@@ -179,6 +179,9 @@ namespace SiBallaImportingData.Utils
         public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }
+        // tetto alle ricerche Tavily (piano gratuito ~1000 al mese): contate in tavily-uso.json nella cartella dati
+        public int TavilyMaxGiorno { get; set; } = 30;
+        public int TavilyMaxMese { get; set; } = 900;
         // svuota tutto lo Sheet dalla riga 3 (intestazioni, formati e macro restano), con copia JSON prima.
         // Solo sul PC: su GitHub Actions viene ignorato, così un true dimenticato nel repo non svuota lo Sheet ogni giorno
         public bool ResetExcel { get; set; }
