@@ -59,7 +59,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
 - Su questo PC mancano le chiavi di Gemini e Appwrite (ci sono sul PC di casa e su GitHub).
 - Gemini piano gratuito: quota GIORNALIERA per modello (23/11/2026: 500 richieste al giorno per gemini-flash-lite). Quando finisce,
   `GeminiHttp` non riprova più e segna il modello come esaurito per il resto del giro (`QuotaFinita`); l'agente si ferma (⏸️).
-  L'agente usa `AGENTE_MODELLO` (Variable, anche nel workflow "Agente verifica") per non consumare la quota della classificazione.
+  `AGENTE_MODELLO` (Variable) darebbe all'agente un'altra quota, ma il 23/11/2026 non c'era un modello adatto: gemini-flash-latest
+  troppo lento/sovraccarico (503, timeout 90 s), gemini-2.5-flash-lite ritirato (404). Quindi niente AGENTE_MODELLO e INDIRIZZI_AGENTE_MAX=5.
 - `--no-push`: il dizionario dei luoghi torna nel repo senza commit né push. Senza, il push automatico del dizionario
   parte solo da `master` e solo se non ci sono altri commit non pubblicati.
 - Memoria delle serie (`Service/MemoriaSerie.cs`): le decisioni dell'utente in "Luogo verificato" sulle altre date

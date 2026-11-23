@@ -48,6 +48,14 @@ namespace SiBallaImportingData.Service
                     throw new HttpRequestException($"Gemini 429: quota giornaliera di {model} finita", null, response.StatusCode);
                 }
 
+                // modello inesistente o ritirato ("no longer available"): come la quota finita, inutile richiamarlo in questo giro
+                if (status == 404)
+                {
+                    if (_quotaFinita.Add(model))
+                        Console.WriteLine($"[AI] ⏸️ modello {model} non disponibile: {Messaggio(responseBody)}");
+                    throw new HttpRequestException($"Gemini 404: modello {model} non disponibile", null, response.StatusCode);
+                }
+
                 bool temporaneo = status == 429 || status >= 500;
                 if (!temporaneo || tentativo > AttesePerRiprovare.Length)
                     throw new HttpRequestException($"Gemini {status}: {Messaggio(responseBody)}", null, response.StatusCode);

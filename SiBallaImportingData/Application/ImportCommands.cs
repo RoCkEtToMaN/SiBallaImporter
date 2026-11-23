@@ -481,9 +481,9 @@ internal static class ImportCommands
                 km = PhotonVenueGeocoder.HaversineKm(lat, lng, vero.Lat, vero.Lng);
                 esito = km <= 0.3 ? "giusto" : km <= 2 ? "vicino" : "sbagliato";
             }
-            else esito = p?.Luogo is null ? "non trovato" : "non confermato";
+            else esito = p is null ? "errore Gemini" : p.Luogo is null ? "non trovato" : "non confermato";
             esiti.Add((e, esito, km));
-            var segno = esito switch { "giusto" => "✅", "vicino" => "🟡", "sbagliato" => "❌", _ => "➖" };
+            var segno = esito switch { "giusto" => "✅", "vicino" => "🟡", "sbagliato" => "❌", "errore Gemini" => "❗", _ => "➖" };
             Console.WriteLine();
             Console.WriteLine($"{segno} {esito}{(km is null ? "" : $" ({km:F2} km)")} | tuo: {vero.Indirizzo} | agente: " +
                               $"{(p?.Luogo is { } l ? string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => s is not null)) : "-")} | " +
@@ -495,7 +495,7 @@ internal static class ImportCommands
         Console.WriteLine();
         Console.WriteLine($"===== Risultato indirizzi: giusti (entro 300 m) {esiti.Count(x => x.Esito == "giusto")}, vicini (entro 2 km) {esiti.Count(x => x.Esito == "vicino")}, " +
                           $"sbagliati {esiti.Count(x => x.Esito == "sbagliato")}, trovati ma non confermati da Photon {esiti.Count(x => x.Esito == "non confermato")}, " +
-                          $"non trovati {esiti.Count(x => x.Esito == "non trovato")} (su {esiti.Count}) =====");
+                          $"non trovati {esiti.Count(x => x.Esito == "non trovato")}, errori di Gemini {esiti.Count(x => x.Esito == "errore Gemini")} (su {esiti.Count}) =====");
         Console.WriteLine("Prova: niente scritto nello Sheet.");
     }
 
