@@ -4293,6 +4293,22 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "lindy challenge": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "agenteNonTrovato": "2026-11-23"
       }
     }
   },
@@ -4331,6 +4347,7 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-08",
+        "agenteNonTrovato": "2026-11-23",
         "stili": [
           "Lindy"
         ]
@@ -13527,15 +13544,15 @@
         "city": "Firenze",
         "country": "Italia",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": null,
-        "lng": null,
-        "geocodedAddress": null,
+        "venueName": "Renny",
+        "address": "Via Francesco Baracca 1F",
+        "lat": 43.7873755,
+        "lng": 11.2255259,
+        "geocodedAddress": "Via Francesco Baracca 1F",
         "verified": false,
-        "source": null,
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
+        "notes": "2026-11-23 via confermata dalla mappa; il testo dice: «Via Francesco Baracca 1F — piazza Puccini, 50127 Firenze»; fonte: https://tuballoswing.it/dove-siamo",
         "stili": [
           "Lindy",
           "Balboa",
@@ -17634,6 +17651,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-23",
         "stili": [
           "Lindy"
         ]
