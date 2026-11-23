@@ -58,8 +58,8 @@ namespace SiBallaImportingData.Service
             "'ok' = serata o festa di social dance swing (data, città e luogo plausibili); va sul calendario; " +
             "'serata+workshop' = serata swing con parte didattica: pratica, social practice, practice night, ripasso, lezione + serata " +
             "(es. 'Pratica e Social Dance', 'La Social Dance di Pratica', 'Initiation/cours & soirée dansante'); va sul calendario e anche tra i workshop; " +
-            "'workshop' = corso, lezioni, stage, workshop, bootcamp, e anche weekend/festival/exchange/camp di più giorni di stili swing, " +
-            "anche se la riga è nella scheda Serate; va tra i workshop (è pubblicato, NON scartato); " +
+            "'workshop' = corso, lezioni, stage, workshop, bootcamp di stili swing senza serate; va tra i workshop (è pubblicato, NON scartato); " +
+            "weekend, festival, exchange e camp di più giorni CON serate (quasi sempre) sono 'serata+workshop': stanno su entrambi i fogli; " +
             "'mercatino' = mercatino o fiera vintage/usato/artigianato/dischi; va in Bacheca; " +
             "'no' = non è ballo swing, l'evento sparisce dal sito; " +
             "'da verificare' = non riesci a deciderlo, oppure sospetti un doppione o un evento annullato: lo guarda il curatore. " +

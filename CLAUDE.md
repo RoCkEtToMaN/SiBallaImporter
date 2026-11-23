@@ -93,7 +93,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   locale, via e citazione testuale -> il codice controlla che la citazione sia nei testi e contenga la via, poi Photon. Mai la sede
   dell'organizzatore senza una fonte su quell'evento (caso GheswingerS: sede a 5 km dalla festa).
 - Controllo qualità (`Application/ControlloQualita.cs`, `--agente-qualita`, workflow "Agente verifica" modo qualita, ogni notte alle 3:30
-  da solo): doppioni (anche lettere "decorate"), festival in Serate e Workshop, date sospette, serie contraddittorie, dati mancanti.
+  da solo): doppioni nella stessa scheda (anche lettere "decorate"), date sospette, serie contraddittorie, dati mancanti.
+  Festival e weekend CON serate stanno su entrambi i fogli (decisione del curatore): non sono doppioni, e per l'agente sono serata+workshop.
   Solo controlli nel codice, niente Gemini, niente scritto nello Sheet. Lo Sheet non ha una colonna per l'orario.
 - `EventIdentity.Same`: stesso giorno + stesso titolo + stesso link = stesso evento anche con città diversa (fino al 23/11/2026 il
   Gothenburg Rhythm Camp veniva riaggiunto a ogni giro perché la città nello Sheet era la regione).

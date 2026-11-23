@@ -45,7 +45,7 @@ internal static class ControlloQualita
     }
 
     // 1. stesso giorno, stessa città, titolo molto simile, entrambe pubblicate (le copie Serate -> Workshop non contano).
-    //    Stessa scheda = doppione; Serate + Workshop = festival/weekend anche in Serate (lì andrebbe "workshop", cioè solo traccia)
+    //    Solo nella stessa scheda: Serate + Workshop è voluto (festival e weekend con serate stanno su entrambi i fogli)
     private static int Doppioni(List<Event> pubblicate)
     {
         var coppie = new List<(Event A, Event B, double Sim)>();
@@ -56,13 +56,12 @@ internal static class ControlloQualita
                 for (int j = i + 1; j < lista.Count; j++)
                 {
                     var (a, b) = (lista[i], lista[j]);
-                    // copia della stessa riga nell'altra scheda (serata+workshop, workshop spostato): è voluta
-                    if (a.SheetName != b.SheetName && (ImportData.NotaCopiaDaSerate(a.NotaVerifica) || ImportData.NotaCopiaDaSerate(b.NotaVerifica))) continue;
+                    // stesso evento su entrambi i fogli (festival con serate, serata+workshop, workshop spostato): è voluto
+                    if (a.SheetName != b.SheetName) continue;
                     if (Simili(a.PartyName, b.PartyName) is double sim) coppie.Add((a, b, sim));
                 }
         }
         var stessaScheda = coppie.Where(x => x.A.SheetName == x.B.SheetName).ToList();
-        var dueSchede = coppie.Where(x => x.A.SheetName != x.B.SheetName).ToList();
 
         Console.WriteLine("\n----- 🔁 Probabili doppioni nella stessa scheda (stesso giorno e città, titolo simile, entrambi pubblicati) -----");
         // le righe ripetute più volte (es. 6 copie dello stesso workshop) in un'unica voce
@@ -79,16 +78,7 @@ internal static class ControlloQualita
             foreach (var e in gr.OrderBy(x => x.SheetRow)) Console.WriteLine($"   • {Riga(e)}");
         }
         if (gruppi.Count == 0) Console.WriteLine("   nessuno");
-
-        Console.WriteLine("\n----- 🎪 Festival e weekend pubblicati sia in Serate sia in Workshop (in Serate andrebbe 'workshop', cioè solo traccia) -----");
-        foreach (var (a, b, _) in dueSchede.Take(MaxPerSezione))
-        {
-            var (serata, workshop) = a.SheetName == TipoEvento.Serate.ToString() ? (a, b) : (b, a);
-            Console.WriteLine($"🎪 Serate riga {serata.SheetRow} ⟷ Workshop riga {workshop.SheetRow} | {serata.DateStart:yyyy-MM-dd} | {serata.City?.Trim()} | {serata.PartyName?.Trim()} [{serata.LuogoVerificato}]");
-        }
-        if (dueSchede.Count == 0) Console.WriteLine("   nessuno");
-        else if (dueSchede.Count > MaxPerSezione) Console.WriteLine($"   … e altri {dueSchede.Count - MaxPerSezione}");
-        return gruppi.Count + dueSchede.Count;
+        return gruppi.Count;
     }
 
     // parole del titolo: le lettere "decorate" (𝗚𝗢𝗧𝗛𝗘𝗡𝗕𝗨𝗥𝗚, 𝘼𝙡𝙡) diventano normali (FormKC), apostrofi tipografici uniformati
