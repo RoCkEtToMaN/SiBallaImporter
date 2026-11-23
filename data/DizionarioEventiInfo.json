@@ -3508,6 +3508,24 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "winter wonderland tea dance party dicembre al nuovo living": {
+        "organizer": null,
+        "city": "Roma",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Charleston"
+        ]
       }
     }
   },
@@ -22818,10 +22836,31 @@
       "verified": false,
       "source": null,
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "ingo singer live retro style dancing freccia azzurra": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "new tones live venerdi novembre al dancing freccia azzurra senigallia by retro style": {
         "organizer": null,
         "city": "Ancona",
         "country": "Italia",
@@ -25091,6 +25130,43 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-23"
+      }
+    }
+  },
+  "gipsy swing e al luppolo saloon|torino": {
+    "default": {
+      "organizer": "GIPSY SWING e Al Luppolo Saloon",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "it s swing party time con serena the jive machines": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   }
