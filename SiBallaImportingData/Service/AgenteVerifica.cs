@@ -91,9 +91,9 @@ namespace SiBallaImportingData.Service
             "già il locale e la via, altrimenti leggi la pagina più promettente (link della riga, sito dell'organizzatore, pagine dell'evento); " +
             "senza cerca_web leggi il link della riga e il sito dell'organizzatore. " +
             "Usa verifica_indirizzo anche come ricerca sulla mappa (OpenStreetMap, gratis): prova come 'locale' il nome del locale se " +
-            "compare nel titolo o nella descrizione (es. 'SWING PARTY (Officina della Birra)' -> 'Officina della Birra'), poi il nome " +
-            "dell'organizzatore (molte scuole di ballo e associazioni hanno la sede sulla mappa); se trova qualcosa ti dice la via. " +
-            "Se conosci tu il locale abituale di quell'organizzatore in quella città puoi provarlo con verifica_indirizzo. " +
+            "compare nel titolo o nella descrizione (es. 'SWING PARTY (Officina della Birra)' -> 'Officina della Birra'). NON usare la sede dell'organizzatore " +
+            "(scuola, associazione, pagina Facebook generica) come luogo dell'evento: feste e serate speciali si tengono spesso altrove; " +
+            "vale solo se una fonte dice che QUESTO evento si tiene lì, o se è la serie abituale della scuola già nel dizionario. " +
             "In proponi metti 'locale' e 'indirizzo' (via e civico, senza città) solo se vengono da una fonte o dalla mappa: " +
             "'fonte_indirizzo' = URL letto, oppure 'mappa' (trovato con verifica_indirizzo dal nome del locale/organizzatore), " +
             "oppure 'conoscenza del modello' (lo sapevi tu e la mappa lo conferma); in questi due ultimi casi sicurezza al massimo media. " +
@@ -182,7 +182,7 @@ namespace SiBallaImportingData.Service
                         (o.SoloIndirizzo ? "\nCOMPITO PRINCIPALE: trova il locale e l'indirizzo (via e civico) di questo evento. Procedi così: 1) cerca_web con titolo, " +
                             "organizzatore e città; 2) se il frammento o la 'risposta' contengono un locale o una via, controllali subito con verifica_indirizzo; " +
                             "3) altrimenti leggi con leggi_pagina il risultato più promettente (sito dell'organizzatore, pagina dell'evento, calendari di eventi) " +
-                            "e cerca la via; 4) prova anche il nome dell'organizzatore come 'locale' con verifica_indirizzo. Chiama proponi solo dopo aver " +
+                            "e cerca la via di QUESTO evento (non la sede dell'organizzatore). Chiama proponi solo dopo aver " +
                             "provato almeno ricerca e mappa, e metti locale/indirizzo/fonte_indirizzo se ne hai trovato uno. Per lo stato proponi lo " +
                             "stato attuale, se non vedi problemi evidenti." : "") } }
                 }
