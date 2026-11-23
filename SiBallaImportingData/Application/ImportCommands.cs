@@ -474,30 +474,39 @@ internal static class ImportCommands
         var esiti = new List<(Event Evento, string Esito, double? Km)>();
         foreach (var (e, vero) in campione)
         {
-            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiIndirizzo = true, SoloIndirizzo = true });
-            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
+            var r = await RicercaLuogo.CercaAsync(e, resolver, settings.Gemini, o.TavilyApiKey, o.TavilyMaxGiorno, o.TavilyMaxMese);
+            if (r.Esito == RicercaLuogo.Esito.Errore && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: la prova si ferma qui"); break; }
             string esito; double? km = null;
-            if (p?.Luogo is { Lat: { } lat, Lng: { } lng })
+            if (r.Luogo is { Lat: { } lat, Lng: { } lng } trovato)
             {
                 km = PhotonVenueGeocoder.HaversineKm(lat, lng, vero.Lat, vero.Lng);
-                esito = km <= 0.3 ? "giusto" : km <= 2 ? "vicino" : "sbagliato";
+                // stessa via scritta (la mappa a volte mette il punto a metà via, non sul civico): giusto anche se un po' lontano
+                esito = km <= 0.3 || (km <= 2 && StessaVia(trovato.Indirizzo, vero.Indirizzo)) ? "giusto" : km <= 2 ? "vicino" : "sbagliato";
             }
-            else esito = p is null ? "errore Gemini" : p.Luogo is null ? "non trovato" : "non confermato";
+            else esito = r.Esito == RicercaLuogo.Esito.Errore ? "errore Gemini" : r.Dettaglio.StartsWith("scartato") ? "scartato" : "non trovato";
             esiti.Add((e, esito, km));
             var segno = esito switch { "giusto" => "✅", "vicino" => "🟡", "sbagliato" => "❌", "errore Gemini" => "❗", _ => "➖" };
             Console.WriteLine();
-            Console.WriteLine($"{segno} {esito}{(km is null ? "" : $" ({km:F2} km)")} | tuo: {vero.Indirizzo} | agente: " +
-                              $"{(p?.Luogo is { } l ? string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => s is not null)) : "-")} | " +
+            Console.WriteLine($"{segno} {esito}{(km is null ? "" : $" ({km:F2} km)")} | tuo: {vero.Indirizzo} | trovato: " +
+                              $"{(r.Luogo is { } l ? string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => s is not null)) : "-")} | " +
                               $"{e.SheetName} riga {e.SheetRow} | {e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.PartyName?.Trim()}");
-            if (p?.Luogo is { } lt) Console.WriteLine($"   {lt.Come}{(lt.Fonte is null ? "" : $" - fonte: {lt.Fonte}")}");
-            if (p is not null) Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
+            Console.WriteLine($"   {(r.Luogo is { } lt ? $"{lt.Come} - fonte: {lt.Fonte}" : r.Dettaglio)}");
         }
 
         Console.WriteLine();
-        Console.WriteLine($"===== Risultato indirizzi: giusti (entro 300 m) {esiti.Count(x => x.Esito == "giusto")}, vicini (entro 2 km) {esiti.Count(x => x.Esito == "vicino")}, " +
-                          $"sbagliati {esiti.Count(x => x.Esito == "sbagliato")}, trovati ma non confermati da Photon {esiti.Count(x => x.Esito == "non confermato")}, " +
+        Console.WriteLine($"===== Risultato indirizzi: giusti {esiti.Count(x => x.Esito == "giusto")}, vicini (entro 2 km) {esiti.Count(x => x.Esito == "vicino")}, " +
+                          $"sbagliati {esiti.Count(x => x.Esito == "sbagliato")}, scartati dai controlli {esiti.Count(x => x.Esito == "scartato")}, " +
                           $"non trovati {esiti.Count(x => x.Esito == "non trovato")}, errori di Gemini {esiti.Count(x => x.Esito == "errore Gemini")} (su {esiti.Count}) =====");
         Console.WriteLine("Prova: niente scritto nello Sheet.");
+    }
+
+    // stessa via: le parole del nome della via (senza numeri) di una contengono quelle dell'altra
+    private static bool StessaVia(string? a, string? b)
+    {
+        static HashSet<string> Parole(string? s) => AddressResolver.ParoleSignificative(s).Where(w => !w.All(char.IsDigit)).ToHashSet();
+        var pa = Parole(a); var pb = Parole(b);
+        if (pa.Count == 0 || pb.Count == 0) return false;
+        return pa.IsSubsetOf(pb) || pb.IsSubsetOf(pa);
     }
 
     /// <summary>
@@ -638,14 +647,14 @@ internal static class ImportCommands
         foreach (var gruppo in daFare)
         {
             var ev = gruppo[0];
-            var p = await AgenteVerifica.VerificaAsync(ev, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { SoloIndirizzo = true });
-            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
+            var esito = await RicercaLuogo.CercaAsync(ev, resolver, settings.Gemini, o.TavilyApiKey, o.TavilyMaxGiorno, o.TavilyMaxMese);
+            if (esito.Esito == RicercaLuogo.Esito.Errore && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
             var titolo = $"{ev.DateStart:yyyy-MM-dd} | {ev.City?.Trim()} | {ev.Organizer?.Trim()} | {ev.PartyName?.Trim()} ({gruppo.Count} date)";
             Console.WriteLine();
-            if (p is null)
+            if (esito.Esito == RicercaLuogo.Esito.Errore)
             {
                 errori++;   // Gemini non ha risposto: non lo segno, si riprova al giro dopo
-                Console.WriteLine($"❗ nessuna risposta | {titolo}");
+                Console.WriteLine($"❗ {esito.Dettaglio} | {titolo}");
                 // due di fila = quota del giorno finita o Gemini giù: mi fermo, ogni altra chiamata aspetterebbe i nuovi tentativi per niente
                 if (++erroriDiFila >= 2)
                 {
@@ -655,12 +664,12 @@ internal static class ImportCommands
                 continue;
             }
             erroriDiFila = 0;
-            if (p.Luogo is { Lat: { } lat, Lng: { } lng } l)
+            if (esito.Luogo is { Lat: { } lat, Lng: { } lng } l)
             {
                 trovati++;
                 var indirizzo = l.Indirizzo ?? l.Locale!;
                 var luogo = string.Join(", ", new[] { l.Locale, l.Indirizzo }.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
-                Console.WriteLine($"📍 {luogo} ({l.Come}{(l.Fonte is null ? "" : $", fonte: {l.Fonte}")}) | {titolo}");
+                Console.WriteLine($"📍 {luogo} ({l.Come}, fonte: {l.Fonte}) | {titolo}");
                 if (scrivi)
                 {
                     store.RegistraDaAgente(ev, l.Locale, indirizzo, lat, lng, l.Come, l.Fonte);
@@ -679,15 +688,14 @@ internal static class ImportCommands
             }
             else
             {
-                if (p.Luogo is { } nc) { nonConfermati++; Console.WriteLine($"➖ trovato ma non confermato dalla mappa: {nc.Locale} {nc.Indirizzo} | {titolo}"); }
-                else { nonTrovati++; Console.WriteLine($"➖ non trovato | {titolo}"); }
+                if (esito.Dettaglio.StartsWith("scartato")) nonConfermati++; else nonTrovati++;
+                Console.WriteLine($"➖ {esito.Dettaglio} | {titolo}");
                 if (scrivi) store.SegnaAgenteNonTrovato(ev);
             }
-            Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
         }
 
         Console.WriteLine();
-        Console.WriteLine($"===== Risultato dizionario: trovati {trovati}, trovati ma non confermati dalla mappa {nonConfermati}, " +
+        Console.WriteLine($"===== Risultato dizionario: trovati {trovati}, scartati dai controlli {nonConfermati}, " +
                           $"non trovati {nonTrovati} (si riprova tra 30 giorni), errori {errori} =====");
         if (!scrivi)
         {

@@ -345,13 +345,13 @@ namespace SiBallaImportingData.Service
             return null;
         }
 
-        private static readonly HttpClient _tavily = new() { Timeout = TimeSpan.FromSeconds(30) };
+        internal static readonly HttpClient _tavily = new() { Timeout = TimeSpan.FromSeconds(30) };
 
         /// <summary>
         /// Ricerche Tavily usate, per giorno e per mese, nel file tavily-uso.json della cartella dati (su GitHub il giro orario lo
         /// conserva tra un giro e l'altro con la cache, come il dizionario): così il piano gratuito (~1000 al mese) dura tutto il mese
         /// </summary>
-        private static class TavilyBudget
+        internal static class TavilyBudget
         {
             private sealed class Uso { public string Giorno { get; set; } = ""; public int Oggi { get; set; } public string Mese { get; set; } = ""; public int NelMese { get; set; } }
             private static string File => DataPaths.Get("tavily-uso.json");
@@ -499,7 +499,7 @@ namespace SiBallaImportingData.Service
             return sb.ToString();
         }
 
-        private static string Accorcia(string? s, int max)
+        internal static string Accorcia(string? s, int max)
         {
             s = (s ?? "").Replace('\n', ' ').Trim();
             return s.Length <= max ? s : s[..max] + "…";
@@ -627,7 +627,7 @@ namespace SiBallaImportingData.Service
             }
         }
 
-        private static string Pulisci(string s) =>
+        internal static string Pulisci(string s) =>
             System.Text.RegularExpressions.Regex.Replace(HtmlAgilityPack.HtmlEntity.DeEntitize(s), @"\s+", " ").Trim();
     }
 }

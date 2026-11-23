@@ -89,6 +89,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   (max `INDIRIZZI_AGENTE_MAX`, default 5, eventi per giro; `AGENTE_MODELLO` = altro modello Gemini con la sua quota gratuita);
   i luoghi già trovati dall'agente (`FindAgente`) si riusano senza Gemini, e prima dell'agente il locale scritto nel titolo ("@ X",
   "(X)", "presso X") si cerca sulla mappa senza Gemini (`LocaliNelTitolo`, controlli in `LocaleGiusto`).
+  Poi `Service/RicercaLuogo.cs` (dal 23/11/2026, al posto dell'agente a più passi): pagina del link + Tavily -> UNA chiamata Gemini con
+  locale, via e citazione testuale -> il codice controlla che la citazione sia nei testi e contenga la via, poi Photon. Mai la sede
+  dell'organizzatore senza una fonte su quell'evento (caso GheswingerS: sede a 5 km dalla festa).
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 
