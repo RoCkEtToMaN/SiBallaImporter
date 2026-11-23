@@ -327,6 +327,7 @@ internal static class ImportCommands
         foreach (var e in righe)
         {
             var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o));
+            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
             proposte.Add((e, p));
             StampaProposta(e, e.LuogoVerificato ?? "", p);
         }
@@ -360,6 +361,7 @@ internal static class ImportCommands
         foreach (var (e, tua) in campione)
         {
             var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiDecisione = true });
+            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
             esiti.Add((e, tua, Come(p), p));
             StampaProposta(e, $"tua: {tua}", p, giusto: Come(p) == tua);
         }
@@ -422,6 +424,10 @@ internal static class ImportCommands
         Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
     }
 
+    // quota giornaliera del modello dell'agente finita (GeminiHttp): inutile continuare, ogni riga fallirebbe subito
+    private static bool QuotaAgenteFinita(AppSettings s) =>
+        GeminiHttp.QuotaFinita(string.IsNullOrWhiteSpace(s.Gemini.AgenteModel) ? s.Gemini.Model : s.Gemini.AgenteModel);
+
     private static AgenteVerifica.Opzioni Opzioni(ImportOptions o) =>
         new(Math.Max(2, o.AgentePassi), o.AgentePagine, o.AgenteRicerche, TavilyApiKey: o.TavilyApiKey);
 
@@ -468,6 +474,7 @@ internal static class ImportCommands
         foreach (var (e, vero) in campione)
         {
             var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiIndirizzo = true });
+            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
             string esito; double? km = null;
             if (p?.Luogo is { Lat: { } lat, Lng: { } lng })
             {
@@ -631,6 +638,7 @@ internal static class ImportCommands
         {
             var ev = gruppo[0];
             var p = await AgenteVerifica.VerificaAsync(ev, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { SoloIndirizzo = true });
+            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
             var titolo = $"{ev.DateStart:yyyy-MM-dd} | {ev.City?.Trim()} | {ev.Organizer?.Trim()} | {ev.PartyName?.Trim()} ({gruppo.Count} date)";
             Console.WriteLine();
             if (p is null)

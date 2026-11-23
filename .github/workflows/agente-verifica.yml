@@ -34,7 +34,7 @@ on:
         options: ["false", "true"]
         default: "false"
       modello:
-        description: Modello Gemini dell'agente (vuoto = quello dell'importatore)
+        description: Modello Gemini dell'agente (vuoto = Variable AGENTE_MODELLO, altrimenti quello dell'importatore)
         default: ""
 
 # stesso gruppo dell'importatore: non leggono/scrivono lo Sheet nello stesso momento
@@ -84,7 +84,8 @@ jobs:
         shell: bash
         env:
           Gemini__ApiKey: ${{ secrets.GEMINI_API_KEY }}
-          Gemini__AgenteModel: ${{ inputs.modello }}
+          # vuoto = Variable AGENTE_MODELLO (quota separata da quella della classificazione), se manca anche quella il modello dell'importatore
+          Gemini__AgenteModel: ${{ inputs.modello || vars.AGENTE_MODELLO }}
           Import__EnableSearching: "false"
           Import__EnableSending: "false"
           Import__EnableImportingOnExcel: "false"
@@ -112,7 +113,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Agente verifica (${{ inputs.modo }})
-          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ "
+          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ "
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log
