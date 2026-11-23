@@ -474,7 +474,7 @@ internal static class ImportCommands
         var esiti = new List<(Event Evento, string Esito, double? Km)>();
         foreach (var (e, vero) in campione)
         {
-            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiIndirizzo = true });
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o) with { NascondiIndirizzo = true, SoloIndirizzo = true });
             if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: l'agente si ferma qui, le righe rimaste al prossimo lancio"); break; }
             string esito; double? km = null;
             if (p?.Luogo is { Lat: { } lat, Lng: { } lng })

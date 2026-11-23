@@ -179,7 +179,12 @@ namespace SiBallaImportingData.Service
                 {
                     ["role"] = "user",
                     ["parts"] = new JsonArray { new JsonObject { ["text"] = Contesto(riga, sheet, store, nascondiDecisione, nascoste, o.NascondiIndirizzo) +
-                        (o.SoloIndirizzo ? "\nCOMPITO PRINCIPALE: trova il locale e l'indirizzo di questo evento (per lo stato proponi lo stato attuale, se non vedi problemi evidenti)." : "") } }
+                        (o.SoloIndirizzo ? "\nCOMPITO PRINCIPALE: trova il locale e l'indirizzo (via e civico) di questo evento. Procedi così: 1) cerca_web con titolo, " +
+                            "organizzatore e città; 2) se il frammento o la 'risposta' contengono un locale o una via, controllali subito con verifica_indirizzo; " +
+                            "3) altrimenti leggi con leggi_pagina il risultato più promettente (sito dell'organizzatore, pagina dell'evento, calendari di eventi) " +
+                            "e cerca la via; 4) prova anche il nome dell'organizzatore come 'locale' con verifica_indirizzo. Chiama proponi solo dopo aver " +
+                            "provato almeno ricerca e mappa, e metti locale/indirizzo/fonte_indirizzo se ne hai trovato uno. Per lo stato proponi lo " +
+                            "stato attuale, se non vedi problemi evidenti." : "") } }
                 }
             };
             var traccia = new List<string>();
@@ -386,15 +391,18 @@ namespace SiBallaImportingData.Service
             {
                 using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.tavily.com/search");
                 req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-                req.Content = new StringContent(new JsonObject { ["query"] = query, ["max_results"] = 6, ["search_depth"] = "basic" }.ToJsonString(),
+                req.Content = new StringContent(new JsonObject { ["query"] = query, ["max_results"] = 6, ["search_depth"] = "basic", ["include_answer"] = "basic" }.ToJsonString(),
                                                 Encoding.UTF8, "application/json");
                 using var risposta = await _tavily.SendAsync(req);
                 var testo = await risposta.Content.ReadAsStringAsync();
                 if (!risposta.IsSuccessStatusCode) return $"ERRORE: Tavily HTTP {(int)risposta.StatusCode} {Accorcia(testo, 120)}";
                 var risultati = JsonNode.Parse(testo)?["results"]?.AsArray();
-                if (risultati is null || risultati.Count == 0) return "nessun risultato";
                 var sb = new StringBuilder();
-                foreach (var r in risultati)
+                // risposta riassunta da Tavily dai risultati (stesso costo): spesso contiene già locale e via
+                if (JsonNode.Parse(testo)?["answer"] is JsonValue ans && ans.TryGetValue<string>(out var risp) && !string.IsNullOrWhiteSpace(risp))
+                    sb.AppendLine($"risposta: {Accorcia(Pulisci(risp), 500)}");
+                if ((risultati is null || risultati.Count == 0) && sb.Length == 0) return "nessun risultato";
+                foreach (var r in risultati ?? new JsonArray())
                     sb.AppendLine($"- {r?["title"]?.GetValue<string>()} | {r?["url"]?.GetValue<string>()}\n  {Accorcia(Pulisci(r?["content"]?.GetValue<string>() ?? ""), 400)}");
                 return sb.ToString();
             }
