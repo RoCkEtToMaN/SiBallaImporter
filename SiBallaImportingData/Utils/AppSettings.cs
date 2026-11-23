@@ -65,6 +65,19 @@ namespace SiBallaImportingData.Utils
                 .AddCommandLine(NormalizeArgs(args), SwitchMappings)
                 .Build();
 
+            // valori con spazi, a capo o virgolette in più (es. una Variable di GitHub copiata come "true " o "\"5\""):
+            // ripuliti prima della lettura, altrimenti "true " non diventa un bool e il giro si ferma subito
+            // (23/11/2026: importatore #103 fallito su Import:IndirizziConAgente)
+            var ripuliti = configuration.AsEnumerable()
+                .Where(kv => kv.Value is not null && kv.Value != kv.Value.Trim().Trim('"', '\'').Trim())
+                .Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value!.Trim().Trim('"', '\'').Trim()))
+                .ToList();
+            if (ripuliti.Count > 0)
+            {
+                Console.WriteLine($"Impostazioni ripulite da spazi o virgolette: {string.Join(", ", ripuliti.Select(kv => kv.Key))}");
+                configuration = new ConfigurationBuilder().AddConfiguration(configuration).AddInMemoryCollection(ripuliti).Build();
+            }
+
             var settings = configuration.Get<AppSettings>() ?? new AppSettings();
 
             // compatibilità con la variabile d'ambiente usata finora

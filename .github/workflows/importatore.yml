@@ -147,7 +147,8 @@ jobs:
           Import__CercaIndirizzi: ${{ inputs.solo_immagini == 'true' && 'false' || (vars.CERCA_INDIRIZZI || 'true') }}
           Import__CercaIndirizziMax: ${{ vars.CERCA_INDIRIZZI_MAX || '20' }}
           # luoghi cercati dall'agente invece che dalla ricerca semplice (variabile del repo INDIRIZZI_AGENTE = true), max eventi per giro
-          Import__IndirizziConAgente: ${{ vars.INDIRIZZI_AGENTE || 'false' }}
+          # contains: vale anche se la Variable è scritta con spazi, a capo o maiuscole ("true ", "True")
+          Import__IndirizziConAgente: ${{ contains(vars.INDIRIZZI_AGENTE, 'true') }}
           Import__AgenteDizionarioMax: ${{ vars.INDIRIZZI_AGENTE_MAX || '5' }}
           # modello Gemini dell'agente (vuoto = quello dell'importatore): con un altro modello usa un'altra quota gratuita giornaliera
           Gemini__AgenteModel: ${{ vars.AGENTE_MODELLO || '' }}
