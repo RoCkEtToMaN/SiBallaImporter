@@ -44,7 +44,7 @@ namespace SiBallaImportingData.Service
                 var pagina = await AgenteVerifica.LeggiPaginaAsync(link);
                 if (!pagina.StartsWith("ERRORE")) fonti.Add((link, pagina));
             }
-            var query = $"{ev.PartyName?.Trim()} {ev.Organizer?.Trim()} {ev.City?.Trim()}";
+            var query = $"{PerRicerca(ev.PartyName)} {PerRicerca(ev.Organizer)} {ev.City?.Trim()}";
             if (!string.IsNullOrWhiteSpace(tavilyKey) && AgenteVerifica.TavilyBudget.Usa(tavilyMaxGiorno, tavilyMaxMese))
                 fonti.AddRange(await TavilyAsync(query, tavilyKey));
             if (fonti.Count == 0)
@@ -129,6 +129,18 @@ namespace SiBallaImportingData.Service
             return new(Esito.Trovato, luogo, $"{fonti.Count} testi letti");
         }
 
+
+        // titolo per la ricerca web: senza emoji e simboli (☆ ⭐ |), senza date ("13/11 –") e non troppo lungo
+        private static string PerRicerca(string? s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return "";
+            var t = new string(s.Select(c => char.IsLetterOrDigit(c) || c is ' ' or '\'' or '&' or '-' ? c : ' ').ToArray());
+            t = System.Text.RegularExpressions.Regex.Replace(t, @"\b\d{1,2}\s*[/.]\s*\d{1,2}(\s*[/.]\s*\d{2,4})?\b", " ");
+            t = System.Text.RegularExpressions.Regex.Replace(t, @"\s*-\s*", " ").Trim();
+            t = System.Text.RegularExpressions.Regex.Replace(t, @"\s+", " ");
+            var parole = t.Split(' ');
+            return parole.Length <= 8 ? t : string.Join(' ', parole.Take(8));
+        }
         // testo normalizzato per confrontare la citazione con i testi (spazi, maiuscole, apostrofi e virgolette tipografiche)
         private static string Norm(string s) =>
             System.Text.RegularExpressions.Regex.Replace(s.ToLowerInvariant().Replace('’', '\'').Replace('“', '"').Replace('”', '"'), @"\s+", " ").Trim();
