@@ -69,7 +69,7 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   della stessa serie decidono le date nuove al posto di Gemini; impara solo dai valori scritti da lui (non dai `no`
   con nota "Gemini:"/"Memoria:"). Ogni giro con `--excel` la applica anche alle righe future; anteprima `--memoria-serie`.
   Chiave della serie: `MemoriaSerie.TitoloSerie` = NormalizeTitle senza mesi né ordinali (NormalizeTitle non va cambiato:
-  serve agli id delle immagini e al dizionario). Gemini risponde con un solo `tipo`: serata / serata_e_workshop / workshop (corsi e anche weekend) / mercatino / altro.
+  serve agli id delle immagini e al dizionario). Gemini risponde con un solo `tipo`: serata / serata_e_workshop (anche festival e weekend con serate: su entrambi i fogli) / workshop (solo didattica) / mercatino / altro.
   Per la serie (non per l'organizzatore) una conferma nella scheda Workshop vale come voto `workshop`.
   Per organizzatore: >= 2 date decise da lui tutte uguali (`no`/`mercatino`/`workshop`) e nessuna conferma -> vale per i suoi eventi nuovi.
   Per gli eventi che non decide, passa a Gemini la "storia organizzatore" (conteggi + titoli d'esempio) come indizio.

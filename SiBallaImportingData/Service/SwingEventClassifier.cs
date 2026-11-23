@@ -18,11 +18,12 @@ namespace SiBallaImportingData.Service
             "Charleston, Solo Jazz, Blues dance, Tap), con DJ o musica dal vivo, senza parte didattica. " +
             "'serata_e_workshop' = serata swing che è anche didattica: pratiche, social practice, practice night, ripassi, " +
             "serate con lezione o corso nel programma (es. 'Initiation/cours & soirée dansante', 'lezione + social', " +
-            "'La Social Dance di Pratica', 'Serata di ripassi'). " +
-            "'workshop' = evento didattico o di più giorni di stili swing: lezioni, lezioni di prova, corsi, classi a livelli " +
+            "'La Social Dance di Pratica', 'Serata di ripassi'); e anche weekend, festival, exchange e camp di più giorni con " +
+            "serate o social dance (es. 'Swing Weekend', 'Lindy Exchange', 'Blues Weekender', 'Balboa Festival'): stanno sia tra " +
+            "le serate sia tra i workshop. " +
+            "'workshop' = evento solo didattico di stili swing, senza serate: lezioni, lezioni di prova, corsi, classi a livelli " +
             "(es. 'Livello aperto', 'Principianti', 'Primi passi'), open class, laboratori, atelier, intensivi, stage, workshop, " +
-            "bootcamp, 'school', 'challenge' didattiche, e anche weekend, festival, exchange e camp di più giorni " +
-            "(es. 'Swing Weekend', 'Lindy Exchange', 'Blues Weekender'). " +
+            "bootcamp, 'school', 'challenge' didattiche. " +
             "'mercatino' = mercatino, mercato o fiera di vintage, handmade, artigianato, usato, abbigliamento o dischi " +
             "(es. 'Mercatino del vintage', 'Flea market', 'Vintage market'), anche con musica o DJ di sottofondo; " +
             "una serata di ballo che si tiene in un mercato (es. 'Swing al Mercato Centrale') è invece 'serata'. " +
