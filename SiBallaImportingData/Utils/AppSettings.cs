@@ -44,6 +44,7 @@ namespace SiBallaImportingData.Utils
             ["--agente-dizionario"] = "Import:AgenteDizionario",
             ["--agente-dizionario-scrivi"] = "Import:AgenteDizionarioScrivi",
             ["--indirizzi-agente"] = "Import:IndirizziConAgente",
+            ["--agente-qualita"] = "Import:AgenteQualita",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -176,6 +177,9 @@ namespace SiBallaImportingData.Utils
         // giro dell'importatore: con CercaIndirizzi (--indirizzi) cerca i luoghi con l'agente invece che con la ricerca semplice di
         // Gemini, al massimo AgenteDizionarioMax eventi per giro (i luoghi già trovati dall'agente si riusano senza contarli)
         public bool IndirizziConAgente { get; set; }
+        // controllo qualità dello Sheet (Application/ControlloQualita.cs): doppioni, date sospette, serie contraddittorie,
+        // dati mancanti, orari strani. Solo proposte, senza Gemini; di notte dal workflow "Agente verifica"
+        public bool AgenteQualita { get; set; }
         public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }

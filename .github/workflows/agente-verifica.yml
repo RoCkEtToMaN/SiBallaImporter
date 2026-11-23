@@ -6,6 +6,7 @@
 #   modo = indirizzi: righe con luogo controllato da te, senza fargli vedere l'indirizzo: quanto si avvicina (km)
 #   modo = dizionario: cerca il luogo degli eventi futuri senza indirizzo; scrivi = true lo salva nel dizionario dei luoghi
 #              (non verificato, commit in data/) e nello Sheet come "gemini" (come --indirizzi); scrivi = false mostra soltanto
+#   modo = qualita: controllo dello Sheet (doppioni, date sospette, serie contraddittorie, dati mancanti); parte anche da solo ogni notte
 #   ricerca web: con il secret TAVILY_API_KEY (tavily.com, gratis senza carta) usa Tavily; altrimenti ricerca_google = true
 #              (ricerca Google di Gemini: senza fatturazione attiva non costa nulla, al massimo risponde 429)
 # Usa gli stessi secrets dell'importatore (GOOGLE_SERVICE_ACCOUNT_JSON, GEMINI_API_KEY), più TAVILY_API_KEY se c'è.
@@ -13,12 +14,15 @@
 name: Agente verifica
 
 on:
+  # ogni notte alle 3:30 (ora italiana d'inverno; d'estate alle 4:30): controllo qualità dello Sheet, senza Gemini
+  schedule:
+    - cron: "30 2 * * *"
   workflow_dispatch:
     inputs:
       modo:
-        description: verifica (righe in attesa), prova (confronto), indirizzi (ritrova i luoghi noti), dizionario (cerca i luoghi mancanti)
+        description: verifica (righe in attesa), prova (confronto), indirizzi (ritrova i luoghi noti), dizionario (cerca i luoghi mancanti), qualita (controllo dello Sheet)
         type: choice
-        options: ["prova", "verifica", "indirizzi", "dizionario"]
+        options: ["prova", "verifica", "indirizzi", "dizionario", "qualita"]
         default: "prova"
       max:
         description: Righe da controllare (nella prova, righe per tipo)
@@ -96,11 +100,13 @@ jobs:
           Import__AgenteVerifica: ${{ inputs.modo == 'verifica' }}
           Import__AgenteProva: ${{ inputs.modo == 'prova' }}
           Import__AgenteIndirizziProva: ${{ inputs.modo == 'indirizzi' }}
-          Gemini__UseGoogleSearch: ${{ inputs.ricerca_google }}
+          Gemini__UseGoogleSearch: ${{ inputs.ricerca_google || 'false' }}
+          # di notte (schedule) parte solo il controllo qualità
+          Import__AgenteQualita: ${{ github.event_name == 'schedule' || inputs.modo == 'qualita' }}
           Import__AgenteDizionario: ${{ inputs.modo == 'dizionario' }}
           Import__AgenteDizionarioScrivi: ${{ inputs.modo == 'dizionario' && inputs.scrivi == 'true' }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          Import__AgenteMax: ${{ inputs.max }}
+          Import__AgenteMax: ${{ inputs.max || '8' }}
         run: dotnet SiBallaImportingData.dll 2>&1 | tee agente.log
 
       # proposte per email (stessi destinatari dell'email degli eventi), log completo in allegato. Non fa mai fallire il run
@@ -112,8 +118,8 @@ jobs:
           ESITO: ${{ job.status }}
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          TITOLO: Agente verifica (${{ inputs.modo }})
-          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ "
+          TITOLO: Agente verifica (${{ inputs.modo || 'qualita' }})
+          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ |^🔁 |^🎪 |^📅 |^⚖️ |===== Risultato controllo qualità|nei prossimi 14 giorni"
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log

@@ -92,6 +92,11 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   Poi `Service/RicercaLuogo.cs` (dal 23/11/2026, al posto dell'agente a più passi): pagina del link + Tavily -> UNA chiamata Gemini con
   locale, via e citazione testuale -> il codice controlla che la citazione sia nei testi e contenga la via, poi Photon. Mai la sede
   dell'organizzatore senza una fonte su quell'evento (caso GheswingerS: sede a 5 km dalla festa).
+- Controllo qualità (`Application/ControlloQualita.cs`, `--agente-qualita`, workflow "Agente verifica" modo qualita, ogni notte alle 3:30
+  da solo): doppioni (anche lettere "decorate"), festival in Serate e Workshop, date sospette, serie contraddittorie, dati mancanti.
+  Solo controlli nel codice, niente Gemini, niente scritto nello Sheet. Lo Sheet non ha una colonna per l'orario.
+- `EventIdentity.Same`: stesso giorno + stesso titolo + stesso link = stesso evento anche con città diversa (fino al 23/11/2026 il
+  Gothenburg Rhythm Camp veniva riaggiunto a ogni giro perché la città nello Sheet era la regione).
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`
   (senza `-scrivi` = anteprima). Il terzo si lancia anche da GitHub: workflow "Riclassifica storico".
 

@@ -22,9 +22,13 @@ public static class EventIdentity
     public static bool Same(Event a, Event b)
     {
         if (a.DateStart.Date != b.DateStart.Date) return false;
-        if (!SamePlace(a, b)) return false;
         var title = Normalize(a.PartyName);
         if (title.Length == 0) return false;
+        // stesso titolo e stesso link: è lo stesso evento anche se la città è scritta diversamente ("Västra Götaland County" nello
+        // Sheet, "Gothenburg" online, coordinate non ancora risolte). Senza questa regola il 23/11/2026 il Gothenburg Rhythm Camp
+        // era nella scheda Workshop 20 volte, una per giro
+        if (title == Normalize(b.PartyName) && Link(a) is { Length: > 0 } link && link == Link(b)) return true;
+        if (!SamePlace(a, b)) return false;
 
         // Due orari espliciti diversi possono indicare due appuntamenti distinti.
         if (a.DateStart.TimeOfDay != TimeSpan.Zero && b.DateStart.TimeOfDay != TimeSpan.Zero
@@ -40,6 +44,14 @@ public static class EventIdentity
         // Almeno tre parole e un titolo contenuto nell'altro, tolte le date.
         return Math.Min(first.Count, second.Count) >= 3
             && (first.IsSubsetOf(second) || second.IsSubsetOf(first));
+    }
+
+    // link senza http/https, www e / finale: "http://www.x.se/a/" = "https://x.se/a"
+    private static string Link(Event e)
+    {
+        var u = (e.EventDetail?.WebSite ?? "").Trim().ToLowerInvariant();
+        u = Regex.Replace(u, @"^https?://(www\.)?", "");
+        return u.TrimEnd('/');
     }
 
     // Stessa città, anche se nello Sheet è stata riscritta: "Montreal" = "Montreal (administrative region)",

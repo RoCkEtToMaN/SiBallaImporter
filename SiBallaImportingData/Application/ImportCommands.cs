@@ -229,7 +229,7 @@ internal static class ImportCommands
     /// Le righe dello Sheet non hanno la descrizione dell'evento: gli eventi online, che ce l'hanno, sono più facili
     /// </summary>
     // nota scritta dal programma (Gemini, memoria, copia da Serate): il valore della cella non è una tua decisione
-    private static bool NotaDelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
+    internal static bool NotaDelProgramma(Event e) => (e.NotaVerifica ?? "").TrimStart() is var n
         && (n.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase) || n.StartsWith(MemoriaSerie.PrefissoNota, StringComparison.OrdinalIgnoreCase)
             || ImportData.NotaCopiaDaSerate(n));
 
@@ -237,7 +237,7 @@ internal static class ImportCommands
     /// La tua decisione sulla riga: workshop, mercatino, serata+workshop, no (scartato) o "swing" (confermato), null se non
     /// l'hai decisa tu. Confermata nella scheda Workshop = workshop (corso, weekend, festival)
     /// </summary>
-    private static string? DecisioneTua(Event e) => e.LuogoVerificato switch
+    internal static string? DecisioneTua(Event e) => e.LuogoVerificato switch
     {
         ImportData.VerifiedSerataWorkshop => ImportData.VerifiedSerataWorkshop,
         ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => NotaDelProgramma(e) && !e.RigaArancione ? null : e.LuogoVerificato,
