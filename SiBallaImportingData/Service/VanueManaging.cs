@@ -25,6 +25,9 @@ public class VenueInfo
     // (scritto nel file solo se c'è, per non aggiungere una riga vuota a ogni voce)
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? GeminiNonTrovato { get; set; }
+    // come GeminiNonTrovato, ma per l'agente (pagine, mappa, titolo, organizzatore): i "non trovato" della vecchia ricerca non lo fermano
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? AgenteNonTrovato { get; set; }
     // stili di ballo imparati dalla colonna H dello sheet (solo celle non colorate come "dedotte"):
     // nell'evento = quelli della data più recente, nel default = quelli presenti in almeno metà delle righe dell'organizzatore
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
@@ -285,6 +288,30 @@ public class KnownVenueStore
         return DateTime.TryParseExact(v.GeminiNonTrovato, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
     }
 
+
+    /// <summary>Data dell'ultima ricerca dell'agente senza risultato per questo evento, null se mai cercato (o trovato)</summary>
+    public DateTime? AgenteNonTrovato(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return null;
+        if (!_data.TryGetValue(MakeKey(e.Organizer, e.City), out var org)) return null;
+        if (!org.Events.TryGetValue(NormalizeTitle(e.PartyName), out var v)) return null;
+        return DateTime.TryParseExact(v.AgenteNonTrovato, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+    }
+
+    /// <summary>Ricerca dell'agente senza risultato: lo segno nella voce dell'evento (creata se manca), si riprova dopo 30 giorni</summary>
+    public void SegnaAgenteNonTrovato(Event e)
+    {
+        if (string.IsNullOrWhiteSpace(e.Organizer) || string.IsNullOrWhiteSpace(e.City)) return;
+        var t = NormalizeTitle(e.PartyName);
+        if (t.Length == 0) return;
+        var key = MakeKey(e.Organizer, e.City);
+        if (!_data.TryGetValue(key, out var org))
+            _data[key] = org = new OrganizerVenues { Default = new VenueInfo { Organizer = e.Organizer, City = e.City, Country = e.Country } };
+        if (!org.Events.TryGetValue(t, out var v))
+            org.Events[t] = v = new VenueInfo { City = e.City, Country = e.Country };
+        v.AgenteNonTrovato = DateTime.Today.ToString("yyyy-MM-dd");
+        _dirty = true;
+    }
     public const string SourceAgente = "agente";
 
     /// <summary>
@@ -313,6 +340,7 @@ public class KnownVenueStore
         v.Source = SourceAgente;
         v.Notes = $"{DateTime.Today:yyyy-MM-dd} {come}" + (string.IsNullOrWhiteSpace(fonte) ? "" : $"; fonte: {fonte}");
         v.GeminiNonTrovato = null;
+        v.AgenteNonTrovato = null;
         _dirty = true;
         return true;
     }

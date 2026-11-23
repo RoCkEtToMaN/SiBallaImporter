@@ -619,7 +619,7 @@ internal static class ImportCommands
         // 3. gli altri: ricerca con l'agente, le date più vicine per prime; i non trovati si riprovano dopo 30 giorni
         var gruppi = tutti
             .Where(g => store.FindAgente(g[0]) is null && !dalTitolo.Contains(g))
-            .Where(g => store.GeminiNonTrovato(g[0]) is not DateTime d || d.AddDays(30) <= DateTime.Today)
+            .Where(g => store.AgenteNonTrovato(g[0]) is not DateTime d || d.AddDays(30) <= DateTime.Today)
             .ToList();
         var daFare = gruppi.Take(Math.Max(1, max)).ToList();
         Console.WriteLine();
@@ -680,7 +680,7 @@ internal static class ImportCommands
             {
                 if (p.Luogo is { } nc) { nonConfermati++; Console.WriteLine($"➖ trovato ma non confermato dalla mappa: {nc.Locale} {nc.Indirizzo} | {titolo}"); }
                 else { nonTrovati++; Console.WriteLine($"➖ non trovato | {titolo}"); }
-                if (scrivi) store.SegnaGeminiNonTrovato(ev);
+                if (scrivi) store.SegnaAgenteNonTrovato(ev);
             }
             Console.WriteLine($"   passi: {string.Join(" → ", p.Traccia)}");
         }
