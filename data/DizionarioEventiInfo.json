@@ -25169,5 +25169,39 @@
         ]
       }
     }
+  },
+  "serena the jive machines|torino": {
+    "default": {
+      "organizer": "Serena & The Jive Machines",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "serena the jive machine live cafe neruda": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": "Cafè Neruda",
+        "address": "Via Errico Giachino 28",
+        "lat": 45.0915815,
+        "lng": 7.6757951,
+        "geocodedAddress": "Via Errico Giachino 28",
+        "verified": false,
+        "source": "agente",
+        "verifiedOn": null,
+        "notes": "2026-11-23 locale 'Cafe' Neruda' scritto nel titolo, trovato sulla mappa come 'Cafè Neruda'; fonte: titolo dell'evento + mappa"
+      }
+    }
   }
 }
