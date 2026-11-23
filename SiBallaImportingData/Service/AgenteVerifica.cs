@@ -36,7 +36,7 @@ namespace SiBallaImportingData.Service
         public sealed record Opzioni(int MaxPassi, int MaxPagine, int MaxRicerche, bool NascondiDecisione = false, bool NascondiIndirizzo = false,
                                      string? TavilyApiKey = null, bool SoloIndirizzo = false, int TavilyMaxGiorno = 30, int TavilyMaxMese = 900);
 
-        private static readonly HttpClient _web = CreaClient();
+        internal static readonly HttpClient _web = CreaClient();
 
         private static HttpClient CreaClient()
         {
