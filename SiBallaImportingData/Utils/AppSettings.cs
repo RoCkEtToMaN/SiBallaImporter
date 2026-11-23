@@ -97,6 +97,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  ResetDb = {Import.ResetDb}");
             Console.WriteLine($"  CercaImmaginiSheet = {Import.CercaImmaginiSheet} (max {Import.CercaImmaginiSheetMax} righe)");
             Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
+            Console.WriteLine($"  IndirizziConAgente = {Import.IndirizziConAgente} (max {Import.AgenteDizionarioMax} eventi per giro), modello agente = {(string.IsNullOrWhiteSpace(Gemini.AgenteModel) ? Gemini.Model + " (lo stesso della classificazione)" : Gemini.AgenteModel)}, Tavily = {(string.IsNullOrWhiteSpace(Import.TavilyApiKey) ? "no" : "sì")}");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
             Console.WriteLine($"  NoPush = {Import.NoPush}, RiclassificaSheet = {Import.RiclassificaSheet}, RiclassificaSheetScrivi = {Import.RiclassificaSheetScrivi}");
