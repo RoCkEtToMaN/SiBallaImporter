@@ -46,6 +46,8 @@ namespace SiBallaImportingData.Utils
             ["--indirizzi-agente"] = "Import:IndirizziConAgente",
             ["--agente-qualita"] = "Import:AgenteQualita",
             ["--agente-qualita-scrivi"] = "Import:AgenteQualitaScrivi",
+            ["--agente-stili"] = "Import:AgenteStili",
+            ["--agente-stili-scrivi"] = "Import:AgenteStiliScrivi",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -183,6 +185,11 @@ namespace SiBallaImportingData.Utils
         public bool AgenteQualita { get; set; }
         // come AgenteQualita, ma cancella dallo Sheet i doppioni sicuri (tiene una riga per evento); il resto resta una proposta
         public bool AgenteQualitaScrivi { get; set; }
+        // stili da confermare (Service/ConfermaStili.cs): celle H lilla confermate o corrette con le prove della pagina dell'evento;
+        // senza -Scrivi mostra soltanto. Di notte dal workflow "Agente verifica", max AgenteStiliMax celle
+        public bool AgenteStili { get; set; }
+        public bool AgenteStiliScrivi { get; set; }
+        public int AgenteStiliMax { get; set; } = 40;
         public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }

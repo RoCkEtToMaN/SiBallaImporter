@@ -98,6 +98,9 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   Solo controlli nel codice, niente Gemini. Di notte CANCELLA i doppioni sicuri (stessa scheda, giorno, città e titolo uguale, o
   titolo simile con stesso link/organizzatore; tiene la riga decisa dal curatore o con più dati); il resto sono proposte per email.
   Note "Agente: …" = del programma, la memoria delle serie le ignora. Lo Sheet non ha una colonna per l'orario.
+- Stili da confermare (`Service/ConfermaStili.cs`, `--agente-stili[-scrivi]`, ogni notte max 40 celle, prima del controllo qualità che
+  cancella righe): celle H lilla -> pagina del link -> 1 chiamata Gemini con citazione -> conferma (via il lilla) o corregge H, nota
+  "Agente: …". Senza prove nella pagina la cella resta lilla. Le celle confermate/corrette il dizionario degli stili le impara.
 - `EventIdentity.Same`: stesso giorno + stesso titolo + stesso link = stesso evento anche con città diversa (fino al 23/11/2026 il
   Gothenburg Rhythm Camp veniva riaggiunto a ogni giro perché la città nello Sheet era la regione).
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`

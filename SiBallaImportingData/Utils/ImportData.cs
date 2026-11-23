@@ -601,6 +601,36 @@ namespace SiBallaImportingData.Utils
             "Se è giusto togli il colore della cella, se è sbagliato correggilo: " +
             "il programma impara lo stile solo da celle non colorate o corrette.";
 
+        /// <summary>
+        /// Stili confermati o corretti dall'agente (ConfermaStili): nuovo valore in H se va corretto, via il lilla, nota "Agente: …"
+        /// con la frase della pagina. Senza colore e senza la nota "Stile dedotto" la cella vale come confermata: il dizionario la impara
+        /// </summary>
+        public static async Task ScriviStiliAgenteAsync(List<(Event Evento, string? NuovoValore, string Nota)> modifiche)
+        {
+            var righe = modifiche.Where(x => x.Evento.SheetName is not null && x.Evento.SheetRow is not null).ToList();
+            if (righe.Count == 0) return;
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+            var requests = righe.Where(x => sheetIds.ContainsKey(x.Evento.SheetName!)).Select(x =>
+            {
+                var cella = new CellData { UserEnteredFormat = new CellFormat(), Note = x.Nota };
+                if (x.NuovoValore is not null) cella.UserEnteredValue = new ExtendedValue { StringValue = x.NuovoValore };
+                return new Request
+                {
+                    UpdateCells = new UpdateCellsRequest
+                    {
+                        Start = new GridCoordinate { SheetId = sheetIds[x.Evento.SheetName!], RowIndex = x.Evento.SheetRow!.Value - 1, ColumnIndex = ColonnaStili },
+                        Rows = new List<RowData> { new() { Values = new List<CellData> { cella } } },
+                        Fields = x.NuovoValore is null ? "userEnteredFormat.backgroundColor,note" : "userEnteredValue,userEnteredFormat.backgroundColor,note"
+                    }
+                };
+            }).ToList();
+            await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
+            Console.WriteLine($"[sheet] stili dell'agente: {righe.Count(x => x.NuovoValore is null)} confermati, {righe.Count(x => x.NuovoValore is not null)} corretti");
+        }
+
         private static bool IsColore(Color? c, Color atteso) =>
             c is not null
             && Math.Abs((c.Red ?? 0) - atteso.Red!.Value) < 0.01
