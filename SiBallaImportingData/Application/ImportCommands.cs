@@ -308,8 +308,13 @@ internal static class ImportCommands
     {
         var o = settings.Import;
         static bool GiaValutata(Event e) => (e.NotaVerifica ?? "").Contains(MemoriaSerie.PrefissoAgente, StringComparison.OrdinalIgnoreCase);
+        // righe "workshop" di Serate decise da Gemini (non da te né dalla memoria) prima della regola del 23/11/2026: festival e weekend
+        // CON serate vanno su entrambi i fogli (serata+workshop). Solo future: in Serate sono traccia, la copia in Workshop c'è già
+        static bool WorkshopDiGemini(Event e) => e.SheetName == TipoEvento.Serate.ToString() && e.LuogoVerificato == ImportData.VerifiedWorkshop
+            && (e.NotaVerifica ?? "").TrimStart().StartsWith("Gemini", StringComparison.OrdinalIgnoreCase)
+            && (e.DateFinish ?? e.DateStart).Date >= DateTime.Today;
         var daValutare = sheetEvents
-            .Where(e => e.LuogoVerificato == ImportData.VerifiedPending && !GiaValutata(e) && !string.IsNullOrWhiteSpace(e.PartyName))
+            .Where(e => (e.LuogoVerificato == ImportData.VerifiedPending || WorkshopDiGemini(e)) && !GiaValutata(e) && !string.IsNullOrWhiteSpace(e.PartyName))
             .ToList();
         // future dalla più vicina a oggi (sono quelle dell'email, che mostra i prossimi giorni); poi, se richiesto (di notte),
         // le passate dalla più recente all'indietro: non vanno sul sito, ma tengono pulito lo storico e servono alla memoria delle serie
@@ -331,12 +336,15 @@ internal static class ImportCommands
             if (p is null) { Console.WriteLine($"\n❗ nessuna risposta: {e.SheetName} riga {e.SheetRow} | {e.PartyName?.Trim()}"); continue; }
             var fonti = p.Fonti.Count > 0 ? $" Fonti: {string.Join(" ", p.Fonti.Take(2))}" : "";
             var motivo = AgenteVerifica.Accorcia(p.Motivo, 200);
-            string? valore = p.Sicurezza == "alta" ? p.Stato switch
-            {
-                AgenteVerifica.StatoOk => ImportData.VerifiedNew,
-                ImportData.VerifiedSerataWorkshop or ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => p.Stato,
-                _ => null,
-            } : null;
+            // riga "workshop" di Serate: solo serata+workshop (con serate: anche tra le serate); mai "no", è già pubblicata in Workshop
+            string? valore = p.Sicurezza != "alta" ? null
+                : WorkshopDiGemini(e) ? (p.Stato is ImportData.VerifiedSerataWorkshop or AgenteVerifica.StatoOk ? ImportData.VerifiedSerataWorkshop : null)
+                : p.Stato switch
+                {
+                    AgenteVerifica.StatoOk => ImportData.VerifiedNew,
+                    ImportData.VerifiedSerataWorkshop or ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => p.Stato,
+                    _ => null,
+                };
             Console.WriteLine();
             if (valore is not null)
             {

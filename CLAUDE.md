@@ -107,6 +107,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   sicurezza alta -> pubblica ("nuovo"/serata+workshop/workshop/mercatino) o scarta ("no", col freno); il resto resta al curatore con
   "Agente: proposta …" in fondo alla nota, mostrata nella sezione "Eventi da verificare" dell'email (🤖 secondo l'agente).
   Le righe che il curatore decide prima della notte non vengono toccate.
+  Valuta anche le righe "workshop" di Serate decise da Gemini (nota "Gemini…", future): festival/weekend con serate -> serata+workshop
+  (regola del 23/11/2026); mai "no" su queste, sono già pubblicate in Workshop.
   Anche nel giro orario, prima dell'email: max 3 righe per giro (`AgenteDecideOrario`, Variable `AGENTE_DA_VERIFICARE`, accesa di default;
   `AGENTE_DA_VERIFICARE_MAX`). Ordine: future dalla data più vicina (sono quelle dell'email, prossimi 7 giorni); di notte, dopo
   20 future, anche 20 passate dalla più recente (`AgenteDecidePassateMax`). Quota Gemini a regime: ~300-370 richieste/giorno su 500.
