@@ -47,7 +47,9 @@ public static class StiliEvento
         (new(@"\bsolo\s*jazz\b", RegexOptions.IgnoreCase), "SoloJazz"),
         (new(@"\bshag\b", RegexOptions.IgnoreCase), "Shag"),
         (new(@"\bcharleston\b", RegexOptions.IgnoreCase), "Charleston"),
-        (new(@"boogie|\brock|\bjive\b|\bfifties\b|anni\s*50", RegexOptions.IgnoreCase), "Boogie Woogie"),
+        // niente più "rock", "jive", "fifties": il Rock 'n' Roll non è uno stile del calendario (curatore, 24/11/2026), e una serata
+        // rock'n'roll non deve ritrovarsi un "Boogie Woogie" dedotto
+        (new(@"boogie", RegexOptions.IgnoreCase), "Boogie Woogie"),
     ];
 
     /// <summary>"Lindy Hop, jazz; Boogie" -> ["Lindy", "SoloJazz", "Boogie Woogie"] (i nomi sconosciuti restano come sono)</summary>

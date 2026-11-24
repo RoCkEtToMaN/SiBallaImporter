@@ -123,6 +123,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   committano l'importatore e il giro notturno. Base per proporre nuove regole (punto 3, da fare).
 - Stile "Rhythm 'n' Blues" (24/11/2026, chiesto dal curatore): in `StiliEvento.Nomi` (+ R&B, RnB, Rhythm & Blues, …, regex
   `StiliEvento.RhythmNBlues`); "Blues" da solo non scatta più dentro "Rhythm 'n' Blues". Sul sito: sinonimi in `sito/index.html`. L'app no.
+  Il Rock 'n' Roll NON è uno stile: la parola "rock" (e jive, fifties) non fa più dedurre Boogie Woogie; serate solo rock'n'roll = no
+  (regola in data/regole-curatore.md).
 - Regole del curatore: `data/regole-curatore.md` (righe "- " sotto i titoli "## "), lette da `Utils/RegoleCuratore.cs` e aggiunte alle
   istruzioni della classificazione (SwingEventClassifier) e dell'agente; valgono più delle regole generali. Il curatore le modifica da GitHub.
 - Comandi una tantum: `--pulisci-lezioni[-scrivi]`, `--riclassifica-sheet[-scrivi]`, `--riclassifica-storico[-scrivi]`

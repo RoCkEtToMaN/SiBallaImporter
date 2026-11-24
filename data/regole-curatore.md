@@ -16,6 +16,8 @@ Per modificarlo da GitHub: apri il file, matita in alto a destra, scrivi, "Commi
 - Country, line dance, two step, balli di gruppo, liscio, tango, salsa, bachata e kizomba sono "no", anche se nel titolo c'è "swing".
 - Concerti, crociere, raduni e festival rockabilly o rock'n'roll sono "no" se non citano social dance di Lindy Hop, Balboa, Boogie Woogie o Shag.
 - Le serate in discoteca generiche (es. "Le Cupole Discoteca") sono "no".
+- Il Rock 'n' Roll non è uno stile del calendario: le serate e i concerti solo rock'n'roll (senza Lindy Hop, Balboa, Boogie Woogie, Shag, Charleston, Rhythm 'n' Blues o social dance swing) sono "no". Se ci sono anche stili swing è "swing".
+- Il Rhythm 'n' Blues (R&B ballato della scena swing) è uno stile del calendario: le serate e i weekend di Rhythm 'n' Blues sono "swing" o "workshop" come gli altri stili.
 
 ## Tipi di evento
 - Pratiche, practice night, ripassi, "social dance di pratica" e "lezione + serata" sono "serata+workshop".

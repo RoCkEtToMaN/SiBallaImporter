@@ -34,7 +34,7 @@ namespace SiBallaImportingData.Service
             "Se un evento è misto ma ha una vera parte di social dance swing è 'serata'. " +
             "Per ogni evento rispondi con id, tipo e un motivo breve in italiano (max 15 parole). " +
             "Indica anche gli stili di ballo dell'evento in 'stili', usando solo questi nomi: " + string.Join(", ", StiliEvento.Nomi) + ". " +
-            "Metti uno stile solo se è citato o evidente da titolo, organizzatore, stili o descrizione (rock'n'roll e jive -> Boogie Woogie); " +
+            "Metti uno stile solo se è citato o evidente da titolo, organizzatore, stili o descrizione (il rock'n'roll e il jive NON sono Boogie Woogie: non dedurre stili da 'rock'); " +
             "se non si capisce lascia la lista vuota, non indovinare. " +
             "Alcuni eventi hanno 'storia organizzatore': le decisioni del curatore del calendario sugli altri eventi dello " +
             "stesso organizzatore (date confermate, pubblicate senza obiezioni o scartate, con qualche titolo d'esempio). " +
