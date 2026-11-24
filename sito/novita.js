@@ -27,6 +27,21 @@
       ]
     },
     {
+      versione: "1.2.2.0",
+      data: "Novembre 2026",
+      titolo: "Nuovo stile: Rhythm 'n' Blues",
+      intro: "Nel calendario arriva un nuovo stile di ballo.",
+      voci: [
+        {
+          tipo: "Nuovo", titolo: "Rhythm 'n' Blues", link: "/",
+          punti: [
+            "Le serate di <b>Rhythm 'n' Blues</b> (anche scritto R&amp;B o Rhythm &amp; Blues) hanno il loro stile, anche nel filtro degli stili del calendario.",
+            "Lo trovi anche nel glossario degli stili, nella pagina della <a href=\"/storia\">storia dello swing</a>."
+          ]
+        }
+      ]
+    },
+    {
       versione: "1.2.1.0",
       data: "Novembre 2026",
       titolo: "Mercatini vintage in Bacheca",

@@ -38,6 +38,7 @@ namespace SiBallaImportingData.Model
         Afrodance,
         Charleston,
         SlowBal,
-        StLouisShag
+        StLouisShag,
+        RhythmNBlues    // 11 (24/11/2026): l'app usa gli stessi numeri
     }
 }

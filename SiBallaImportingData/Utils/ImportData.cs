@@ -1279,6 +1279,14 @@ namespace SiBallaImportingData.Utils
                     case "collegiate shag":
                         result.Add(StileEvento.Shag);
                         break;
+                    case "boogie woogie":
+                    case "boogie-woogie":
+                    case "boogie":
+                        result.Add(StileEvento.Boogie);
+                        break;
+                    case var r when Regex.IsMatch(r, "^(" + StiliEvento.RhythmNBlues + ")$", RegexOptions.IgnoreCase):
+                        result.Add(StileEvento.RhythmNBlues);
+                        break;
                     //case "authentic jazz":
                     //case "authentic":
                     //case "vintage jazz":
