@@ -1687,6 +1687,24 @@
         "stili": [
           "SoloJazz"
         ]
+      },
+      "rolli goes to chicago": {
+        "organizer": null,
+        "city": "Genova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -8849,9 +8867,7 @@
       "notes": null,
       "stili": [
         "Lindy",
-        "Balboa",
-        "Blues",
-        "SoloJazz"
+        "Blues"
       ]
     },
     "events": {
@@ -8893,6 +8909,24 @@
           "Blues",
           "Lindy",
           "SoloJazz"
+        ]
+      },
+      "addicted to blues": {
+        "organizer": null,
+        "city": "Firenze",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Blues"
         ]
       }
     }
