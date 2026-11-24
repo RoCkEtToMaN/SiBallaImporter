@@ -106,7 +106,8 @@ internal static class ImportRunner
                         await ConfermaStili.EseguiAsync(sheetEvents, settings.Gemini, opzioni.AgenteStiliMax, opzioni.AgenteStiliScrivi);
                 }
                 if (opzioni.AgenteDecide || opzioni.AgenteDecideScrivi)
-                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideMax, opzioni.AgenteDecideScrivi);
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideMax, opzioni.AgenteDecideScrivi,
+                                                           maxPassate: opzioni.AgenteDecidePassateMax);
                 if (opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi) await ControlloQualita.EseguiAsync(sheetEvents, opzioni.AgenteQualitaScrivi);
                 if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);
@@ -235,7 +236,7 @@ internal static class ImportRunner
             {
                 try
                 {
-                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideOrarioMax, scrivi: true, primaQueste: nuoviEventi);
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideOrarioMax, scrivi: true);
                 }
                 catch (Exception ex)
                 {

@@ -237,7 +237,8 @@ L'agente valuta le righe `da verificare` e decide da solo **solo i casi chiari**
   **🤖 secondo l'agente: …** con la sua proposta, e decidi tu.
 
 Quando: nel **giro orario**, prima dell'email, al massimo 3 righe per giro (Variable `AGENTE_DA_VERIFICARE` = `false` per
-spegnerlo, `AGENTE_DA_VERIFICARE_MAX` per il massimo), e **di notte** fino a 20 righe per smaltire l'arretrato.
+spegnerlo, `AGENTE_DA_VERIFICARE_MAX` per il massimo), partendo dalla data più vicina a oggi (quelle dell'email), e **di notte**
+fino a 20 righe future più, se avanza quota, 20 righe già passate (dalla più recente: tengono pulito lo storico).
 Le righe che decidi tu prima non le tocca. Le pubblica come `nuovo` e non `ok`: la memoria delle serie non le scambia per tue.
 
 ### Il lavoro notturno dell'agente (ogni notte alle 3:30)

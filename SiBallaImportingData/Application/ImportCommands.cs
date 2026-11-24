@@ -304,18 +304,21 @@ internal static class ImportCommands
     /// "nuovo" e non "ok": la memoria delle serie non deve scambiarle per conferme del curatore. scrivi = false: mostra soltanto
     /// </summary>
     public static async Task AgenteDecideAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver, int max, bool scrivi,
-                                               IReadOnlyCollection<Event>? primaQueste = null)
+                                               int maxPassate = 0)
     {
         var o = settings.Import;
         static bool GiaValutata(Event e) => (e.NotaVerifica ?? "").Contains(MemoriaSerie.PrefissoAgente, StringComparison.OrdinalIgnoreCase);
-        var righe = sheetEvents
-            .Where(e => (e.DateFinish ?? e.DateStart).Date >= DateTime.Today && e.LuogoVerificato == ImportData.VerifiedPending)
-            .Where(e => !GiaValutata(e) && !string.IsNullOrWhiteSpace(e.PartyName))
-            // prima le righe arrivate in questo giro (così finiscono nell'email già decise o con il parere), poi le più vicine
-            .OrderBy(e => primaQueste is not null && primaQueste.Any(n => EventIdentity.Same(n, e)) ? 0 : 1).ThenBy(e => e.DateStart).ToList();
-        var daFare = righe.Take(Math.Max(1, max)).ToList();
+        var daValutare = sheetEvents
+            .Where(e => e.LuogoVerificato == ImportData.VerifiedPending && !GiaValutata(e) && !string.IsNullOrWhiteSpace(e.PartyName))
+            .ToList();
+        // future dalla più vicina a oggi (sono quelle dell'email, che mostra i prossimi giorni); poi, se richiesto (di notte),
+        // le passate dalla più recente all'indietro: non vanno sul sito, ma tengono pulito lo storico e servono alla memoria delle serie
+        var future = daValutare.Where(e => (e.DateFinish ?? e.DateStart).Date >= DateTime.Today).OrderBy(e => e.DateStart).ToList();
+        var passate = daValutare.Where(e => (e.DateFinish ?? e.DateStart).Date < DateTime.Today).OrderByDescending(e => e.DateStart).ToList();
+        var daFare = future.Take(Math.Max(1, max)).Concat(passate.Take(Math.Max(0, maxPassate))).ToList();
         Console.WriteLine();
-        Console.WriteLine($"===== Righe da verificare: l'agente ne valuta {daFare.Count} (su {righe.Count} non ancora valutate) " +
+        Console.WriteLine($"===== Righe da verificare: l'agente ne valuta {daFare.Count} ({Math.Min(future.Count, Math.Max(1, max))} future su {future.Count}" +
+                          $"{(maxPassate > 0 ? $", {Math.Min(passate.Count, maxPassate)} passate su {passate.Count}" : "")}; non ancora valutate) " +
                           $"{(scrivi ? "- applica le decisioni sicure" : "- anteprima")} =====");
         if (!GeminiPronto(settings)) return;
 

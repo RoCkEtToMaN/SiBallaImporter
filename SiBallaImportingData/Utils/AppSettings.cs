@@ -211,6 +211,8 @@ namespace SiBallaImportingData.Utils
         public bool AgenteDecide { get; set; }
         public bool AgenteDecideScrivi { get; set; }
         public int AgenteDecideMax { get; set; } = 20;
+        // di notte, dopo le future: righe "da verificare" già passate, dalla più recente (storico pulito, memoria delle serie)
+        public int AgenteDecidePassateMax { get; set; } = 20;
         // nel giro orario: prima dell'email l'agente valuta al massimo AgenteDecideOrarioMax righe "da verificare" (Variable
         // AGENTE_DA_VERIFICARE, accesa di default su GitHub; spenta sul PC)
         public bool AgenteDecideOrario { get; set; }
