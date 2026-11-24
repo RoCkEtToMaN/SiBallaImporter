@@ -111,6 +111,8 @@ internal static class ImportRunner
                                                            maxPassate: opzioni.AgenteDecidePassateMax);
                 // di notte: le correzioni e decisioni del curatore rispetto al registro (prima del controllo qualità, che cancella righe)
                 if (opzioni.AgenteQualitaScrivi) StampaCorrezioniCuratore(sheetEvents);
+                // di notte: le regole che la memoria ha imparato dalle parole dei titoli (righe "🧠" nell'email, file data/regole-imparate.md)
+                if (opzioni.AgenteQualitaScrivi) MemoriaSerie.Da(sheetEvents);
                 if (opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi) await ControlloQualita.EseguiAsync(sheetEvents, opzioni.AgenteQualitaScrivi);
                 if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);

@@ -54,6 +54,96 @@ namespace SiBallaImportingData.Service
         private readonly Dictionary<string, Storia> _serie = new();
         private readonly Dictionary<string, Organizzatore> _organizzatori = new();
 
+        // ---- parole imparate (24/11/2026): una parola (o coppia di parole) del titolo che compare solo in eventi scartati da te,
+        // di almeno MinParolaOrganizzatori organizzatori diversi, e mai in un evento che hai tenuto, diventa una regola "no" per
+        // gli eventi nuovi e per le righe future "nuovo"/"gemini"/"da verificare". Non vale se il titolo nomina uno stile del
+        // calendario (stesso freno dell'agente) o se la serie/l'organizzatore hanno date confermate. Basta un tuo "sì" su un
+        // evento con quella parola perché la regola sparisca al giro dopo.
+        private const int MinParolaNo = 5;
+        private const int MinParolaOrganizzatori = 6;   // con 3 uscivano "paris", "cours", "open" (provato il 24/11/2026)
+        public const string RegoleImparateRepoPath = "data/regole-imparate.md";
+        private sealed class Parola
+        {
+            public int No, Tenuti;
+            public HashSet<string> Organizzatori = new();
+            public List<string> Titoli = new();
+        }
+        private readonly Dictionary<string, Parola> _regoleParole = new();
+
+        private static readonly HashSet<string> ParoleVuote = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "del", "della", "delle", "dei", "degli", "alla", "alle", "agli", "con", "per", "tra", "fra", "una", "uno", "the", "and",
+            "for", "with", "des", "les", "une", "aux", "avec", "pour", "par", "der", "die", "das", "und", "mit", "von",
+            "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica", "monday", "tuesday", "wednesday",
+            "thursday", "friday", "saturday", "sunday", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche",
+            "edizione", "edition", "night", "serata", "soiree", "party", "social", "dance", "swing", "festival", "event",
+        };
+
+        /// <summary>Parole del titolo (minuscole, senza accenti, >= 3 lettere, niente mesi/giorni/numeri) e coppie di parole vicine</summary>
+        private static HashSet<string> Parole(string? titolo)
+        {
+            var t = KnownVenueStore.NormalizeTitle(titolo);
+            var parole = System.Text.RegularExpressions.Regex.Matches(t, @"[a-z]+").Select(m => m.Value)
+                .Where(w => w.Length >= 3 && !ParoleVuote.Contains(w) && !MesiEOrdinali.IsMatch(w)).ToList();
+            var out_ = new HashSet<string>(parole);
+            for (int i = 0; i + 1 < parole.Count; i++) out_.Add(parole[i] + " " + parole[i + 1]);
+            return out_;
+        }
+
+        private void ImparaParole(IEnumerable<Event> sheetEvents)
+        {
+            var tutte = new Dictionary<string, Parola>();
+            foreach (var e in sheetEvents)
+            {
+                if (string.IsNullOrWhiteSpace(e.PartyName) || AgenteVerifica.StileDelCalendario.IsMatch(e.PartyName)) continue;
+                var voto = VotoDi(e);
+                if (voto is not (Voto.No or Voto.SiTuo or Voto.SiTacito or Voto.SerataWorkshop)) continue;
+                foreach (var w in Parole(e.PartyName))
+                {
+                    if (!tutte.TryGetValue(w, out var p)) tutte[w] = p = new Parola();
+                    if (voto != Voto.No) { p.Tenuti++; continue; }
+                    p.No++;
+                    p.Organizzatori.Add(KnownVenueStore.MakeKey(e.Organizer ?? "", ""));
+                    var titolo = e.PartyName.Trim();
+                    if (p.Titoli.Count < MaxTitoliEsempio && !p.Titoli.Contains(titolo)) p.Titoli.Add(titolo.Length > 60 ? titolo[..60] : titolo);
+                }
+            }
+            foreach (var (w, p) in tutte)
+                if (p.Tenuti == 0 && p.No >= MinParolaNo && p.Organizzatori.Count >= MinParolaOrganizzatori)
+                    _regoleParole[w] = p;
+            // una coppia di parole è inutile se una delle due è già una regola da sola
+            foreach (var coppia in _regoleParole.Keys.Where(k => k.Contains(' ')).ToList())
+                if (coppia.Split(' ').Any(_regoleParole.ContainsKey)) _regoleParole.Remove(coppia);
+        }
+
+        /// <summary>Le regole imparate, una per riga ("🧠 «parola»: N scartati da te, ..."), per il log, l'email e data/regole-imparate.md</summary>
+        public List<string> RegoleImparate() => _regoleParole.OrderByDescending(x => x.Value.No)
+            .Select(x => $"🧠 «{x.Key}» nel titolo -> no: {x.Value.No} eventi scartati da te ({x.Value.Organizzatori.Count} organizzatori), " +
+                         $"nessuno tenuto; es. {string.Join(", ", x.Value.Titoli.Select(t => $"\"{t}\""))}")
+            .ToList();
+
+        private void SalvaRegoleImparate()
+        {
+            if (DictionaryRepoSync.RepoPath(RegoleImparateRepoPath) is not { } p) return;
+            try
+            {
+                var testo = "# Regole imparate dal programma\n\n" +
+                            "Le scrive da solo l'importatore a ogni giro, dalle tue decisioni in \"Luogo verificato\" (non modificarle qui).\n" +
+                            "Una parola del titolo diventa una regola \"no\" se compare in almeno " + MinParolaNo + " eventi scartati da te, di almeno " +
+                            MinParolaOrganizzatori + " organizzatori, e in nessun evento che hai tenuto.\n" +
+                            "Non vale se il titolo nomina uno stile del calendario (Lindy, Balboa, Blues, Shag, Charleston, Boogie, Solo Jazz, Rhythm 'n' Blues).\n" +
+                            "Per togliere una regola basta un tuo \"sì\" (o \"ok\") su un evento con quella parola. Per le regole scritte da te: regole-curatore.md.\n\n" +
+                            string.Join("\n", RegoleImparate().Select(r => "- " + r[2..].Trim())) + "\n";
+                if (File.Exists(p) && File.ReadAllText(p) == testo) return;
+                Directory.CreateDirectory(Path.GetDirectoryName(p)!);
+                File.WriteAllText(p, testo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[memoria] regole imparate non salvate: {ex.Message}");
+            }
+        }
+
         private static string? ChiaveOrganizzatore(Event e) =>
             string.IsNullOrWhiteSpace(e.Organizer) ? null : KnownVenueStore.MakeKey(e.Organizer, "");
 
@@ -169,6 +259,11 @@ namespace SiBallaImportingData.Service
             Console.WriteLine($"[memoria] organizzatori decisi per tutti i loro eventi: " +
                               $"{perOrg.GetValueOrDefault(ImportData.VerifiedNo)} scartati, {perOrg.GetValueOrDefault(ImportData.VerifiedMercatino)} mercatini, " +
                               $"{perOrg.GetValueOrDefault(ImportData.VerifiedWorkshop)} workshop (su {memoria._organizzatori.Count} con una storia)");
+
+            memoria.ImparaParole(sheetEvents);
+            Console.WriteLine($"[memoria] regole imparate dalle parole dei titoli: {memoria._regoleParole.Count} (elenco in {RegoleImparateRepoPath})");
+            foreach (var r in memoria.RegoleImparate()) Console.WriteLine(r);
+            memoria.SalvaRegoleImparate();
             return memoria;
         }
 
@@ -258,6 +353,18 @@ namespace SiBallaImportingData.Service
                          : d.Stato == ImportData.VerifiedMercatino ? "segnate mercatino da te (va in Bacheca)"
                          : "segnate workshop/corso da te (va nella scheda Workshop)";
                 return (d.Stato, $"{PrefissoNota} organizzatore con {d.Date} date {cosa}, nessuna confermata");
+            }
+
+            // parole imparate: non se il titolo nomina uno stile del calendario, né se la serie o l'organizzatore hanno conferme
+            if (_regoleParole.Count > 0 && !string.IsNullOrWhiteSpace(e.PartyName) && !AgenteVerifica.StileDelCalendario.IsMatch(e.PartyName)
+                && !(Chiave(e) is string ch && _serie.TryGetValue(ch, out var st) && (st.Si > 0 || st.SerataWorkshop > 0))
+                && !(ChiaveOrganizzatore(e) is string co && _organizzatori.TryGetValue(co, out var og) && og.Si > 0))
+            {
+                var regola = Parole(e.PartyName).Where(_regoleParole.ContainsKey)
+                    .Select(w => (Parola: w, Info: _regoleParole[w])).OrderByDescending(x => x.Info.No).FirstOrDefault();
+                if (regola.Info is not null)
+                    return (ImportData.VerifiedNo, $"{PrefissoNota} regola imparata: «{regola.Parola}» nel titolo, {regola.Info.No} eventi così " +
+                                                   $"scartati da te ({regola.Info.Organizzatori.Count} organizzatori) e nessuno tenuto");
             }
             return null;
         }

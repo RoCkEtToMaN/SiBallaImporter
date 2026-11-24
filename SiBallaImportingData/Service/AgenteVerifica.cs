@@ -446,7 +446,7 @@ namespace SiBallaImportingData.Service
         }
 
         // stili del calendario nel titolo o nella colonna Stile (non "swing" da solo: c'è anche nel West Coast Swing)
-        private static readonly System.Text.RegularExpressions.Regex StileDelCalendario = new(
+        internal static readonly System.Text.RegularExpressions.Regex StileDelCalendario = new(
             @"lindy|balboa|boogie|\bshag\b|charleston|solo ?jazz|\bblues\b|\btap\b|" + StiliEvento.RhythmNBlues, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         // doppioni e annullamenti: li decide il curatore (magari la riga scartata è quella giusta)
         private static readonly System.Text.RegularExpressions.Regex DoppioneOAnnullato = new(

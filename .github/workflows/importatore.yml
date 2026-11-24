@@ -194,6 +194,7 @@ jobs:
           git add data/DizionarioEventiInfo.json
           # registro delle decisioni del programma (il programma lo scrive direttamente in data/)
           [ -f data/registro-decisioni.json ] && git add data/registro-decisioni.json
+          [ -f data/regole-imparate.md ] && git add data/regole-imparate.md
           if git diff --cached --quiet; then echo "Dizionario e registro invariati"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

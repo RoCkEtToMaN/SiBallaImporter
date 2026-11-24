@@ -127,7 +127,7 @@ jobs:
           RUN_NUMBER: ${{ github.run_number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TITOLO: Agente verifica (${{ inputs.modo || 'qualita' }})
-          ELENCO: "🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ |^🗑️ |^❓ |^✏️ |^✅ confermato|===== Risultato stili|^✍️ |===== Le tue correzioni|^📅 |^⚖️ |===== Risultato controllo qualità|nei prossimi 14 giorni"
+          ELENCO: "^🧠 |regole imparate dalle parole|🤖 |❌ |🙈 |===== Risultato agente|sicurezza (alta|media|bassa): |stesso esito sul sito|avrebbe nascosto|^(✅|🟡|❌|➖) (giusto|vicino|sbagliato|non )|===== Risultato indirizzi|📍 |===== Dizionario|===== Risultato dizionario|^➖ |⏸️ |^🗑️ |^❓ |^✏️ |^✅ confermato|===== Risultato stili|^✍️ |===== Le tue correzioni|^📅 |^⚖️ |===== Risultato controllo qualità|nei prossimi 14 giorni"
         run: python3 .github/scripts/email_log.py out/agente.log SiBallaImportingData/appsettings.json || true
 
       - name: Allega il log
@@ -159,6 +159,7 @@ jobs:
         run: |
           [ -f data/registro-decisioni.json ] || exit 0
           git add data/registro-decisioni.json
+          [ -f data/regole-imparate.md ] && git add data/regole-imparate.md || true
           if git diff --cached --quiet; then echo "Registro invariato"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

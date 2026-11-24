@@ -72,6 +72,10 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   serve agli id delle immagini e al dizionario). Gemini risponde con un solo `tipo`: serata / serata_e_workshop (anche festival e weekend con serate: su entrambi i fogli) / workshop (solo didattica) / mercatino / altro.
   Per la serie (non per l'organizzatore) una conferma nella scheda Workshop vale come voto `workshop`.
   Per organizzatore: >= 2 date decise da lui tutte uguali (`no`/`mercatino`/`workshop`) e nessuna conferma -> vale per i suoi eventi nuovi.
+  Parole imparate (24/11/2026, `MemoriaSerie.ImparaParole`): parola/coppia del titolo in >= 5 suoi `no` di >= 6 organizzatori e in nessun
+  evento tenuto (conferma o tacito passato) -> `no`; non se il titolo nomina uno stile del calendario (`AgenteVerifica.StileDelCalendario`)
+  o serie/organizzatore hanno conferme. Con 3 organizzatori uscivano "paris"/"open"/"cours": non abbassare. Elenco in `data/regole-imparate.md`
+  (committato dall'importatore e dal giro notturno), righe 🧠 nell'email notturna. L'utente vuole che impari da solo e glielo mostri.
   Per gli eventi che non decide, passa a Gemini la "storia organizzatore" (conteggi + titoli d'esempio) come indizio.
 - Stato `workshop` (solo Serate): workshop/corso finito in Serate. Ogni giro con `--excel` lo copia in Workshop (`nuovo`, nota
   "Spostato da Serate (riga N)", che la memoria ignora); la riga in Serate resta come traccia, fuori da DB/sito/email.

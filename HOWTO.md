@@ -107,6 +107,15 @@ vengono decise come hai deciso tu per le altre date, senza chiedere a Gemini:
 nessuna, anche i suoi eventi nuovi prendono quel valore (nota "Memoria: organizzatore con N date…").
 Basta confermare (`ok`) un suo evento per fermare la regola.
 
+**Parole del titolo** (regole imparate, dal 24/11/2026): se una parola (o una coppia di parole) compare nel
+titolo di **almeno 5 eventi scartati da te**, di **almeno 6 organizzatori diversi**, e in **nessun evento che
+hai tenuto**, diventa una regola `no` per gli eventi nuovi e per le righe future `da verificare`, `nuovo` o
+`gemini` (nota "Memoria: regola imparata: «parola» …"). Non vale se il titolo nomina uno stile del
+calendario (Lindy, Balboa, Blues, Shag, Charleston, Boogie, Solo Jazz, Rhythm 'n' Blues), né se la serie o
+l'organizzatore hanno date confermate. Il 24/11/2026 le regole erano 6, tutte sul West Coast: west, coast,
+wcs, westie, wsdc, registry. L'elenco aggiornato è in `data/regole-imparate.md` (lo scrive il programma) e
+nell'email notturna (righe 🧠). Per togliere una regola basta un tuo `sì`/`ok` su un evento con quella parola.
+
 Le righe decise così hanno la nota **"Memoria: …"** con il motivo. Se la memoria sbaglia, correggi
 la riga: scrivere `ok` su una data di una serie scartata la rende "mista" e la memoria smette di
 decidere da sola. I `no` scritti da Gemini (righe storico) o dalla memoria stessa non contano: impara
