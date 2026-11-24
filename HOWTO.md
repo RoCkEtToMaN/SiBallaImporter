@@ -241,6 +241,20 @@ spegnerlo, `AGENTE_DA_VERIFICARE_MAX` per il massimo), partendo dalla data più 
 fino a 20 righe future più, se avanza quota, 20 righe già passate (dalla più recente: tengono pulito lo storico).
 Le righe che decidi tu prima non le tocca. Le pubblica come `nuovo` e non `ok`: la memoria delle serie non le scambia per tue.
 
+### Le tue regole: `data/regole-curatore.md`
+
+Le regole che valgono più di tutte (per Gemini quando classifica e per l'agente quando decide) stanno in un file di testo:
+https://github.com/RoCkEtToMaN/SiBallaImporter/blob/master/data/regole-curatore.md — matita ✏️, scrivi, "Commit changes".
+Una regola per riga, che inizia con "- ", sotto un titolo "## …", concreta e con cosa fare (swing, serata+workshop, workshop,
+mercatino, no, da verificare). Es.: "- Country, line dance e two step sono no anche se nel titolo c'è swing". Vale dal giro dopo.
+
+### Il registro delle decisioni e le tue correzioni
+
+Ogni decisione del programma sullo stato di una riga (Gemini, memoria, agente) va in `data/registro-decisioni.json`. Ogni notte
+l'agente lo confronta con lo Sheet: dove hai cambiato lo stato deciso dal programma è una **correzione**, dove hai deciso una riga
+lasciata a te è una **decisione**. Nell'email notturna, sezione **✍️ Le tue correzioni**: le nuove e, per la settimana, gli errori
+più frequenti. Da qui si ricavano le regole nuove (prossimo passo: proposta settimanale di regole da approvare).
+
 ### Il lavoro notturno dell'agente (ogni notte alle 3:30)
 
 Workflow "Agente verifica", parte da solo (lanciabile anche a mano con i modi `stili`, `decide`, `qualita`). Nell'ordine:
