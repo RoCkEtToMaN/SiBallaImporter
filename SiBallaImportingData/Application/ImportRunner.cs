@@ -21,6 +21,7 @@ internal static class ImportRunner
         // la prendo da lì all'avvio e ce la rimetto con un commit dopo il salvataggio
         var dizionarioPath = Path.Combine(AppContext.BaseDirectory, "DizionarioEventiInfo.json");
         DictionaryRepoSync.PullIntoBin(dizionarioPath);
+        RegoleCuratore.PerPrompt();   // regole del curatore (data/regole-curatore.md): le legge subito, così il log dice quante sono
         var store = KnownVenueStore.Load(dizionarioPath);
         var resolver = new AddressResolver(store);
         await InizializzaGeografiaAsync();

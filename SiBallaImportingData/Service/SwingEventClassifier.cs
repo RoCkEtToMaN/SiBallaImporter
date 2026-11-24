@@ -229,7 +229,7 @@ namespace SiBallaImportingData.Service
 
             var body = new
             {
-                systemInstruction = new { parts = new[] { new { text = Istruzioni } } },
+                systemInstruction = new { parts = new[] { new { text = Istruzioni + RegoleCuratore.PerPrompt() } } },
                 contents = new[] { new { role = "user", parts = new[] { new { text = elenco.ToString() } } } },
                 generationConfig = new
                 {

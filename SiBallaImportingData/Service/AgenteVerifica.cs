@@ -204,7 +204,7 @@ namespace SiBallaImportingData.Service
                 }
                 var body = new JsonObject
                 {
-                    ["systemInstruction"] = new JsonObject { ["parts"] = new JsonArray { new JsonObject { ["text"] = Istruzioni } } },
+                    ["systemInstruction"] = new JsonObject { ["parts"] = new JsonArray { new JsonObject { ["text"] = Istruzioni + RegoleCuratore.PerPrompt() } } },
                     ["contents"] = contents.DeepClone(),
                     ["tools"] = Strumenti(),
                     ["toolConfig"] = new JsonObject
