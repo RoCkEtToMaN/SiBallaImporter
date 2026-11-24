@@ -400,9 +400,9 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
+        "Lindy",
         "Balboa",
-        "Shag",
-        "Lindy"
+        "Shag"
       ]
     },
     "events": {
@@ -515,6 +515,24 @@
         ]
       },
       "lo swing del principe gran ballo di natale lindy hop boogie woogie dj dom parker": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "lo swing del principe lindy hop boogie woogie night dj dom parker": {
         "organizer": null,
         "city": "Milano",
         "country": "Italia",
@@ -1594,6 +1612,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Lindy"
         ]
@@ -5001,7 +5020,8 @@
         "verifiedOn": null,
         "notes": null,
         "stili": [
-          "Balboa"
+          "Balboa",
+          "SlowBal"
         ]
       },
       "brescia balboa series 4th november": {
@@ -5070,7 +5090,8 @@
         "verifiedOn": null,
         "notes": null,
         "stili": [
-          "Balboa"
+          "Balboa",
+          "SlowBal"
         ]
       },
       "brescia balboa series 4th april": {
@@ -6177,7 +6198,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Boogie Woogie"
+        ]
       }
     }
   },
@@ -8496,15 +8520,15 @@
         "city": "Genova",
         "country": "Italia",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": 44.40837097167969,
-        "lng": 8.932470321655273,
-        "geocodedAddress": null,
+        "venueName": "Caffè Campetto",
+        "address": "Vico San Matteo 17r",
+        "lat": 44.4084773,
+        "lng": 8.9325511,
+        "geocodedAddress": "Vico San Matteo 17r",
         "verified": false,
-        "source": "iniziale",
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
+        "notes": "2026-11-24 via confermata dalla mappa; il testo dice: «Caffè Campetto – Vico San Matteo 17r, Genova»; fonte: https://airdancia.com/event/campettos-balboa-night-genes",
         "stili": [
           "Balboa"
         ]
@@ -11178,6 +11202,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Blues",
           "Lindy"
@@ -11216,6 +11241,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Lindy"
         ]
@@ -17992,6 +18018,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Lindy"
         ]
@@ -19570,12 +19597,12 @@
       "country": "Canada",
       "eventCount": null,
       "venueName": null,
-      "address": null,
-      "lat": null,
-      "lng": null,
-      "geocodedAddress": null,
+      "address": "Wilbrod Street 151",
+      "lat": 45.425350189208984,
+      "lng": -75.68492889404297,
+      "geocodedAddress": "Wilbrod Street 151",
       "verified": false,
-      "source": null,
+      "source": "iniziale+photon-reverse",
       "verifiedOn": null,
       "notes": null,
       "stili": [
@@ -19619,6 +19646,21 @@
         "stili": [
           "Lindy"
         ]
+      },
+      "learn to swing dance level up hour lesson social with ottawa swing dance society": {
+        "organizer": null,
+        "city": "Eastern Ontario",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.425350189208984,
+        "lng": -75.68492889404297,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null
       }
     }
   },
@@ -22630,7 +22672,10 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
-        "geminiNonTrovato": "2026-11-12"
+        "geminiNonTrovato": "2026-11-12",
+        "stili": [
+          "Boogie Woogie"
+        ]
       }
     }
   },
@@ -24991,7 +25036,11 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
-        "geminiNonTrovato": "2026-11-22"
+        "geminiNonTrovato": "2026-11-22",
+        "stili": [
+          "SoloJazz",
+          "Lindy"
+        ]
       }
     }
   },
@@ -25172,7 +25221,11 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-23",
-        "agenteNonTrovato": "2026-11-24"
+        "agenteNonTrovato": "2026-11-24",
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
       }
     }
   },
@@ -25388,6 +25441,43 @@
         "geocodedAddress": null,
         "verified": false,
         "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "arci joshua blues club aps|como": {
+    "default": {
+      "organizer": "Arci Joshua Blues Club APS",
+      "city": "Como",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Cantoniga 11",
+      "lat": 45.777278900146484,
+      "lng": 9.098520278930664,
+      "geocodedAddress": "Via Cantoniga 11",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swingin the night away pratica di lindy hop": {
+        "organizer": null,
+        "city": "Como",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.777278900146484,
+        "lng": 9.098520278930664,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
         "stili": [
