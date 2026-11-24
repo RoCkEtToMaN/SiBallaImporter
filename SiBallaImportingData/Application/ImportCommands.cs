@@ -296,6 +296,84 @@ internal static class ImportCommands
     }
 
     /// <summary>
+    /// Ogni notte: l'agente valuta le righe future "da verificare" (le più vicine per prime, max) e applica solo le decisioni sicure.
+    ///  - swing con sicurezza alta -> pubblicata ("nuovo", "serata+workshop", "workshop", "mercatino"), nota "Agente: …"
+    ///  - "no" con sicurezza alta (dopo il freno: niente "no" se il titolo nomina uno stile del calendario) -> "no", nota "Agente: …"
+    ///    (erano già nascoste: nessun evento visibile sparisce)
+    ///  - il resto resta "da verificare", con la proposta in fondo alla nota per il curatore; non viene rivalutato ogni notte
+    /// "nuovo" e non "ok": la memoria delle serie non deve scambiarle per conferme del curatore. scrivi = false: mostra soltanto
+    /// </summary>
+    public static async Task AgenteDecideAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver, int max, bool scrivi)
+    {
+        var o = settings.Import;
+        static bool GiaValutata(Event e) => (e.NotaVerifica ?? "").Contains(MemoriaSerie.PrefissoAgente, StringComparison.OrdinalIgnoreCase);
+        var righe = sheetEvents
+            .Where(e => (e.DateFinish ?? e.DateStart).Date >= DateTime.Today && e.LuogoVerificato == ImportData.VerifiedPending)
+            .Where(e => !GiaValutata(e) && !string.IsNullOrWhiteSpace(e.PartyName))
+            .OrderBy(e => e.DateStart).ToList();
+        var daFare = righe.Take(Math.Max(1, max)).ToList();
+        Console.WriteLine();
+        Console.WriteLine($"===== Righe da verificare: l'agente ne valuta {daFare.Count} (su {righe.Count} non ancora valutate) " +
+                          $"{(scrivi ? "- applica le decisioni sicure" : "- anteprima")} =====");
+        if (!GeminiPronto(settings)) return;
+
+        var applicate = new List<Event>();
+        var soloNota = new List<(Event Evento, string Nota)>();
+        foreach (var e in daFare)
+        {
+            var p = await AgenteVerifica.VerificaAsync(e, sheetEvents, store, resolver, settings.Gemini, Opzioni(o));
+            if (p is null && QuotaAgenteFinita(settings)) { Console.WriteLine("⏸️ quota giornaliera di Gemini finita: le righe rimaste alla prossima notte"); break; }
+            if (p is null) { Console.WriteLine($"\n❗ nessuna risposta: {e.SheetName} riga {e.SheetRow} | {e.PartyName?.Trim()}"); continue; }
+            var fonti = p.Fonti.Count > 0 ? $" Fonti: {string.Join(" ", p.Fonti.Take(2))}" : "";
+            var motivo = AgenteVerifica.Accorcia(p.Motivo, 200);
+            string? valore = p.Sicurezza == "alta" ? p.Stato switch
+            {
+                AgenteVerifica.StatoOk => ImportData.VerifiedNew,
+                ImportData.VerifiedSerataWorkshop or ImportData.VerifiedWorkshop or ImportData.VerifiedMercatino or ImportData.VerifiedNo => p.Stato,
+                _ => null,
+            } : null;
+            Console.WriteLine();
+            if (valore is not null)
+            {
+                Console.WriteLine($"🤖 {(valore == ImportData.VerifiedNo ? "scartata" : "pubblicata")} come '{valore}' | {e.SheetName} riga {e.SheetRow} | " +
+                                  $"{e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.PartyName?.Trim()} — {motivo}");
+                e.StatoNuovaRiga = valore;
+                e.MotivoVerifica = $"{MemoriaSerie.PrefissoAgente} {(valore == ImportData.VerifiedNo ? "scartata" : "pubblicata")} " +
+                                   $"({p.Stato}, sicurezza alta) il {DateTime.Today:dd/MM/yyyy}: {motivo}.{fonti}";
+                applicate.Add(e);
+            }
+            else
+            {
+                Console.WriteLine($"🤖 da decidere tu: proposta '{p.Stato}' (sicurezza {p.Sicurezza}) | {e.SheetName} riga {e.SheetRow} | " +
+                                  $"{e.DateStart:yyyy-MM-dd} | {e.City?.Trim()} | {e.PartyName?.Trim()} — {motivo}");
+                // in fondo alla nota (le note "Gemini: …" all'inizio servono ad altri controlli): così la notte dopo non la rivaluta
+                soloNota.Add((e, $"{(string.IsNullOrWhiteSpace(e.NotaVerifica) ? "" : e.NotaVerifica + "\n")}{MemoriaSerie.PrefissoAgente} proposta " +
+                                 $"'{p.Stato}' (sicurezza {p.Sicurezza}) il {DateTime.Today:dd/MM/yyyy}: {motivo}.{fonti}"));
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine($"===== Risultato righe da verificare: {applicate.Count(x => x.StatoNuovaRiga != ImportData.VerifiedNo)} pubblicate, " +
+                          $"{applicate.Count(x => x.StatoNuovaRiga == ImportData.VerifiedNo)} scartate, {soloNota.Count} da decidere tu =====");
+        if (!scrivi)
+        {
+            Console.WriteLine("Anteprima: niente scritto. Per applicare: --agente-decide-scrivi");
+            return;
+        }
+        try
+        {
+            await ImportData.ScriviMemoriaAsync(applicate);
+            foreach (var e in applicate) { e.LuogoVerificato = e.StatoNuovaRiga; e.NotaVerifica = e.MotivoVerifica; e.RigaArancione = false; }
+            await ImportData.ScriviNoteVerificaAsync(soloNota);
+            foreach (var (e, nota) in soloNota) e.NotaVerifica = nota;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[sheet] ⚠️ decisioni dell'agente non scritte: {ex.Message}");
+        }
+    }
+
+    /// <summary>
     /// Agente di verifica sulle righe future in attesa del tuo controllo ("da verificare", "nuovo", "gemini"), le più vicine
     /// per prime: per ognuna stampa la proposta con motivo, sicurezza, problemi e fonti. Non scrive niente nello Sheet
     /// </summary>

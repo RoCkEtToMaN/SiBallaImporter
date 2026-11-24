@@ -95,7 +95,7 @@ internal static class ImportRunner
         // AGENTE DI VERIFICA: legge la pagina dell'evento, cerca nello Sheet e propone lo stato delle righe in attesa.
         // --agente-verifica sulle righe future "da verificare"/"nuovo"/"gemini", --agente-prova sulle righe che hai già deciso tu
         // (confronto). Non scrive niente nello Sheet. Poi il programma si ferma
-        if (opzioni.AgenteVerifica || opzioni.AgenteProva || opzioni.AgenteIndirizziProva || opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi || opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi || opzioni.AgenteStili || opzioni.AgenteStiliScrivi)
+        if (opzioni.AgenteVerifica || opzioni.AgenteProva || opzioni.AgenteIndirizziProva || opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi || opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi || opzioni.AgenteStili || opzioni.AgenteStiliScrivi || opzioni.AgenteDecide || opzioni.AgenteDecideScrivi)
         {
             if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
             {
@@ -105,6 +105,8 @@ internal static class ImportRunner
                     if (await ImportData.LeggiStiliDedottiAsync(sheetEvents))
                         await ConfermaStili.EseguiAsync(sheetEvents, settings.Gemini, opzioni.AgenteStiliMax, opzioni.AgenteStiliScrivi);
                 }
+                if (opzioni.AgenteDecide || opzioni.AgenteDecideScrivi)
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideMax, opzioni.AgenteDecideScrivi);
                 if (opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi) await ControlloQualita.EseguiAsync(sheetEvents, opzioni.AgenteQualitaScrivi);
                 if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);
@@ -220,6 +222,25 @@ internal static class ImportRunner
                 eventiSheet = ImportData.LoadFile();
                 sheetEvents = eventiSheet.Values.SelectMany(x => x).ToList();
                 store.ApplyToSheetEvents(sheetEvents);
+            }
+        }
+
+        // righe "da verificare" (anche quelle appena aggiunte): l'agente decide quelle chiare prima dell'email (max AgenteDecideOrarioMax
+        // per giro, le più vicine), le altre restano per il curatore con il parere dell'agente. Le note vanno rilette: dopo la rilettura
+        // dello Sheet non ci sono, e servono sia all'agente sia al parere nell'email
+        if (opzioni.EnableSending || opzioni.AgenteDecideOrario)
+        {
+            bool note = await ImportData.LeggiNoteVerificaAsync(sheetEvents);
+            if (note && opzioni.AgenteDecideOrario && opzioni.EnableImportingOnExcel)
+            {
+                try
+                {
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideOrarioMax, scrivi: true);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[agente] ⚠️ righe da verificare non valutate in questo giro: {ex.Message}");
+                }
             }
         }
 

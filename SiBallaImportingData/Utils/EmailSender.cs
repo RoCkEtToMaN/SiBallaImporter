@@ -152,7 +152,18 @@ namespace SiBallaImportingData.Utils
                 text += $"<br><br>*Eventi da verificare (secondo l'AI probabilmente non swing)*❓:<br>";
 
                 foreach (var (ev, motivo) in daVerificare.OrderBy(x => x.Evento.DateStart))
+                {
                     text += $"  ·{Segno(ev)}{ev.DateStart.Day}/{ev.DateStart.Month}; {ev.City}; {ev.PartyName}; {ev.Organizer}; {ev.EventDetail.WebSite} — <i>{motivo}</i><br>";
+                    // parere dell'agente notturno (in fondo alla nota di "Luogo verificato"): "Agente: proposta 'ok' (sicurezza media) il …: motivo"
+                    var parere = System.Text.RegularExpressions.Regex.Match(ev.NotaVerifica ?? "",
+                        @"Agente: proposta '(?<stato>[^']+)' \(sicurezza (?<sic>\w+)\)[^:]*: (?<motivo>[^\n]*?)(\. Fonti:|$)", System.Text.RegularExpressions.RegexOptions.Multiline);
+                    if (parere.Success)
+                    {
+                        var stato = parere.Groups["stato"].Value == "ok" ? "serata swing" : parere.Groups["stato"].Value;
+                        text += $"&nbsp;&nbsp;&nbsp;&nbsp;🤖 secondo l'agente: <b>{System.Net.WebUtility.HtmlEncode(stato)}</b> " +
+                                $"(sicurezza {parere.Groups["sic"].Value}) – {System.Net.WebUtility.HtmlEncode(parere.Groups["motivo"].Value)}<br>";
+                    }
+                }
             }
 
             // eventi di cui non si sa la città: non so se sono dentro il raggio, li segnalo invece di perderli

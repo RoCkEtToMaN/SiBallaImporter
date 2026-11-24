@@ -208,8 +208,8 @@ mappa il nome del locale (anche quello scritto nel titolo) e dell'organizzatore,
 Al massimo `INDIRIZZI_AGENTE_MAX` eventi per giro (default 5). Prima dell'agente, gratis e senza Gemini: i luoghi già
 trovati per lo stesso evento si riusano, e il locale scritto nel titolo ("… @ Nelson Tavern", "(Officina della Birra)",
 "presso …") si cerca direttamente sulla mappa. L'agente riceve anche i luoghi già usati dallo stesso organizzatore in quella
-città. Con la Variable `AGENTE_MODELLO` (es. `gemini-flash-latest`) l'agente usa un altro modello, con la sua quota gratuita,
-e non toglie richieste alla classificazione degli eventi nuovi. Quando lo trova:
+città. La Variable `AGENTE_MODELLO` darebbe all'agente un altro modello con la sua quota, ma il 23/11/2026 non ce n'era uno
+adatto (`gemini-flash-latest` troppo lento e sovraccarico, `gemini-2.5-flash-lite` ritirato): meglio non crearla. Quando lo trova:
 
 - colonna F `Paese, Città, Via (coordinate della via)`, `gemini` in **Luogo verificato**, nota con la fonte;
 - nel dizionario la voce dell'evento, **non verificata** (`"source": "agente"`), riusata per le date nuove
@@ -222,6 +222,37 @@ e non toglie richieste alla classificazione degli eventi nuovi. Quando lo trova:
 
 Per provarlo prima: workflow "Agente verifica", modo `indirizzi` (quanto ci azzecca sui luoghi che conosci)
 e modo `dizionario` con scrivi = `false` (cosa troverebbe).
+
+Come cerca la via: legge la pagina del link, fa una ricerca Tavily e legge per intero le 2 pagine migliori (anche il piè
+di pagina e la pagina "Contatti/Dove siamo"); poi UNA chiamata a Gemini deve indicare la frase esatta che dice dove si tiene
+l'evento, e il codice controlla che la frase ci sia e che la via esista sulla mappa. Mai la sede della scuola, se il testo non
+dice che quell'evento si tiene lì. Prova del 23/11/2026: 8 vie giuste su 15, nessuna sbagliata.
+
+### L'agente e le righe "da verificare"
+
+L'agente valuta le righe `da verificare` e decide da solo **solo i casi chiari** (sicurezza alta):
+- swing → la pubblica (`nuovo`, `serata+workshop`, `workshop`, `mercatino`), nota "Agente: … motivo e fonte";
+- non swing (country, discoteca, …) → `no` con la nota; mai se il titolo nomina Lindy, Balboa, Boogie, Shag, …
+- il resto resta `da verificare`: nella sezione "Eventi da verificare" dell'email trovi sotto la riga
+  **🤖 secondo l'agente: …** con la sua proposta, e decidi tu.
+
+Quando: nel **giro orario**, prima dell'email, al massimo 3 righe per giro (Variable `AGENTE_DA_VERIFICARE` = `false` per
+spegnerlo, `AGENTE_DA_VERIFICARE_MAX` per il massimo), e **di notte** fino a 20 righe per smaltire l'arretrato.
+Le righe che decidi tu prima non le tocca. Le pubblica come `nuovo` e non `ok`: la memoria delle serie non le scambia per tue.
+
+### Il lavoro notturno dell'agente (ogni notte alle 3:30)
+
+Workflow "Agente verifica", parte da solo (lanciabile anche a mano con i modi `stili`, `decide`, `qualita`). Nell'ordine:
+1. **stili da confermare**: per le celle H lilla legge la pagina dell'evento; se il testo nomina gli stili conferma (via il lilla)
+   o corregge la cella, con la nota "Agente: … «frase»"; senza prove la cella resta lilla. Max 40 celle a notte;
+2. **righe da verificare**: come sopra, fino a 20;
+3. **controllo qualità**: cancella i **doppioni sicuri** (stessa scheda, giorno, città e titolo uguale, o titolo simile con lo
+   stesso link o organizzatore; tiene la riga decisa da te o con più dati) e ti segnala i doppioni ambigui, le date sospette
+   (es. anno nel titolo diverso) e le serie con decisioni diverse. Festival e weekend con serate stanno apposta su entrambi i
+   fogli: non sono doppioni.
+
+Al mattino arriva l'email "Agente verifica (qualita)" con 🗑️ cancellati, ✅/✏️ stili, 🤖 decisioni e ❓ casi da decidere.
+Tutto usa la quota gratuita di Gemini (500 richieste al giorno): se finisce, l'agente si ferma (⏸️) e riprende il giorno dopo.
 
 ### Gemini: errori temporanei
 

@@ -152,6 +152,10 @@ jobs:
           Import__AgenteDizionarioMax: ${{ vars.INDIRIZZI_AGENTE_MAX || '5' }}
           # modello Gemini dell'agente (vuoto = quello dell'importatore): con un altro modello usa un'altra quota gratuita giornaliera
           Gemini__AgenteModel: ${{ vars.AGENTE_MODELLO || '' }}
+          # righe da verificare: prima dell'email l'agente decide quelle chiare (max 3 per giro). Si spegne con la Variable
+          # AGENTE_DA_VERIFICARE = false; AGENTE_DA_VERIFICARE_MAX cambia il massimo
+          Import__AgenteDecideOrario: ${{ !contains(vars.AGENTE_DA_VERIFICARE, 'false') }}
+          Import__AgenteDecideOrarioMax: ${{ vars.AGENTE_DA_VERIFICARE_MAX || '3' }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           Import__ResetDb: "false"
           Import__ResetExcel: "false"
