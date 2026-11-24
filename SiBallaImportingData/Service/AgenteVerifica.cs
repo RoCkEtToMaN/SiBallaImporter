@@ -63,7 +63,8 @@ namespace SiBallaImportingData.Service
             "'mercatino' = mercatino o fiera vintage/usato/artigianato/dischi; va in Bacheca; " +
             "'no' = non è ballo swing, l'evento sparisce dal sito; " +
             "'da verificare' = non riesci a deciderlo, oppure sospetti un doppione o un evento annullato: lo guarda il curatore. " +
-            "Stili del calendario: Lindy Hop, Balboa, Boogie Woogie, Collegiate Shag, St. Louis Shag, Charleston, Solo Jazz, Blues dance, Tap. " +
+            "Stili del calendario: Lindy Hop, Balboa, Boogie Woogie, Collegiate Shag, St. Louis Shag, Charleston, Solo Jazz, Blues dance, Tap, " +
+            "Rhythm 'n' Blues (R&B ballato della scena swing). " +
             "Regole del curatore, valgono anche per festival e weekend: è 'no' il West Coast Swing quando è l'unico stile (compresi " +
             "gli eventi WSDC, 'Open' e i weekend '100% West Coast'); il rock'n'roll acrobatico sportivo, il rock 4 temps / rock sauté " +
             "francese ('Bal Rock', 'Week-end 100% Rock'); concerti, crociere, raduni e festival della scena rockabilly, rock'n'roll, " +
@@ -446,7 +447,7 @@ namespace SiBallaImportingData.Service
 
         // stili del calendario nel titolo o nella colonna Stile (non "swing" da solo: c'è anche nel West Coast Swing)
         private static readonly System.Text.RegularExpressions.Regex StileDelCalendario = new(
-            @"lindy|balboa|boogie|\bshag\b|charleston|solo ?jazz|\bblues\b|\btap\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            @"lindy|balboa|boogie|\bshag\b|charleston|solo ?jazz|\bblues\b|\btap\b|" + StiliEvento.RhythmNBlues, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         // doppioni e annullamenti: li decide il curatore (magari la riga scartata è quella giusta)
         private static readonly System.Text.RegularExpressions.Regex DoppioneOAnnullato = new(
             @"doppion|duplicat|annullat|rinviat|save the date|stesso evento", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
