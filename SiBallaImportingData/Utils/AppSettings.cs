@@ -50,6 +50,7 @@ namespace SiBallaImportingData.Utils
             ["--agente-stili-scrivi"] = "Import:AgenteStiliScrivi",
             ["--agente-decide"] = "Import:AgenteDecide",
             ["--agente-decide-scrivi"] = "Import:AgenteDecideScrivi",
+            ["--agente-decide-orario"] = "Import:AgenteDecideOrario",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -117,6 +118,7 @@ namespace SiBallaImportingData.Utils
             Console.WriteLine($"  CercaImmaginiSheet = {Import.CercaImmaginiSheet} (max {Import.CercaImmaginiSheetMax} righe)");
             Console.WriteLine($"  CercaIndirizzi = {Import.CercaIndirizzi} (max {Import.CercaIndirizziMax} eventi)");
             Console.WriteLine($"  IndirizziConAgente = {Import.IndirizziConAgente} (max {Import.AgenteDizionarioMax} eventi per giro), modello agente = {(string.IsNullOrWhiteSpace(Gemini.AgenteModel) ? Gemini.Model + " (lo stesso della classificazione)" : Gemini.AgenteModel)}, Tavily = {(string.IsNullOrWhiteSpace(Import.TavilyApiKey) ? "no" : $"sì (max {Import.TavilyMaxGiorno} ricerche al giorno, {Import.TavilyMaxMese} al mese)")}");
+            Console.WriteLine($"  AgenteDecideOrario = {Import.AgenteDecideOrario} (max {Import.AgenteDecideOrarioMax} righe 'da verificare' per giro)");
             Console.WriteLine($"  TestImmagini = {Import.TestImmagini}, TestSwing = {Import.TestSwing}, TestIndirizzi = {Import.TestIndirizzi} (max {Import.TestIndirizziMax})");
             Console.WriteLine($"  PulisciLezioni = {Import.PulisciLezioni}, PulisciLezioniScrivi = {Import.PulisciLezioniScrivi}, ResetExcel = {Import.ResetExcel}");
             Console.WriteLine($"  NoPush = {Import.NoPush}, RiclassificaSheet = {Import.RiclassificaSheet}, RiclassificaSheetScrivi = {Import.RiclassificaSheetScrivi}");
@@ -209,6 +211,10 @@ namespace SiBallaImportingData.Utils
         public bool AgenteDecide { get; set; }
         public bool AgenteDecideScrivi { get; set; }
         public int AgenteDecideMax { get; set; } = 20;
+        // nel giro orario: prima dell'email l'agente valuta al massimo AgenteDecideOrarioMax righe "da verificare" (Variable
+        // AGENTE_DA_VERIFICARE, accesa di default su GitHub; spenta sul PC)
+        public bool AgenteDecideOrario { get; set; }
+        public int AgenteDecideOrarioMax { get; set; } = 3;
         public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }

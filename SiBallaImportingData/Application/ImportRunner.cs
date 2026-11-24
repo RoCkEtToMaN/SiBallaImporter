@@ -225,6 +225,25 @@ internal static class ImportRunner
             }
         }
 
+        // righe "da verificare" (anche quelle appena aggiunte): l'agente decide quelle chiare prima dell'email (max AgenteDecideOrarioMax
+        // per giro, le più vicine), le altre restano per il curatore con il parere dell'agente. Le note vanno rilette: dopo la rilettura
+        // dello Sheet non ci sono, e servono sia all'agente sia al parere nell'email
+        if (opzioni.EnableSending || opzioni.AgenteDecideOrario)
+        {
+            bool note = await ImportData.LeggiNoteVerificaAsync(sheetEvents);
+            if (note && opzioni.AgenteDecideOrario && opzioni.EnableImportingOnExcel)
+            {
+                try
+                {
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideOrarioMax, scrivi: true);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[agente] ⚠️ righe da verificare non valutate in questo giro: {ex.Message}");
+                }
+            }
+        }
+
         if (opzioni.EnableSending)
             await InviaEmailAsync(settings, eventiSheet, sheetEvents, eventiOnline);
 
