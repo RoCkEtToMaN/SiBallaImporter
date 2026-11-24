@@ -209,6 +209,8 @@ internal static class ImportCommands
         try
         {
             await ImportData.ScriviMemoriaAsync(cambi);
+            foreach (var e in cambi) RegistroDecisioni.Registra(e, e.StatoNuovaRiga!, "memoria", e.MotivoVerifica);
+            RegistroDecisioni.Salva();
             // anche in memoria, così DB ed email di questo giro le vedono già cambiate
             foreach (var e in cambi)
             {
@@ -376,6 +378,8 @@ internal static class ImportCommands
         try
         {
             await ImportData.ScriviMemoriaAsync(applicate);
+            foreach (var e in applicate) RegistroDecisioni.Registra(e, e.StatoNuovaRiga!, "agente", e.MotivoVerifica);
+            RegistroDecisioni.Salva();
             foreach (var e in applicate) { e.LuogoVerificato = e.StatoNuovaRiga; e.NotaVerifica = e.MotivoVerifica; e.RigaArancione = false; }
             await ImportData.ScriviNoteVerificaAsync(soloNota);
             foreach (var (e, nota) in soloNota) e.NotaVerifica = nota;

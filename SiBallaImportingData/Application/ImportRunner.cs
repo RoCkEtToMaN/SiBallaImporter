@@ -109,6 +109,8 @@ internal static class ImportRunner
                 if (opzioni.AgenteDecide || opzioni.AgenteDecideScrivi)
                     await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideMax, opzioni.AgenteDecideScrivi,
                                                            maxPassate: opzioni.AgenteDecidePassateMax);
+                // di notte: le correzioni e decisioni del curatore rispetto al registro (prima del controllo qualità, che cancella righe)
+                if (opzioni.AgenteQualitaScrivi) StampaCorrezioniCuratore(sheetEvents);
                 if (opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi) await ControlloQualita.EseguiAsync(sheetEvents, opzioni.AgenteQualitaScrivi);
                 if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);
@@ -215,6 +217,10 @@ internal static class ImportRunner
             // immagine su Storage prima di scrivere la riga: il link online (es. Facebook) scade, la copia no
             await EventImages.UploadAsync(nuoviEventi, appWriteService);
             await ImportData.PrepareToAppendToGoogleSheet([.. nuoviEventi.OrderBy(x => x.DateStart)], eventiSheet);
+            // registro delle decisioni: stato deciso dal programma per le righe nuove (per trovare poi le correzioni del curatore)
+            foreach (var e in nuoviEventi.Where(x => x.StatoNuovaRiga is not null))
+                RegistroDecisioni.Registra(e, e.StatoNuovaRiga!, (e.MotivoVerifica ?? "").StartsWith(MemoriaSerie.PrefissoNota) ? "memoria" : "gemini", e.MotivoVerifica);
+            RegistroDecisioni.Salva();
 
             // DB ed email partono dallo Sheet letto all'inizio: rileggo, così le righe appena aggiunte arrivano
             // in questo giro e non in quello dopo. I luoghi del dizionario vanno riapplicati (in memoria, come al punto 4)
@@ -411,6 +417,26 @@ internal static class ImportRunner
             Console.WriteLine($"❌ {nome}: {ex.GetType().Name}: {ex.Message} -> eventi {nome} saltati");
             return [];
         }
+    }
+
+    /// <summary>
+    /// Correzioni e decisioni del curatore rispetto al registro delle decisioni del programma (data/registro-decisioni.json):
+    /// le nuove di questa notte e il conto degli ultimi 7 giorni, nell'email del lavoro notturno. Sono la base per nuove regole
+    /// </summary>
+    private static void StampaCorrezioniCuratore(List<Event> sheetEvents)
+    {
+        var nuove = RegistroDecisioni.RilevaCorrezioni(sheetEvents);
+        RegistroDecisioni.Salva();
+        var settimana = RegistroDecisioni.UltimeDelCuratore(7);
+        Console.WriteLine();
+        Console.WriteLine($"===== Le tue correzioni: {nuove.Count} nuove; negli ultimi 7 giorni {settimana.Count(v => v.Tipo == "correzione")} correzioni " +
+                          $"a decisioni del programma e {settimana.Count(v => v.Tipo == "decisione")} righe da verificare decise da te =====");
+        foreach (var v in nuove.OrderBy(v => v.Data))
+            Console.WriteLine($"✍️ {(v.Tipo == "correzione" ? "corretta" : "decisa")}: {v.Chi} aveva messo '{v.Valore}', tu '{v.Curatore}' | {v.Data} | " +
+                              $"{v.Citta} | {v.Organizzatore} | {v.Titolo}{(v.Motivo is null ? "" : $" — {v.Motivo}")}");
+        // per chi ha sbagliato di più: dove il programma ti fa lavorare
+        foreach (var g in settimana.Where(v => v.Tipo == "correzione").GroupBy(v => $"{v.Chi}: '{v.Valore}' → '{v.Curatore}'").OrderByDescending(g => g.Count()).Take(5))
+            Console.WriteLine($"   {g.Count()}× {g.Key}");
     }
 
     private static async Task InizializzaGeografiaAsync()
