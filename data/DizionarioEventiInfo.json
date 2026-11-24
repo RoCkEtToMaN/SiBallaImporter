@@ -1963,7 +1963,11 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "Balboa"
+      ]
     },
     "events": {
       "halloween swing party": {
@@ -1997,6 +2001,24 @@
         "notes": null,
         "stili": [
           "Lindy"
+        ]
+      },
+      "the balboa room": {
+        "organizer": null,
+        "city": "Terni",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
         ]
       }
     }
@@ -4537,6 +4559,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Lindy",
           "SoloJazz"
@@ -4556,6 +4579,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Lindy"
         ]
@@ -21323,15 +21347,15 @@
         "city": "Jung-gu",
         "country": "South Korea",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": null,
-        "lng": null,
-        "geocodedAddress": null,
+        "venueName": "Bongcheon Salon Dance Hall",
+        "address": "1732 Nambusunhwan-ro",
+        "lat": 37.4814856,
+        "lng": 126.9511657,
+        "geocodedAddress": "1732 Nambusunhwan-ro",
         "verified": false,
-        "source": null,
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
+        "notes": "2026-11-24 via confermata dalla mappa; il testo dice: «Bongcheon Salon Dance Hall: sede principal de talleres y fiestas.2.ª planta, Daewook Building, 1732 Nambusunhwan-ro, Gwanak-gu, Seúl, República de Corea.»; fonte: https://www.socialswing.blog/korea-blues-camp-2026",
         "stili": [
           "Blues"
         ]
@@ -21369,6 +21393,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-24",
         "stili": [
           "Lindy",
           "SoloJazz"
@@ -25112,7 +25137,8 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
-        "geminiNonTrovato": "2026-11-23"
+        "geminiNonTrovato": "2026-11-23",
+        "agenteNonTrovato": "2026-11-24"
       }
     }
   },
@@ -25219,6 +25245,120 @@
         "source": "agente",
         "verifiedOn": null,
         "notes": "2026-11-23 locale 'Cafe' Neruda' scritto nel titolo, trovato sulla mappa come 'Cafè Neruda'; fonte: titolo dell'evento + mappa"
+      }
+    }
+  },
+  "jivin jim dandy|brighton and hove": {
+    "default": {
+      "organizer": "Jivin Jim Dandy",
+      "city": "Brighton and Hove",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "pink flamingo new year s eve dance party": {
+        "organizer": null,
+        "city": "Brighton and Hove",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swingshoes happy feet studio e hepcats copenhagen|capital region of denmark": {
+    "default": {
+      "organizer": "SwingShoes, Happy Feet Studio e Hepcats Copenhagen",
+      "city": "Capital Region of Denmark",
+      "country": "Denmark",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "snowflake new years swing dance party": {
+        "organizer": null,
+        "city": "Capital Region of Denmark",
+        "country": "Denmark",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing folie s|metropolitan france": {
+    "default": {
+      "organizer": "Swing Folie's",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "soiree lindy hop rock n swing west coast swing bachata": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   }
