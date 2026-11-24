@@ -24,6 +24,7 @@ Per modificarlo da GitHub: apri il file, matita in alto a destra, scrivi, "Commi
 - Festival, weekend, exchange e camp di più giorni CON serate o social dance sono "serata+workshop": stanno su entrambi i fogli.
 - Corsi, lezioni, stage e workshop senza serate sono "workshop".
 - Mercatini e fiere vintage, handmade, dischi o usato sono "mercatino", anche se l'organizzatore è della scena rockabilly.
+- Vendite, pop-up store e prove di scarpe o abbigliamento da ballo (es. "Scarpe Swing Millelire") sono "mercatino", anche se durano più giorni o il titolo nomina uno stile.
 
 ## Organizzatori e serie
 - "SWING MASTER SERIES" di Blue Energy Rock (Verona) è "no".
