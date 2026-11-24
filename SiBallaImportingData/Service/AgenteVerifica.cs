@@ -456,8 +456,10 @@ namespace SiBallaImportingData.Service
         {
             if (DoppioneOAnnullato.IsMatch(motivo + " " + string.Join(" ", problemi)))
                 return "doppione o annullamento, decide il curatore";
-            var titoloEStili = $"{riga.PartyName} {riga.SheetStiliRaw ?? riga.EventDetail?.StylesToString}";
-            if (!titoloEStili.Contains("west coast", StringComparison.OrdinalIgnoreCase) && StileDelCalendario.IsMatch(titoloEStili))
+            // lo stile della colonna H conta solo se non è dedotto dal programma (cella lilla): "Country Saturday" con un "Boogie Woogie"
+            // dedotto non va frenato. Niente eccezione per il West Coast: "Lindy Hop - Rock n Swing - West Coast + Bachata" ha anche Lindy
+            var titoloEStili = riga.StileDedotto ? riga.PartyName ?? "" : $"{riga.PartyName} {riga.SheetStiliRaw ?? riga.EventDetail?.StylesToString}";
+            if (StileDelCalendario.IsMatch(titoloEStili))
                 return "il titolo o lo stile nominano uno stile del calendario";
             return null;
         }
