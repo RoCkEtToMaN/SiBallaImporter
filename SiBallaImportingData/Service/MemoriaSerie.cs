@@ -115,6 +115,9 @@ namespace SiBallaImportingData.Service
                 case ImportData.VerifiedStorico:
                     return Voto.Nessuno;
                 default:
+                    // valore scritto dall'agente (nota "Agente: …"): pubblicato ma non controllato da te, come "nuovo"
+                    if (nota.StartsWith(PrefissoAgente, StringComparison.OrdinalIgnoreCase))
+                        return e.DateStart.Date < DateTime.Today ? Voto.SiTacito : Voto.Nessuno;
                     return Voto.SiTuo;
             }
         }

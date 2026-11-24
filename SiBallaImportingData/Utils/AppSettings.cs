@@ -48,6 +48,8 @@ namespace SiBallaImportingData.Utils
             ["--agente-qualita-scrivi"] = "Import:AgenteQualitaScrivi",
             ["--agente-stili"] = "Import:AgenteStili",
             ["--agente-stili-scrivi"] = "Import:AgenteStiliScrivi",
+            ["--agente-decide"] = "Import:AgenteDecide",
+            ["--agente-decide-scrivi"] = "Import:AgenteDecideScrivi",
             ["--reset-excel"] = "Import:ResetExcel",
             ["--giorni"] = "Import:Giorni",
             ["--radius"] = "Import:Radius",
@@ -203,6 +205,10 @@ namespace SiBallaImportingData.Utils
         public bool AgenteStili { get; set; }
         public bool AgenteStiliScrivi { get; set; }
         public int AgenteStiliMax { get; set; } = 40;
+        // righe "da verificare": l'agente le valuta e applica solo le decisioni sicure (sicurezza alta); di notte, max AgenteDecideMax
+        public bool AgenteDecide { get; set; }
+        public bool AgenteDecideScrivi { get; set; }
+        public int AgenteDecideMax { get; set; } = 20;
         public int AgenteDizionarioMax { get; set; } = 5;
         // ricerca web gratuita per l'agente (tavily.com, piano gratuito senza carta); vuoto = variabile TAVILY_API_KEY
         public string? TavilyApiKey { get; set; }

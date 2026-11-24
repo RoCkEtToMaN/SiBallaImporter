@@ -14,21 +14,21 @@
 name: Agente verifica
 
 on:
-  # ogni notte alle 3:30 (ora italiana d'inverno; d'estate alle 4:30): stili da confermare e controllo qualità dello Sheet
+  # ogni notte alle 3:30 (ora italiana d'inverno; d'estate alle 4:30): stili da confermare, righe da verificare e controllo qualità dello Sheet
   schedule:
     - cron: "30 2 * * *"
   workflow_dispatch:
     inputs:
       modo:
-        description: verifica (righe in attesa), prova (confronto), indirizzi (ritrova i luoghi noti), dizionario (cerca i luoghi mancanti), qualita (controllo dello Sheet), stili (conferma le celle lilla)
+        description: verifica (righe in attesa), prova (confronto), indirizzi (ritrova i luoghi noti), dizionario (cerca i luoghi mancanti), qualita (controllo dello Sheet), stili (conferma le celle lilla), decide (righe da verificare)
         type: choice
-        options: ["prova", "verifica", "indirizzi", "dizionario", "qualita", "stili"]
+        options: ["prova", "verifica", "indirizzi", "dizionario", "qualita", "stili", "decide"]
         default: "prova"
       max:
         description: Righe da controllare (nella prova, righe per tipo)
         default: "8"
       scrivi:
-        description: Modi dizionario, qualita e stili - salva i luoghi / cancella i doppioni sicuri / conferma gli stili (false = solo anteprima)
+        description: Modi dizionario, qualita, stili e decide - salva i luoghi / cancella i doppioni / conferma gli stili / applica le decisioni sicure (false = anteprima)
         type: choice
         options: ["false", "true"]
         default: "false"
@@ -108,6 +108,9 @@ jobs:
           # stili da confermare: di notte conferma o corregge da solo (max 40 celle); a mano con modo stili
           Import__AgenteStili: ${{ inputs.modo == 'stili' }}
           Import__AgenteStiliScrivi: ${{ github.event_name == 'schedule' || (inputs.modo == 'stili' && inputs.scrivi == 'true') }}
+          # righe da verificare: di notte l'agente applica le decisioni sicure (max 20); a mano con modo decide
+          Import__AgenteDecide: ${{ inputs.modo == 'decide' }}
+          Import__AgenteDecideScrivi: ${{ github.event_name == 'schedule' || (inputs.modo == 'decide' && inputs.scrivi == 'true') }}
           Import__AgenteDizionario: ${{ inputs.modo == 'dizionario' }}
           Import__AgenteDizionarioScrivi: ${{ inputs.modo == 'dizionario' && inputs.scrivi == 'true' }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}

@@ -95,7 +95,7 @@ internal static class ImportRunner
         // AGENTE DI VERIFICA: legge la pagina dell'evento, cerca nello Sheet e propone lo stato delle righe in attesa.
         // --agente-verifica sulle righe future "da verificare"/"nuovo"/"gemini", --agente-prova sulle righe che hai già deciso tu
         // (confronto). Non scrive niente nello Sheet. Poi il programma si ferma
-        if (opzioni.AgenteVerifica || opzioni.AgenteProva || opzioni.AgenteIndirizziProva || opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi || opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi || opzioni.AgenteStili || opzioni.AgenteStiliScrivi)
+        if (opzioni.AgenteVerifica || opzioni.AgenteProva || opzioni.AgenteIndirizziProva || opzioni.AgenteDizionario || opzioni.AgenteDizionarioScrivi || opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi || opzioni.AgenteStili || opzioni.AgenteStiliScrivi || opzioni.AgenteDecide || opzioni.AgenteDecideScrivi)
         {
             if (await ImportData.LeggiNoteVerificaAsync(sheetEvents))
             {
@@ -105,6 +105,8 @@ internal static class ImportRunner
                     if (await ImportData.LeggiStiliDedottiAsync(sheetEvents))
                         await ConfermaStili.EseguiAsync(sheetEvents, settings.Gemini, opzioni.AgenteStiliMax, opzioni.AgenteStiliScrivi);
                 }
+                if (opzioni.AgenteDecide || opzioni.AgenteDecideScrivi)
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideMax, opzioni.AgenteDecideScrivi);
                 if (opzioni.AgenteQualita || opzioni.AgenteQualitaScrivi) await ControlloQualita.EseguiAsync(sheetEvents, opzioni.AgenteQualitaScrivi);
                 if (opzioni.AgenteProva) await ImportCommands.AgenteProvaAsync(settings, sheetEvents, store, resolver);
                 if (opzioni.AgenteVerifica) await ImportCommands.AgenteVerificaAsync(settings, sheetEvents, store, resolver);

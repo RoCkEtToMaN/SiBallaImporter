@@ -601,6 +601,28 @@ namespace SiBallaImportingData.Utils
             "Se è giusto togli il colore della cella, se è sbagliato correggilo: " +
             "il programma impara lo stile solo da celle non colorate o corrette.";
 
+        /// <summary>Solo la nota della cella "Luogo verificato" (valore e colore restano): proposte dell'agente lasciate al curatore</summary>
+        public static async Task ScriviNoteVerificaAsync(List<(Event Evento, string Nota)> note)
+        {
+            var righe = note.Where(x => x.Evento.SheetName is not null && x.Evento.SheetRow is not null && x.Evento.SheetVerifiedColumn is not null).ToList();
+            if (righe.Count == 0) return;
+            const string spreadsheetId = "1USp-VdikKPfroZWQ3-f5B7tOb5PcoOb4iJTfx2WOQOo";
+            var service = ServizioSheet();
+            var spreadsheet = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+            var sheetIds = spreadsheet.Sheets.ToDictionary(s => s.Properties.Title, s => s.Properties.SheetId);
+            var requests = righe.Where(x => sheetIds.ContainsKey(x.Evento.SheetName!)).Select(x => new Request
+            {
+                UpdateCells = new UpdateCellsRequest
+                {
+                    Start = new GridCoordinate { SheetId = sheetIds[x.Evento.SheetName!], RowIndex = x.Evento.SheetRow!.Value - 1, ColumnIndex = x.Evento.SheetVerifiedColumn },
+                    Rows = new List<RowData> { new() { Values = new List<CellData> { new() { Note = x.Nota } } } },
+                    Fields = "note"
+                }
+            }).ToList();
+            await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
+            Console.WriteLine($"[sheet] note dell'agente su {requests.Count} righe 'da verificare'");
+        }
+
         /// <summary>
         /// Stili confermati o corretti dall'agente (ConfermaStili): nuovo valore in H se va corretto, via il lilla, nota "Agente: …"
         /// con la frase della pagina. Senza colore e senza la nota "Stile dedotto" la cella vale come confermata: il dizionario la impara
