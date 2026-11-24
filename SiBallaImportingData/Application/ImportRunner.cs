@@ -235,7 +235,7 @@ internal static class ImportRunner
             {
                 try
                 {
-                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideOrarioMax, scrivi: true);
+                    await ImportCommands.AgenteDecideAsync(settings, sheetEvents, store, resolver, opzioni.AgenteDecideOrarioMax, scrivi: true, primaQueste: nuoviEventi);
                 }
                 catch (Exception ex)
                 {

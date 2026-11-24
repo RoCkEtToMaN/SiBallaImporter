@@ -303,14 +303,16 @@ internal static class ImportCommands
     ///  - il resto resta "da verificare", con la proposta in fondo alla nota per il curatore; non viene rivalutato ogni notte
     /// "nuovo" e non "ok": la memoria delle serie non deve scambiarle per conferme del curatore. scrivi = false: mostra soltanto
     /// </summary>
-    public static async Task AgenteDecideAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver, int max, bool scrivi)
+    public static async Task AgenteDecideAsync(AppSettings settings, List<Event> sheetEvents, KnownVenueStore store, AddressResolver resolver, int max, bool scrivi,
+                                               IReadOnlyCollection<Event>? primaQueste = null)
     {
         var o = settings.Import;
         static bool GiaValutata(Event e) => (e.NotaVerifica ?? "").Contains(MemoriaSerie.PrefissoAgente, StringComparison.OrdinalIgnoreCase);
         var righe = sheetEvents
             .Where(e => (e.DateFinish ?? e.DateStart).Date >= DateTime.Today && e.LuogoVerificato == ImportData.VerifiedPending)
             .Where(e => !GiaValutata(e) && !string.IsNullOrWhiteSpace(e.PartyName))
-            .OrderBy(e => e.DateStart).ToList();
+            // prima le righe arrivate in questo giro (così finiscono nell'email già decise o con il parere), poi le più vicine
+            .OrderBy(e => primaQueste is not null && primaQueste.Any(n => EventIdentity.Same(n, e)) ? 0 : 1).ThenBy(e => e.DateStart).ToList();
         var daFare = righe.Take(Math.Max(1, max)).ToList();
         Console.WriteLine();
         Console.WriteLine($"===== Righe da verificare: l'agente ne valuta {daFare.Count} (su {righe.Count} non ancora valutate) " +
