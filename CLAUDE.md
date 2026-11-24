@@ -109,6 +109,8 @@ Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nell
   Le righe che il curatore decide prima della notte non vengono toccate.
   Valuta anche le righe "workshop" di Serate decise da Gemini (nota "Gemini…", future): festival/weekend con serate -> serata+workshop
   (regola del 23/11/2026); mai "no" su queste, sono già pubblicate in Workshop.
+  Freno sul "no": se il titolo (o lo stile in H, solo se non lilla/dedotto) nomina uno stile del calendario -> resta da verificare.
+  Quando l'importatore toglie l'arancione alle righe controllate cancella solo le note "Gemini…", non quelle del curatore.
   Anche nel giro orario, prima dell'email: max 3 righe per giro (`AgenteDecideOrario`, Variable `AGENTE_DA_VERIFICARE`, accesa di default;
   `AGENTE_DA_VERIFICARE_MAX`). Ordine: future dalla data più vicina (sono quelle dell'email, prossimi 7 giorni); di notte, dopo
   20 future, anche 20 passate dalla più recente (`AgenteDecidePassateMax`). Quota Gemini a regime: ~300-370 richieste/giorno su 500.

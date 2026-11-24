@@ -239,6 +239,8 @@ internal static class ImportRunner
         if (opzioni.EnableSending || opzioni.AgenteDecideOrario)
         {
             bool note = await ImportData.LeggiNoteVerificaAsync(sheetEvents);
+            // anche le celle stile lilla (dedotte): il freno sul "no" dell'agente non deve fidarsi di uno stile dedotto
+            if (note && opzioni.AgenteDecideOrario) await ImportData.LeggiStiliDedottiAsync(sheetEvents);
             if (note && opzioni.AgenteDecideOrario && opzioni.EnableImportingOnExcel)
             {
                 try

@@ -771,6 +771,7 @@ namespace SiBallaImportingData.Utils
             var spreadsheet = await get.ExecuteAsync();
 
             var requests = new List<Request>();
+            int ripulite = 0;
             foreach (var sheet in spreadsheet.Sheets)
             {
                 if (!perFoglio.TryGetValue(sheet.Properties.Title, out var righe)) continue;
@@ -797,6 +798,12 @@ namespace SiBallaImportingData.Utils
                                     Fields = "userEnteredFormat.backgroundColor"
                                 }
                             });
+                        ripulite++;
+                        // via solo la nota del programma ("Gemini: …", eventualmente con la proposta dell'agente in fondo): quella
+                        // scritta dal curatore (es. "Curatore: doppione della riga N") resta. Il 24/11/2026 due note "doppione"
+                        // erano sparite così, e il controllo dei doppioni aveva lasciato al curatore 25 copie del Gothenburg Rhythm Camp
+                        var notaRiga = (righe[riga].NotaVerifica ?? "").TrimStart();
+                        if (notaRiga.Length > 0 && !notaRiga.StartsWith("Gemini", StringComparison.OrdinalIgnoreCase)) continue;
                         requests.Add(new Request
                         {
                             UpdateCells = new UpdateCellsRequest
@@ -812,7 +819,7 @@ namespace SiBallaImportingData.Utils
             if (requests.Count == 0) return;
 
             await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest { Requests = requests }, spreadsheetId).ExecuteAsync();
-            Console.WriteLine($"[sheet] 🎨 tolto il colore a {requests.Count / 2} righe controllate");
+            Console.WriteLine($"[sheet] 🎨 tolto il colore a {ripulite} righe controllate");
         }
 
         // ---------- Formule dell'intestazione bloccate (#REF!) ----------
