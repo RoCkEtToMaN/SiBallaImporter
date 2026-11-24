@@ -15,7 +15,7 @@ namespace SiBallaImportingData.Service
             "Sei un esperto di balli swing e curi un calendario di eventi swing. Ti passo una lista di eventi trovati online. " +
             "Per ognuno scegli UN SOLO 'tipo' tra questi: " +
             "'serata' = serata o festa di social dance swing (Lindy Hop, Balboa, Boogie Woogie, Collegiate Shag, St. Louis Shag, " +
-            "Charleston, Solo Jazz, Blues dance, Tap), con DJ o musica dal vivo, senza parte didattica. " +
+            "Charleston, Solo Jazz, Blues dance, Tap, Rhythm 'n' Blues), con DJ o musica dal vivo, senza parte didattica. " +
             "'serata_e_workshop' = serata swing che è anche didattica: pratiche, social practice, practice night, ripassi, " +
             "serate con lezione o corso nel programma (es. 'Initiation/cours & soirée dansante', 'lezione + social', " +
             "'La Social Dance di Pratica', 'Serata di ripassi'); e anche weekend, festival, exchange e camp di più giorni con " +

@@ -14,7 +14,7 @@ public static class StiliEvento
 {
     // nomi scritti nella colonna H (gli stessi già usati nello Sheet e capiti da ParseStili e dal sito)
     public static readonly string[] Nomi =
-        ["Lindy", "Balboa", "Blues", "SoloJazz", "Shag", "Charleston", "Boogie Woogie", "SlowBal", "StLouisShag"];
+        ["Lindy", "Balboa", "Blues", "SoloJazz", "Shag", "Charleston", "Boogie Woogie", "SlowBal", "StLouisShag", "Rhythm 'n' Blues"];
 
     private static readonly Dictionary<string, string> Sinonimi = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -27,14 +27,23 @@ public static class StiliEvento
         ["boogie woogie"] = "Boogie Woogie", ["boogie-woogie"] = "Boogie Woogie", ["boogiewoogie"] = "Boogie Woogie", ["boogie"] = "Boogie Woogie",
         ["slowbal"] = "SlowBal", ["slow bal"] = "SlowBal", ["slow balboa"] = "SlowBal",
         ["stlouisshag"] = "StLouisShag", ["st louis shag"] = "StLouisShag", ["st. louis shag"] = "StLouisShag",
+        // Rhythm 'n' Blues (24/11/2026): ballo R&B della scena swing, diverso dal Blues dance
+        ["rhythm 'n' blues"] = "Rhythm 'n' Blues", ["rhythm ’n’ blues"] = "Rhythm 'n' Blues", ["rhythm n blues"] = "Rhythm 'n' Blues",
+        ["rhythm and blues"] = "Rhythm 'n' Blues", ["rhythm & blues"] = "Rhythm 'n' Blues", ["rhythm&blues"] = "Rhythm 'n' Blues",
+        ["r&b"] = "Rhythm 'n' Blues", ["rnb"] = "Rhythm 'n' Blues", ["r'n'b"] = "Rhythm 'n' Blues", ["r’n’b"] = "Rhythm 'n' Blues",
     };
+
+    /// <summary>"Rhythm 'n' Blues", "Rhythm & Blues", "Rhythm and Blues", "R&B", "R'n'B", "RnB" (apostrofi diritti o tipografici)</summary>
+    public const string RhythmNBlues = @"rhythm\s*['’]?\s*(n|and|&)\s*['’]?\s*blues|\br\s*['’]?\s*(n|&)\s*['’]?\s*b\b|\brnb\b";
 
     // parole nel titolo o nell'organizzatore -> stile (ultima riserva: grossolana, per questo la cella resta da confermare)
     private static readonly (Regex Parola, string Stile)[] ParoleChiave =
     [
         (new(@"\blindy\b", RegexOptions.IgnoreCase), "Lindy"),
         (new(@"\bbalboa\b", RegexOptions.IgnoreCase), "Balboa"),
-        (new(@"\bblues\b", RegexOptions.IgnoreCase), "Blues"),
+        (new(RhythmNBlues, RegexOptions.IgnoreCase), "Rhythm 'n' Blues"),
+        // "Blues" da solo: non quello di "Rhythm 'n' Blues" / "Rhythm & Blues"
+        (new(@"(?<!rhythm\s*['’]?\s*(n|and|&)\s*['’]?\s*)\bblues\b", RegexOptions.IgnoreCase), "Blues"),
         (new(@"\bsolo\s*jazz\b", RegexOptions.IgnoreCase), "SoloJazz"),
         (new(@"\bshag\b", RegexOptions.IgnoreCase), "Shag"),
         (new(@"\bcharleston\b", RegexOptions.IgnoreCase), "Charleston"),
