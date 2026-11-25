@@ -1,4 +1,52 @@
 {
+  "2026-11-07|go hop the jitterbugs|that swing nbg|bavaria": {
+    "data": "2026-11-07",
+    "scheda": "Serate",
+    "titolo": "Go Hop the Jitterbugs!",
+    "organizzatore": "that.swing.nbg",
+    "citta": "Bavaria",
+    "link": "https://www.thatswing.de/en/go-hop-jitterbugs/",
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Weekend di workshop con serate e musica dal vivo di Lindy Hop, Balboa e Shag.. Fonti: https://www.thatswing.de/en/go-hop-jitterbugs/",
+    "quando": "2026-11-25"
+  },
+  "2026-11-07|gonna go bop the goosebumps live|crazy swing school|ferrara": {
+    "data": "2026-11-07",
+    "scheda": "Serate",
+    "titolo": "GONNA GO BOP - The Goosebumps Live",
+    "organizzatore": "Crazy Swing School",
+    "citta": "Ferrara",
+    "link": "https://pci.jotform.com/form/252112276291350?utm_id=97758_v0_s00_e0_tv4_a1demong6js71i&fbclid=IwZXh0bgNhZW0CMTAAcGRvZgFzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEegmN7f9Q1G3ZnnpWewXQPRzLj8hdE9mozzU5bzU_wHRak4OBbBXKKvu2OhaQ_aem_BX28omp392v9VY2Pc7sTOg",
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Evento con workshop (Northern Soul) e serata di social dance (Jive/Rockabilly con live band), organizzato da Crazy Swing School. Trattandosi di serata con didattica, lo stato corretto è serata+worksho…. Fonti: https://pci.jotform.co",
+    "quando": "2026-11-25"
+  },
+  "2026-11-07|lindy hop trainingslager mit frenschi walter|hep cat club|augsburg": {
+    "data": "2026-11-07",
+    "scheda": "Serate",
+    "titolo": "Lindy Hop Trainingslager mit Frenschi & Walter",
+    "organizzatore": "Hep Cat Club",
+    "citta": "Augsburg",
+    "link": "http://hepcatclub.com/events/lindy-trainingslager",
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Lindy Hop Trainingslager con workshop e festa serale di social dance organizzato da Hep Cat Club ad Augsburg.. Fonti: http://hepcatclub.com/events/lindy-trainingslager",
+    "quando": "2026-11-25"
+  },
+  "2026-11-07|swing roll party night|big apple dance|monza e brianza": {
+    "data": "2026-11-07",
+    "scheda": "Serate",
+    "titolo": "SWING & ROLL party night",
+    "organizzatore": "Big Apple dance",
+    "citta": "Monza e Brianza",
+    "link": "https://www.hellogest.com/preregistration/q426fj8g/edit",
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata swing confermata dalla serie abituale di Big Apple dance (Swinguys), stili Balboa e Shag. Indirizzo mancante ma la serie è consolidata.. Fonti: https://www.hellogest.com/preregistration/q426fj8g/edit",
+    "quando": "2026-11-25"
+  },
   "2026-11-13|autumn swing challenge wsdc rising star tour event|marias zsigmond melinda szanyi e altri 4|budapest": {
     "data": "2026-11-13",
     "scheda": "Workshop",
@@ -198,7 +246,10 @@
     "valore": "nuovo",
     "chi": "gemini",
     "motivo": "Gemini: serata e anche workshop. Camp di più giorni con workshop e social dance swing.",
-    "quando": "2026-11-25"
+    "quando": "2026-11-25",
+    "curatore": "no",
+    "curatoreIl": "2026-11-25",
+    "tipo": "correzione"
   },
   "2026-11-27|lo swing del principe lindy hop boogie woogie night dj dom parker|lo swing del principe milano|milano": {
     "data": "2026-11-27",
@@ -326,7 +377,10 @@
     "valore": "da verificare",
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "quando": "2026-11-24",
+    "curatore": "no",
+    "curatoreIl": "2026-11-25",
+    "tipo": "decisione"
   },
   "2026-11-29|purebal bliss part|tise chao|los angeles county": {
     "data": "2026-11-29",
@@ -386,16 +440,29 @@
     "motivo": "Gemini: mercatino, va in Bacheca. Negozio temporaneo di abbigliamento e vintage Millelire.",
     "quando": "2026-11-25"
   },
+  "2026-12-04|perry boogie meets sery lee bowling seventies venerdi dicembre|perry boogie|rimini": {
+    "data": "2026-12-04",
+    "scheda": "Serate",
+    "titolo": "Perry Boogie meets Sery Lee Bowling Seventies Venerdì 4 Dicembre",
+    "organizzatore": "Perry Boogie",
+    "citta": "Rimini",
+    "link": "https://www.facebook.com/perrysboogie",
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata social dance con musica dal vivo (Boogie Woogie, Swing e Rhythm & Blues) al Bowling Seventies..",
+    "quando": "2026-11-25"
+  },
   "2026-12-05|gran ballo swing lo swing natalizio|swing family|fermo": {
     "data": "2026-12-05",
+    "scheda": "Serate",
     "titolo": "☆GRAN BALLO SWING - Lo Swing Natalizio 1☆",
     "organizzatore": "Swing Family",
     "citta": "Fermo",
     "link": "https://swing-dance-family.s2.yapla.com/it/event-134445",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Serata swing con ripassone e musica dal vivo della Rockingo Band al Vintage Club Ballroom22 di Porto Sant'Elpidio.. Fonti: https://swing-dance-family.s2.yapla.com/it/event-134445",
+    "quando": "2026-11-25"
   },
   "2026-12-05|il tuo bacio e come un rock|mash up genova swing different|genova": {
     "data": "2026-12-05",
@@ -408,6 +475,18 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-12-05|learn to swing dance level up hour lesson social with ottawa swing dance society|ottawa swing dance society osds|eastern ontario": {
+    "data": "2026-12-05",
+    "scheda": "Serate",
+    "titolo": "Learn to Swing Dance + Level Up Hour    Lesson + Social with Ottawa Swing Dance Society",
+    "organizzatore": "Ottawa Swing Dance Society - OSDS",
+    "citta": "Eastern Ontario",
+    "link": "http://swingottawa.ca/new-at-osds",
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Serata swing con lezione e social dance (Lindy Hop) della Ottawa Swing Dance Society, identica alle altre date della serie già confermate..",
+    "quando": "2026-11-25"
+  },
   "2026-12-05|shake that swing|swingin up academy|prato": {
     "data": "2026-12-05",
     "titolo": "Shake that Swing",
@@ -416,6 +495,18 @@
     "link": "https://shorturl.at/cioGw",
     "valore": "nuovo",
     "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-05|special country night|martina lusetti|reggio emilia": {
+    "data": "2026-12-05",
+    "scheda": "Serate",
+    "titolo": "SPECIAL COUNTRY NIGHT",
+    "organizzatore": "Martina Lusetti",
+    "citta": "Reggio Emilia",
+    "link": "https://www.facebook.com/share/1Jszvi7AWw/",
+    "valore": "no",
+    "chi": "agente",
+    "motivo": "Agente: scartata (no, sicurezza alta) il 25/11/2026: Il titolo indica chiaramente una serata country, che secondo le regole del curatore è uno stile escluso..",
     "quando": "2026-11-25"
   },
   "2026-12-06|king swing in padua abano terme|annette achhammer e swing dance lindy hop events|padova": {
@@ -431,14 +522,15 @@
   },
   "2026-12-06|king swing in padua|annette achhammer e lindy hop deutschland|padova": {
     "data": "2026-12-06",
+    "scheda": "Workshop",
     "titolo": "King Swing in Padua",
     "organizzatore": "Annette Achhammer e Lindy Hop Deutschland",
     "citta": "Padova",
     "link": "https://xswingcongress.wixsite.com/king",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Weekend swing con workshop e serate di Lindy Hop, Balboa, Solo Jazz e Boogie presso l'Hotel Alexander Palace ad Abano Terme..",
+    "quando": "2026-11-25"
   },
   "2026-12-06|sleighbals ring|carolina swing dance|greenville county": {
     "data": "2026-12-06",
@@ -451,36 +543,53 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-12-07|il circolo dello swing social dance con deejay sauro|sugar swing asd|ancona": {
+    "data": "2026-12-07",
+    "scheda": "Serate",
+    "titolo": "IL CIRCOLO DELLO SWING! Social dance con Deejay Sauro",
+    "organizzatore": "Sugar Swing Asd",
+    "citta": "Ancona",
+    "link": "https://sugar-swing-asd.s2.yapla.com/it/event-134228",
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata social dance swing organizzata da Sugar Swing Asd a Jesi (AN). Jesi è la città corretta per questo evento.. Fonti: https://sugar-swing-asd.s2.yapla.com/it/event-134228",
+    "quando": "2026-11-25"
+  },
   "2026-12-08|anni di ca bottona carribb roots roll with the talking parrots|ca bottona e andrea sartori|verona": {
     "data": "2026-12-08",
+    "scheda": "Serate",
     "titolo": "10 Anni di Cà Bottona: Carribb Roots & Roll with the TALKING PARROTS",
     "organizzatore": "Ca'Bottona e Andrea Sartori",
     "citta": "Verona",
     "link": "https://www.facebook.com/GOODFOODLIVEMUSICNICEPEOPLE",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini: Concerto di musica roots e rock and roll senza social dance swing.",
+    "valore": "no",
+    "chi": "agente",
+    "motivo": "Agente: scartata (no, sicurezza alta) il 25/11/2026: Concerto di musica roots e rock and roll senza social dance swing..",
     "quando": "2026-11-25"
   },
   "2026-12-10|shanghai lindy festival 10th anniversary||shanghai": {
     "data": "2026-12-10",
+    "scheda": "Workshop",
     "titolo": "Shanghai Lindy Festival (10th Anniversary)",
+    "organizzatore": "",
     "citta": "Shanghai",
     "link": "https://www.shanghailindyfestival.com/",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Festival internazionale di Lindy Hop e Balboa con workshop e serate danzanti..",
+    "quando": "2026-11-25"
   },
   "2026-12-11|boogie invitational weekend||oslo": {
     "data": "2026-12-11",
+    "scheda": "Workshop",
     "titolo": "Boogie Invitational Weekend",
+    "organizzatore": "",
     "citta": "Oslo",
     "link": "https://boogiefeetfestival.com/biw",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Festival di Boogie Woogie a Oslo con workshop e 3 serate danzanti (social dance); da inserire come serata+workshop. Indirizzo non specificato sul sito.. Fonti: https://boogiefeetfestival.com/biw",
+    "quando": "2026-11-25"
   },
   "2026-12-11|steel and velvet venerdi dicembre|retro dream verona|verona": {
     "data": "2026-12-11",
