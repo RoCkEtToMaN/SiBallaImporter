@@ -191,14 +191,13 @@
   },
   "2026-11-27|ll hings azz|svenska rytmsektionen|vastra gotaland county": {
     "data": "2026-11-27",
-    "scheda": "Workshop",
     "titolo": "\uD835\uDDDA\uD835\uDDE2\uD835\uDDE7\uD835\uDDDB\uD835\uDDD8\uD835\uDDE1\uD835\uDDD5\uD835\uDDE8\uD835\uDDE5\uD835\uDDDA \uD835\uDDE5\uD835\uDDDB\uD835\uDDEC\uD835\uDDE7\uD835\uDDDB\uD835\uDDE0 \uD835\uDDD6\uD835\uDDD4\uD835\uDDE0\uD835\uDDE3 \uD835\uDFEE\uD835\uDFEC\uD835\uDFEE\uD835\uDFF2 - \uD835\uDE3C\uD835\uDE61\uD835\uDE61 \uD835\uDE4F\uD835\uDE5D\uD835\uDE5E\uD835\uDE63\uD835\uDE5C\uD835\uDE68 \uD835\uDE45\uD835\uDE56\uD835\uDE6F\uD835\uDE6F",
     "organizzatore": "Svenska Rytmsektionen",
     "citta": "Västra Götaland County",
     "link": "http://www.svenskarytmsektionen.se/gbg-rhythm-camp",
-    "valore": "serata+workshop",
-    "chi": "agente",
-    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Festival di più giorni (tap dance, vernacular jazz e social dancing) con serate e workshop: è un evento 'serata+workshop'..",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Camp di più giorni con workshop e social dance swing.",
     "quando": "2026-11-25"
   },
   "2026-11-27|lo swing del principe lindy hop boogie woogie night dj dom parker|lo swing del principe milano|milano": {
@@ -285,25 +284,27 @@
   },
   "2026-11-28|lichfield lindy christmas dance with the hot house combo|lichfield lindy|staffordshire": {
     "data": "2026-11-28",
+    "scheda": "Serate",
     "titolo": "Lichfield Lindy Christmas Dance with The Hot House Combo",
     "organizzatore": "Lichfield Lindy",
     "citta": "Staffordshire",
     "link": "https://buytickets.at/lichfieldlindy/2326286",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata di social dance swing natalizia organizzata da Lichfield Lindy con musica dal vivo (The Hot House Combo), lindy hop e balboa.. Fonti: https://buytickets.at/lichfieldlindy/2326286",
+    "quando": "2026-11-25"
   },
   "2026-11-28|saturday night hohoho hop|perth swing dance academy|western australia": {
     "data": "2026-11-28",
+    "scheda": "Serate",
     "titolo": "Saturday Night HoHoHo-Hop!",
     "organizzatore": "Perth Swing Dance Academy",
     "citta": "Western Australia",
     "link": "https://www.facebook.com/PerthSwingDanceAcademy",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata sociale di swing dance (Lindy Hop, Charleston, Shag, Balboa) organizzata dalla Perth Swing Dance Academy..",
+    "quando": "2026-11-25"
   },
   "2026-11-28|west coast swing night|paolo biassoni e francesca torti|milano": {
     "data": "2026-11-28",
@@ -337,6 +338,18 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2026-11-29|serena the jive machine live cafe neruda special guest dj set dj raffo the twist|serena the jive machines e cafeneruda torino circolo arci|torino": {
+    "data": "2026-11-29",
+    "scheda": "Serate",
+    "titolo": "Serena & The Jive Machine live@ Cafe' Neruda-Special Guest DJ set DJ RAFFO \" The Twist\"",
+    "organizzatore": "Serena & The Jive Machines e CafèNeruda Torino Circolo Arci",
+    "citta": "Torino",
+    "link": "https://www.facebook.com/people/Serena-The-Jive-Machines/61587001482609/",
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Concerto di boogie woogie e swing con pista da ballo e dj set al Cafè Neruda. Evento di social dance confermato..",
+    "quando": "2026-11-25"
   },
   "2026-11-29|swing aperidance senigallia an college|college 66|ancona": {
     "data": "2026-11-29",
@@ -562,6 +575,16 @@
     "organizzatore": "Arci Tavola Tonda e Space Jazz Palermo",
     "citta": "Palermo",
     "link": "https://www.facebook.com/ArciTavolaTonda",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-13|aperiswing party|swingfly dance|modena": {
+    "data": "2026-12-13",
+    "titolo": "APERISWING   Party",
+    "organizzatore": "SwingFly Dance",
+    "citta": "Modena",
+    "link": "https://bit.ly/swingflydance",
     "valore": "nuovo",
     "chi": "gemini",
     "quando": "2026-11-25"

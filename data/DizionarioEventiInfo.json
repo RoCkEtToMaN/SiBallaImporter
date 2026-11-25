@@ -400,9 +400,9 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Lindy",
         "Balboa",
-        "Shag"
+        "Shag",
+        "Lindy"
       ]
     },
     "events": {
@@ -546,8 +546,28 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-25",
         "stili": [
           "Lindy"
+        ]
+      },
+      "lo swing del principe alboa endez ous balboa shag social dj jivin charlie": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Shag"
         ]
       }
     }
@@ -2464,6 +2484,24 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "no swing no christmas cena di natale": {
+        "organizer": null,
+        "city": "Lucca",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -3113,9 +3151,7 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Lindy",
-        "Balboa",
-        "Shag"
+        "Lindy"
       ]
     },
     "events": {
@@ -4636,6 +4672,24 @@
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "hop hop hop festa di natale": {
+        "organizer": null,
+        "city": "Pisa",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
         "verifiedOn": null,
         "notes": null,
         "stili": [
@@ -11081,7 +11135,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "swing party officina della birra": {
@@ -11096,6 +11153,24 @@
         "geocodedAddress": null,
         "verified": false,
         "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "swing party reunion s": {
+        "organizer": null,
+        "city": "Milano",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
         "verifiedOn": null,
         "notes": null,
         "stili": [
@@ -19116,10 +19191,31 @@
       "verified": false,
       "source": null,
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "roaring 20s jazz age saturday night swing ft ben harvey his ornamentals lessons dance": {
+        "organizer": null,
+        "city": "Toronto",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "roaring 20s jazz age news years day live band swing dance party blues party lessons dances": {
         "organizer": null,
         "city": "Toronto",
         "country": "Canada",
@@ -22656,12 +22752,12 @@
       "country": "Sweden",
       "eventCount": null,
       "venueName": null,
-      "address": null,
-      "lat": null,
-      "lng": null,
-      "geocodedAddress": null,
+      "address": "Doktor Fries Torg",
+      "lat": 57.6833610534668,
+      "lng": 11.971229553222656,
+      "geocodedAddress": "Doktor Fries Torg",
       "verified": false,
-      "source": null,
+      "source": "iniziale+photon-reverse",
       "verifiedOn": null,
       "notes": null
     },
@@ -22673,11 +22769,11 @@
         "eventCount": null,
         "venueName": null,
         "address": null,
-        "lat": null,
-        "lng": null,
+        "lat": 57.6833610534668,
+        "lng": 11.971229553222656,
         "geocodedAddress": null,
         "verified": false,
-        "source": null,
+        "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-11"
@@ -23039,6 +23135,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-25",
         "stili": [
           "Lindy"
         ]
@@ -25180,15 +25277,15 @@
         "city": "Reggio Emilia",
         "country": "Italia",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": null,
-        "lng": null,
-        "geocodedAddress": null,
+        "venueName": "ORTI - Casa di Quartiere",
+        "address": "Via Toscanini, 20",
+        "lat": 44.6847803,
+        "lng": 10.6484157,
+        "geocodedAddress": "Via Toscanini, 20",
         "verified": false,
-        "source": null,
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
+        "notes": "2026-11-25 via confermata dalla mappa; il testo dice: «Orti Swing - Speak Easy ven 27 nov 2026 ore 20:00 ORTI - Casa di Quartiere — Reggio Emilia Via Toscanini, 20 — Social Dance Lindy Balboa Charleston»; fonte: https://www.swingdance.app/events/reggio-emilia",
         "stili": [
           "Lindy"
         ]
@@ -25671,6 +25768,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-25",
         "stili": [
           "Boogie Woogie"
         ]
@@ -25714,6 +25812,492 @@
           "Lindy",
           "Shag",
           "SoloJazz"
+        ]
+      }
+    }
+  },
+  "gabriela ciu a|krakow": {
+    "default": {
+      "organizer": "Gabriela Ciuła",
+      "city": "Kraków",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lost party in lost bar": {
+        "organizer": null,
+        "city": "Kraków",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Charleston",
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "doo wop boogiedancers|venezia": {
+    "default": {
+      "organizer": "Doo-Wop Boogiedancers",
+      "city": "Venezia",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "SoloJazz"
+      ]
+    },
+    "events": {
+      "doo wop club pratica guidata solo jazz e ballo libero": {
+        "organizer": null,
+        "city": "Venezia",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "agenteNonTrovato": "2026-11-25",
+        "stili": [
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "some like it hot e juliette stremitzer|vienna": {
+    "default": {
+      "organizer": "Some Like It Hot e Juliette Stremitzer",
+      "city": "Vienna",
+      "country": "Austria",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing in the city mit dj king d": {
+        "organizer": null,
+        "city": "Vienna",
+        "country": "Austria",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "vintage club|munich": {
+    "default": {
+      "organizer": "Vintage Club",
+      "city": "Munich",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "snowball session chaaange partner": {
+        "organizer": null,
+        "city": "Munich",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "arci tavola tonda e space jazz palermo|palermo": {
+    "default": {
+      "organizer": "Arci Tavola Tonda e Space Jazz Palermo ",
+      "city": "Palermo",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swing ballroom": {
+        "organizer": null,
+        "city": "Palermo",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "grimaldi danse club|metropolitan france": {
+    "default": {
+      "organizer": "Grimaldi Danse Club",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Lindy"
+      ]
+    },
+    "events": {
+      "sunday dance party": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      },
+      "reveillon de la saint sylvestre": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swing island malta|sliema": {
+    "default": {
+      "organizer": "Swing Island Malta",
+      "city": "Sliema",
+      "country": "Malta",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "swinging around the christmas tree dancing tea party": {
+        "organizer": null,
+        "city": "Sliema",
+        "country": "Malta",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "renny club firenze e tuballoswing|firenze": {
+    "default": {
+      "organizer": "Renny Club Firenze e Tuballoswing",
+      "city": "Firenze",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "la cena di natale del renny": {
+        "organizer": null,
+        "city": "Firenze",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "agnieszka janarek e alex sloopi|krakow": {
+    "default": {
+      "organizer": "Agnieszka Janarek e Alex Sloopi",
+      "city": "Kraków",
+      "country": "Poland",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy",
+        "SoloJazz"
+      ]
+    },
+    "events": {
+      "solo jazz weekend with alex slops from the old soulz in krakow poland": {
+        "organizer": null,
+        "city": "Kraków",
+        "country": "Poland",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "nimes swing e the riff jazz club|occitania": {
+    "default": {
+      "organizer": "Nîmes Swing e The Riff Jazz club",
+      "city": "Occitania",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
+    },
+    "events": {
+      "swing weekend au riff jazz club": {
+        "organizer": null,
+        "city": "Occitania",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "charlotte vitse e elise moureau|flemish brabant": {
+    "default": {
+      "organizer": "Charlotte Vitse e Elise Moureau",
+      "city": "Flemish Brabant",
+      "country": "Belgium",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "stukswing": {
+        "organizer": null,
+        "city": "Flemish Brabant",
+        "country": "Belgium",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "tap4season|verona": {
+    "default": {
+      "organizer": "Tap4season",
+      "city": "Verona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "tap dance master davide accossato": {
+        "organizer": null,
+        "city": "Verona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
         ]
       }
     }
