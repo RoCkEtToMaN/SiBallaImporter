@@ -3,6 +3,9 @@
 Progetto "Dove siBalla stasera?": un importer C# raccoglie gli eventi swing nello Google Sheet, il sito
 (https://siballa.pages.dev) e l'app SiBalla li mostrano. Si lavora in italiano.
 
+Cronologia, decisioni recenti e lavori aperti (passaggio tra postazioni, da aggiornare a fine sessione):
+@HANDOFF.md
+
 ## Struttura
 - `SiBallaImportingData/`: importer .NET (cerca eventi online → Sheet → email → DB Appwrite). Opzioni da riga di
   comando in `Utils/AppSettings.cs`, ricette commentate in cima a `appsettings.json`.
