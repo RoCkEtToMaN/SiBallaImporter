@@ -142,7 +142,9 @@ def aggiungi_mercatino(mercatini: dict, foglio: str, intestazione: list, rf: lis
     chiave = normalizza_titolo(titolo) + "|" + norm(citta)
     v = mercatini.get(chiave)
     if v is None:
-        v = mercatini[chiave] = {"titolo": titolo, "citta": citta, "organizzatore": pulisci_nome(html.unescape(cella(rf, 6))), "giorni": set()}
+        # id stabile (titolo + città) per il link /bacheca?mercatino=ID di "↗ Condividi"
+        v = mercatini[chiave] = {"id": hashlib.sha1(chiave.encode("utf-8")).hexdigest()[:10],
+                                 "titolo": titolo, "citta": citta, "organizzatore": pulisci_nome(html.unescape(cella(rf, 6))), "giorni": set()}
         if m:
             lat, lng = (float(x.replace(",", ".")) for x in m.groups())
             if lat or lng:
