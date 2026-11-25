@@ -400,9 +400,9 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
+        "Lindy",
         "Balboa",
-        "Shag",
-        "Lindy"
+        "Shag"
       ]
     },
     "events": {
@@ -2192,7 +2192,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       },
       "west coast swing trainingslager": {
         "organizer": null,
@@ -3093,6 +3096,24 @@
         "geocodedAddress": null,
         "verified": false,
         "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "gran ballo swing lo swing natalizio": {
+        "organizer": null,
+        "city": "Fermo",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 43.24034881591797,
+        "lng": 13.74979019165039,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
         "stili": [
@@ -6326,7 +6347,12 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy",
+          "Shag"
+        ]
       }
     }
   },
@@ -6428,7 +6454,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -8289,6 +8318,24 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-08",
+        "stili": [
+          "Lindy"
+        ]
+      },
+      "il circolo dello swing social dance con deejay sauro": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
         "stili": [
           "Lindy"
         ]
@@ -11412,7 +11459,8 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "agenteNonTrovato": "2026-11-25"
       }
     }
   },
@@ -21724,6 +21772,7 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-11",
+        "agenteNonTrovato": "2026-11-25",
         "stili": [
           "Lindy"
         ]
@@ -21761,6 +21810,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-25",
         "stili": [
           "Lindy"
         ]
@@ -25929,6 +25979,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-25",
         "stili": [
           "Lindy"
         ]
@@ -26299,6 +26350,267 @@
         "stili": [
           "Lindy"
         ]
+      }
+    }
+  },
+  "annette achhammer e lindy hop deutschland|padova": {
+    "default": {
+      "organizer": "Annette Achhammer e Lindy Hop Deutschland",
+      "city": "Padova",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": "Via Enrico Fermi",
+      "lat": 45.34912109375,
+      "lng": 11.787360191345215,
+      "geocodedAddress": "Via Enrico Fermi",
+      "verified": false,
+      "source": "iniziale+photon-reverse",
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "king swing in padua": {
+        "organizer": null,
+        "city": "Padova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": 45.34912109375,
+        "lng": 11.787360191345215,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": "iniziale",
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "the happy swingers lisa moro e michael slim bonny bonomo|bologna": {
+    "default": {
+      "organizer": "The Happy Swingers, Lisa Moro e Michael Slim Bonny Bonomo",
+      "city": "Bologna",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "the rock step saturday night happy birthday the happy swingers": {
+        "organizer": null,
+        "city": "Bologna",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Boogie Woogie",
+          "Lindy",
+          "Balboa",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "perth swing dance academy|western australia": {
+    "default": {
+      "organizer": "Perth Swing Dance Academy",
+      "city": "Western Australia",
+      "country": "Australia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "saturday night hohoho hop": {
+        "organizer": null,
+        "city": "Western Australia",
+        "country": "Australia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Charleston",
+          "Lindy",
+          "Shag"
+        ]
+      }
+    }
+  },
+  "lichfield lindy|staffordshire": {
+    "default": {
+      "organizer": "Lichfield Lindy",
+      "city": "Staffordshire",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lichfield lindy christmas dance with the hot house combo": {
+        "organizer": null,
+        "city": "Staffordshire",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "swingfly dance|modena": {
+    "default": {
+      "organizer": "SwingFly Dance",
+      "city": "Modena",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "aperiswing party": {
+        "organizer": null,
+        "city": "Modena",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "serena the jive machines e cafeneruda torino circolo arci|torino": {
+    "default": {
+      "organizer": "Serena & The Jive Machines e CafèNeruda Torino Circolo Arci",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "serena the jive machine live cafe neruda special guest dj set dj raffo the twist": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": "Cafè Neruda",
+        "address": "Via Errico Giachino 28",
+        "lat": 45.0915815,
+        "lng": 7.6757951,
+        "geocodedAddress": "Via Errico Giachino 28",
+        "verified": false,
+        "source": "agente",
+        "verifiedOn": null,
+        "notes": "2026-11-25 locale 'Cafe' Neruda' scritto nel titolo, trovato sulla mappa come 'Cafè Neruda'; fonte: titolo dell'evento + mappa"
+      }
+    }
+  },
+  "perry boogie|ancona": {
+    "default": {
+      "organizer": "Perry Boogie",
+      "city": "Ancona",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "perry boogie wally white mega senigallia": {
+        "organizer": null,
+        "city": "Ancona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "agenteNonTrovato": "2026-11-25"
       }
     }
   }
