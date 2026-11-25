@@ -157,14 +157,26 @@
   },
   "2026-11-24|lost party in lost bar|gabriela ciu a|krakow": {
     "data": "2026-11-24",
+    "scheda": "Serate",
     "titolo": "Lost Party In Lost Bar",
     "organizzatore": "Gabriela Ciuła",
     "citta": "Kraków",
     "link": "https://www.facebook.com/gaba.ciula",
-    "valore": "da verificare",
+    "valore": "nuovo",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata swing regolare (Lindy Hop, Balboa, Charleston, Shag, Blues) organizzata da Gabriela Ciuła al Lost Bar di Cracovia. Indirizzo trovato tramite mappa..",
+    "quando": "2026-11-25"
+  },
+  "2026-11-26|doo wop club pratica guidata solo jazz e ballo libero|doo wop boogiedancers|venezia": {
+    "data": "2026-11-26",
+    "titolo": "Doo-Wop Club - Pratica guidata Solo Jazz e ballo libero",
+    "organizzatore": "Doo-Wop Boogiedancers",
+    "citta": "Venezia",
+    "link": "https://www.facebook.com/doowopboogie",
+    "valore": "nuovo",
     "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "motivo": "Gemini: serata e anche workshop. Pratica guidata e ballo libero organizzati dai Doo-Wop Boogiedancers.",
+    "quando": "2026-11-25"
   },
   "2026-11-26|slow town blues night blues social dance|slow town blues|torino": {
     "data": "2026-11-26",
@@ -179,14 +191,15 @@
   },
   "2026-11-27|ll hings azz|svenska rytmsektionen|vastra gotaland county": {
     "data": "2026-11-27",
+    "scheda": "Workshop",
     "titolo": "\uD835\uDDDA\uD835\uDDE2\uD835\uDDE7\uD835\uDDDB\uD835\uDDD8\uD835\uDDE1\uD835\uDDD5\uD835\uDDE8\uD835\uDDE5\uD835\uDDDA \uD835\uDDE5\uD835\uDDDB\uD835\uDDEC\uD835\uDDE7\uD835\uDDDB\uD835\uDDE0 \uD835\uDDD6\uD835\uDDD4\uD835\uDDE0\uD835\uDDE3 \uD835\uDFEE\uD835\uDFEC\uD835\uDFEE\uD835\uDFF2 - \uD835\uDE3C\uD835\uDE61\uD835\uDE61 \uD835\uDE4F\uD835\uDE5D\uD835\uDE5E\uD835\uDE63\uD835\uDE5C\uD835\uDE68 \uD835\uDE45\uD835\uDE56\uD835\uDE6F\uD835\uDE6F",
     "organizzatore": "Svenska Rytmsektionen",
     "citta": "Västra Götaland County",
     "link": "http://www.svenskarytmsektionen.se/gbg-rhythm-camp",
-    "valore": "da verificare",
-    "chi": "gemini",
-    "motivo": "Gemini non ha classificato l'evento: controlla tu",
-    "quando": "2026-11-24"
+    "valore": "serata+workshop",
+    "chi": "agente",
+    "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Festival di più giorni (tap dance, vernacular jazz e social dancing) con serate e workshop: è un evento 'serata+workshop'..",
+    "quando": "2026-11-25"
   },
   "2026-11-27|lo swing del principe lindy hop boogie woogie night dj dom parker|lo swing del principe milano|milano": {
     "data": "2026-11-27",
@@ -223,6 +236,16 @@
     "chi": "agente",
     "motivo": "Agente: scartata (no, sicurezza alta) il 24/11/2026: L'evento include West Coast Swing, Rock n Swing e Bachata tra i generi principali, rendendolo non idoneo secondo le regole del curatore..",
     "quando": "2026-11-24"
+  },
+  "2026-11-27|swing in the city mit dj king d|some like it hot e juliette stremitzer|vienna": {
+    "data": "2026-11-27",
+    "titolo": "Swing in the City mit DJ King D",
+    "organizzatore": "Some Like It Hot e Juliette Stremitzer",
+    "citta": "Vienna",
+    "link": "https://www.facebook.com/somelikeithotvienna",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
   },
   "2026-11-28|buon compleanno|go west viterbo|viterbo": {
     "data": "2026-11-28",
@@ -282,6 +305,17 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-11-28|west coast swing night|paolo biassoni e francesca torti|milano": {
+    "data": "2026-11-28",
+    "titolo": "West Coast Swing Night",
+    "organizzatore": "Paolo Biassoni e Francesca Torti",
+    "citta": "Milano",
+    "link": "https://mctimeclub.it",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-25"
+  },
   "2026-11-28|westiewaves wcs party broadway|westiewaves e richard fulop|budapest": {
     "data": "2026-11-28",
     "titolo": "WestieWaves WCS Party @ Broadway",
@@ -328,6 +362,17 @@
     "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 24/11/2026: Pratica di Lindy Hop al Joshua Blues Club, evento di social/pratica swing. Indirizzo verificato..",
     "quando": "2026-11-24"
   },
+  "2026-12-04|negozio millelire temporaneo|millelire|fermo": {
+    "data": "2026-12-04",
+    "titolo": "Negozio Millelire TEMPORANEO",
+    "organizzatore": "MilleLire",
+    "citta": "Fermo",
+    "link": "https://www.facebook.com/stilemillelire",
+    "valore": "mercatino",
+    "chi": "gemini",
+    "motivo": "Gemini: mercatino, va in Bacheca. Negozio temporaneo di abbigliamento e vintage Millelire.",
+    "quando": "2026-11-25"
+  },
   "2026-12-05|gran ballo swing lo swing natalizio|swing family|fermo": {
     "data": "2026-12-05",
     "titolo": "☆GRAN BALLO SWING - Lo Swing Natalizio 1☆",
@@ -349,6 +394,16 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2026-12-05|shake that swing|swingin up academy|prato": {
+    "data": "2026-12-05",
+    "titolo": "Shake that Swing",
+    "organizzatore": "Swingin’ Up Academy",
+    "citta": "Prato",
+    "link": "https://shorturl.at/cioGw",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
   },
   "2026-12-06|king swing in padua abano terme|annette achhammer e swing dance lindy hop events|padova": {
     "data": "2026-12-06",
@@ -382,6 +437,17 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2026-12-08|anni di ca bottona carribb roots roll with the talking parrots|ca bottona e andrea sartori|verona": {
+    "data": "2026-12-08",
+    "titolo": "10 Anni di Cà Bottona: Carribb Roots & Roll with the TALKING PARROTS",
+    "organizzatore": "Ca'Bottona e Andrea Sartori",
+    "citta": "Verona",
+    "link": "https://www.facebook.com/GOODFOODLIVEMUSICNICEPEOPLE",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Concerto di musica roots e rock and roll senza social dance swing.",
+    "quando": "2026-11-25"
   },
   "2026-12-10|shanghai lindy festival 10th anniversary||shanghai": {
     "data": "2026-12-10",
@@ -425,6 +491,18 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-12-12|elb coast swing|tanzgiesellschaft|kreis herzogtum lauenburg": {
+    "data": "2026-12-12",
+    "scheda": "Serate",
+    "titolo": "Elb-Coast-Swing 2026",
+    "organizzatore": "Tanzgiesellschaft",
+    "citta": "Kreis Herzogtum Lauenburg",
+    "link": "https://www.facebook.com/Tanzgiesellschaft",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «coast» nel titolo, 26 eventi così scartati da te (16 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-25"
+  },
   "2026-12-12|live music lindy hop party with hot jazz band|chance to dance tanckurzusok chance to dance courses ozora andras e volner nagy melinda|budapest": {
     "data": "2026-12-12",
     "titolo": "Live music Lindy Hop party with Hot Jazz Band",
@@ -447,6 +525,26 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-12-12|no swing no christmas cena di natale|vintage dance versilia|lucca": {
+    "data": "2026-12-12",
+    "titolo": "\"NO SWING - NO CHRISTMAS!\" - cena di natale!",
+    "organizzatore": "Vintage Dance Versilia",
+    "citta": "Lucca",
+    "link": "https://www.facebook.com/vintagedanceversilia",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-12|snowball session chaaange partner|vintage club|munich": {
+    "data": "2026-12-12",
+    "titolo": "❄️ SNOWBALL SESSION – „CHAAANGE PARTNER!“ \uD83D\uDC83\uD83D\uDD7A",
+    "organizzatore": "Vintage Club",
+    "citta": "Munich",
+    "link": "http://www.vintage-club.de",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
   "2026-12-12|soiree lindy hop|swing sherbrooke|estrie": {
     "data": "2026-12-12",
     "titolo": "Soirée 100 % Lindy Hop",
@@ -457,6 +555,67 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2026-12-12|swing ballroom|arci tavola tonda e space jazz palermo|palermo": {
+    "data": "2026-12-12",
+    "titolo": "SWING BALLROOM",
+    "organizzatore": "Arci Tavola Tonda e Space Jazz Palermo",
+    "citta": "Palermo",
+    "link": "https://www.facebook.com/ArciTavolaTonda",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-13|lo swing del principe alboa endez ous balboa shag social dj jivin charlie|lo swing del principe milano|milano": {
+    "data": "2026-12-13",
+    "titolo": "☆ Lo Swing del Principe ☆ \uD835\uDC01\uD835\uDC1A\uD835\uDC25\uD835\uDC1B\uD835\uDC28\uD835\uDC1A \uD835\uDC11\uD835\uDC1E\uD835\uDC27\uD835\uDC1D\uD835\uDC1E\uD835\uDC33 \uD835\uDC15\uD835\uDC28\uD835\uDC2E\uD835\uDC2C ☆ Balboa & Shag Social☆Dj Jivin'Charlie",
+    "organizzatore": "Lo swing del Principe Milano",
+    "citta": "Milano",
+    "link": "https://www.facebook.com/loswingdelprincipemilano",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-13|sunday dance party|grimaldi danse club|metropolitan france": {
+    "data": "2026-12-13",
+    "titolo": "Sunday Dance Party",
+    "organizzatore": "Grimaldi Danse Club",
+    "citta": "Metropolitan France",
+    "link": "http://www.grimaldidanse.com",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-13|swing party reunion s|ivan mutti|milano": {
+    "data": "2026-12-13",
+    "titolo": "SWING PARTY       REUNION 90*s",
+    "organizzatore": "Ivan Mutti",
+    "citta": "Milano",
+    "link": "https://www.facebook.com/profile.php?id=100008961370570",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-13|swinging around the christmas tree dancing tea party|swing island malta|sliema": {
+    "data": "2026-12-13",
+    "titolo": "Swinging Around the Christmas Tree / Dancing Tea Party",
+    "organizzatore": "Swing Island Malta",
+    "citta": "Sliema",
+    "link": "https://www.facebook.com/SwingIslandMalta",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-13|tap dance master davide accossato|tap4season|verona": {
+    "data": "2026-12-13",
+    "titolo": "Tap Dance Master Davide Accossato",
+    "organizzatore": "Tap4season",
+    "citta": "Verona",
+    "link": "https://www.facebook.com/Tap4season",
+    "valore": "workshop",
+    "chi": "gemini",
+    "motivo": "Gemini: workshop/corso, va nella scheda Workshop. Masterclass di tip tap senza serate di ballo.",
+    "quando": "2026-11-25"
   },
   "2026-12-15|lindy in the lou with the holiday hamfats|lindy in the lou|saint louis": {
     "data": "2026-12-15",
@@ -480,6 +639,69 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-12-17|la cena di natale del renny|renny club firenze e tuballoswing|firenze": {
+    "data": "2026-12-17",
+    "titolo": "La Cena di Natale del Renny! 2026",
+    "organizzatore": "Renny Club Firenze e Tuballoswing",
+    "citta": "Firenze",
+    "link": "https://www.facebook.com/RennyClubFirenze",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-19|hop hop hop festa di natale|jazz road swing dance|pisa": {
+    "data": "2026-12-19",
+    "titolo": "Hop Hop Hop - Festa di Natale",
+    "organizzatore": "Jazz Road - Swing Dance",
+    "citta": "Pisa",
+    "link": "https://www.facebook.com/jazzroadswingdance",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2026-12-19|solo jazz weekend with alex slops from the old soulz in krakow poland|agnieszka janarek e alex sloopi|krakow": {
+    "data": "2026-12-19",
+    "titolo": "Solo Jazz weekend with Alex “Slops” from the Old Soulz. In Kraków Poland!",
+    "organizzatore": "Agnieszka Janarek e Alex Sloopi",
+    "citta": "Kraków",
+    "link": "https://www.facebook.com/agnieszka.janarek",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Weekend intensivo di Solo Jazz con workshop e pratiche.",
+    "quando": "2026-11-25"
+  },
+  "2026-12-19|swing weekend au riff jazz club|nimes swing e the riff jazz club|occitania": {
+    "data": "2026-12-19",
+    "titolo": "Swing Weekend au Riff Jazz Club",
+    "organizzatore": "Nîmes Swing e The Riff Jazz club",
+    "citta": "Occitania",
+    "link": "https://www.facebook.com/nimesswing",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Swing weekend in un jazz club con eventi musicali e di ballo.",
+    "quando": "2026-11-25"
+  },
+  "2026-12-31|reveillon de la saint sylvestre|grimaldi danse club|metropolitan france": {
+    "data": "2026-12-31",
+    "titolo": "Réveillon de la Saint Sylvestre",
+    "organizzatore": "Grimaldi Danse Club",
+    "citta": "Metropolitan France",
+    "link": "http://www.grimaldidanse.com",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2027-01-01|roaring 20s jazz age news years day live band swing dance party blues party lessons dances|swing toronto e simon threlkeld|toronto": {
+    "data": "2027-01-01",
+    "titolo": "Roaring 20s Jazz Age News Years Day Live Band Swing Dance Party + Blues Party! Lessons & Dances!",
+    "organizzatore": "Swing Toronto e Simon Threlkeld",
+    "citta": "Toronto",
+    "link": "https://www.facebook.com/SwingTorontoPage",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Evento di Capodanno con lezioni e feste di ballo.",
+    "quando": "2026-11-25"
+  },
   "2027-01-15|mblx miami beach lindy xchange|all swing with yuval hod e juls slavikas|miami dade county": {
     "data": "2027-01-15",
     "titolo": "MBLX 2027 - Miami Beach Lindy Xchange",
@@ -491,6 +713,28 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2027-01-16|stukswing|charlotte vitse e elise moureau|flemish brabant": {
+    "data": "2027-01-16",
+    "titolo": "STUKswing",
+    "organizzatore": "Charlotte Vitse e Elise Moureau",
+    "citta": "Flemish Brabant",
+    "link": "https://www.facebook.com/ChVitse",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-25"
+  },
+  "2027-01-22|festival cap a l west|tempo swing|metropolitan france": {
+    "data": "2027-01-22",
+    "scheda": "Serate",
+    "titolo": "Festival Cap à l'West",
+    "organizzatore": "Tempo Swing",
+    "citta": "Metropolitan France",
+    "link": "https://www.temposwingdanse.com/festival-cap-a-lwest",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-25"
+  },
   "2027-02-05|jazzy feet years a party weekend|jazzy feet|ile de france": {
     "data": "2027-02-05",
     "titolo": "Jazzy Feet 10 years ! A Party Weekend",
@@ -501,6 +745,18 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2027-02-05|west in val|west in val|metropolitan france": {
+    "data": "2027-02-05",
+    "scheda": "Serate",
+    "titolo": "West in Val' 2027",
+    "organizzatore": "West in Val'",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/profile.php?id=61589284154271",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-25"
   },
   "2027-02-07|sunday afternoon swing the reunion ft the savoy band lindy lesson blues after party|swing toronto e simon threlkeld|toronto": {
     "data": "2027-02-07",
@@ -532,5 +788,29 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2027-07-15|swinglab berlin wsdc trial event|swinglab berlin|undefined": {
+    "data": "2027-07-15",
+    "scheda": "Serate",
+    "titolo": "SwingLab Berlin - WSDC (Trial) Event - 2. Edition",
+    "organizzatore": "SwingLab Berlin",
+    "citta": "undefined",
+    "link": "https://www.swinglab-berlin.com",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wsdc» nel titolo, 13 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-25"
+  },
+  "2027-10-15|west auvergn swing|west auvergn swing|metropolitan france": {
+    "data": "2027-10-15",
+    "scheda": "Serate",
+    "titolo": "West Auvergn' Swing 8",
+    "organizzatore": "West Auvergn' Swing",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/westauvergnswing",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-25"
   }
 }

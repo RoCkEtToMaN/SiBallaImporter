@@ -283,15 +283,15 @@
         "city": "Bologna",
         "country": "Italia",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": 44.702430725097656,
-        "lng": 11.403989791870117,
-        "geocodedAddress": null,
+        "venueName": "Discoteca Vivi Le Grotte",
+        "address": "Via Guglielmo Oberdan 21",
+        "lat": 44.4969035,
+        "lng": 11.3461758,
+        "geocodedAddress": "Via Guglielmo Oberdan 21",
         "verified": false,
-        "source": "iniziale",
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
+        "notes": "2026-11-25 via confermata dalla mappa; il testo dice: «Discoteca Vivi Le Grotte - Via Guglielmo Oberdan 21 40018 San Pietro in Casale»; fonte: https://www.bolognawelcome.com/it/eventi/musica-e-danza/tutti-in-pista-coi-favolosi-anni-50",
         "stili": [
           "Lindy"
         ]
@@ -2513,7 +2513,10 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
-        "geminiNonTrovato": "2026-11-11"
+        "geminiNonTrovato": "2026-11-11",
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -7161,15 +7164,19 @@
         "city": "Flemish Brabant",
         "country": "Belgium",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": 50.87126922607422,
-        "lng": 4.703979969024658,
-        "geocodedAddress": null,
+        "venueName": "Appeltuin",
+        "address": "Weldadigheidsstraat 74",
+        "lat": 50.8711651,
+        "lng": 4.7041057,
+        "geocodedAddress": "Weldadigheidsstraat 74",
         "verified": false,
-        "source": "iniziale",
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null
+        "notes": "2026-11-25 via confermata dalla mappa; il testo dice: «How to get there? Weldadigheidsstraat 74 3000 Leuven Belgium»; fonte: https://www.apolloswing.be/en/class/appeltuin-school-solo-jazz-thursday",
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
       },
       "solo jazz trickeration routine with ann sofie in leuven": {
         "organizer": null,
@@ -10604,6 +10611,24 @@
         "stili": [
           "Lindy"
         ]
+      },
+      "sound swing society ii": {
+        "organizer": null,
+        "city": "Savona",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -13753,6 +13778,25 @@
         "notes": null,
         "stili": [
           "Blues",
+          "Lindy"
+        ]
+      },
+      "slow town blues night blues social dance": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "agenteNonTrovato": "2026-11-25",
+        "stili": [
           "Lindy"
         ]
       }
@@ -17607,16 +17651,15 @@
         "city": "Milano",
         "country": "Italia",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": null,
-        "lng": null,
-        "geocodedAddress": null,
+        "venueName": "Circle S&S",
+        "address": "Via Cristoforo Colombo 8",
+        "lat": 45.4451275,
+        "lng": 9.0878516,
+        "geocodedAddress": "Via Cristoforo Colombo 8",
         "verified": false,
-        "source": null,
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
-        "geminiNonTrovato": "2026-11-09",
+        "notes": "2026-11-25 via confermata dalla mappa; il testo dice: «Location: Circle S&S, Via Cristoforo Colombo 8, Corsico»; fonte: https://madswingteam.it?shopping%2Fzero%2F3302681214.html=",
         "stili": [
           "Lindy"
         ]
@@ -23344,15 +23387,15 @@
         "city": "Berlin",
         "country": "Germany",
         "eventCount": null,
-        "venueName": null,
-        "address": null,
-        "lat": null,
-        "lng": null,
-        "geocodedAddress": null,
+        "venueName": "Institut Français de Berlin",
+        "address": "Kurfürstendamm 211",
+        "lat": 52.5020922,
+        "lng": 13.3249378,
+        "geocodedAddress": "Kurfürstendamm 211",
         "verified": false,
-        "source": null,
+        "source": "agente",
         "verifiedOn": null,
-        "notes": null,
+        "notes": "2026-11-25 via confermata dalla mappa; il testo dice: «Institut Français de Berlin Kurfürstendamm 211 10719 Berlin»; fonte: https://www.facebook.com/institut.francais.berlin",
         "stili": [
           "Lindy"
         ]
@@ -25482,6 +25525,195 @@
         "notes": null,
         "stili": [
           "Lindy"
+        ]
+      }
+    }
+  },
+  "rockin turin e vinile torino|torino": {
+    "default": {
+      "organizer": "Rockin' Turin e Vinile Torino",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lost in the fifties season opening": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "hound dogs nelson tavern e margherita petracchi|livorno": {
+    "default": {
+      "organizer": "HOUND DOGS, Nelson Tavern e Margherita Petracchi",
+      "city": "Livorno",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rock n roll night nelson tavern": {
+        "organizer": null,
+        "city": "Livorno",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Rock 'n' Roll"
+        ]
+      }
+    }
+  },
+  "cafeneruda torino circolo arci|torino": {
+    "default": {
+      "organizer": "CafèNeruda Torino Circolo Arci",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "serena the jive machines": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Boogie Woogie"
+        ]
+      }
+    }
+  },
+  "samuele cogo|torino": {
+    "default": {
+      "organizer": "Samuele Cogo",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "rockin downtown": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Boogie Woogie"
+        ]
+      }
+    }
+  },
+  "rockin turin|torino": {
+    "default": {
+      "organizer": "Rockin' Turin",
+      "city": "Torino",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lost in the fifties roberto s birthday swing rock n roll con dj luca valentino": {
+        "organizer": null,
+        "city": "Torino",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy",
+          "Shag",
+          "SoloJazz"
         ]
       }
     }
