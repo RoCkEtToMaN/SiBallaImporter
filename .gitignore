@@ -43,3 +43,6 @@ __pycache__/
 
 # export locale dello Sheet (il sito lo rigenera da solo in sito.yml)
 sito/eventi.json
+
+# build locali: la dll contiene la chiave del service account incorporata
+artifacts/
