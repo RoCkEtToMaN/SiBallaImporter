@@ -233,8 +233,9 @@
     }).join(", ");
   }
   function schedaMercatino(m) {
-    return '<article class="card annuncio"><div class="testa-ann"><div class="cosa mercatino-ev">🛍️ Mercatino vintage' +
-      '<span class="tuo" title="Trovato da siBalla tra gli eventi online, non è un annuncio di un utente">segnalato da siBalla</span></div></div>' +
+    return '<article class="card annuncio"' + (m.id ? ' id="mercatino-' + esc(m.id) + '"' : "") + '><div class="testa-ann"><div class="cosa mercatino-ev">🛍️ Mercatino vintage' +
+      '<span class="tuo" title="Trovato da siBalla tra gli eventi online, non è un annuncio di un utente">segnalato da siBalla</span></div>' +
+      (m.id ? '<button type="button" class="condividi" data-merc="' + esc(m.id) + '" title="Manda questo mercatino a chi potrebbe essere interessato">↗ Condividi</button>' : "") + "</div>" +
       "<h3>" + esc(m.citta) + (m.citta ? " · " : "") + esc(m.titolo) + "</h3>" +
       '<div class="data-ann">' + esc(giorniMercatino(m.giorni)) + "</div>" +
       (m.img ? '<img class="foto-merc" src="' + esc(m.img) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
@@ -425,9 +426,17 @@
   $("lista").addEventListener("click", function (e) {
     var b = e.target.closest("button.condividi");
     if (!b) return;
-    var a = annuncio(+b.getAttribute("data-id"));
-    if (!a) return;
-    var url = location.origin + "/bacheca?annuncio=" + a.id, testo = testoCondividi(a);
+    var url, testo, idm = b.getAttribute("data-merc");
+    if (idm) {   // mercatino trovato da siBalla: link /bacheca?mercatino=ID
+      var m = mercatini.filter(function (x) { return x.id === idm; })[0];
+      if (!m) return;
+      url = location.origin + "/bacheca?mercatino=" + encodeURIComponent(m.id);
+      testo = ["🛍️ Mercatino vintage", m.citta, m.titolo, giorniMercatino(m.giorni)].filter(Boolean).join(" · ");
+    } else {
+      var a = annuncio(+b.getAttribute("data-id"));
+      if (!a) return;
+      url = location.origin + "/bacheca?annuncio=" + a.id; testo = testoCondividi(a);
+    }
     if (navigator.share) {
       navigator.share({ title: "Bacheca siBalla", text: testo, url: url }).catch(function () {});
       return;
@@ -530,14 +539,20 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }), merc])
       .then(function (x) { annunci = x[0].annunci || []; disegna(); apriDaLink(); })
       .catch(function () {
-        if (mercatini.length) { disegna(); $("lista").insertAdjacentHTML("afterbegin", '<p class="vuoto">Annunci non caricati, riprova più tardi.</p>'); }
+        if (mercatini.length) { disegna(); apriDaLink(); $("lista").insertAdjacentHTML("afterbegin", '<p class="vuoto">Annunci non caricati, riprova più tardi.</p>'); }
         else $("lista").innerHTML = '<p class="vuoto">Impossibile caricare la bacheca, riprova più tardi.</p>';
       });
   }
   // /bacheca?annuncio=ID (link delle email): apre la discussione di quell'annuncio e ci porta lì
   function apriDaLink() {
-    var id = 0;
-    try { id = +new URLSearchParams(location.search).get("annuncio") || 0; } catch (e) {}
+    var id = 0, idm = "";
+    try { id = +new URLSearchParams(location.search).get("annuncio") || 0; idm = new URLSearchParams(location.search).get("mercatino") || ""; } catch (e) {}
+    if (idm) {   // /bacheca?mercatino=ID (link di "↗ Condividi" su un mercatino)
+      var em = document.getElementById("mercatino-" + idm);
+      if (em) { em.classList.add("evidenziato"); em.scrollIntoView({ block: "start" }); }
+      else $("lista").insertAdjacentHTML("afterbegin", "<p class=\"box\">Questo mercatino è già passato. Qui sotto trovi gli altri annunci.</p>");
+      return;
+    }
     if (!id) return;
     if (!annuncio(id)) {   // link vecchio: l'annuncio è scaduto o è stato tolto
       $("lista").insertAdjacentHTML("afterbegin", "<p class=\"box\">Questo annuncio non è più in bacheca: è scaduto o chi l'ha scritto l'ha tolto. Qui sotto trovi gli altri.</p>");

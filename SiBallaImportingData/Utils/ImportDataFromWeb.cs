@@ -817,7 +817,7 @@ namespace SiBallaImportingData.Utils
                 //logger.LogException(httpEx);
 
                 //// Opzionale: invio immediato
-                //await logger.SendLogsByEmail("giacomo.lo87@gmail.com", httpEx.StackTrace, httpEx.Message);
+                //await logger.SendLogsByEmail(destinatario, httpEx.StackTrace, httpEx.Message);
 
                 throw;
             }
@@ -831,7 +831,7 @@ namespace SiBallaImportingData.Utils
                 //logger.LogException(htmlEx);
 
                 //// Opzionale: invio immediato
-                //await logger.SendLogsByEmail("giacomo.lo87@gmail.com", htmlEx.StackTrace, htmlEx.Message);
+                //await logger.SendLogsByEmail(destinatario, htmlEx.StackTrace, htmlEx.Message);
 
                 throw;
             }
@@ -845,7 +845,7 @@ namespace SiBallaImportingData.Utils
                 //logger.LogException(e);
 
                 //// Opzionale: invio immediato
-                //await logger.SendLogsByEmail("giacomo.lo87@gmail.com", e.StackTrace, e.Message);
+                //await logger.SendLogsByEmail(destinatario, e.StackTrace, e.Message);
 
                 // A seconda delle tue esigenze, potresti voler rigettare l'eccezione
                 throw;
