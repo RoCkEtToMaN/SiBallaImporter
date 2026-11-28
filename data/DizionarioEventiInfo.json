@@ -400,9 +400,9 @@
       "verifiedOn": null,
       "notes": null,
       "stili": [
-        "Lindy",
         "Balboa",
-        "Shag"
+        "Shag",
+        "Lindy"
       ]
     },
     "events": {
@@ -927,6 +927,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-28",
         "stili": [
           "Balboa",
           "Lindy",
@@ -1233,6 +1234,7 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-28",
         "stili": [
           "Balboa"
         ]
@@ -2094,7 +2096,11 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Lindy"
+      ]
     },
     "events": {
       "1er booster balboa danse swing bordeaux atelier sante": {
@@ -2128,6 +2134,25 @@
         "notes": null,
         "stili": [
           "Balboa"
+        ]
+      },
+      "soiree swing claribol stompers festival asc": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Lindy"
         ]
       }
     }
@@ -2522,7 +2547,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "il ballo dei fantasmi": {
@@ -3006,6 +3034,7 @@
         "verifiedOn": null,
         "notes": null,
         "geminiNonTrovato": "2026-11-08",
+        "agenteNonTrovato": "2026-11-28",
         "stili": [
           "Balboa",
           "Shag"
@@ -4258,6 +4287,24 @@
         "stili": [
           "Lindy"
         ]
+      },
+      "savoy swingtime ball sunday": {
+        "organizer": null,
+        "city": "Rimini",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -4380,7 +4427,10 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Lindy"
+      ]
     },
     "events": {
       "swing jazz charleston livello aperto piazza bologna": {
@@ -4427,7 +4477,10 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
-        "agenteNonTrovato": "2026-11-23"
+        "agenteNonTrovato": "2026-11-23",
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -7115,7 +7168,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -7904,7 +7960,14 @@
       "verified": false,
       "source": "iniziale+photon-reverse",
       "verifiedOn": null,
-      "notes": null
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "Blues",
+        "Lindy",
+        "Shag",
+        "SlowBal"
+      ]
     },
     "events": {
       "solo jazz lindy hop vikend delavnica remy kouakou kouame": {
@@ -7921,6 +7984,49 @@
         "source": "iniziale",
         "verifiedOn": null,
         "notes": null
+      },
+      "fast slow mix jam session swing plesni vecer v kazini": {
+        "organizer": null,
+        "city": "Lubiana",
+        "country": "Slovenia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy",
+          "Shag",
+          "SlowBal"
+        ]
+      },
+      "fast slow mix swing plesni vecer": {
+        "organizer": null,
+        "city": "Lubiana",
+        "country": "Slovenia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy",
+          "Shag"
+        ]
       }
     }
   },
@@ -8743,7 +8849,10 @@
         "verified": false,
         "source": "iniziale",
         "verifiedOn": null,
-        "notes": null
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   },
@@ -19467,6 +19576,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-28",
         "stili": [
           "Balboa",
           "Charleston",
@@ -19507,6 +19617,7 @@
         "source": null,
         "verifiedOn": null,
         "notes": null,
+        "agenteNonTrovato": "2026-11-28",
         "stili": [
           "Balboa"
         ]
@@ -24408,13 +24519,13 @@
         "country": "Italia",
         "eventCount": null,
         "venueName": null,
-        "address": null,
-        "lat": null,
-        "lng": null,
-        "geocodedAddress": null,
-        "verified": false,
-        "source": null,
-        "verifiedOn": null,
+        "address": "Viale Brigata Bisagno 2",
+        "lat": 44.403629302978516,
+        "lng": 8.947310447692871,
+        "geocodedAddress": "Viale Brigata Bisagno 2",
+        "verified": true,
+        "source": "manuale",
+        "verifiedOn": "2026-11-28",
         "notes": null,
         "geminiNonTrovato": "2026-11-21",
         "stili": [
@@ -26611,6 +26722,347 @@
         "verifiedOn": null,
         "notes": null,
         "agenteNonTrovato": "2026-11-25"
+      }
+    }
+  },
+  "alessandro capaccioli|firenze": {
+    "default": {
+      "organizer": "Alessandro Capaccioli",
+      "city": "Firenze",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "il boogie e non solo e qui": {
+        "organizer": null,
+        "city": "Firenze",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Boogie Woogie"
+        ]
+      }
+    }
+  },
+  "swing n rhythm e myriam tetreault|montreal": {
+    "default": {
+      "organizer": "Swing 'N' Rhythm e Myriam Tétreault",
+      "city": "Montreal",
+      "country": "Canada",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "dimanche apero swing solo jazz special noel competition solo jazz": {
+        "organizer": null,
+        "city": "Montreal",
+        "country": "Canada",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy",
+          "SoloJazz"
+        ]
+      }
+    }
+  },
+  "andreas hoppe e swing connects|cologne": {
+    "default": {
+      "organizer": "Andreas Hoppe e Swing Connects !!!",
+      "city": "Cologne",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "der vorhang fallt der abschieds lindy hop heaven": {
+        "organizer": null,
+        "city": "Cologne",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "balboa baby vienna e sandra hartbach|vienna": {
+    "default": {
+      "organizer": "Balboa, Baby Vienna e Sandra Hartbach",
+      "city": "Vienna",
+      "country": "Austria",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "shuffle cafe silvester": {
+        "organizer": null,
+        "city": "Vienna",
+        "country": "Austria",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa"
+        ]
+      }
+    }
+  },
+  "mr pingle|hamburg": {
+    "default": {
+      "organizer": "Mr. Pingle",
+      "city": "Hamburg",
+      "country": "Germany",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "lindy lights ball": {
+        "organizer": null,
+        "city": "Hamburg",
+        "country": "Germany",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "Blues",
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "fast feet friday pdx|multnomah county": {
+    "default": {
+      "organizer": "Fast Feet Friday PDX",
+      "city": "Multnomah County",
+      "country": "Stati Uniti d'America",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null,
+      "stili": [
+        "Balboa",
+        "SlowBal"
+      ]
+    },
+    "events": {
+      "save the date keep bal weird pdx": {
+        "organizer": null,
+        "city": "Multnomah County",
+        "country": "Stati Uniti d'America",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Balboa",
+          "SlowBal"
+        ]
+      }
+    }
+  },
+  "hot rock n boogie|greater lincolnshire": {
+    "default": {
+      "organizer": "Hot Rock n Boogie",
+      "city": "Greater Lincolnshire",
+      "country": "United Kingdom",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "hot rock n boogie": {
+        "organizer": null,
+        "city": "Greater Lincolnshire",
+        "country": "United Kingdom",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Boogie Woogie"
+        ]
+      }
+    }
+  },
+  "rocking hop lauris laeti e altri 2|metropolitan france": {
+    "default": {
+      "organizer": "Rocking'hop, Lauris & Laeti e altri 2",
+      "city": "Metropolitan France",
+      "country": "France",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "micro festival swing 5eme samedi janvier": {
+        "organizer": null,
+        "city": "Metropolitan France",
+        "country": "France",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
+      }
+    }
+  },
+  "annette achhammer e swing dance lindy hop events|padova": {
+    "default": {
+      "organizer": "Annette Achhammer e Swing Dance / Lindy Hop Events",
+      "city": "Padova",
+      "country": "Italia",
+      "eventCount": null,
+      "venueName": null,
+      "address": null,
+      "lat": null,
+      "lng": null,
+      "geocodedAddress": null,
+      "verified": false,
+      "source": null,
+      "verifiedOn": null,
+      "notes": null
+    },
+    "events": {
+      "king swing in padua abano terme": {
+        "organizer": null,
+        "city": "Padova",
+        "country": "Italia",
+        "eventCount": null,
+        "venueName": null,
+        "address": null,
+        "lat": null,
+        "lng": null,
+        "geocodedAddress": null,
+        "verified": false,
+        "source": null,
+        "verifiedOn": null,
+        "notes": null,
+        "stili": [
+          "Lindy"
+        ]
       }
     }
   }

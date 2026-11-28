@@ -305,6 +305,26 @@
     "chi": "gemini",
     "quando": "2026-11-25"
   },
+  "2026-11-28|ballast che ti passa|rock swing easy|pisa": {
+    "data": "2026-11-28",
+    "titolo": "BALLAST CHE TI PASSA",
+    "organizzatore": "Rock & Swing Easy",
+    "citta": "Pisa",
+    "link": "https://www.facebook.com/rockswingeasy",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-11-28|ballificio fast feet|swing circus|roma": {
+    "data": "2026-11-28",
+    "titolo": "Ballificio - Fast Feet Edition",
+    "organizzatore": "Swing Circus",
+    "citta": "Roma",
+    "link": "https://www.facebook.com/ProductionSwingCircus",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
   "2026-11-28|buon compleanno|go west viterbo|viterbo": {
     "data": "2026-11-28",
     "scheda": "Serate",
@@ -316,6 +336,28 @@
     "chi": "agente",
     "motivo": "Agente: scartata (no, sicurezza alta) il 24/11/2026: L'organizzatore Go West Viterbo è un'associazione o gruppo di ballo country western, non di ballo swing. L'evento è una festa a tema country.. Fonti: https://www.facebook.com/share/1J38yYwSk7/",
     "quando": "2026-11-24"
+  },
+  "2026-11-28|c era una volta lo swing vintage party|salento swing people|lecce": {
+    "data": "2026-11-28",
+    "titolo": "C'era una volta lo Swing - Vintage Party",
+    "organizzatore": "Salento Swing People",
+    "citta": "Lecce",
+    "link": "https://www.facebook.com/salentoswingpeople",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-11-28|country night|black roses country dance group|brescia": {
+    "data": "2026-11-28",
+    "scheda": "Serate",
+    "titolo": "Country Night",
+    "organizzatore": "Black Roses Country Dance Group",
+    "citta": "Brescia",
+    "link": "https://www.facebook.com/share/17TNKxWxZK/",
+    "valore": "no",
+    "chi": "agente",
+    "motivo": "Agente: scartata (no, sicurezza alta) il 28/11/2026: Evento di ballo country, escluso dalle regole del calendario (country e line dance sono no)..",
+    "quando": "2026-11-28"
   },
   "2026-11-28|country night|free country|torino": {
     "data": "2026-11-28",
@@ -351,6 +393,16 @@
     "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 24/11/2026: Serata swing con lezione e social dance (Lindy Hop) organizzata dalla Ottawa Swing Dance Society..",
     "quando": "2026-11-24"
   },
+  "2026-11-28|let s swing nel foyer del teatro bellini|cotton swing|napoli": {
+    "data": "2026-11-28",
+    "titolo": "Let's Swing nel foyer del Teatro Bellini",
+    "organizzatore": "Cotton Swing",
+    "citta": "Napoli",
+    "link": "https://www.facebook.com/CottonSwing",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
   "2026-11-28|lichfield lindy christmas dance with the hot house combo|lichfield lindy|staffordshire": {
     "data": "2026-11-28",
     "scheda": "Serate",
@@ -362,6 +414,27 @@
     "chi": "agente",
     "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata di social dance swing natalizia organizzata da Lichfield Lindy con musica dal vivo (The Hot House Combo), lindy hop e balboa.. Fonti: https://buytickets.at/lichfieldlindy/2326286",
     "quando": "2026-11-25"
+  },
+  "2026-11-28|lindy blues social|katrien greven e veronique dullers|limburg": {
+    "data": "2026-11-28",
+    "titolo": "Lindy & Blues social",
+    "organizzatore": "Katrien Greven e Veronique Dullers",
+    "citta": "Limburg",
+    "link": "https://www.facebook.com/katrien.greven",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-11-28|rock n roll boogie woogie sala infinity|melaluna newdance|ancona": {
+    "data": "2026-11-28",
+    "titolo": "Rock'n'Roll & Boogie Woogie - Sala Infinity",
+    "organizzatore": "Melaluna NewDance",
+    "citta": "Ancona",
+    "link": "https://www.facebook.com/melalunadance",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Serata di solo Rock'n'Roll e Boogie Woogie senza stili swing di social dance.",
+    "quando": "2026-11-28"
   },
   "2026-11-28|saturday night hohoho hop|perth swing dance academy|western australia": {
     "data": "2026-11-28",
@@ -375,6 +448,16 @@
     "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Serata sociale di swing dance (Lindy Hop, Charleston, Shag, Balboa) organizzata dalla Perth Swing Dance Academy..",
     "quando": "2026-11-25"
   },
+  "2026-11-28|serata lindy hop spettacolo drag|daniele ferraris world dance academy|alessandria": {
+    "data": "2026-11-28",
+    "titolo": "Serata Lindy Hop + Spettacolo Drag",
+    "organizzatore": "Daniele Ferraris World Dance Academy",
+    "citta": "Alessandria",
+    "link": "https://www.facebook.com/danieleferrarisworlddanceacademy/",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
   "2026-11-28|soiree swing claribol stompers festival asc|asso tap swing|metropolitan france": {
     "data": "2026-11-28",
     "titolo": "Soirée SWING - CLARIBOL STOMPERS - Festival ASC",
@@ -385,6 +468,17 @@
     "chi": "gemini",
     "motivo": "Gemini: serata e anche workshop. Festival ASC con serate e componenti didattiche.",
     "quando": "2026-11-25"
+  },
+  "2026-11-28|st louis shag vikend delavnica za zacetnike in nadaljevalce|bottoms up|lubiana": {
+    "data": "2026-11-28",
+    "titolo": "St. Louis Shag: vikend delavnica za začetnike in nadaljevalce",
+    "organizzatore": "Bottoms Up",
+    "citta": "Lubiana",
+    "link": "https://olivestep.com/public/01985a1e-9e75-7410-972a-6032260c81a3/groups/01a139e7-4b16-7ad1-8113-968ab63ac827/apply",
+    "valore": "workshop",
+    "chi": "gemini",
+    "motivo": "Gemini: workshop/corso, va nella scheda Workshop. Delavnica (workshop) dedicata allo St. Louis Shag senza parte di social dance serale.",
+    "quando": "2026-11-28"
   },
   "2026-11-28|west coast swing night|paolo biassoni e francesca torti|milano": {
     "data": "2026-11-28",
@@ -411,6 +505,16 @@
     "curatoreIl": "2026-11-25",
     "tipo": "decisione"
   },
+  "2026-11-29|aperiswing della domenica evento gratuito|swing family|fermo": {
+    "data": "2026-11-29",
+    "titolo": "APERISWING della Domenica\n Evento gratuito",
+    "organizzatore": "Swing Family",
+    "citta": "Fermo",
+    "link": "https://www.facebook.com/swingfamilymarche",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
   "2026-11-29|dimanche apero swing solo jazz special noel competition solo jazz|swing n rhythm e myriam tetreault|montreal administrative region": {
     "data": "2026-11-29",
     "titolo": "✦ Dimanche Apéro Swing & Solo Jazz spécial Noël ✦COMPÉTITION SOLO JAZZ✦",
@@ -432,6 +536,17 @@
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
   },
+  "2026-11-29|rock west coast sunday dance|l annex|metropolitan france": {
+    "data": "2026-11-29",
+    "titolo": "\uD83C\uDFB8ROCK&WEST COAST \uD83C\uDFB8SUNDAY DANCE \uD83C\uDFB8",
+    "organizzatore": "L’annex",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/people/Lannex/100084208440438/",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
   "2026-11-29|serena the jive machine live cafe neruda special guest dj set dj raffo the twist|serena the jive machines e cafeneruda torino circolo arci|torino": {
     "data": "2026-11-29",
     "scheda": "Serate",
@@ -443,6 +558,16 @@
     "chi": "agente",
     "motivo": "Agente: pubblicata (ok, sicurezza alta) il 25/11/2026: Concerto di boogie woogie e swing con pista da ballo e dj set al Cafè Neruda. Evento di social dance confermato..",
     "quando": "2026-11-25"
+  },
+  "2026-11-29|sunday sinners swing social dance by nat marty|nat marty swing dance|ascoli piceno": {
+    "data": "2026-11-29",
+    "titolo": "Sunday Sinners - Swing Social Dance by Nat & Marty",
+    "organizzatore": "Nat & Marty swing dance",
+    "citta": "Ascoli Piceno",
+    "link": "https://www.facebook.com/profile.php?id=61580273273923",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
   },
   "2026-11-29|swing aperidance senigallia an college|college 66|ancona": {
     "data": "2026-11-29",
@@ -526,6 +651,27 @@
     "motivo": "Agente: pubblicata (serata+workshop, sicurezza alta) il 25/11/2026: Serata swing con lezione e social dance (Lindy Hop) della Ottawa Swing Dance Society, identica alle altre date della serie già confermate..",
     "quando": "2026-11-25"
   },
+  "2026-12-05|manhattan in swing|movet aps|reggio emilia": {
+    "data": "2026-12-05",
+    "titolo": "Manhattan in Swing",
+    "organizzatore": "MoveT Aps",
+    "citta": "Reggio Emilia",
+    "link": "https://www.facebook.com/MoveT.aps",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-05|salt peanuts atelier aperitif dansant swing|sax ale le 14b e altri 2|brussels capital": {
+    "data": "2026-12-05",
+    "titolo": "SALT PEANUTS - Atelier & Apéritif dansant Swing",
+    "organizzatore": "Sax & Ale, Le 14B e altri 2",
+    "citta": "Brussels-Capital",
+    "link": "https://www.facebook.com/Saxandale",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Atelier con aperitivo dansant, combina didattica e social dance.",
+    "quando": "2026-11-28"
+  },
   "2026-12-05|shake that swing|swingin up academy|prato": {
     "data": "2026-12-05",
     "titolo": "Shake that Swing",
@@ -547,6 +693,37 @@
     "chi": "agente",
     "motivo": "Agente: scartata (no, sicurezza alta) il 25/11/2026: Il titolo indica chiaramente una serata country, che secondo le regole del curatore è uno stile escluso..",
     "quando": "2026-11-25"
+  },
+  "2026-12-05|swing roll party night|big apple dance|monza e brianza": {
+    "data": "2026-12-05",
+    "titolo": "SWING & ROLL party night",
+    "organizzatore": "Big Apple dance",
+    "citta": "Monza e Brianza",
+    "link": "https://www.hellogest.com/preregistration/q426fj8g/edit",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-06|ateliers et soiree wcs alod|corps ze ames wcs|metropolitan france": {
+    "data": "2026-12-06",
+    "titolo": "Ateliers et Soirée WCS - ALOD",
+    "organizzatore": "Corps-Zé-Âmes WCS",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/corpszeames.wcs",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wcs» nel titolo, 22 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2026-12-06|gheswingers nel paese delle meraviglie|gheswingers vida loca e altri 2|treviso": {
+    "data": "2026-12-06",
+    "titolo": "Gheswingers nel paese delle meraviglie",
+    "organizzatore": "GheswingerS, Vida Loca e altri 2",
+    "citta": "Treviso",
+    "link": "https://www.facebook.com/gheswingers",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
   },
   "2026-12-06|king swing in padua abano terme|annette achhammer e swing dance lindy hop events|padova": {
     "data": "2026-12-06",
@@ -627,6 +804,17 @@
     "motivo": "Agente: scartata (no, sicurezza alta) il 25/11/2026: Concerto di musica roots e rock and roll senza social dance swing..",
     "quando": "2026-11-25"
   },
+  "2026-12-10|initiation et soiree wcs a nantes|l a west e le bal pop nantes|metropolitan france": {
+    "data": "2026-12-10",
+    "titolo": "Initiation et soirée WCS à Nantes",
+    "organizzatore": "L.A. WEST e Le Bal Pop' - Nantes",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/L.A.West.44",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wcs» nel titolo, 22 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
   "2026-12-10|shanghai lindy festival 10th anniversary||shanghai": {
     "data": "2026-12-10",
     "scheda": "Workshop",
@@ -649,6 +837,16 @@
     "chi": "gemini",
     "motivo": "Gemini: serata e anche workshop. Festival di lindy hop di più giorni con workshop e social.",
     "quando": "2026-11-25"
+  },
+  "2026-12-11|balboa bay share your swing side event|the great coconut club|udine": {
+    "data": "2026-12-11",
+    "titolo": "Balboa Bay - Share Your Swing side event",
+    "organizzatore": "The Great Coconut Club",
+    "citta": "Udine",
+    "link": "https://www.facebook.com/thegreatcoconutclub",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
   },
   "2026-12-11|boogie invitational weekend||oslo": {
     "data": "2026-12-11",
@@ -673,6 +871,17 @@
     "motivo": "Gemini: serata e anche workshop. Weekend di boogie e social dance.",
     "quando": "2026-11-25"
   },
+  "2026-12-11|positiva rockabilly gang live in acustico molaf san dona di piave|big tuna entertainment booking agency e positiva rock n roll rockabilly gang|venezia": {
+    "data": "2026-12-11",
+    "titolo": "POSITIVA ROCKABILLY GANG live in acustico@MOLAF, SAN DONA' DI PIAVE",
+    "organizzatore": "BIG TUNA Entertainment & Booking Agency e Positiva - Rock'n'Roll & Rockabilly Gang",
+    "citta": "Venezia",
+    "link": "https://www.BIGTUNARECORDS.com",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Concerto rockabilly acustico senza menzione di social dance swing.",
+    "quando": "2026-11-28"
+  },
   "2026-12-11|steel and velvet venerdi dicembre|retro dream verona|verona": {
     "data": "2026-12-11",
     "titolo": "STEEL and VELVET | Venerdì 11 dicembre",
@@ -694,6 +903,27 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2026-12-11|winter crazy swing west coast swing|virginie escaravage|ile de france": {
+    "data": "2026-12-11",
+    "titolo": "WINTER CRAZY SWING 15 - 100% WEST COAST SWING",
+    "organizzatore": "Virginie Escaravage",
+    "citta": "Ile-de-France",
+    "link": "https://www.facebook.com/profile.php?id=61563529341685",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2026-12-11|yrs party w soul peanuts live||regional unit of central athens": {
+    "data": "2026-12-11",
+    "titolo": "10 yrs PARTY w/ Soul Peanuts LIVE!",
+    "organizzatore": "Τζαζ Αντιδραστήρας",
+    "citta": "Regional Unit of Central Athens",
+    "link": "https://www.facebook.com/jazzreactor",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
   },
   "2026-12-12|christmas party in villa brigido|trieste swing boat|trieste": {
     "data": "2026-12-12",
@@ -820,6 +1050,16 @@
     "chi": "gemini",
     "quando": "2026-11-25"
   },
+  "2026-12-13|santa l oca social fast feet|boogie killers|parma": {
+    "data": "2026-12-13",
+    "titolo": "SANTA L'OCA - Social fast feet",
+    "organizzatore": "Boogie Killers",
+    "citta": "Parma",
+    "link": "https://www.facebook.com/boogiekillers",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
   "2026-12-13|sunday dance party|grimaldi danse club|metropolitan france": {
     "data": "2026-12-13",
     "titolo": "Sunday Dance Party",
@@ -893,6 +1133,27 @@
     "chi": "gemini",
     "quando": "2026-11-25"
   },
+  "2026-12-18|christmas party la nostra festa di natale|blue energy rock|verona": {
+    "data": "2026-12-18",
+    "titolo": "CHRISTMAS PARTY …. La nostra FESTA DI NATALE",
+    "organizzatore": "Blue Energy Rock",
+    "citta": "Verona",
+    "link": "https://www.facebook.com/BlueEnergyRock",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Festa di Natale di Blue Energy Rock, escluso dalla storia organizzatore.",
+    "quando": "2026-11-28"
+  },
+  "2026-12-19|boogie roll party night|big apple dance|monza e brianza": {
+    "data": "2026-12-19",
+    "titolo": "BOOGIE & ROLL party night",
+    "organizzatore": "Big Apple dance",
+    "citta": "Monza e Brianza",
+    "link": "https://www.hellogest.com/preregistration/q426fj8g/edit",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
   "2026-12-19|der vorhang fallt der abschieds lindy hop heaven|andreas hoppe e swing connects|cologne": {
     "data": "2026-12-19",
     "titolo": "Der Vorhang fällt - der Abschieds-Lindy Hop Heaven",
@@ -912,6 +1173,39 @@
     "valore": "nuovo",
     "chi": "gemini",
     "quando": "2026-11-25"
+  },
+  "2026-12-19|jazz factory s christmas special|jazz factory|uusimaa": {
+    "data": "2026-12-19",
+    "titolo": "Jazz Factory's Christmas Special",
+    "organizzatore": "Jazz Factory",
+    "citta": "Uusimaa",
+    "link": "https://jazzfactory.fi/code-of-conduct-eng",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Festival o evento di più giorni con social dance.",
+    "quando": "2026-11-28"
+  },
+  "2026-12-19|positiva rockabilly gang live bar oratorio da p8 montebello vicentino|big tuna entertainment booking agency e positiva rock n roll rockabilly gang|vicenza": {
+    "data": "2026-12-19",
+    "titolo": "POSITIVA ROCKABILLY GANG live@BAR ORATORIO da P8, MONTEBELLO VICENTINO",
+    "organizzatore": "BIG TUNA Entertainment & Booking Agency e Positiva - Rock'n'Roll & Rockabilly Gang",
+    "citta": "Vicenza",
+    "link": "https://www.facebook.com/profile.php?id=100063589570023",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Concerto rockabilly senza menzione di social dance swing.",
+    "quando": "2026-11-28"
+  },
+  "2026-12-19|sardinia rockabilly christmas party|sardinia rockabilly family e maurizio rocca|cagliari": {
+    "data": "2026-12-19",
+    "titolo": "★✯★  SARDINIA  ROCKABILLY CHRISTMAS PARTY 2026  ★✯★",
+    "organizzatore": "Sardinia Rockabilly Family e Maurizio Rocca",
+    "citta": "Cagliari",
+    "link": "https://www.facebook.com/sardiniarockabillyfamily",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Party rockabilly senza social dance swing.",
+    "quando": "2026-11-28"
   },
   "2026-12-19|solo jazz weekend with alex slops from the old soulz in krakow poland|agnieszka janarek e alex sloopi|krakow": {
     "data": "2026-12-19",
@@ -934,6 +1228,99 @@
     "chi": "gemini",
     "motivo": "Gemini: serata e anche workshop. Swing weekend in un jazz club con eventi musicali e di ballo.",
     "quando": "2026-11-25"
+  },
+  "2026-12-19|the boogie express|gheswingers hot rod garage treviso by alby for friends e altri 3|treviso": {
+    "data": "2026-12-19",
+    "titolo": "The Boogie Express",
+    "organizzatore": "GheswingerS, Hot Rod Garage Treviso by Alby For Friends e altri 3",
+    "citta": "Treviso",
+    "link": "https://www.facebook.com/gheswingers",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-19|the jukebox sabato dicembre|retro dream verona|verona": {
+    "data": "2026-12-19",
+    "titolo": "THE JUKEBOX - Sabato 19 dicembre",
+    "organizzatore": "Retro Dream Verona",
+    "citta": "Verona",
+    "link": "https://www.facebook.com/retrodreamverona",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-19|the party before christmas show social dance|crazy rock ballet asd|firenze": {
+    "data": "2026-12-19",
+    "titolo": "The Party Before Christmas - Show & Social Dance",
+    "organizzatore": "Crazy Rock Ballet asd",
+    "citta": "Firenze",
+    "link": "https://www.facebook.com/crazyrockballet",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-20|xmas party live music con i cross stompers swing band aperidance|college 66|ancona": {
+    "data": "2026-12-20",
+    "titolo": "XMAS PARTY 2026   Live Music con i CROSS STOMPERS SWING BAND - AperiDance",
+    "organizzatore": "College 66",
+    "citta": "Ancona",
+    "link": "https://www.college66.com/acquista/p/tickets",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-22|christmas party the west connection|l a west|metropolitan france": {
+    "data": "2026-12-22",
+    "titolo": "CHRISTMAS PARTY — THE WEST CONNECTION",
+    "organizzatore": "L.A. WEST",
+    "citta": "Metropolitan France",
+    "link": "https://www.helloasso.com/associations/loire-atlantique-west-coast-swing/evenements/the-west-connection",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2026-12-23|swing park events al jester club il|roberto zanda e swing park events|cagliari": {
+    "data": "2026-12-23",
+    "titolo": "SWING PARK EVENTS al Jester Club il 23/12/2026",
+    "organizzatore": "Roberto Zanda e Swing Park Events",
+    "citta": "Cagliari",
+    "link": "https://www.facebook.com/roberto.zanda.58",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-26|after xmas party|vintage club|munich": {
+    "data": "2026-12-26",
+    "titolo": "AFTER XMAS-PARTY",
+    "organizzatore": "Vintage Club",
+    "citta": "Munich",
+    "link": "https://www.facebook.com/profile.php?id=100057537966162",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2026-12-27|the black bling thing sunday 27th december|ceroc daventry gary lanham e altri 5|west northamptonshire": {
+    "data": "2026-12-27",
+    "titolo": "THE BLACK & BLING THING \n \n SUNDAY 27th December 2026",
+    "organizzatore": "Ceroc Daventry, Gary Lanham e altri 5",
+    "citta": "West Northamptonshire",
+    "link": "https://eventbookings.ceroc.com/quickbook/100",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Evento Ceroc senza stili swing del calendario.",
+    "quando": "2026-11-28"
+  },
+  "2026-12-30|rockabilly boogie woogie gli anni scendono in piazza per natale|ciroealessia kickin swing|vibo valentia": {
+    "data": "2026-12-30",
+    "titolo": "Rockabilly & Boogie Woogie - Gli anni '50 scendono in piazza per Natale",
+    "organizzatore": "CiroeAlessia Kickin Swing",
+    "citta": "Vibo Valentia",
+    "link": "https://www.facebook.com/profile.php?id=61594741092713",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Evento rockabilly in piazza senza social dance swing.",
+    "quando": "2026-11-28"
   },
   "2026-12-31|lindy lights ball|mr pingle|hamburg": {
     "data": "2026-12-31",
@@ -976,6 +1363,28 @@
     "motivo": "Gemini: serata e anche workshop. Evento di Capodanno con lezioni e feste di ballo.",
     "quando": "2026-11-25"
   },
+  "2027-01-07|initiation et soiree wcs a nantes|l a west e le bal pop nantes|metropolitan france": {
+    "data": "2027-01-07",
+    "titolo": "Initiation et soirée WCS à Nantes",
+    "organizzatore": "L.A. WEST e Le Bal Pop' - Nantes",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/L.A.West.44",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wcs» nel titolo, 22 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2027-01-08|whisper not time to celebrate|karl brochard|ile de france": {
+    "data": "2027-01-08",
+    "titolo": "WHISPER NOT, TIME TO CELEBRATE! ( Edition 2)",
+    "organizzatore": "Karl Brochard",
+    "citta": "Ile-de-France",
+    "link": "https://www.billetweb.fr/whisper-not-by-hungry-jazz",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Edizione speciale con workshop e social dance.",
+    "quando": "2026-11-28"
+  },
   "2027-01-15|mblx miami beach lindy xchange|all swing with yuval hod e juls slavikas|miami dade county": {
     "data": "2027-01-15",
     "titolo": "MBLX 2027 - Miami Beach Lindy Xchange",
@@ -986,6 +1395,17 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2027-01-16|soiree rock et wcs danse avec moi|danse avec moi|normandy": {
+    "data": "2027-01-16",
+    "titolo": "Soirée Rock et WCS - \"Danse avec moi\"",
+    "organizzatore": "Danse avec moi",
+    "citta": "Normandy",
+    "link": "https://www.facebook.com/profile.php?id=100094107766479",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wcs» nel titolo, 22 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
   },
   "2027-01-16|stukswing|charlotte vitse e elise moureau|flemish brabant": {
     "data": "2027-01-16",
@@ -1008,6 +1428,17 @@
     "chi": "memoria",
     "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
     "quando": "2026-11-25"
+  },
+  "2027-01-22|lindy hop decouverte soiree swing danse swing wave surf cafe|asso tap swing e bernard cluzel|metropolitan france": {
+    "data": "2027-01-22",
+    "titolo": "Lindy Hop Découverte + Soirée Swing - Danse Swing - Wave Surf Café",
+    "organizzatore": "Asso TAP SWING e Bernard Cluzel",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/tapswing",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Lezione di prova iniziale seguita da serata swing.",
+    "quando": "2026-11-28"
   },
   "2027-02-05|jazzy feet years a party weekend|jazzy feet|ile de france": {
     "data": "2027-02-05",
@@ -1042,6 +1473,93 @@
     "chi": "gemini",
     "motivo": "Gemini non ha classificato l'evento: controlla tu",
     "quando": "2026-11-24"
+  },
+  "2027-02-11|initiation et soiree wcs a nantes|l a west e le bal pop nantes|metropolitan france": {
+    "data": "2027-02-11",
+    "titolo": "Initiation et soirée WCS à Nantes",
+    "organizzatore": "L.A. WEST e Le Bal Pop' - Nantes",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/L.A.West.44",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wcs» nel titolo, 22 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2027-02-12|love swing|love swing e dance in west|metropolitan france": {
+    "data": "2027-02-12",
+    "titolo": "Love & Swing 2027",
+    "organizzatore": "Love & Swing e Dance-in-west",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/profile.php?id=100080256332676",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Weekend o evento swing di più giorni con social.",
+    "quando": "2026-11-28"
+  },
+  "2027-02-12|west caen swing 3eme|danse avec moi west caen swing e sylvain vimond|normandy": {
+    "data": "2027-02-12",
+    "titolo": "West Caen Swing - 3ème édition (2027)",
+    "organizzatore": "Danse avec moi, West Caen Swing e Sylvain Vimond",
+    "citta": "Normandy",
+    "link": "https://www.facebook.com/profile.php?id=100094107766479",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2027-02-13|coup de foudre rock swing sur la piste|cornebarrieu danse|occitania": {
+    "data": "2027-02-13",
+    "titolo": "Coup de foudre Rock & Swing sur la piste",
+    "organizzatore": "Cornebarrieu Danse",
+    "citta": "Occitania",
+    "link": "https://www.facebook.com/cornebarrieudanse",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "quando": "2026-11-28"
+  },
+  "2027-02-13|dance2delight valentines|sicora e west coast swing noord nederland|frisia": {
+    "data": "2027-02-13",
+    "titolo": "Dance2Delight - Valentines Edition",
+    "organizzatore": "Sicora e West Coast Swing Noord-Nederland",
+    "citta": "Frisia",
+    "link": "https://sicora.weticket.io/dance2delight-13-februari-2027",
+    "valore": "da verificare",
+    "chi": "gemini",
+    "motivo": "Gemini: Evento West Coast Swing come unico stile.",
+    "quando": "2026-11-28"
+  },
+  "2027-03-11|initiation et soiree wcs a nantes|l a west e le bal pop nantes|metropolitan france": {
+    "data": "2027-03-11",
+    "titolo": "Initiation et soirée WCS à Nantes",
+    "organizzatore": "L.A. WEST e Le Bal Pop' - Nantes",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/L.A.West.44",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «wcs» nel titolo, 22 eventi così scartati da te (13 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
+  },
+  "2027-03-19|solo swing soiree swing bordeaux wave surf cafe|asso tap swing e bernard cluzel|metropolitan france": {
+    "data": "2027-03-19",
+    "titolo": "Solo Swing + Soirée Swing - Bordeaux - Wave Surf Café",
+    "organizzatore": "Asso TAP SWING e Bernard Cluzel",
+    "citta": "Metropolitan France",
+    "link": "http://tapswingandco.fr",
+    "valore": "nuovo",
+    "chi": "gemini",
+    "motivo": "Gemini: serata e anche workshop. Lezione di solo jazz seguita da serata swing.",
+    "quando": "2026-11-28"
+  },
+  "2027-05-21|soiree west coast swing vendredi mai|rocking hop|metropolitan france": {
+    "data": "2027-05-21",
+    "titolo": "Soirée West Coast Swing vendredi 21 mai",
+    "organizzatore": "Rocking'hop",
+    "citta": "Metropolitan France",
+    "link": "https://www.facebook.com/rocksalsapelissanne",
+    "valore": "no",
+    "chi": "memoria",
+    "motivo": "Memoria: regola imparata: «west» nel titolo, 32 eventi così scartati da te (22 organizzatori) e nessuno tenuto",
+    "quando": "2026-11-28"
   },
   "2027-06-11|newcastle lindy festival||newcastle upon tyne": {
     "data": "2027-06-11",
