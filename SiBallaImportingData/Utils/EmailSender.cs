@@ -55,7 +55,7 @@ namespace SiBallaImportingData.Utils
                                 .Select(email => email.Trim())
                                 .Where(email => !string.IsNullOrEmpty(email))
                                 .Select(email => new { Email = email }).ToArray(),
-                            Subject = $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
+                            Subject = (Avvisi().Count > 0 ? "⚠️ " : "") + $"Bollettino settimanale {DateTime.Today.ToString("dd/MM/yyyy")} - " +
                                 $"{DateTime.Today.AddDays(settings.Import.Giorni).ToString("dd/MM/yyyy")}",
                             TextPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare, nuovi),
                             HTMLPart = TextEmail(eventi, settings.Import, daVerificare, luogoDaVerificare, nuovi)
@@ -107,9 +107,19 @@ namespace SiBallaImportingData.Utils
             }
             return false;
         }
+        /// <summary>
+        /// Avvisi tecnici da mettere in cima all'email (variabile d'ambiente AVVISI_EMAIL, righe separate da a capo):
+        /// su GitHub la riempie il passo "Stato del keep-alive Appwrite" se l'ultimo keep-alive è fallito.
+        /// </summary>
+        private static List<string> Avvisi() =>
+            (Environment.GetEnvironmentVariable("AVVISI_EMAIL") ?? "")
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+
         private static string TextEmail(List<Event> eventi, ImportOptions opzioni, List<(Event Evento, string Motivo)>? daVerificare = null, List<Event>? luogoDaVerificare = null, List<Event>? nuovi = null)
         {
-            string text = $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
+            string text = string.Concat(Avvisi().Select(a => $"<b>⚠️ {System.Net.WebUtility.HtmlEncode(a)}</b><br><br>"));
+            text += $"Buongiorno ecco a voi il bollettino provvisorio per il range di date " +
                           $"{DateTime.Now} - {DateTime.Today.AddDays(opzioni.Giorni)} ,<br>" +
                           $"con raggio d'azione di {opzioni.Radius} Km.<br><br>" +
                           $"Bollettino ({DateTime.Today.Day}/{DateTime.Today.Month} - " +

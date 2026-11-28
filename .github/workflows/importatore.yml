@@ -118,6 +118,22 @@ jobs:
           key: email-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: email-
 
+      # se l'ultimo keep-alive di Appwrite è fallito, l'email degli eventi lo dice in cima (⚠️):
+      # dal 12 al 27/11/2026 è fallito ogni giorno senza che ce ne accorgessimo e il progetto è andato in pausa
+      - name: Stato del keep-alive Appwrite
+        id: keepalive
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          read -r esito quando url < <(gh run list -R "$GITHUB_REPOSITORY" --workflow appwrite-keepalive.yml -L 1 \
+            --json conclusion,createdAt,url -q '.[0] | "\(.conclusion) \(.createdAt) \(.url)"' || true) || true
+          echo "ultimo keep-alive: ${esito:-?} ${quando:-} ${url:-}"
+          if [ "$esito" = "failure" ]; then
+            giorno=$(TZ=Europe/Rome date -d "$quando" +%d/%m)
+            echo "avviso=Appwrite keep-alive FALLITO il $giorno: il progetto rischia la pausa (o è già in pausa) e l'app non riceve gli eventi. Controlla la console Appwrite (Restore) e il run: $url" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Esegui importatore
         id: importatore
         working-directory: out
@@ -157,6 +173,8 @@ jobs:
           Import__AgenteDecideOrario: ${{ !contains(vars.AGENTE_DA_VERIFICARE, 'false') }}
           Import__AgenteDecideOrarioMax: ${{ vars.AGENTE_DA_VERIFICARE_MAX || '3' }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          # riga ⚠️ in cima all'email degli eventi (vuota se il keep-alive va)
+          AVVISI_EMAIL: ${{ steps.keepalive.outputs.avviso }}
           Import__ResetDb: "false"
           Import__ResetExcel: "false"
           Import__PulisciLezioni: "false"

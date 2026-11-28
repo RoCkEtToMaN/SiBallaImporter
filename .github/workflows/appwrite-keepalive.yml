@@ -26,8 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # serve solo per l'email in caso di errore (script e destinatari)
+      - uses: actions/checkout@v4
+
       - name: Legge un documento da serate e workshop
         run: |
+          exec > >(tee -a keepalive.log) 2>&1
           for collection in serate workshop; do
             status=$(curl -s -o response.json -w "%{http_code}" -G \
               "$APPWRITE_ENDPOINT/databases/$APPWRITE_DATABASE/collections/$collection/documents" \
@@ -37,8 +41,9 @@ jobs:
 
             echo "$collection -> HTTP $status"
             if [ "$status" != "200" ]; then
-              # Fa fallire il run (e arriva la mail di GitHub) se il progetto è già in pausa
-              cat response.json
+              # Fa fallire il run (e arriva l'email qui sotto) se il progetto è già in pausa
+              grep -q project_paused response.json && echo "❌ Progetto Appwrite IN PAUSA: console Appwrite > progetto > Restore"
+              echo "❌ Lettura di $collection fallita (HTTP $status): $(cat response.json)"
               exit 1
             fi
           done
@@ -47,7 +52,8 @@ jobs:
         env:
           APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
         run: |
-          [ -n "$APPWRITE_API_KEY" ] || { echo "::error::Secret APPWRITE_API_KEY mancante"; exit 1; }
+          exec > >(tee -a keepalive.log) 2>&1
+          [ -n "$APPWRITE_API_KEY" ] || { echo "❌ Secret APPWRITE_API_KEY mancante"; exit 1; }
           auth=(-H "X-Appwrite-Project: $APPWRITE_PROJECT" -H "X-Appwrite-Key: $APPWRITE_API_KEY" -H "Content-Type: application/json")
           id="keepalive$(date +%s)"
           url="$APPWRITE_ENDPOINT/databases/$APPWRITE_DATABASE/collections"
@@ -57,14 +63,27 @@ jobs:
           echo "crea $id -> HTTP $status"
           if [ "$status" != "201" ]; then
             # 401 = alla chiave manca lo scope collections.write (Appwrite console > Overview > API Keys)
-            cat response.json
+            echo "❌ Collezione temporanea non creata (HTTP $status): $(cat response.json)"
+            [ "$status" = "401" ] && echo "❌ Alla chiave APPWRITE_API_KEY mancano gli scope per creare collezioni (console Appwrite > API Keys)"
             exit 1
           fi
 
           status=$(curl -s -o response.json -w "%{http_code}" -X DELETE "$url/$id" "${auth[@]}")
           echo "cancella $id -> HTTP $status"
           if [ "$status" != "204" ]; then
-            echo "::error::Collezione $id non cancellata: toglila a mano dalla console"
-            cat response.json
+            echo "❌ Collezione $id non cancellata (HTTP $status), toglila a mano dalla console: $(cat response.json)"
             exit 1
           fi
+
+      # email (stessi destinatari dell'importatore) se un passo è fallito: dal 12 al 27/11/2026 il keep-alive
+      # è fallito ogni giorno, le email di GitHub sono passate inosservate e il progetto è andato in pausa
+      - name: Email se il keep-alive fallisce
+        if: failure()
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_API_SECRET: ${{ secrets.MAILJET_API_SECRET }}
+          ESITO: failure
+          TITOLO: "⚠️ Appwrite keep-alive"
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/scripts/email_log.py keepalive.log SiBallaImportingData/appsettings.json
