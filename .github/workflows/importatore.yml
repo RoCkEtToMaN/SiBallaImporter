@@ -89,7 +89,7 @@ jobs:
         run: |
           if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) { throw "Secret GOOGLE_SERVICE_ACCOUNT_JSON mancante" }
           # il JSON viene incorporato come EmbeddedResource in fase di build
-          Set-Content -Path SiBallaImportingData/Resources/siballa-8c6d48649c13.json -Value $env:GOOGLE_SERVICE_ACCOUNT_JSON -Encoding utf8NoBOM
+          Set-Content -Path SiBallaImportingData/Resources/siballa-a91afa101ace.json -Value $env:GOOGLE_SERVICE_ACCOUNT_JSON -Encoding utf8NoBOM
 
       - name: Build
         run: dotnet publish "$PROJECT" -c Release -r linux-x64 --self-contained false -o "$OUT"

@@ -30,7 +30,6 @@ namespace SiBallaImportingData.Utils
 
             Dictionary<TipoEvento, List<Event>> eventiDic = new Dictionary<TipoEvento, List<Event>>();
 
-            //var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
             var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             var assembly = Assembly.GetExecutingAssembly();           
 

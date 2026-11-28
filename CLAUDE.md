@@ -53,7 +53,7 @@ Cronologia, decisioni recenti e lavori aperti (passaggio tra postazioni, da aggi
 - `--reset-excel` (solo dal PC) prima copia Serate e Workshop nello Sheet come "Backup Serate AAAA-MM-GG hh.mm"
   (+ JSON locale), poi svuota solo quelle due schede. Il sito salta le schede "Backup ...".
 - Lettura da qui: service account `googlesheet@siballa.iam.gserviceaccount.com`, chiave in
-  `SiBallaImportingData/Resources/siballa-8c6d48649c13.json`. Python: `py` + venv nella scratchpad con
+  `SiBallaImportingData/Resources/siballa-a91afa101ace.json`. Python: `py` + venv nella scratchpad con
   `google-auth requests`, riusando le funzioni di `sito/esporta_sheet.py`. La Drive API non è abilitata: altri
   file si leggono solo se condivisi con il service account e passati per link.
 - Non scrivere nello Sheet senza una richiesta esplicita dell'utente.
