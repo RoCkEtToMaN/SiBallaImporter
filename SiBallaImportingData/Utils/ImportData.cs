@@ -30,7 +30,8 @@ namespace SiBallaImportingData.Utils
 
             Dictionary<TipoEvento, List<Event>> eventiDic = new Dictionary<TipoEvento, List<Event>>();
 
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            //var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             var assembly = Assembly.GetExecutingAssembly();           
 
             // Nome della risorsa (di solito: Namespace.NomeFile.Extensione)
@@ -315,7 +316,8 @@ namespace SiBallaImportingData.Utils
         }
         public static async Task AppendToGoogleSheet(List<Event> events, string sheetName)
         {
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
+
             var assembly = Assembly.GetExecutingAssembly();
 
             using var stream = assembly.GetManifestResourceStream(resourcePath);
@@ -670,7 +672,7 @@ namespace SiBallaImportingData.Utils
             if (righe.Count == 0) return true;
             try
             {
-                var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+                var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
                 using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                     ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
                 var service = new SheetsService(new BaseClientService.Initializer()
@@ -751,7 +753,7 @@ namespace SiBallaImportingData.Utils
                 .ToList();
             if (controllate.Count == 0) return;
 
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
             var service = new SheetsService(new BaseClientService.Initializer()
@@ -880,7 +882,7 @@ namespace SiBallaImportingData.Utils
 
         private static SheetsService ServizioSheet()
         {
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
             return new SheetsService(new BaseClientService.Initializer()
@@ -1159,7 +1161,7 @@ namespace SiBallaImportingData.Utils
                                          && x.Event.EventDetail?.Latitude is not null && x.Event.EventDetail.Longitude is not null).ToList();
             if (lista.Count == 0) return;
 
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
             var service = new SheetsService(new BaseClientService.Initializer()
@@ -1427,7 +1429,7 @@ namespace SiBallaImportingData.Utils
                 }).ToList();
             if (data.Count == 0) return;
 
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
 
@@ -1455,7 +1457,7 @@ namespace SiBallaImportingData.Utils
 
         public static async Task<string?> ResetSheetAsync()
         {
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
 
@@ -1529,7 +1531,7 @@ namespace SiBallaImportingData.Utils
                 .ToList();
             if (righe.Count == 0) return;
 
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
 
@@ -1652,7 +1654,7 @@ namespace SiBallaImportingData.Utils
                 return;
             }
 
-            var resourcePath = "SiBallaImportingData.Resources.siballa-8c6d48649c13.json";
+            var resourcePath = "SiBallaImportingData.Resources.siballa-a91afa101ace.json";
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourcePath)
                 ?? throw new FileNotFoundException($"Risorsa '{resourcePath}' non trovata");
 

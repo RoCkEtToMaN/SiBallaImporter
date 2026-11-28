@@ -17,10 +17,12 @@
 
   <ItemGroup>
     <None Remove="Resources\siballa-8c6d48649c13.json" />
+    <None Remove="Resources\siballa-a91afa101ace.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\siballa-8c6d48649c13.json" />
+    <EmbeddedResource Include="Resources\siballa-a91afa101ace.json" />
   </ItemGroup>
 
   <ItemGroup>
